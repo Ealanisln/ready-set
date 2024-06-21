@@ -23,7 +23,7 @@ body {
   @apply opacity-70;
 }
 .sticky-menu #navbarCollapse li .ud-menu-scroll.active {
-  @apply text-primary opacity-100 dark:text-white;
+  @apply opacity-100 dark:text-white;
 }
 .sticky-menu .loginBtn {
   @apply text-dark hover:text-primary hover:opacity-100 dark:text-white;
@@ -74,4 +74,12 @@ body {
 
 .blog-details h3 {
   @apply text-dark mb-6 text-2xl font-bold dark:text-white sm:text-[28px] sm:leading-[40px];
+}
+
+.theme-toggler span { /* Or whatever your button's class is */
+  color: white; /* Light mode color */
+}
+
+.theme-toggler span.dark\:block { /* Target the dark mode icon specifically */
+  color: black; /* Dark mode color */
 }

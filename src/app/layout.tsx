@@ -37,7 +37,7 @@ export default function RootLayout({
           <SessionProvider>
             <ThemeProvider
               attribute="class"
-              enableSystem={false}
+              enableSystem={true}
               defaultTheme="light"
             >
               <ToasterContext />

@@ -10,7 +10,6 @@ const ErrorPage = () => {
   return (
     <>
       <Breadcrumb pageName="404 Page" />
-
       <NotFound />
     </>
   );
