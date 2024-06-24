@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -11,13 +10,14 @@ import type { Adapter } from "next-auth/adapters";
 
 export const authOptions: NextAuthOptions = {
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/signin",
   },
   adapter: PrismaAdapter(prisma) as Adapter,
-  secret: process.env.SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },
+
 
   providers: [
     CredentialsProvider({
@@ -61,11 +61,6 @@ export const authOptions: NextAuthOptions = {
 
         return user;
       },
-    }),
-
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
 
     GoogleProvider({
@@ -114,5 +109,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
+
+  
   // debug: process.env.NODE_ENV === "developement",
 };
