@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="mb-10 w-full">
               <Link href="/" className="mb-6 inline-block max-w-[160px]">
                 <Image
-                  src="/images/logo/logo-white.svg"
+                  src="/images/logo/logo-dark.png"
                   alt="logo"
                   width={140}
                   height={30}
@@ -21,8 +21,7 @@ const Footer = () => {
                 />
               </Link>
               <p className="mb-8 max-w-[270px] text-base text-gray-7">
-                We create digital experiences for brands and companies by using
-                technology.
+                Always ready for you. 
               </p>
               <div className="-mx-3 flex items-center">
                 <a
@@ -293,12 +292,12 @@ const Footer = () => {
                 <p className="text-base text-gray-7">
                   Designed and Developed by{" "}
                   <a
-                    href="https://tailgrids.com"
+                    href="https://alanis.dev"
                     rel="nofollow noopner noreferrer"
                     target="_blank"
                     className="text-gray-1 hover:underline"
                   >
-                    TailGrids and Next.js Templates
+                  Alanis Web Dev
                   </a>
                 </p>
               </div>
