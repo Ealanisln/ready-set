@@ -290,25 +290,26 @@ const Header = () => {
                   <>
                     <p
                       className={`loginBtn px-7 py-3 text-base font-medium ${
-                        !sticky && pathUrl === "/" ? "text-black" : "text-dark"
+                        !sticky && pathUrl === "/" ? "text-white" : "text-black"
                       }`}
                     >
                       {session?.user?.name}
                     </p>
                     {pathUrl !== "/" || sticky ? (
                       <button
-                        onClick={() => signOut()}
-                        className="signUpBtn rounded-lg bg-primary bg-opacity-100 px-6 py-3 text-base font-medium text-black duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
-                      >
-                        Sign Out
-                      </button>
+                      onClick={() => signOut()}
+                      className="signUpBtn rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
+                    >
+                      Sign Out
+                    </button>
                     ) : (
-                      <button
-                        onClick={() => signOut()}
-                        className="signUpBtn rounded-lg bg-white bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-dark"
-                      >
-                        Sign Out
-                      </button>
+                    <button
+                      onClick={() => signOut()}
+                      className="signUpBtn rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white"
+                    >
+                      Sign Out
+                    </button>
+                    
                     )}
                   </>
                 ) : (
