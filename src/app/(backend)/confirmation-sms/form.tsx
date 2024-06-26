@@ -30,6 +30,7 @@ const DeliveryForm = () => {
     control,
     handleSubmit,
     formState: { errors },
+    reset
   } = useForm<Inputs>({
     defaultValues: {
       orders: [{}] as Order[],
@@ -80,8 +81,6 @@ const DeliveryForm = () => {
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
   };
-
-  const { reset, ...otherFormMethods } = useForm();
 
   return (
     <div className="overflow-hidden py-16 md:py-20 lg:py-28">
@@ -165,10 +164,10 @@ const DeliveryForm = () => {
                   <div className="container">
                     {fields.map((field, index) => (
                       <div key={field.id}>
-                        <div className="mb-3 block text-md font-medium text-dark dark:text-white">
-                        <h3 className="py-4">Drive {index + 1}</h3>
+                        <div className="text-md mb-3 block font-medium text-dark dark:text-white">
+                          <h3 className="py-4">Drive {index + 1}</h3>
                         </div>
-                        <div  className="-mx-4 flex flex-wrap">
+                        <div className="-mx-4 flex flex-wrap">
                           <div className="w-full px-4 md:w-1/2">
                             <div className="mb-8">
                               <label htmlFor={`orders.${index}.orderNumber`}>
