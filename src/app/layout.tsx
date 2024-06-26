@@ -39,7 +39,7 @@ export default function RootLayout({
               <ToasterContext />
               {!isBackendAdminRoute && <Header />} {/* Conditionally render Header */}
               {children}
-              <Footer />
+              {/* <Footer /> */}
               <ScrollToTop />
             </ThemeProvider>
           </SessionProvider>
