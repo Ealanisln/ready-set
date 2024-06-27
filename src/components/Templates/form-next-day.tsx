@@ -24,13 +24,13 @@ type Inputs = {
   orders: Order[];
 };
 
-const DeliveryForm = () => {
+const FormNextDay = () => {
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<Inputs>({
     defaultValues: {
       orders: [{}] as Order[],
@@ -80,10 +80,12 @@ const DeliveryForm = () => {
       .writeText(message)
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
+
+    reset();
   };
 
   return (
-    <div className="overflow-hidden py-16 md:py-20 lg:py-28">
+    <div className="overflow-hidden py-8">
       <div className="container">
         <div className="-mx-4 flex flex-wrap">
           <div className="w-full px-4 ">
@@ -92,7 +94,7 @@ const DeliveryForm = () => {
               data-wow-delay=".15s"
             >
               <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl lg:text-2xl xl:text-3xl">
-                SMS Day Before Confirmation
+               Next day Confirmation
               </h2>
               <p className="mb-12 text-base font-medium text-body-color">
                 Fill the required data to get the sms template.
@@ -435,15 +437,6 @@ const DeliveryForm = () => {
                       Add Another Order
                     </Button>
 
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => reset()}
-                      className="px-4 py-2"
-                    >
-                      Reset Form
-                    </Button>
-
                     <Button type="submit" className="px-4 py-2">
                       Submit
                     </Button>
@@ -458,4 +451,4 @@ const DeliveryForm = () => {
   );
 };
 
-export default DeliveryForm;
+export default FormNextDay;

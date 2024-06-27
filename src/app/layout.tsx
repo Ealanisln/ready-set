@@ -21,7 +21,7 @@ export default function RootLayout({
   const pathname = usePathname(); // Get current pathname
 
   // Updated condition to check for backend admin routes
-  const isBackendAdminRoute = pathname?.startsWith("/admin");
+  const isBackendAdminRoute = pathname?.startsWith("/admin",);
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -37,9 +37,9 @@ export default function RootLayout({
           <SessionProvider>
             <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
               <ToasterContext />
-              {!isBackendAdminRoute && <Header />} {/* Conditionally render Header */}
+              {!isBackendAdminRoute && <Header />}
               {children}
-              {/* <Footer /> */}
+              <Footer />
               <ScrollToTop />
             </ThemeProvider>
           </SessionProvider>
