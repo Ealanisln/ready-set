@@ -56,35 +56,36 @@ const FormSameDay = () => {
     let message = `Hello ${data.driverName}, this is ${data.helpdeskAgent}. You're scheduled for a food drive today, ${formattedDate}.\n\n`;
 
     message += `Route/Order  Pick Up\n`;
-    
+
     data.orders.forEach((order) => {
       message += `${order.orderNumber}  ${order.pickupTime}\n`;
     });
-    
+
     message += `\nPlease confirm your readiness for today's food drive by replying. If unavailable, inform us ASAP to arrange a replacement to avoid penalties.\n\n`;
     message += `✅ Ensure restaurant sign-off via Coolfire app with location updates activated.\n`;
     message += `✅ Check Coolfire app for drive details. Notify promptly of app issues.\n\n`;
     message += `Arrive 15 mins early at the resto. Thanks, and drive safely!`;
-    
+
     alert(message);
 
     navigator.clipboard
       .writeText(message)
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
+    reset();
   };
 
   return (
     <div className="overflow-hidden py-8">
       <div className="container">
         <div className="-mx-4 flex flex-wrap">
-          <div className="w-full px-4 ">
+          <div className="w-full px-4">
             <div
-              className="wow fadeInUp dark:bg-gray-dark mb-12 rounded-sm bg-white px-8 py-11 shadow-three sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]"
+              className="wow fadeInUp dark:bg-gray-dark mb-12 rounded-sm px-8 py-11 shadow-three sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]"
               data-wow-delay=".15s"
             >
               <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl lg:text-2xl xl:text-3xl">
-               Same day confirmation
+                Same day confirmation
               </h2>
               <p className="mb-12 text-base font-medium text-body-color">
                 Fill the required data to get the sms template.
@@ -228,15 +229,6 @@ const FormSameDay = () => {
                       className="px-4 py-2"
                     >
                       Add Another Order
-                    </Button>
-
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => reset()}
-                      className="px-4 py-2"
-                    >
-                      Reset Form
                     </Button>
 
                     <Button type="submit" className="px-4 py-2">

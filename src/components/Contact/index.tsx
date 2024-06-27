@@ -12,7 +12,7 @@ const Contact = () => {
                   CONTACT US
                 </span>
                 <h2 className="max-w-[260px] text-[35px] font-semibold leading-[1.14] text-dark dark:text-white">
-                  Let&#39;s talk about your problem.
+                  Let&#39;s talk about your needs.
                 </h2>
               </div>
               <div className="mb-12 flex flex-wrap justify-between lg:mb-0">
@@ -30,10 +30,10 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="mb-[18px] text-lg font-semibold text-dark dark:text-white">
-                      Our Location
+                      Our Service Area
                     </h3>
                     <p className="text-base text-body-color dark:text-dark-6">
-                      401 Broadway, 24th Floor, Orchard Cloud View, London
+                    Palo Alto, CA · San Mateo, CA · Mountain View, CA · San Jose, CA · Oakland, CA · Sunnyvale, CA · Richmond, CA · Hayward, CA · Concord, CA · San Francisco, CA
                     </p>
                   </div>
                 </div>
@@ -53,10 +53,7 @@ const Contact = () => {
                       How Can We Help?
                     </h3>
                     <p className="text-base text-body-color dark:text-dark-6">
-                      info@yourdomain.com
-                    </p>
-                    <p className="mt-1 text-base text-body-color dark:text-dark-6">
-                      contact@yourdomain.com
+                      info@ready-set.co
                     </p>
                   </div>
                 </div>

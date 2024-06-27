@@ -84,7 +84,7 @@ const Header = () => {
                       src={`${
                         sticky
                           ? "/images/logo/logo-white.png"
-                          : "/images/logo/logo-dark.png"
+                          : "/images/logo/logo-white.png"
                       }`}
                       alt="logo"
                       width={140}
