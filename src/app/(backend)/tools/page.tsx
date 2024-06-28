@@ -1,7 +1,12 @@
 import FormNextDay from "@/components/Templates/form-next-day";
 import FormSameDay from "@/components/Templates/form-same-day";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Ready Set | SMS Templates",
+  description: "Templates for a helpdesk use. ",
+};
 
 const page = () => {
   return (

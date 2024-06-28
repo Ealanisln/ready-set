@@ -13,7 +13,7 @@ const PricingPage = () => {
   return (
     <>
       <Breadcrumb pageName="Pricing Page" />
-      <Pricing />
+      {/* <Pricing /> */}
       <Faq />
     </>
   );

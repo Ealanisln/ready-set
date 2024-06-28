@@ -1,4 +1,61 @@
+"use client";
+
+import sendEmail from "@/app/actions/email";
+import { useForm, SubmitHandler } from "react-hook-form";
+import React, { useState } from "react";
+import { Button } from "../ui/button";
+
+interface FormInputs {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+}
+
+interface MessageState {
+  type: "success" | "error";
+  text: string;
+}
+
 const Contact = () => {
+  const [message, setMessage] = useState<MessageState | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormInputs>();
+
+  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+    try {
+      const result = await sendEmail(data);
+      setMessage({ type: "success", text: result });
+
+      setTimeout(() => {
+        setMessage(null);
+        reset();
+      }, 3000);
+    } catch (error: unknown) {
+      // Explicitly type error as unknown
+      let errorMessage =
+        "We're sorry, there was an error sending your message.";
+
+      if (error instanceof Error) {
+        errorMessage += " " + error.message;
+      }
+
+      setMessage({
+        type: "error",
+        text: errorMessage,
+      });
+
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    }
+  };
+
   return (
     <section id="contact" className="relative py-20 md:py-[120px]">
       <div className="absolute left-0 top-0 -z-[1] h-full w-full dark:bg-dark"></div>
@@ -33,7 +90,9 @@ const Contact = () => {
                       Our Service Area
                     </h3>
                     <p className="text-base text-body-color dark:text-dark-6">
-                    Palo Alto, CA · San Mateo, CA · Mountain View, CA · San Jose, CA · Oakland, CA · Sunnyvale, CA · Richmond, CA · Hayward, CA · Concord, CA · San Francisco, CA
+                      Palo Alto, CA · San Mateo, CA · Mountain View, CA · San
+                      Jose, CA · Oakland, CA · Sunnyvale, CA · Richmond, CA ·
+                      Hayward, CA · Concord, CA · San Francisco, CA
                     </p>
                   </div>
                 </div>
@@ -53,7 +112,12 @@ const Contact = () => {
                       How Can We Help?
                     </h3>
                     <p className="text-base text-body-color dark:text-dark-6">
-                      info@ready-set.co
+                      <a
+                        href="mailto:info@ready-set.co"
+                        className="hover:underline"
+                      >
+                        info@ready-set.co
+                      </a>
                     </p>
                   </div>
                 </div>
@@ -69,20 +133,30 @@ const Contact = () => {
               <h3 className="mb-8 text-2xl font-semibold text-dark dark:text-white md:text-[28px] md:leading-[1.42]">
                 Send us a Message
               </h3>
-              <form>
+              <form
+                onSubmit={handleSubmit((data) => {
+                  onSubmit(data);
+                })}
+              >
                 <div className="mb-[22px]">
                   <label
-                    htmlFor="fullName"
+                    htmlFor="name"
                     className="mb-4 block text-sm text-body-color dark:text-dark-6"
                   >
                     Full Name*
                   </label>
                   <input
+                    {...register("name", { required: true })}
                     type="text"
-                    name="fullName"
+                    name="name"
                     placeholder="Adam Gelius"
                     className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   />
+                  {errors.name && (
+                    <span className="mt-1 text-sm text-red-500">
+                      This field is required
+                    </span>
+                  )}
                 </div>
                 <div className="mb-[22px]">
                   <label
@@ -92,11 +166,17 @@ const Contact = () => {
                     Email*
                   </label>
                   <input
+                    {...register("email", { required: true })}
                     type="email"
                     name="email"
                     placeholder="example@yourmail.com"
                     className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   />
+                  {errors.email && (
+                    <span className="mt-1 text-sm text-red-500">
+                      This field is required
+                    </span>
+                  )}
                 </div>
                 <div className="mb-[22px]">
                   <label
@@ -106,11 +186,17 @@ const Contact = () => {
                     Phone*
                   </label>
                   <input
+                    {...register("phone", { required: true })}
                     type="text"
                     name="phone"
-                    placeholder="+885 1254 5211 552"
+                    placeholder="415-123-2222"
                     className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   />
+                  {errors.phone && (
+                    <span className="mt-1 text-sm text-red-500">
+                      This field is required
+                    </span>
+                  )}
                 </div>
                 <div className="mb-[30px]">
                   <label
@@ -120,21 +206,42 @@ const Contact = () => {
                     Message*
                   </label>
                   <textarea
+                    {...register("message", {
+                      required: true,
+                      maxLength: 500,
+                    })}
                     name="message"
                     rows={1}
                     placeholder="type your message here"
                     className="w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
                   ></textarea>
+                  {errors.email && (
+                    <span className="mt-1 text-sm text-red-500">
+                      This field is required
+                    </span>
+                  )}
                 </div>
                 <div className="mb-0">
-                  <button
+                  <Button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-md bg-primary px-10 py-3 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-primary/90"
+                    className="inline-flex items-center justify-center rounded-md bg-primary px-10 py-3 text-base font-medium text-slate-600 transition duration-300 ease-in-out hover:bg-primary/90"
                   >
                     Send
-                  </button>
+                  </Button>
                 </div>
               </form>
+              {/* Display confirmation or error message */}
+              {message && (
+                <div
+                  className={`mt-4 rounded p-3 ${
+                    message.type === "success"
+                      ? "bg-yellow-200 text-green-800"
+                      : "bg-red-200 text-red-800"
+                  }`}
+                >
+                  {message.text}
+                </div>
+              )}
             </div>
           </div>
         </div>
