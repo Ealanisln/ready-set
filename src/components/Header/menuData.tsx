@@ -16,7 +16,7 @@ const menuData: Menu[] = [
   {
     id: 3,
     title: "Catering Request",
-    path: "/pricing",
+    path: "/catering-request",
     newTab: false,
   },
   {
@@ -28,7 +28,7 @@ const menuData: Menu[] = [
   {
     id: 5,
     title: "Blog",
-    path: "/blogs",
+    path: "/blog",
     newTab: false,
   },
   {
@@ -44,8 +44,8 @@ const menuData: Menu[] = [
       },
       {
         id: 62,
-        title: "Pricing Page",
-        path: "/pricing",
+        title: "Catering request",
+        path: "/catering-request",
         newTab: false,
       },
       {
@@ -57,7 +57,7 @@ const menuData: Menu[] = [
       {
         id: 64,
         title: "Blog Grid Page",
-        path: "/blogs",
+        path: "/blog",
         newTab: false,
       },
       {

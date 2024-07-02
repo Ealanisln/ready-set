@@ -3,7 +3,7 @@ import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
 
-const Pricing = () => {
+const CateringRequest = () => {
   return (
     <section
       id="pricing"
@@ -29,4 +29,4 @@ const Pricing = () => {
   );
 };
 
-export default Pricing;
+export default CateringRequest;

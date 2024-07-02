@@ -36,9 +36,9 @@ const HomeBlogSection = async () => {
       <div className="container mx-auto">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="Our Blogs"
+            subtitle="Our Blog"
             title="Our Recent News"
-            paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+            paragraph="You can find valuable information about our services."
             width="640px"
             center
           />

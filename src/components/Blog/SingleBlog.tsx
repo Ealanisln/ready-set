@@ -15,7 +15,7 @@ const Posts = ({ data }: PostsProps) => {
         <div key={post._id} className="mb-8 overflow-hidden rounded flex flex-col justify-between h-full">
           <div>
             <Link
-              href={`/blogs/${post.slug?.current}`}
+              href={`/blog/${post.slug?.current}`}
               className="block"
             >
               {post.mainImage ? (
@@ -40,7 +40,7 @@ const Posts = ({ data }: PostsProps) => {
             </div>
             <h3>
               <Link
-                href={`/blogs/${post.slug?.current}`}
+                href={`/blog/${post.slug?.current}`}
                 className="mb-4 inline-block text-xl font-semibold text-dark hover:text-primary dark:text-white dark:hover:text-primary sm:text-2xl lg:text-xl xl:text-2xl"
               >
                 {post.title}
