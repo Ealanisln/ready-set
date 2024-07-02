@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/client";
 import Link from "next/link";
@@ -13,10 +12,9 @@ const Posts = ({ data }: PostsProps) => {
   return (
     <div className="wow fadeInUp grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3" data-wow-delay=".1s">
       {data.map((post, idx) => (
-        <div key={idx} className="mb-8 overflow-hidden rounded flex flex-col justify-between h-full">
+        <div key={post._id} className="mb-8 overflow-hidden rounded flex flex-col justify-between h-full">
           <div>
             <Link
-              key={post._id}
               href={`/blogs/${post.slug?.current}`}
               className="block"
             >

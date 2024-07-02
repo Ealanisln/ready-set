@@ -26,12 +26,12 @@ export default function Home() {
       <Features />
       <About />
       <CallToAction />
+      <HomeBlogSection />
       {/*
       <Pricing />
       <Testimonials />
       <Faq />
       <Team />
-      <HomeBlogSection posts={posts} />
       <Contact />
       <Clients /> */}
     </main>

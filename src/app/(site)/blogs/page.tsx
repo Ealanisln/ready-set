@@ -37,8 +37,6 @@ async function getData() {
 export default async function Blog() {
   const data: SimpleBlogCard[] = await getData();
 
-  console.log(data);
-
   return (
     <>
       <Breadcrumb pageName="Welcome to our blog" />

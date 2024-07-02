@@ -30,7 +30,6 @@ const Signin = () => {
       .then((callback) => {
         if (callback?.error) {
           toast.error(callback?.error);
-          console.log(callback?.error);
           setLoading(false);
           return;
         }
@@ -43,7 +42,6 @@ const Signin = () => {
       })
       .catch((err) => {
         setLoading(false);
-        console.log(err.message);
         toast.error(err.message);
       });
   };

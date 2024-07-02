@@ -23,7 +23,6 @@ async function getData(slug: string) {
 
 export default async function Page({ params }: { params: any }) {
   const data: FullPost = await getData(params.slug);
-  console.log(JSON.stringify(data.body, null, 2));
 
   if (!data) {
     notFound();
