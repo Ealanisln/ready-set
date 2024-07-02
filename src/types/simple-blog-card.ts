@@ -1,8 +1,3 @@
-interface Author {
-  _id: string;
-  name: string;
-}
-
 interface MainImage {
   alt: string;
   asset: any; // You might want to create a separate interface for the 'image' type
@@ -11,7 +6,6 @@ interface MainImage {
 
 export interface SimpleBlogCard {
   smallDescription?: string;
-  author: Author;
   _id: string;
   _updatedAt: string;
   title: string;

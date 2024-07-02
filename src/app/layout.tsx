@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
-import { usePathname } from "next/navigation"; // Import usePathname
+import { usePathname } from "next/navigation";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ToasterContext from "./api/contex/ToasetContex";
@@ -18,10 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState<boolean>(true);
-  const pathname = usePathname(); // Get current pathname
+  const pathname = usePathname();
 
-  // Updated condition to check for backend admin routes
-  const isBackendAdminRoute = pathname?.startsWith("/admin",);
+  const isBackendAdminRoute = pathname?.startsWith("/admin");
+  const isStudioRoute = pathname?.startsWith("/studio");
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -37,9 +37,9 @@ export default function RootLayout({
           <SessionProvider>
             <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
               <ToasterContext />
-              {!isBackendAdminRoute && <Header />}
+              {!isBackendAdminRoute && !isStudioRoute && <Header />}
               {children}
-              <Footer />
+              {!isStudioRoute && <Footer />}
               <ScrollToTop />
             </ThemeProvider>
           </SessionProvider>
