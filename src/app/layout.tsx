@@ -39,7 +39,7 @@ export default function RootLayout({
               <ToasterContext />
               {!isBackendAdminRoute && !isStudioRoute && <Header />}
               {children}
-              {!isStudioRoute && <Footer />}
+              {!isBackendAdminRoute && !isStudioRoute && <Footer />}
               <ScrollToTop />
             </ThemeProvider>
           </SessionProvider>

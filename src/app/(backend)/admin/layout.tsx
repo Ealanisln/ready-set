@@ -1,3 +1,5 @@
+import { NavBar } from "@/components/Dashboard";
+
 export default function AdminLayout({
   children,
 }: {
@@ -5,7 +7,10 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NavBar />
+        {children}
+      </body>
     </html>
   );
 }
