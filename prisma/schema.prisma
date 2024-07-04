@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
@@ -11,7 +8,53 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Account {
+model user {
+  id                    String             @id @default(cuid())
+  guid                  String?
+  name                  String?
+  email                 String?            @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  passwordResetToken    String?            @unique
+  passwordResetTokenExp DateTime?
+  type                  users_type         @default(vendor)
+  company_name          String?            @db.VarChar(191)
+  contact_name          String?            @db.VarChar(191)
+  contact_number        String?            @db.VarChar(191)
+  website               String?            @db.VarChar(191)
+  street1               String?            @db.VarChar(191)
+  street2               String?            @db.VarChar(191)
+  city                  String?            @db.VarChar(191)
+  state                 String?            @db.VarChar(191)
+  zip                   String?            @db.VarChar(191)
+  location_number       String?            @db.VarChar(191)
+  parking_loading       String?            @db.VarChar(191)
+  counties              String?
+  time_needed           String?
+  catering_brokerage    String?
+  frequency             String?
+  provide               String?
+  head_count            String?            @db.VarChar(191)
+  photo_vehicle         String?
+  photo_license         String?
+  photo_insurance       String?
+  status                users_status       @default(pending)
+  side_notes            String?
+  confirmation_code     String?
+  remember_token        String?            @db.VarChar(100)
+  created_at            DateTime?          @db.Timestamptz(6)
+  updated_at            DateTime?          @db.Timestamptz(6)
+  accounts              account[]
+  sessions              session[]
+  addresses             address[]
+  catering_requests     catering_request[]
+  on_demands            on_demand[]
+  dispatches            dispatch[]
+  driver_dispatches     dispatch[]         @relation("DriverRelation")
+}
+
+model account {
   id                String  @id @default(cuid())
   userId            String
   type              String
@@ -25,43 +68,183 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-model Session {
+model session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id                    String    @id @default(cuid())
-  name                  String?
-  email                 String?   @unique
-  emailVerified         DateTime?
-  image                 String?
-  password              String?
-  passwordResetToken    String?   @unique
-  passwordResetTokenExp DateTime?
-  accounts              Account[]
-  sessions              Session[]
-  role                  Role      @default(USER)
-}
-
-enum Role {
-  USER
-  EDITOR
-  ADMIN
-}
-
-model VerificationToken {
+model verification_token {
+  id         String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model address {
+  id                BigInt             @id(map: "idx_16458_primary") @default(autoincrement())
+  user_id           String
+  county            String?            @db.VarChar(191)
+  vendor            String?
+  street1           String?            @db.VarChar(191)
+  street2           String?            @db.VarChar(191)
+  city              String?            @db.VarChar(191)
+  state             String?            @db.VarChar(191)
+  zip               String?            @db.VarChar(191)
+  location_number   String?            @db.VarChar(191)
+  parking_loading   String?            @db.VarChar(191)
+  status            addresses_status   @default(inactive)
+  created_at        DateTime?          @db.Timestamptz(6)
+  updated_at        DateTime?          @db.Timestamptz(6)
+  user              user               @relation(fields: [user_id], references: [id])
+  catering_requests catering_request[]
+  on_demands        on_demand[]
+}
+
+model catering_request {
+  id               BigInt                      @id(map: "idx_16474_primary") @default(autoincrement())
+  guid             String?
+  user_id          String
+  address_id       BigInt
+  brokerage        String?                     @db.VarChar(191)
+  order_number     String?                     @db.VarChar(191)
+  date             DateTime?                   @db.Date
+  pickup_time      DateTime?                   @db.Time
+  arrival_time     DateTime?                   @db.Time
+  complete_time    DateTime?                   @db.Time
+  headcount        String?                     @db.VarChar(191)
+  need_host        catering_requests_need_host @default(no)
+  hours_needed     String?                     @db.VarChar(191)
+  number_of_host   String?                     @db.VarChar(191)
+  client_attention String?
+  pickup_notes     String?
+  special_notes    String?
+  image            String?
+  status           catering_requests_status?   @default(active)
+  order_total      Decimal?                    @default(0.00) @db.Decimal(10, 2)
+  tip              Decimal?                    @default(0.00) @db.Decimal(10, 2)
+  created_at       DateTime?                   @db.Timestamptz(6)
+  updated_at       DateTime?                   @db.Timestamptz(6)
+  user             user                        @relation(fields: [user_id], references: [id])
+  address          address                     @relation(fields: [address_id], references: [id])
+}
+
+model dispatch {
+  id           BigInt                  @id(map: "idx_16494_primary") @default(autoincrement())
+  user_id      String
+  user_type    dispatches_user_type    @default(vendor)
+  service_id   BigInt
+  service_type dispatches_service_type @default(catering)
+  driver_id    String
+  created_at   DateTime?               @db.Timestamptz(6)
+  updated_at   DateTime?               @db.Timestamptz(6)
+  user         user                    @relation(fields: [user_id], references: [id])
+  driver       user                    @relation("DriverRelation", fields: [driver_id], references: [id])
+}
+
+model failed_job {
+  id         BigInt   @id(map: "idx_16501_primary") @default(autoincrement())
+  connection String
+  queue      String
+  payload    String
+  exception  String
+  failed_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model migrations {
+  id        BigInt @id(map: "idx_16509_primary") @default(autoincrement())
+  migration String @db.VarChar(191)
+  batch     BigInt
+}
+
+model on_demand {
+  id               BigInt                 @id(map: "idx_16514_primary") @default(autoincrement())
+  guid             String?
+  user_id          String
+  address_id       BigInt
+  order_number     String?                @db.VarChar(191)
+  date             DateTime?              @db.Date
+  pickup_time      DateTime?              @db.Time
+  arrival_time     DateTime?              @db.Time
+  complete_time    DateTime?              @db.Time
+  hours_needed     String?                @db.VarChar(191)
+  item_delivered   String?                @db.VarChar(191)
+  vehicle_type     on_demand_vehicle_type @default(Car)
+  client_attention String?
+  pickup_notes     String?
+  special_notes    String?
+  image            String?
+  status           on_demand_status?      @default(active)
+  order_total      Decimal?               @default(0.00) @db.Decimal(10, 2)
+  tip              Decimal?               @default(0.00) @db.Decimal(10, 2)
+  length           String?                @db.VarChar(191)
+  width            String?                @db.VarChar(191)
+  height           String?                @db.VarChar(191)
+  weight           String?                @db.VarChar(191)
+  created_at       DateTime?              @db.Timestamptz(6)
+  updated_at       DateTime?              @db.Timestamptz(6)
+  user             user                   @relation(fields: [user_id], references: [id])
+  address          address                @relation(fields: [address_id], references: [id])
+}
+
+enum addresses_status {
+  active
+  inactive
+}
+
+enum catering_requests_need_host {
+  yes
+  no
+}
+
+enum catering_requests_status {
+  active
+  assigned
+  cancelled
+  completed
+}
+
+enum dispatches_service_type {
+  catering
+  ondemand
+}
+
+enum dispatches_user_type {
+  vendor
+  client
+}
+
+enum on_demand_status {
+  active
+  assigned
+  cancelled
+  completed
+}
+
+enum on_demand_vehicle_type {
+  Car
+  Van
+  Truck
+}
+
+enum users_status {
+  active
+  pending
+  deleted
+}
+
+enum users_type {
+  vendor
+  client
+  driver
+  admin
 }
