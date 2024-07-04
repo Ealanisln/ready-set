@@ -64,7 +64,7 @@ interface User {
   name: string;
   contact_number: string;
   email: string;
-  type: 'vendor' | 'client' | 'driver' | 'admin';
+  type: "vendor" | "client" | "driver" | "admin";
   // Add other fields as needed
 }
 
@@ -206,13 +206,13 @@ export default function Users() {
                             <Badge variant="outline">{user.type}</Badge>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                           415-123-2222
+                            {user.contact_number ? user.contact_number : "None"}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
                             {user.email}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            Creado el
+                            Created at
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>

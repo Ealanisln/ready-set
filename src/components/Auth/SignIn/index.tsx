@@ -1,13 +1,11 @@
 "use client";
+
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import SocialSignIn from "../SocialSignIn";
-import SwitchOption from "../SwitchOption";
-import MagicLink from "../MagicLink";
 import Loader from "@/components/Common/Loader";
 
 const Signin = () => {
@@ -74,21 +72,20 @@ const Signin = () => {
                 </Link>
               </div>
 
-              <SocialSignIn />
+              {/* <SocialSignIn /> */}
 
-              <span className="z-1 relative my-8 block text-center">
+              {/* <span className="z-1 relative my-8 block text-center">
                 <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
                 <span className="text-body-secondary relative z-10 inline-block bg-white px-3 text-base dark:bg-dark-2">
                   OR
                 </span>
-              </span>
+              </span> */}
 
-              <SwitchOption
+              {/* <SwitchOption
                 isPassword={isPassword}
                 setIsPassword={setIsPassword}
-              />
+              /> */}
 
-              {isPassword ? (
                 <form onSubmit={(e) => e.preventDefault()}>
                   <div className="mb-[22px]">
                     <input
@@ -120,9 +117,7 @@ const Signin = () => {
                     </button>
                   </div>
                 </form>
-              ) : (
-                <MagicLink />
-              )}
+
 
               <Link
                 href="/forgot-password"

@@ -4,9 +4,9 @@ import { prisma } from "@/utils/prismaDB";
 
 export async function POST(request: any) {
   const body = await request.json();
-  const { name, email, password } = body;
+  const { name, email, phoneNumber, password } = body;
 
-  if (!name || !email || !password) {
+  if (!name || !phoneNumber || !email || !password) {
     return NextResponse.json("Missing Fields", { status: 400 });
   }
 
@@ -26,6 +26,7 @@ export async function POST(request: any) {
     data: {
       name,
       email: email.toLowerCase(),
+      contact_number: phoneNumber,
       password: hashedPassword,
     },
   });
