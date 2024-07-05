@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { useForm, useFieldArray } from "react-hook-form";
 
 type Order = {
@@ -25,14 +25,20 @@ type Inputs = {
 };
 
 const FormSameDay = () => {
+  const [persistentDate, setPersistentDate] = useState("");
+  const [persistentHelpdeskAgent, setPersistentHelpdeskAgent] = useState("");
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
     reset,
   } = useForm<Inputs>({
     defaultValues: {
+      date: persistentDate,          // Set default from persistent state
+      helpdeskAgent: persistentHelpdeskAgent, // Set default from persistent state
       orders: [{}] as Order[],
     },
   });
@@ -43,6 +49,7 @@ const FormSameDay = () => {
   });
 
   const onSubmit = (data: Inputs) => {
+
     const [year, month, day] = data.date.split("-").map(Number);
     const dateObj = new Date(year, month - 1, day);
 
@@ -72,7 +79,10 @@ const FormSameDay = () => {
       .writeText(message)
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
-    reset();
+      reset({
+        // Reset only the 'orders' field array
+        orders: [{}] as Order[],
+      });
   };
 
   return (

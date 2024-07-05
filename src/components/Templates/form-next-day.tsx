@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
 type Order = {
@@ -25,6 +25,9 @@ type Inputs = {
 };
 
 const FormNextDay = () => {
+  const [persistentDate, setPersistentDate] = useState("");
+  const [persistentHelpdeskAgent, setPersistentHelpdeskAgent] = useState("");
+
   const {
     register,
     control,
@@ -33,6 +36,8 @@ const FormNextDay = () => {
     reset,
   } = useForm<Inputs>({
     defaultValues: {
+      date: persistentDate, // Set default from persistent state
+      helpdeskAgent: persistentHelpdeskAgent, // Set default from persistent state
       orders: [{}] as Order[],
     },
   });
@@ -67,10 +72,10 @@ const FormNextDay = () => {
                 : "TH"
         } ORDER----------\n`;
       }
-      message += `ORDER# ${order.orderNumber}\n`;
+      message += `\nORDER# ${order.orderNumber}\n`;
       message += `PICK UP: ${order.pickupTime}\n${order.restaurant} - ${order.restaurantAddress}\n`;
       message += `DROP OFF: ${order.dropOffTimeStart} - ${order.dropOffTimeEnd}\n${order.company} - ${order.companyAddress}\n`;
-      message += `PAY: $${order.totalPay}\n`;
+      message += `\n PAY: $${order.totalPay}\n`;
       message += `HEADCOUNT: ${order.headcounts}\n`;
     });
 
@@ -80,6 +85,8 @@ const FormNextDay = () => {
       .writeText(message)
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
+    setPersistentDate(data.date); // Update persistent date after form submission
+    setPersistentHelpdeskAgent(data.helpdeskAgent); // Update persistent helpdesk agent after form submission
 
     reset();
   };
