@@ -1,7 +1,7 @@
 // src/components/Auth/SignUp/ui/BaseForm.tsx
-import React from 'react';
-import { useForm, UseFormReturn } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { baseSchema, FormData } from "@/components/Auth/SignUp/FormSchemas";
 
 interface BaseFormProps {
@@ -22,7 +22,9 @@ const BaseForm: React.FC<BaseFormProps> = ({ onSubmit, children }) => {
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
       {methods.formState.errors.name && (
-        <p className="mb-4 text-red-500">{methods.formState.errors.name.message}</p>
+        <p className="mb-4 text-red-500">
+          {methods.formState.errors.name.message}
+        </p>
       )}
 
       <input
@@ -31,7 +33,9 @@ const BaseForm: React.FC<BaseFormProps> = ({ onSubmit, children }) => {
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
       {methods.formState.errors.phoneNumber && (
-        <p className="mb-4 text-red-500">{methods.formState.errors.phoneNumber.message}</p>
+        <p className="mb-4 text-red-500">
+          {methods.formState.errors.phoneNumber.message}
+        </p>
       )}
 
       <input
@@ -41,7 +45,9 @@ const BaseForm: React.FC<BaseFormProps> = ({ onSubmit, children }) => {
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
       {methods.formState.errors.email && (
-        <p className="mb-4 text-red-500">{methods.formState.errors.email.message}</p>
+        <p className="mb-4 text-red-500">
+          {methods.formState.errors.email.message}
+        </p>
       )}
 
       <input
@@ -51,7 +57,9 @@ const BaseForm: React.FC<BaseFormProps> = ({ onSubmit, children }) => {
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
       {methods.formState.errors.password && (
-        <p className="mb-4 text-red-500">{methods.formState.errors.password.message}</p>
+        <p className="mb-4 text-red-500">
+          {methods.formState.errors.password.message}
+        </p>
       )}
 
       {children(methods)}

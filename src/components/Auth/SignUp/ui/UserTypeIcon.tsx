@@ -1,4 +1,5 @@
 import { Store, User, Truck } from "lucide-react";
+import { UserType } from "../FormSchemas";
 
 interface UserTypeIconProps {
   type: UserType;

@@ -1,3 +1,5 @@
+import { UserType } from "./FormSchemas";
+
 export const getBottomText = (type: UserType) => {
   switch (type) {
     case "vendor":

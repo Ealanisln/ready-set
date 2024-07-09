@@ -1,6 +1,11 @@
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { driverSchema, FormData } from "@/components/Auth/SignUp/FormSchemas";
+import {
+  driverSchema,
+  DriverFormData,
+  FormData,
+} from "@/components/Auth/SignUp/FormSchemas";
+import CommonFields from "../CommonFields";
 
 interface DriverFormProps {
   onSubmit: (data: FormData) => void;
@@ -11,22 +16,26 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<DriverFormData>({
     resolver: zodResolver(driverSchema),
   });
 
+  const handleSubmitForm: SubmitHandler<DriverFormData> = (data) => {
+    onSubmit(data as FormData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input
-        {...register("licenseNumber")}
-        placeholder="License Number"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
-      />
-      {errors.licenseNumber && (
-        <p className="mb-4 text-red-500">
-          {errors.licenseNumber.message as string}
-        </p>
-      )}
+    <form onSubmit={handleSubmit(handleSubmitForm)}>
+      <CommonFields register={register} errors={errors} />
+
+      <div className="pt-6">
+        <button
+          type="submit"
+          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition"
+        >
+          Register as Driver
+        </button>
+      </div>
     </form>
   );
 };
