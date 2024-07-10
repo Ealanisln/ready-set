@@ -26,19 +26,19 @@ export const baseSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      /^(?=.*[@$!%*?&]).{8,}$/,
+      "Password must be at least 8 characters long and contain at least one special character",
     ),
   parking: z
     .string()
     .min(1, "If provided, parking information must not be empty")
     .optional(),
   company: z.string().min(1, "Company name is required"),
-  contactname: z.string().min(1, "Contact name is required"),
 });
 
 export const vendorSchema = baseSchema.extend({
   userType: z.literal("vendor"),
+  name: z.string().min(1, "Name is required"),
   company: z.string().min(1, "Company name is required"),
   countiesServed: z
     .array(z.enum(COUNTIES))
@@ -49,10 +49,9 @@ export const vendorSchema = baseSchema.extend({
   cateringBrokerage: z
     .array(z.enum(CATERING_BROKERAGE))
     .min(1, "Please select at least one option"),
-  frequency: z.enum(FREQUENCY),
+  frequency: z.array(z.enum(FREQUENCY)),
   provisions: z.array(z.enum(PROVISIONS)),
 });
-
 export const clientSchema = z.object({
   userType: z.literal("client"),
   name: z.string().min(1, "Name is required"),
@@ -60,8 +59,12 @@ export const clientSchema = z.object({
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   company: z.string().min(1, "Company name is required"),
-  countyLocation: z.array(createEnum(COUNTIES)).min(1, "Please select at least one county"),
-  timeNeeded: z.array(createEnum(TIME_NEEDED)).min(1, "Please select at least one time"),
+  countyLocation: z
+    .array(createEnum(COUNTIES))
+    .min(1, "Please select at least one county"),
+  timeNeeded: z
+    .array(createEnum(TIME_NEEDED))
+    .min(1, "Please select at least one time"),
   headcount: createEnum(HEADCOUNT),
   frequency: createEnum(FREQUENCY),
 });

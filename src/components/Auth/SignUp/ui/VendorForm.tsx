@@ -1,5 +1,5 @@
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { vendorSchema, FormData } from "@/components/Auth/SignUp/FormSchemas";
 import { z } from "zod";
@@ -15,9 +15,9 @@ import { CheckboxGroup, RadioGroup } from "./FormComponents";
 
 interface VendorFormProps {
   onSubmit: (data: FormData) => void;
+  isLoading: boolean;
 }
-
-const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
+const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading }) => {
   const {
     register,
     handleSubmit,
@@ -26,15 +26,28 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
   } = useForm<z.infer<typeof vendorSchema>>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
+      userType: "vendor",
       countiesServed: [],
       timeNeeded: [],
       cateringBrokerage: [],
       provisions: [],
+      frequency: [], 
     },
   });
 
+  // Add this wrapper function
+  const onSubmitWrapper = (data: z.infer<typeof vendorSchema>) => {
+    console.log("Form submission started");
+    console.log("Form data:", data);
+    console.log("Calling onSubmit function");
+    onSubmit(data);
+    console.log("onSubmit function called");
+  };
+
+  console.log("Form errors:", errors);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmitWrapper)}>
       <CommonFields<z.infer<typeof vendorSchema>>
         register={register}
         errors={errors}
@@ -67,14 +80,12 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
       )}
 
       <input
-        {...register("contactname")}
+        {...register("name")}
         placeholder="Contact Name"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.contactname && (
-        <p className="mb-4 text-red-500">
-          {errors.contactname.message as string}
-        </p>
+      {errors.name && (
+        <p className="mb-4 text-red-500">{errors.name.message as string}</p>
       )}
 
       <div className="space-y-6">
@@ -121,7 +132,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
         </div>
 
         <div>
-          <RadioGroup
+          <CheckboxGroup
             name="frequency"
             control={control}
             options={FREQUENCY}
@@ -148,13 +159,24 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
           )}
         </div>
       </div>
+      {Object.keys(errors).length > 0 && (
+        <div className="mb-4 text-red-500">
+          <p>Please correct the following errors:</p>
+          <ul>
+            {Object.entries(errors).map(([key, error]) => (
+              <li key={key}>{error.message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="pt-6">
         <button
           type="submit"
-          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition"
+          disabled={isLoading}
+          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
         >
-          Register as Vendor
+          {isLoading ? "Registering..." : "Register as Vendor"}
         </button>
       </div>
     </form>

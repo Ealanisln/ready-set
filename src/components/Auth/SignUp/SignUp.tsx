@@ -20,9 +20,11 @@ const SignUp = () => {
   const [userType, setUserType] = useState<UserType | null>(null);
 
   const onSubmit = async (data: FormData) => {
+    console.log("SignUp: onSubmit called with data:", data);
     setLoading(true);
-
+  
     try {
+      console.log("SignUp: Sending registration request");
       const response = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -30,16 +32,22 @@ const SignUp = () => {
         },
         body: JSON.stringify(data),
       });
-
+  
+      console.log("SignUp: Registration response received:", response);
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Registration failed");
       }
-
+  
+      const responseData = await response.json();
+      console.log("SignUp: Registration successful:", responseData);
+  
       toast.success("Successfully registered");
       setLoading(false);
       router.push("/signin");
     } catch (err) {
+      console.error("SignUp: Registration error:", err);
       if (err instanceof Error) {
         toast.error(err.message);
       } else {
@@ -48,7 +56,7 @@ const SignUp = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <section className="bg-[#F4F7FF] py-4 dark:bg-dark lg:py-8">
       <div className="container">
@@ -103,7 +111,7 @@ const SignUp = () => {
                       {getBottomText(userType)}
                     </p>
                     {userType === "vendor" && (
-                      <VendorForm onSubmit={onSubmit} />
+                      <VendorForm onSubmit={onSubmit} isLoading={loading} />
                     )}
                     {userType === "client" && (
                       <ClientForm onSubmit={onSubmit} />

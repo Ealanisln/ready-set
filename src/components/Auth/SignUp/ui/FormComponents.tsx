@@ -5,7 +5,7 @@ import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 interface CheckboxGroupProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
-  options: readonly string[]; // Change this line
+  options: readonly string[]; 
   label: string;
 }
 
