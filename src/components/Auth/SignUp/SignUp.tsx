@@ -111,7 +111,7 @@ const SignUp = () => {
                       {getBottomText(userType)}
                     </p>
                     {userType === "vendor" && (
-                      <VendorForm onSubmit={onSubmit} isLoading={loading} />
+                      <VendorForm onSubmit={onSubmit} />
                     )}
                     {userType === "client" && (
                       <ClientForm onSubmit={onSubmit} />

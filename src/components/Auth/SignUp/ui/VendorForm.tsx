@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { vendorSchema, FormData } from "@/components/Auth/SignUp/FormSchemas";
-import { z } from "zod";
 import CommonFields from "../CommonFields";
 import {
   COUNTIES,
@@ -10,49 +9,53 @@ import {
   CATERING_BROKERAGE,
   FREQUENCY,
   PROVISIONS,
+  VendorFormData,
 } from "./FormData";
 import { CheckboxGroup, RadioGroup } from "./FormComponents";
 
 interface VendorFormProps {
-  onSubmit: (data: FormData) => void;
-  isLoading: boolean;
+  onSubmit: (data: VendorFormData) => Promise<void>;
 }
-const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading }) => {
+
+const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<z.infer<typeof vendorSchema>>({
+  } = useForm<VendorFormData>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
       userType: "vendor",
       countiesServed: [],
       timeNeeded: [],
       cateringBrokerage: [],
+      frequency: undefined,
       provisions: [],
-      frequency: [], 
     },
   });
 
   // Add this wrapper function
-  const onSubmitWrapper = (data: z.infer<typeof vendorSchema>) => {
-    console.log("Form submission started");
-    console.log("Form data:", data);
-    console.log("Calling onSubmit function");
-    onSubmit(data);
-    console.log("onSubmit function called");
+  const onSubmitWrapper = async (data: VendorFormData) => {
+    setIsLoading(true);
+    try {
+      console.log("Form submission started");
+      console.log("Form data:", data);
+      await onSubmit(data);
+      console.log("Form submission completed");
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  console.log("Form errors:", errors);
-
   return (
     <form onSubmit={handleSubmit(onSubmitWrapper)}>
-      <CommonFields<z.infer<typeof vendorSchema>>
+      <CommonFields<VendorFormData>
         register={register}
         errors={errors}
       />
-
       <input
         {...register("parking")}
         placeholder="Parking / Loading (Optional)"
@@ -97,9 +100,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading }) => {
             label="Counties Served"
           />
           {errors.countiesServed && (
-            <p className="mt-2 text-red-500">
-              {errors.countiesServed.message as string}
-            </p>
+            <p className="mt-2 text-red-500">{errors.countiesServed.message}</p>
           )}
         </div>
 
@@ -126,13 +127,13 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading }) => {
           />
           {errors.cateringBrokerage && (
             <p className="mt-2 text-red-500">
-              {errors.cateringBrokerage.message as string}
+              {errors.cateringBrokerage.message}
             </p>
           )}
         </div>
 
         <div>
-          <CheckboxGroup
+          <RadioGroup
             name="frequency"
             control={control}
             options={FREQUENCY}
@@ -144,7 +145,6 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading }) => {
             </p>
           )}
         </div>
-
         <div>
           <CheckboxGroup
             name="provisions"
