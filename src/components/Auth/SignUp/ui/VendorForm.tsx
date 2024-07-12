@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { vendorSchema, FormData } from "@/components/Auth/SignUp/FormSchemas";
+import { vendorSchema } from "@/components/Auth/SignUp/FormSchemas";
 import CommonFields from "../CommonFields";
 import {
   COUNTIES,
@@ -16,6 +16,7 @@ import { CheckboxGroup, RadioGroup } from "./FormComponents";
 interface VendorFormProps {
   onSubmit: (data: VendorFormData) => Promise<void>;
 }
+
 
 const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +39,12 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
 
   // Add this wrapper function
   const onSubmitWrapper = async (data: VendorFormData) => {
+    console.log("Form data:", JSON.stringify(data, null, 2));
+
+    Object.entries(data).forEach(([key, value]) => {
+      console.log(`${key}:`, value);
+    });
+
     setIsLoading(true);
     try {
       console.log("Form submission started");
@@ -50,12 +57,10 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
       setIsLoading(false);
     }
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmitWrapper)}>
-      <CommonFields<VendorFormData>
-        register={register}
-        errors={errors}
-      />
+      <CommonFields<VendorFormData> register={register} errors={errors} />
       <input
         {...register("parking")}
         placeholder="Parking / Loading (Optional)"
@@ -83,12 +88,24 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
       )}
 
       <input
-        {...register("name")}
+        {...register("contact_name")}
         placeholder="Contact Name"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.name && (
-        <p className="mb-4 text-red-500">{errors.name.message as string}</p>
+      {errors.contact_name && (
+        <p className="mb-4 text-red-500">
+          {errors.contact_name.message as string}
+        </p>
+      )}
+
+      <input
+        {...register("website")}
+        placeholder="Website (Optional)"
+        type="url"
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+      />
+      {errors.website && (
+        <p className="mb-4 text-red-500">{errors.website.message as string}</p>
       )}
 
       <div className="space-y-6">

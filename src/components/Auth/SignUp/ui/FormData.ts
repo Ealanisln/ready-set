@@ -54,7 +54,19 @@ export const PROVISIONS: readonly Option[] = [
   // Add other provisions
 ] as const;
 
-export const HEADCOUNT = ['1-10', '11-50', '51-100', '101-500', '500+'] as const;
+export const HEADCOUNT = [
+  "1-24",
+  "25-49",
+  "50-74",
+  "75-99",
+  "100-124",
+  "125-149",
+  "150-174",
+  "175-199",
+  "200-249",
+  "250-299",
+  "+300",
+] as const;
 
 // Define the form data structure
 export interface FormData {
@@ -72,7 +84,6 @@ export interface FormData {
   frequency: (typeof FREQUENCY)[number];
   provisions?: (typeof PROVISIONS)[number][];
   headcount?: (typeof HEADCOUNT)[number];
-  // Add the new fields here
   contact_name?: string;
   contact_number?: string;
   website?: string;
@@ -84,17 +95,44 @@ export interface FormData {
   location_number?: string;
 }
 // You can also create type-specific interfaces if needed
-export interface VendorFormData extends FormData {
+export interface VendorFormData {
   userType: "vendor";
-  countiesServed: (typeof COUNTIES)[number][];
-  cateringBrokerage?: (typeof CATERING_BROKERAGE)[number][];
-  provisions: (typeof PROVISIONS)[number][];
-  // Add any vendor-specific fields here
+  contact_name: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  company: string;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  parking?: string;
+  countiesServed: string[];
+  timeNeeded: string[];
+  cateringBrokerage?: string[];
+  frequency: string;
+  provisions?: string[];
+  website?: string;
 }
-export interface ClientFormData extends FormData {
+export interface ClientFormData {
   userType: "client";
-  countyLocation: (typeof COUNTIES)[number][];
+  contact_name: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  company: string;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  timeNeeded: string[];
+  frequency: string;
+  parking?: string;
+  countiesServed: string[];
   headcount: (typeof HEADCOUNT)[number];
+  website?: string;
 }
 
 export interface DriverFormData extends FormData {

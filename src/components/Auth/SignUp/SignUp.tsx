@@ -7,7 +7,15 @@ import VendorForm from "./ui/VendorForm";
 import ClientForm from "./ui/ClientForm";
 import DriverForm from "./ui/DriverForm";
 import UserTypeIcon from "./ui/UserTypeIcon";
-import { UserType, FormData, userTypes } from "./FormSchemas";
+import {
+  UserType,
+  FormDataUnion,
+  VendorFormData,
+  ClientFormData,
+  DriverFormData,
+  userTypes,
+  vendorSchema,
+} from "./FormSchemas";
 import { getBottomText } from "./utils";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,10 +27,10 @@ const SignUp = () => {
   const router = useRouter();
   const [userType, setUserType] = useState<UserType | null>(null);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormDataUnion) => {
     console.log("SignUp: onSubmit called with data:", data);
     setLoading(true);
-  
+
     try {
       console.log("SignUp: Sending registration request");
       const response = await fetch("/api/register", {
@@ -32,17 +40,17 @@ const SignUp = () => {
         },
         body: JSON.stringify(data),
       });
-  
+
       console.log("SignUp: Registration response received:", response);
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Registration failed");
       }
-  
+
       const responseData = await response.json();
       console.log("SignUp: Registration successful:", responseData);
-  
+
       toast.success("Successfully registered");
       setLoading(false);
       router.push("/signin");
@@ -56,7 +64,21 @@ const SignUp = () => {
       setLoading(false);
     }
   };
-  
+
+  const onSubmitVendor = async (data: VendorFormData) => {
+    await onSubmit({ ...data, userType: "vendor" });
+  };
+
+  const onSubmitClient = async (data: ClientFormData) => {
+    await onSubmit({ ...data, userType: "client" });
+  };
+
+  const onSubmitDriver = async (data: DriverFormData) => {
+    await onSubmit({
+      ...data,
+      userType: "driver",
+    } as FormDataUnion);
+  };
   return (
     <section className="bg-[#F4F7FF] py-4 dark:bg-dark lg:py-8">
       <div className="container">
@@ -111,13 +133,13 @@ const SignUp = () => {
                       {getBottomText(userType)}
                     </p>
                     {userType === "vendor" && (
-                      <VendorForm onSubmit={onSubmit} />
+                      <VendorForm onSubmit={onSubmitVendor} />
                     )}
                     {userType === "client" && (
-                      <ClientForm onSubmit={onSubmit} />
+                      <ClientForm onSubmit={onSubmitClient} />
                     )}
                     {userType === "driver" && (
-                      <DriverForm onSubmit={onSubmit} />
+                      <DriverForm onSubmit={onSubmitDriver} />
                     )}
                     <div className="flex justify-between pt-4">
                       <button

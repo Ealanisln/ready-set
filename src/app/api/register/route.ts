@@ -13,20 +13,19 @@ export async function POST(request: Request) {
     const {
       name,
       email,
+      website,
       phoneNumber,
       password,
       userType,
       company,
       parking,
       countiesServed,
-      countyLocation,
       timeNeeded,
       cateringBrokerage,
       frequency,
       provisions,
       headcount,
       contact_name,
-      website,
       street1,
       street2,
       city,
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
     } = body;
 
     // Validate required fields
-    if (!name || !email || !phoneNumber || !password || !userType || !company) {
+    if (!contact_name || !email || !phoneNumber || !password || !userType || !company) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },

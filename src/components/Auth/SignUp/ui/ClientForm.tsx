@@ -1,16 +1,23 @@
-import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { clientSchema, ClientFormData, FormData } from "@/components/Auth/SignUp/FormSchemas";
-import { CheckboxGroup, RadioGroup } from "./FormComponents";
-import { COUNTIES, TIME_NEEDED, HEADCOUNT, FREQUENCY } from './FormData';
+import { clientSchema } from "@/components/Auth/SignUp/FormSchemas";
 import CommonFields from "../CommonFields";
+import {
+  COUNTIES,
+  TIME_NEEDED,
+  FREQUENCY,
+  HEADCOUNT,
+  ClientFormData,
+} from "./FormData";
+import { CheckboxGroup, RadioGroup } from "./FormComponents";
 
 interface ClientFormProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: ClientFormData) => Promise<void>;
 }
 
-const ClientForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
+const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -18,80 +25,175 @@ const ClientForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
     formState: { errors },
   } = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: { 
+    defaultValues: {
       userType: "client",
-      countyLocation: [],
+      countiesServed: [],
       timeNeeded: [],
+      frequency: undefined,
+      headcount: undefined,
     },
   });
 
-  const handleSubmitForm: SubmitHandler<ClientFormData> = (data) => {
-    onSubmit(data as FormData);
+  // Add this wrapper function
+  const onSubmitWrapper = async (data: ClientFormData) => {
+    console.log("Form data:", JSON.stringify(data, null, 2));
+
+    Object.entries(data).forEach(([key, value]) => {
+      console.log(`${key}:`, value);
+    });
+
+    setIsLoading(true);
+    try {
+      console.log("Form submission started");
+      console.log("Form data:", data);
+      await onSubmit(data);
+      console.log("Form submission completed");
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(handleSubmitForm)}>
-      <CommonFields register={register} errors={errors} />
-      
+    <form onSubmit={handleSubmit(onSubmitWrapper)}>
+      <CommonFields<ClientFormData> register={register} errors={errors} />
+      <input
+        {...register("parking")}
+        placeholder="Parking / Loading (Optional)"
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+      />
+      {errors.parking && (
+        <p className="mb-4 text-red-500">{errors.parking.message as string}</p>
+      )}
+
+      <div className="my-6 flex items-center">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <span className="mx-4 flex-shrink text-gray-600">
+          Additional Information
+        </span>
+        <div className="flex-grow border-t border-gray-300"></div>
+      </div>
+
       <input
         {...register("company")}
         placeholder="Company Name"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
       {errors.company && (
-        <p className="mb-4 text-red-500">{errors.company.message}</p>
+        <p className="mb-4 text-red-500">{errors.company.message as string}</p>
       )}
 
-      <CheckboxGroup
-        name="countyLocation"
-        control={control}
-        options={COUNTIES}
-        label="County Location"
+      <input
+        {...register("contact_name")}
+        placeholder="Contact Name"
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.countyLocation && (
-        <p className="mt-2 text-red-500">{errors.countyLocation.message as string}</p>
+      {errors.contact_name && (
+        <p className="mb-4 text-red-500">
+          {errors.contact_name.message as string}
+        </p>
       )}
 
-      <CheckboxGroup
-        name="timeNeeded"
-        control={control}
-        options={TIME_NEEDED}
-        label="Time Needed"
+      <input
+        {...register("website")}
+        placeholder="Website (Optional)"
+        type="url"
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.timeNeeded && (
-        <p className="mt-2 text-red-500">{errors.timeNeeded.message as string}</p>
+      {errors.website && (
+        <p className="mb-4 text-red-500">{errors.website.message as string}</p>
       )}
 
-      <RadioGroup
-        name="headcount"
-        control={control}
-        options={HEADCOUNT}
-        label="Headcount"
-      />
-      {errors.headcount && (
-        <p className="mt-2 text-red-500">{errors.headcount.message as string}</p>
+      <div className="space-y-6">
+        <div>
+          <CheckboxGroup
+            name="countiesServed"
+            control={control}
+            options={COUNTIES}
+            label="County location"
+          />
+          {errors.countiesServed && (
+            <p className="mt-2 text-red-500">{errors.countiesServed.message}</p>
+          )}
+        </div>
+
+        <div>
+          <CheckboxGroup
+            name="timeNeeded"
+            control={control}
+            options={TIME_NEEDED}
+            label="Time Needed"
+          />
+          {errors.timeNeeded && (
+            <p className="mt-2 text-red-500">
+              {errors.timeNeeded.message as string}
+            </p>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="headcount"
+            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Headcount
+          </label>
+          <select
+            id="headcount"
+            {...register("headcount")}
+            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            <option value="">Select headcount</option>
+            {HEADCOUNT.map((count) => (
+              <option key={count} value={count}>
+                {count}
+              </option>
+            ))}
+          </select>
+          {errors.headcount && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+              {errors.headcount.message as string}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <RadioGroup
+            name="frequency"
+            control={control}
+            options={FREQUENCY}
+            label="Frequency"
+          />
+          {errors.frequency && (
+            <p className="mt-2 text-red-500">
+              {errors.frequency.message as string}
+            </p>
+          )}
+        </div>
+      </div>
+      {Object.keys(errors).length > 0 && (
+        <div className="mb-4 text-red-500">
+          <p>Please correct the following errors:</p>
+          <ul>
+            {Object.entries(errors).map(([key, error]) => (
+              <li key={key}>{error.message}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
-      <RadioGroup
-        name="frequency"
-        control={control}
-        options={FREQUENCY}
-        label="Frequency"
-      />
-      {errors.frequency && (
-        <p className="mt-2 text-red-500">{errors.frequency.message as string}</p>
-      )}
-
-      <div className="pt-6"> 
+      <div className="pt-6">
         <button
           type="submit"
-          className="w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition hover:bg-primary-dark"
+          disabled={isLoading}
+          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
         >
-          Register as Client
+          {isLoading ? "Registering..." : "Register as Vendor"}
         </button>
       </div>
     </form>
   );
 };
 
-export default ClientForm;
+export default VendorForm;

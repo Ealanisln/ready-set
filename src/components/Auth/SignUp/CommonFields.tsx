@@ -7,11 +7,11 @@ type CommonFields = {
   email: string;
   password: string;
   passwordConfirmation: string;
-  streetAddress1: string;
-  streetAddress2?: string;
+  street1: string;
+  street2?: string;
   city: string;
   state: string;
-  zipCode: string;
+  zip: string;
 };
 
 interface CommonFieldsProps<T extends Partial<CommonFields>> {
@@ -45,7 +45,7 @@ const CommonFields = <T extends Partial<CommonFields>>({
         <p className="mb-4 text-red-500">{errors.password.message as string}</p>
       )}
 
-      <input
+      {/* <input
         {...register("passwordConfirmation" as Path<T>)}
         placeholder="Confirm Password"
         type="password"
@@ -55,7 +55,7 @@ const CommonFields = <T extends Partial<CommonFields>>({
         <p className="mb-4 text-red-500">
           {errors.passwordConfirmation.message as string}
         </p>
-      )}
+      )} */}
 
       <div className="my-6 flex items-center">
         <div className="flex-grow border-t border-gray-300"></div>
@@ -75,27 +75,23 @@ const CommonFields = <T extends Partial<CommonFields>>({
         </p>
       )}
       <input
-        {...register("streetAddress1" as Path<T>)}
+        {...register("street1" as Path<T>)}
         placeholder="Street Address 1"
         type="text"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.streetAddress1 && (
-        <p className="mb-4 text-red-500">
-          {errors.streetAddress1.message as string}
-        </p>
+      {errors.street1 && (
+        <p className="mb-4 text-red-500">{errors.street1.message as string}</p>
       )}
 
       <input
-        {...register("streetAddress2" as Path<T>)}
+        {...register("street2" as Path<T>)}
         placeholder="Street Address 2 (Optional)"
         type="text"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.streetAddress2 && (
-        <p className="mb-4 text-red-500">
-          {errors.streetAddress2.message as string}
-        </p>
+      {errors.street2 && (
+        <p className="mb-4 text-red-500">{errors.street2.message as string}</p>
       )}
 
       <input
@@ -119,13 +115,13 @@ const CommonFields = <T extends Partial<CommonFields>>({
       )}
 
       <input
-        {...register("zipCode" as Path<T>)}
+        {...register("zip" as Path<T>)}
         placeholder="Zip Code"
         type="text"
         className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
       />
-      {errors.zipCode && (
-        <p className="mb-4 text-red-500">{errors.zipCode.message as string}</p>
+      {errors.zip && (
+        <p className="mb-4 text-red-500">{errors.zip.message as string}</p>
       )}
     </>
   );
