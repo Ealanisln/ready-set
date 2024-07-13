@@ -43,8 +43,8 @@ model user {
   side_notes            String?
   confirmation_code     String?
   remember_token        String?            @db.VarChar(100)
-  created_at            DateTime?          @db.Timestamptz(6)
-  updated_at            DateTime?          @db.Timestamptz(6)
+  created_at            DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
   accounts              account[]
   sessions              session[]
   addresses             address[]

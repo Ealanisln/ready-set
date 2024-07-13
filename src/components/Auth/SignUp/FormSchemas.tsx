@@ -18,7 +18,7 @@ const getValues = <T extends readonly (string | { value: string })[]>(
   ) as [string, ...string[]];
 
 export const baseSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  contact_name: z.string().min(1, "Contact name is required"),
   email: z.string().email("Invalid email address"),
   phoneNumber: z
     .string()
@@ -41,7 +41,8 @@ export const baseSchema = z.object({
   zip: z.string().min(1, "Zip code is required"),
 });
 
-const baseVendorSchema = baseSchema.extend({
+export const vendorSchema = baseSchema.extend({
+  contact_name: z.string().min(1, "Contact name is required"),
   userType: z.literal("vendor"),
   parking: z.string().optional(),
   countiesServed: z
@@ -53,33 +54,7 @@ const baseVendorSchema = baseSchema.extend({
   cateringBrokerage: z.array(z.enum(getValues(CATERING_BROKERAGE))).optional(),
   frequency: z.enum(getValues(FREQUENCY)),
   provisions: z.array(z.enum(getValues(PROVISIONS))).optional(),
-});
-
-export const vendorSchema = z.object({
-  userType: z.literal("vendor"),
-  email: z.string().email("Invalid email address"),
-  website: z
-    .union([z.string().url("Invalid website URL"), z.string().max(0)])
-    .optional(),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
-  contact_name: z.string().min(1, "Name is required"),
-  company: z.string().min(1, "Company name is required"),
-  street1: z.string().min(1, "Street address is required"),
-  street2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  zip: z.string().min(5, "Zip code is required"),
-  parking: z.string().optional(),
-  countiesServed: z
-    .array(z.enum(getValues(COUNTIES)))
-    .min(1, "Select at least one county"),
-  timeNeeded: z
-    .array(z.enum(getValues(TIME_NEEDED)))
-    .min(1, "Select at least one time"),
-  cateringBrokerage: z.array(z.enum(getValues(CATERING_BROKERAGE))).optional(),
-  frequency: z.enum(getValues(FREQUENCY)),
-  provisions: z.array(z.enum(getValues(PROVISIONS))).optional(),
+  company: z.string().nonempty("Company name is required"),
 });
 
 export const clientSchema = z.object({
@@ -136,7 +111,6 @@ export const userTypes = ["vendor", "client", "driver"] as const;
 export type UserType = (typeof userTypes)[number];
 
 export const formSchema = z.discriminatedUnion("userType", [
-  baseVendorSchema,
   clientSchema,
   driverSchema,
 ]);

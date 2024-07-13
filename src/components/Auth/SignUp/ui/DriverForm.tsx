@@ -48,6 +48,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmitWrapper)}>
+      <input type="hidden" {...register("userType")} value="driver" />
+
       <input
         {...register("name")}
         placeholder="Name"

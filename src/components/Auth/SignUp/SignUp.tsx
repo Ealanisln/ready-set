@@ -45,7 +45,8 @@ const SignUp = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        console.error("API error:", errorData);
+        throw new Error(errorData.error || "An error occurred during registration");
       }
 
       const responseData = await response.json();

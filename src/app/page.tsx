@@ -23,7 +23,7 @@ export default function Home() {
     <main>
       <ScrollUp />
       <Hero />
-      <Features />
+			<Features />
       <About />
       <CallToAction />
       <HomeBlogSection />
@@ -37,3 +37,4 @@ export default function Home() {
     </main>
   );
 }
+

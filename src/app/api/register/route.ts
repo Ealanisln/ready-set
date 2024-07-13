@@ -34,14 +34,19 @@ export async function POST(request: Request) {
       location_number,
     } = body;
 
-    // Validate required fields
-    if (!contact_name || !email || !phoneNumber || !password || !userType || !company) {
+    if (!name || !email || !phoneNumber || !password || !userType) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
-
+    
+    if (userType === "vendor" && (!company || !contact_name)) {
+      return NextResponse.json(
+        { error: "Missing required fields for vendor" },
+        { status: 400 },
+      );
+    }
     const exist = await prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
@@ -89,6 +94,8 @@ export async function POST(request: Request) {
       state,
       zip,
       location_number: location_number?.toString(),
+      created_at: new Date(), // Add this line to set the created_at field
+      updated_at: new Date(), // Also set the updated_at field if you have one
     };
 
     const newUser = await prisma.user.create({

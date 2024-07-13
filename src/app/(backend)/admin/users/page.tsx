@@ -46,8 +46,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -61,10 +59,12 @@ import { useEffect, useState } from "react";
 
 interface User {
   id: string;
-  name: string;
+  name?: string;
+  contact_name?: string;
   contact_number: string;
   email: string;
   type: "vendor" | "client" | "driver" | "admin";
+  created_at?: Date; 
   // Add other fields as needed
 }
 
@@ -93,7 +93,11 @@ export default function Users() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Loading...</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -200,7 +204,9 @@ export default function Users() {
                     <TableBody>
                       {users.map((user) => (
                         <TableRow key={user.id}>
-                          <TableCell>{user.name}</TableCell>
+                          <TableCell>
+                            {user.name || user.contact_name || "N/A"}
+                          </TableCell>{" "}
                           <TableCell>
                             {" "}
                             <Badge variant="outline">{user.type}</Badge>
@@ -212,8 +218,8 @@ export default function Users() {
                             {user.email}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            Created at
-                          </TableCell>
+  {user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A'}
+</TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
