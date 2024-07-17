@@ -6,11 +6,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <NavBar />
+    <>
+      <NavBar />
+      <main className="admin-content">
         {children}
-      </body>
-    </html>
+      </main>
+    </>
   );
 }

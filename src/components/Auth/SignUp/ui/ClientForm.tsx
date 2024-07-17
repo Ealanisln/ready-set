@@ -7,7 +7,7 @@ import {
   COUNTIES,
   TIME_NEEDED,
   FREQUENCY,
-  HEADCOUNT,
+  HEAD_COUNT,
   ClientFormData,
 } from "./FormData";
 import { CheckboxGroup, RadioGroup } from "./FormComponents";
@@ -30,7 +30,7 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
       countiesServed: [],
       timeNeeded: [],
       frequency: undefined,
-      headcount: undefined,
+      head_count: { value: "", label: "" },
     },
   });
 
@@ -140,20 +140,20 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
             Headcount
           </label>
           <select
-            id="headcount"
-            {...register("headcount")}
+            id="head_count"
+            {...register("head_count")}
             className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           >
             <option value="">Select headcount</option>
-            {HEADCOUNT.map((count) => (
-              <option key={count} value={count}>
-                {count}
+            {HEAD_COUNT.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
-          {errors.headcount && (
+          {errors.head_count && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-              {errors.headcount.message as string}
+              {errors.head_count.message as string}
             </p>
           )}
         </div>

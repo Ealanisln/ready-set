@@ -1,5 +1,5 @@
 // FormComponents.tsx
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
 interface Option {
@@ -14,7 +14,8 @@ interface CheckboxGroupProps<T extends FieldValues> {
   label: string;
 }
 
-export function CheckboxGroup<T extends FieldValues>({ name, control, options, label }: CheckboxGroupProps<T>) {
+export const CheckboxGroup = forwardRef<HTMLInputElement, CheckboxGroupProps<any>>((props, ref) => {
+  const { name, control, options, label } = props;
   return (
     <div>
       <h3 className="mb-2 font-semibold">{label}</h3>
@@ -26,6 +27,8 @@ export function CheckboxGroup<T extends FieldValues>({ name, control, options, l
               control={control}
               render={({ field }) => (
                 <input
+                  {...field}
+                  ref={ref}
                   type="checkbox"
                   id={`${name}-${option.value}`}
                   value={option.value}
@@ -46,7 +49,9 @@ export function CheckboxGroup<T extends FieldValues>({ name, control, options, l
       </div>
     </div>
   );
-}
+});
+
+CheckboxGroup.displayName = 'CheckboxGroup';
 
 interface RadioGroupProps<T extends FieldValues> {
   name: Path<T>;
@@ -54,7 +59,9 @@ interface RadioGroupProps<T extends FieldValues> {
   options: readonly Option[];  
   label: string;
 }
-export function RadioGroup<T extends FieldValues>({ name, control, options, label }: RadioGroupProps<T>) {
+
+export const RadioGroup = forwardRef<HTMLInputElement, RadioGroupProps<any>>((props, ref) => {
+  const { name, control, options, label } = props;
   return (
     <div>
       <h3 className="mb-2 font-semibold">{label}</h3>
@@ -66,6 +73,8 @@ export function RadioGroup<T extends FieldValues>({ name, control, options, labe
               control={control}
               render={({ field }) => (
                 <input
+                  {...field}
+                  ref={ref}
                   type="radio"
                   id={`${name}-${option.value}`}
                   value={option.value}
@@ -81,4 +90,6 @@ export function RadioGroup<T extends FieldValues>({ name, control, options, labe
       </div>
     </div>
   );
-}
+});
+
+RadioGroup.displayName = 'RadioGroup';

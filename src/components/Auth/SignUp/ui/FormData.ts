@@ -54,19 +54,24 @@ export const PROVISIONS: readonly Option[] = [
   // Add other provisions
 ] as const;
 
-export const HEADCOUNT = [
-  "1-24",
-  "25-49",
-  "50-74",
-  "75-99",
-  "100-124",
-  "125-149",
-  "150-174",
-  "175-199",
-  "200-249",
-  "250-299",
-  "+300",
-] as const;
+export const HEAD_COUNT: Option[] = [
+  { value: "1-24", label: "1-24" },
+  { value: "25-49", label: "25-49" },
+  { value: "50-74", label: "50-74" },
+  { value: "75-99", label: "75-99" },
+  { value: "100-124", label: "100-124" },
+  { value: "125-149", label: "125-149" },
+  { value: "150-174", label: "150-174" },
+  { value: "175-199", label: "175-199" },
+  { value: "200-249", label: "200-249" },
+  { value: "250-299", label: "250-299" },
+  { value: "+300", label: "+300" },
+];
+
+export interface Option {
+  value: string;
+  label: string;
+}
 
 // Define the form data structure
 export interface FormData {
@@ -83,7 +88,7 @@ export interface FormData {
   cateringBrokerage?: (typeof CATERING_BROKERAGE)[number][];
   frequency: (typeof FREQUENCY)[number];
   provisions?: (typeof PROVISIONS)[number][];
-  headcount?: (typeof HEADCOUNT)[number];
+  head_count?: (typeof HEAD_COUNT)[number];
   contact_name?: string;
   contact_number?: string;
   website?: string;
@@ -94,7 +99,7 @@ export interface FormData {
   zip?: string;
   location_number?: string;
 }
-// You can also create type-specific interfaces if needed
+
 export interface VendorFormData {
   userType: "vendor";
   contact_name: string;
@@ -128,15 +133,15 @@ export interface ClientFormData {
   state: string;
   zip: string;
   timeNeeded: string[];
-  frequency: string;
+  frequency: (typeof FREQUENCY)[number]["value"];  
   parking?: string;
   countiesServed: string[];
-  headcount: (typeof HEADCOUNT)[number];
+  head_count: Option;  
   website?: string;
 }
 
 export interface DriverFormData extends FormData {
   userType: "driver";
   countyLocation: (typeof COUNTIES)[number][];
-  headcount: (typeof HEADCOUNT)[number];
+  head_count: (typeof HEAD_COUNT)[number];
 }

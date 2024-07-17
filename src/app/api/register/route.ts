@@ -1,52 +1,52 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
-import { FormData } from "@/components/Auth/SignUp/ui/FormData";
+import { VendorFormData, ClientFormData, DriverFormData } from "@/components/Auth/SignUp/ui/FormData";
 
 const prisma = new PrismaClient();
 
+type RequestBody = VendorFormData | ClientFormData | DriverFormData;
+
 export async function POST(request: Request) {
   try {
-    const body: FormData = await request.json();
-    console.log("Request body:", body);
+    const body: RequestBody = await request.json();
+    console.log("Received body:", JSON.stringify(body, null, 2));
 
-    const {
-      name,
-      email,
-      website,
-      phoneNumber,
-      password,
-      userType,
-      company,
-      parking,
-      countiesServed,
-      timeNeeded,
-      cateringBrokerage,
-      frequency,
-      provisions,
-      headcount,
-      contact_name,
-      street1,
-      street2,
-      city,
-      state,
-      zip,
-      location_number,
-    } = body;
+    const { email, phoneNumber, password, userType } = body;
 
-    if (!name || !email || !phoneNumber || !password || !userType) {
+    if (!email || !phoneNumber || !password || !userType) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
+        { error: "Missing required fields", missingFields: ['email', 'phoneNumber', 'password', 'userType'].filter(field => !body[field as keyof RequestBody]) },
+        { status: 400 }
       );
     }
-    
-    if (userType === "vendor" && (!company || !contact_name)) {
-      return NextResponse.json(
-        { error: "Missing required fields for vendor" },
-        { status: 400 },
-      );
+
+    if (userType === 'vendor') {
+      const { company, contact_name, street1, city, state, zip, timeNeeded, frequency } = body as VendorFormData;
+      if (!company || !contact_name || !street1 || !city || !state || !zip || !timeNeeded || !frequency) {
+        return NextResponse.json(
+          { error: "Missing required fields for vendor", missingFields: ['company', 'contact_name', 'street1', 'city', 'state', 'zip', 'timeNeeded', 'frequency'].filter(field => !(body as VendorFormData)[field as keyof VendorFormData]) },
+          { status: 400 }
+        );
+      }
+    } else if (userType === 'client') {
+      const { company, contact_name, street1, city, state, zip, timeNeeded, frequency, countiesServed, head_count } = body as ClientFormData;
+      if (!company || !contact_name || !street1 || !city || !state || !zip || !timeNeeded || !frequency || !countiesServed || !head_count) {
+        return NextResponse.json(
+          { error: "Missing required fields for client", missingFields: ['company', 'contact_name', 'street1', 'city', 'state', 'zip', 'timeNeeded', 'frequency', 'countiesServed', 'head_count'].filter(field => !(body as ClientFormData)[field as keyof ClientFormData]) },
+          { status: 400 }
+        );
+      }
+    } else if (userType === 'driver') {
+      const { contact_name, street1, city, state, zip, countyLocation, head_count } = body as DriverFormData;
+      if (!contact_name || !street1 || !city || !state || !zip || !countyLocation || !head_count) {
+        return NextResponse.json(
+          { error: "Missing required fields for driver", missingFields: ['contact_name', 'street1', 'city', 'state', 'zip', 'countyLocation', 'head_count'].filter(field => !(body as DriverFormData)[field as keyof DriverFormData]) },
+          { status: 400 }
+        );
+      }
     }
+
     const exist = await prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
@@ -56,51 +56,41 @@ export async function POST(request: Request) {
     if (exist) {
       return NextResponse.json(
         { error: "User already exists!" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userData: Prisma.userCreateInput = {
-      name,
       email: email.toLowerCase(),
       contact_number: phoneNumber,
       password: hashedPassword,
       type: userType as users_type,
-      company_name: company,
-      parking_loading: parking,
-      counties: Array.isArray(countiesServed)
-        ? countiesServed.join(", ")
-        : countiesServed,
-      time_needed: Array.isArray(timeNeeded)
-        ? timeNeeded.join(", ")
-        : timeNeeded,
-      catering_brokerage: Array.isArray(cateringBrokerage)
-        ? cateringBrokerage.join(", ")
-        : cateringBrokerage,
-      frequency:
-        typeof frequency === "object" && "value" in frequency
-          ? frequency.value
-          : frequency,
-      provide: Array.isArray(provisions) ? provisions.join(", ") : provisions,
-      head_count: headcount?.toString(),
+      name: body.contact_name,
+      company_name: 'company' in body ? body.company : undefined,
+      parking_loading: 'parking' in body ? body.parking : undefined,
+      counties: 'countiesServed' in body ? (body as VendorFormData | ClientFormData).countiesServed.join(", ") : undefined,
+      time_needed: 'timeNeeded' in body ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ") : undefined,
+      catering_brokerage: 'cateringBrokerage' in body ? (body as VendorFormData).cateringBrokerage?.join(", ") : undefined,
+      frequency: 'frequency' in body ? (body as VendorFormData | ClientFormData).frequency : undefined,
+      provide: 'provisions' in body ? (body as VendorFormData).provisions?.join(", ") : undefined,
+      head_count: 'head_count' in body ? body.head_count.toString() : undefined,
       status: users_status.pending,
-      contact_name,
-      website,
-      street1,
-      street2,
-      city,
-      state,
-      zip,
-      location_number: location_number?.toString(),
-      created_at: new Date(), // Add this line to set the created_at field
-      updated_at: new Date(), // Also set the updated_at field if you have one
+      website: 'website' in body ? body.website : undefined,
+      street1: body.street1,
+      street2: 'street2' in body ? body.street2 : undefined,
+      city: body.city,
+      state: body.state,
+      zip: body.zip,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
-
+    
     const newUser = await prisma.user.create({
       data: userData,
     });
+
 
     console.log("User creation successful");
     return NextResponse.json(

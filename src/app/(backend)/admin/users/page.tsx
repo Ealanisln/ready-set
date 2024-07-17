@@ -64,7 +64,7 @@ interface User {
   contact_number: string;
   email: string;
   type: "vendor" | "client" | "driver" | "admin";
-  created_at?: Date; 
+  created_at?: Date;
   // Add other fields as needed
 }
 
@@ -132,9 +132,12 @@ export default function Users() {
             <div className="flex items-center">
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="active">Driver</TabsTrigger>
                 <TabsTrigger value="archived" className="hidden sm:flex">
-                  Archived
+                  Vendor
+                </TabsTrigger>
+                <TabsTrigger value="archived" className="hidden sm:flex">
+                  Client
                 </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
@@ -168,7 +171,7 @@ export default function Users() {
                 <Button size="sm" className="h-8 gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add User
+                    <Link href="/signup">Add User</Link>
                   </span>
                 </Button>
               </div>
@@ -205,10 +208,11 @@ export default function Users() {
                       {users.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
-                            {user.name || user.contact_name || "N/A"}
-                          </TableCell>{" "}
+                            <Link href={`/admin/users/${user.id}`}>
+                              {user.name || user.contact_name || "N/A"}
+                            </Link>
+                          </TableCell>
                           <TableCell>
-                            {" "}
                             <Badge variant="outline">{user.type}</Badge>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
@@ -218,8 +222,10 @@ export default function Users() {
                             {user.email}
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-  {user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A'}
-</TableCell>
+                            {user.created_at
+                              ? new Date(user.created_at).toLocaleString()
+                              : "N/A"}
+                          </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -234,7 +240,11 @@ export default function Users() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Link href={`/admin/users/${user.id}`}>
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>Delete</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

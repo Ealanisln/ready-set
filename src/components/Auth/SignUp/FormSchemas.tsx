@@ -5,7 +5,7 @@ import {
   CATERING_BROKERAGE,
   FREQUENCY,
   PROVISIONS,
-  HEADCOUNT,
+  HEAD_COUNT,
 } from "./ui/FormData";
 
 const phoneRegex = /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
@@ -16,6 +16,13 @@ const getValues = <T extends readonly (string | { value: string })[]>(
   options.map((option) =>
     typeof option === "string" ? option : option.value,
   ) as [string, ...string[]];
+
+  const arrayToTuple = <T extends string>(arr: T[]): [T, ...T[]] => {
+    if (arr.length === 0) {
+      throw new Error("Array must have at least one element");
+    }
+    return arr as [T, ...T[]];
+  };
 
 export const baseSchema = z.object({
   contact_name: z.string().min(1, "Contact name is required"),
@@ -79,8 +86,11 @@ export const clientSchema = z.object({
   timeNeeded: z
     .array(z.enum(getValues(TIME_NEEDED)))
     .min(1, "Please select at least one time"),
-  headcount: z.enum(HEADCOUNT),
-  frequency: z.enum(getValues(FREQUENCY)),
+    head_count:  z.object({
+      value: z.string(),
+      label: z.string(),
+    }),
+    frequency: z.enum(arrayToTuple(FREQUENCY.map(option => option.value))),
 });
 
 export const driverSchema = z.object({
@@ -119,3 +129,7 @@ export type FormDataUnion = VendorFormData | ClientFormData | DriverFormData;
 export type DriverFormData = z.infer<typeof driverSchema>;
 export type VendorFormData = z.infer<typeof vendorSchema>;
 export type ClientFormData = z.infer<typeof clientSchema>;
+
+export type UserFormValues = {
+  type: 'vendor' | 'client' | 'driver';
+} & (VendorFormData | ClientFormData | DriverFormData);
