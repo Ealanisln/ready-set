@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clientSchema } from "@/components/Auth/SignUp/FormSchemas";
 import CommonFields from "../CommonFields";
@@ -30,7 +30,7 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
       countiesServed: [],
       timeNeeded: [],
       frequency: undefined,
-      head_count: { value: "", label: "" },
+      head_count: undefined,
     },
   });
 
@@ -139,18 +139,26 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
           >
             Headcount
           </label>
-          <select
-            id="head_count"
-            {...register("head_count")}
-            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-          >
-            <option value="">Select headcount</option>
-            {HEAD_COUNT.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="head_count"
+            control={control}
+            rules={{ required: "Please select a headcount" }}
+            render={({ field }) => (
+              <>
+                <RadioGroup
+                  {...field}
+                  control={control}
+                  options={HEAD_COUNT}
+                  label="Headcount"
+                />
+                {errors.head_count && (
+                  <p className="mt-2 text-red-500">
+                    {errors.head_count.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
           {errors.head_count && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-500">
               {errors.head_count.message as string}

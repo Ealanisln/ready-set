@@ -136,7 +136,7 @@ export interface ClientFormData {
   frequency: (typeof FREQUENCY)[number]["value"];  
   parking?: string;
   countiesServed: string[];
-  head_count: Option;  
+  head_count: string;
   website?: string;
 }
 

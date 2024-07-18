@@ -17,12 +17,12 @@ const getValues = <T extends readonly (string | { value: string })[]>(
     typeof option === "string" ? option : option.value,
   ) as [string, ...string[]];
 
-  const arrayToTuple = <T extends string>(arr: T[]): [T, ...T[]] => {
-    if (arr.length === 0) {
-      throw new Error("Array must have at least one element");
-    }
-    return arr as [T, ...T[]];
-  };
+const arrayToTuple = <T extends string>(arr: T[]): [T, ...T[]] => {
+  if (arr.length === 0) {
+    throw new Error("Array must have at least one element");
+  }
+  return arr as [T, ...T[]];
+};
 
 export const baseSchema = z.object({
   contact_name: z.string().min(1, "Contact name is required"),
@@ -86,11 +86,8 @@ export const clientSchema = z.object({
   timeNeeded: z
     .array(z.enum(getValues(TIME_NEEDED)))
     .min(1, "Please select at least one time"),
-    head_count:  z.object({
-      value: z.string(),
-      label: z.string(),
-    }),
-    frequency: z.enum(arrayToTuple(FREQUENCY.map(option => option.value))),
+  frequency: z.enum(getValues(FREQUENCY)),
+  head_count: z.string().min(1, "Please select a headcount"),
 });
 
 export const driverSchema = z.object({
@@ -131,5 +128,5 @@ export type VendorFormData = z.infer<typeof vendorSchema>;
 export type ClientFormData = z.infer<typeof clientSchema>;
 
 export type UserFormValues = {
-  type: 'vendor' | 'client' | 'driver';
+  type: "vendor" | "client" | "driver";
 } & (VendorFormData | ClientFormData | DriverFormData);
