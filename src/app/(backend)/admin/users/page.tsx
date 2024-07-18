@@ -72,6 +72,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -91,6 +92,10 @@ export default function Users() {
 
     fetchUsers();
   }, []);
+
+  const filteredUsers = filter
+    ? users.filter((user) => user.type === filter)
+    : users;
 
   if (loading) {
     return (
@@ -130,16 +135,6 @@ export default function Users() {
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Driver</TabsTrigger>
-                <TabsTrigger value="archived" className="hidden sm:flex">
-                  Vendor
-                </TabsTrigger>
-                <TabsTrigger value="archived" className="hidden sm:flex">
-                  Client
-                </TabsTrigger>
-              </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -151,23 +146,40 @@ export default function Users() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                    <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem checked>
-                      Active
+                    <DropdownMenuCheckboxItem
+                      checked={filter === null}
+                      onClick={() => setFilter(null)}
+                    >
+                      All
                     </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>
-                      Archived
+                    <DropdownMenuCheckboxItem
+                      checked={filter === "driver"}
+                      onClick={() => setFilter("driver")}
+                    >
+                      Driver
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={filter === "client"}
+                      onClick={() => setFilter("client")}
+                    >
+                      Client
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={filter === "vendor"}
+                      onClick={() => setFilter("vendor")}
+                    >
+                      Vendor
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button size="sm" variant="outline" className="h-8 gap-1">
+                {/* <Button size="sm" variant="outline" className="h-8 gap-1">
                   <File className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Export
                   </span>
-                </Button>
+                </Button> */}
                 <Button size="sm" className="h-8 gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -205,7 +217,7 @@ export default function Users() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <Link href={`/admin/users/${user.id}`}>
@@ -240,12 +252,9 @@ export default function Users() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>
-                                  <Link href={`/admin/users/${user.id}`}>
-                                    Edit
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <Link href={`/admin/users/${user.id}`}>
+                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                </Link>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>

@@ -13,6 +13,7 @@ export async function GET(
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -39,28 +40,38 @@ export async function PUT(
   try {
     const data = await request.json();
 
+    let processedData = { ...data };
+
+    // Handle name fields based on user type
+    if (data.type === "driver") {
+      if (data.name) {
+        processedData.name = data.name;
+      }
+      delete processedData.contact_name;
+    } else if (data.type === "vendor" || data.type === "client") {
+      if (data.contact_name) {
+        processedData.contact_name = data.contact_name;
+      }
+      delete processedData.name;
+    }
     // Process array fields
-    const processedData = {
-      ...data,
-      counties: Array.isArray(data.countiesServed)
-        ? data.countiesServed.join(", ")
-        : data.counties,
-      time_needed: Array.isArray(data.timeNeeded)
-        ? data.timeNeeded.join(", ")
-        : data.time_needed,
-      catering_brokerage: Array.isArray(data.cateringBrokerage)
-        ? data.cateringBrokerage.join(", ")
-        : data.catering_brokerage,
-      provide: Array.isArray(data.provisions)
-        ? data.provisions.join(", ")
-        : data.provide,
-    };
+    processedData.counties = data.countiesServed
+      ? data.countiesServed.join(", ")
+      : "";
+    processedData.time_needed = data.timeNeeded
+      ? data.timeNeeded.join(", ")
+      : "";
+    processedData.catering_brokerage = data.cateringBrokerage
+      ? data.cateringBrokerage.join(", ")
+      : "";
+    processedData.provide = data.provisions ? data.provisions.join(", ") : "";
 
     // Remove fields that shouldn't be directly updated
     delete processedData.countiesServed;
     delete processedData.timeNeeded;
     delete processedData.cateringBrokerage;
     delete processedData.provisions;
+    delete processedData.id; // Ensure we're not trying to update the ID
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

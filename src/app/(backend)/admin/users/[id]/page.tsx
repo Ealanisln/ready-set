@@ -2,36 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import Image from "next/image";
 import { ChevronLeft, Upload } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useForm, SubmitHandler } from "react-hook-form";
 import PageHeader from "@/components/Header/PageHeader";
 import ProfileCard from "@/components/Dashboard/ProfileCard";
 import AddressCard from "@/components/Dashboard/AddressCard";
 import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsCard";
-import { useToast } from "@/components/ui/use-toast";
-
+import UserStatusCard from "@/components/Dashboard/UserStatusCard";
+import toast from "react-hot-toast";
+import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
 
 interface User {
   id: string;
@@ -54,7 +43,7 @@ interface User {
   frequency?: string;
   provisions?: string[];
   head_count?: string;
-  // Add other fields as needed
+  status?: "active" | "pending" | "deleted";
 }
 
 interface UserFormValues extends User {
@@ -63,15 +52,17 @@ interface UserFormValues extends User {
 }
 
 export default function EditUser({ params }: { params: { id: string } }) {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   const {
     control,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<UserFormValues>({
     defaultValues: {
       countiesServed: [],
@@ -87,12 +78,15 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const watchedValues = watch();
 
   useEffect(() => {
+    setHasUnsavedChanges(isDirty);
+  }, [isDirty]);
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await fetch(`/api/users/${params.id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
-        console.log("Fetched user data:", data);
 
         // Set form values
         setValue("displayName", data.name || data.contact_name || "");
@@ -107,6 +101,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
         setValue("zip", data.zip || "");
         setValue("parking_loading", data.parking_loading || "");
         setValue("type", data.type || "");
+        setValue("status", data.status || "pending");
 
         // Vendor specific fields
         if (data.type === "vendor") {
@@ -145,14 +140,16 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
       const submitData: User = { ...data };
-      if (data.type === "driver" || data.type === "vendor") {
-        submitData.contact_name = data.displayName;
-        delete submitData.name;
-      } else {
+
+      delete (submitData as any).displayName;
+
+      if (data.type === "driver") {
         submitData.name = data.displayName;
         delete submitData.contact_name;
+      } else if (data.type === "vendor" || data.type === "client") {
+        submitData.contact_name = data.displayName;
+        delete submitData.name;
       }
-      delete (submitData as any).displayName;
 
       if (data.type === "client") {
         submitData.head_count = data.head_count;
@@ -170,18 +167,20 @@ export default function EditUser({ params }: { params: { id: string } }) {
       }
 
       const updatedUser = await response.json();
-      console.log("User updated successfully:", updatedUser);
-      toast({
-        description: "User saved successfully!",
-        variant: "default",
-      });
+      setValue(
+        "displayName",
+        updatedUser.name || updatedUser.contact_name || "",
+      );
+
+      toast.success("User saved successfully!");
+      reset(updatedUser);
+
+      setHasUnsavedChanges(false);
+      reset(data);
       router.push("/admin/users");
     } catch (error) {
       console.error("Error updating user:", error);
-      toast({
-        description: "Failed to save user. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to save user. Please try again.");
     }
   };
 
@@ -194,7 +193,66 @@ export default function EditUser({ params }: { params: { id: string } }) {
     ? "Loading..."
     : `Editing ${watchedValues.displayName || "User"}`;
 
-  if (loading) return <div>Loading...</div>;
+  const handleBack = () => {
+    reset(); // Reset the form
+    setHasUnsavedChanges(false);
+    toast("Changes discarded", { icon: "🔄" });
+    router.push("/admin/users");
+  };
+
+  const handleDiscard = () => {
+    reset(); // Reset the form
+    setHasUnsavedChanges(false);
+    toast("Changes discarded", { icon: "🔄" });
+    router.push("/admin/users");
+  };
+
+  async function updateUserStatus(
+    userId: string,
+    newStatus: "active" | "pending" | "deleted",
+  ): Promise<void> {
+    const response = await fetch("/api/users/updateUserStatus", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, newStatus }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Response status:", response.status);
+      console.error("Response text:", text);
+      throw new Error(
+        `Failed to update user status: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  }
+
+  const handleStatusChange = async (
+    newStatus: "active" | "pending" | "deleted",
+  ) => {
+    try {
+      await updateUserStatus(params.id, newStatus);
+      // Update local state
+      setValue("status", newStatus);
+      toast.success("User status updated successfully!");
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+      toast.error("Failed to update user status. Please try again.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -208,10 +266,27 @@ export default function EditUser({ params }: { params: { id: string } }) {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
               <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" className="h-7 w-7">
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Back</span>
-                </Button>
+                {hasUnsavedChanges ? (
+                  <UnsavedChangesAlert
+                    onConfirm={handleBack}
+                    triggerButton={
+                      <Button variant="outline" size="icon" className="h-7 w-7">
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={handleBack}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                  </Button>
+                )}
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
                   Type of account
                 </h1>
@@ -219,9 +294,25 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   {watchedValues.type}
                 </Badge>
                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                  <Button variant="outline" size="sm">
-                    Discard
-                  </Button>
+                  {hasUnsavedChanges ? (
+                    <UnsavedChangesAlert
+                      onConfirm={handleDiscard}
+                      triggerButton={
+                        <Button variant="outline" size="sm">
+                          Discard
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDiscard}
+                      type="button"
+                    >
+                      Discard
+                    </Button>
+                  )}
                   <Button size="sm">Save User</Button>
                 </div>
               </div>
@@ -240,31 +331,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   )}
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                  <Card x-chunk="dashboard-07-chunk-3">
-                    <CardHeader>
-                      <CardTitle>User Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6">
-                        <div className="grid gap-3">
-                          <Label htmlFor="status">Status</Label>
-                          <Select>
-                            <SelectTrigger
-                              id="status"
-                              aria-label="Select status"
-                            >
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="draft">Draft</SelectItem>
-                              <SelectItem value="published">Active</SelectItem>
-                              <SelectItem value="archived">Archived</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <UserStatusCard
+                    user={{ ...watchedValues, id: params.id }}
+                    onStatusChange={handleStatusChange}
+                  />
                   <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
@@ -281,7 +351,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                           alt="User image"
                           className="aspect-square w-full rounded-md object-cover"
                           height="300"
-                          src="/placeholder.svg"
+                          src="/images/placeholder.svg"
                           width="300"
                         />
                         <div className="grid grid-cols-3 gap-2">
@@ -290,7 +360,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                               alt="User image"
                               className="aspect-square w-full rounded-md object-cover"
                               height="84"
-                              src="/placeholder.svg"
+                              src="/images/placeholder.svg"
                               width="84"
                             />
                           </button>
@@ -299,7 +369,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                               alt="User image"
                               className="aspect-square w-full rounded-md object-cover"
                               height="84"
-                              src="/placeholder.svg"
+                              src="/images/placeholder.svg"
                               width="84"
                             />
                           </button>
@@ -331,7 +401,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
                 <Button variant="outline" size="sm">
                   Discard
                 </Button>
-                <Button size="sm">Save User</Button>
+                <Button size="sm" type="submit">
+                  Save User
+                </Button>
               </div>
             </div>
           </form>
