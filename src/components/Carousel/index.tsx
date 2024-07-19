@@ -41,27 +41,31 @@ export function CarouselPlugin() {
       onMouseEnter={plugin.current.stop}
       onMouseLeave={plugin.current.reset}
     >
-         <CarouselContent>
-        {images.map((image, index) => (
-          <CarouselItem key={index}>
-            <Card className="relative w-full h-[400px] overflow-hidden">
-              <CardContent className="p-2 h-[400px] relative">
-                <picture>
-                  <source srcSet={image.webp} type="image/webp" />
-                  <source srcSet={image.png} type="image/png" />
-                  <Image
-                    src={image.png}
-                    alt={image.alt}
-                    layout="fill"
-                    objectFit="cover"
-                    sizes="(max-width: 768px) 100vw, 845px"
-                  />
-                </picture>
-              </CardContent>
-            </Card>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
+     <CarouselContent>
+  {images.map((image, index) => (
+    <CarouselItem key={index}>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <div className="relative aspect-[16/9]">
+            <picture>
+              <source srcSet={image.webp} type="image/webp" />
+              <source srcSet={image.png} type="image/png" />
+              <Image
+                src={image.webp}
+                alt={image.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 845px"
+                quality={80}
+                priority={index === 0}
+                className="object-cover rounded-md"
+              />
+            </picture>
+          </div>
+        </CardContent>
+      </Card>
+    </CarouselItem>
+  ))}
+</CarouselContent>
     </Carousel>
   );
 }
