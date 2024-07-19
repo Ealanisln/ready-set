@@ -80,35 +80,35 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM,
     }),
   ],
-
   callbacks: {
     jwt: async (payload: any) => {
       const { token } = payload;
       const user = payload.user;
-
+  
       if (user) {
         return {
           ...token,
           id: user.id,
+          type: user.type, // Add the user type to the token
         };
       }
       return token;
     },
-
-    session: async ({ session, token }) => {
+  
+    session: async ({ session, token }: { session: any; token: any }) => {
       if (session?.user) {
         return {
           ...session,
           user: {
             ...session.user,
-            id: token?.id,
+            id: token.id,
+            type: token.type, // Add the user type to the session
           },
         };
       }
       return session;
     },
   },
-
 
   
   // debug: process.env.NODE_ENV === "developement",

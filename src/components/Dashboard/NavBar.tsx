@@ -11,6 +11,7 @@ import Link from "next/link";
 import {
   Car,
   CircleUser,
+  Contact,
   Gauge,
   Home,
   LineChart,
@@ -20,7 +21,7 @@ import {
   Search,
   Settings,
   Truck,
-  Users2,
+  Users,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
@@ -79,13 +80,13 @@ const NavBar = () => {
               >
                 Users
               </Link>
-              <Link
+              {/* <Link
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={closeSheet}
               >
                 Customers
-              </Link>
+              </Link> */}
               <Link
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
@@ -145,24 +146,24 @@ const NavBar = () => {
                     href="/admin/users"
                     className="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
                   >
-                    <Package className="h-5 w-5" />
+                    <Users className="h-5 w-5" />
                     <span className="sr-only">Users</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">Users</TooltipContent>
               </Tooltip>
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
                     href="#"
                     className="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
                   >
-                    <Users2 className="h-5 w-5" />
+                    <Contact className="h-5 w-5" />
                     <span className="sr-only">Customers</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">Customers</TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
