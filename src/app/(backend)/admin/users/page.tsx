@@ -1,61 +1,8 @@
-// app/admin/users/page.tsx
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreHorizontal,
-  Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
-  Search,
-  Settings,
-  ShoppingCart,
-  Users2,
-} from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { BreadcrumbNavigation } from "@/components/Dashboard/UserView/BreadCrumbNavigation";
+import { MainContent } from "@/components/Dashboard/UserView/MainContent";
 
 interface User {
   id: string;
@@ -65,7 +12,6 @@ interface User {
   email: string;
   type: "vendor" | "client" | "driver" | "admin";
   created_at?: Date;
-  // Add other fields as needed
 }
 
 export default function Users() {
@@ -73,6 +19,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -93,10 +40,6 @@ export default function Users() {
     fetchUsers();
   }, []);
 
-  const filteredUsers = filter
-    ? users.filter((user) => user.type === filter)
-    : users;
-
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -108,170 +51,14 @@ export default function Users() {
   if (error) {
     return <div>Error: {error}</div>;
   }
+
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Users</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>All users</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <BreadcrumbNavigation />
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
-            <div className="flex items-center">
-              <div className="ml-auto flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      checked={filter === null}
-                      onClick={() => setFilter(null)}
-                    >
-                      All
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={filter === "driver"}
-                      onClick={() => setFilter("driver")}
-                    >
-                      Driver
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={filter === "client"}
-                      onClick={() => setFilter("client")}
-                    >
-                      Client
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={filter === "vendor"}
-                      onClick={() => setFilter("vendor")}
-                    >
-                      Vendor
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {/* <Button size="sm" variant="outline" className="h-8 gap-1">
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Export
-                  </span>
-                </Button> */}
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    <Link href="/signup">Add User</Link>
-                  </span>
-                </Button>
-              </div>
-            </div>
-            <TabsContent value="all">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardHeader>
-                  <CardTitle>Users</CardTitle>
-                  <CardDescription>
-                    Manage your users and view their sales performance.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          Phone
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          E-mail
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell">
-                          Created at
-                        </TableHead>
-                        <TableHead>
-                          <span className="sr-only">Actions</span>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <Link href={`/admin/users/${user.id}`}>
-                              {user.name || user.contact_name || "N/A"}
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{user.type}</Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {user.contact_number ? user.contact_number : "None"}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {user.email}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {user.created_at
-                              ? new Date(user.created_at).toLocaleString()
-                              : "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <Link href={`/admin/users/${user.id}`}>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                                </Link>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  <div className="text-muted-foreground text-xs">
-                    Showing <strong>1-10</strong> of <strong>32</strong> Users
-                  </div>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </main>
+        <MainContent users={users} filter={filter} setFilter={setFilter} />
       </div>
     </div>
   );

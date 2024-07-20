@@ -34,6 +34,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { signOut, useSession } from "next-auth/react";
+
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -217,10 +219,12 @@ const NavBar = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <Link href="/admin/settings">
               <DropdownMenuItem>Settings</DropdownMenuItem>
+              </Link>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
