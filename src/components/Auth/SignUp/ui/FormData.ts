@@ -142,6 +142,5 @@ export interface ClientFormData {
 
 export interface DriverFormData extends FormData {
   userType: "driver";
-  countyLocation: (typeof COUNTIES)[number][];
-  head_count: (typeof HEAD_COUNT)[number];
+  name: string;  // Make sure this is included
 }

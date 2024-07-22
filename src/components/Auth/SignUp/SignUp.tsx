@@ -14,7 +14,6 @@ import {
   ClientFormData,
   DriverFormData,
   userTypes,
-  vendorSchema,
 } from "./FormSchemas";
 import { getBottomText } from "./utils";
 import Link from "next/link";

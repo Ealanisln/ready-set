@@ -38,10 +38,10 @@ export async function POST(request: Request) {
         );
       }
     } else if (userType === 'driver') {
-      const { contact_name, street1, city, state, zip, countyLocation, head_count } = body as DriverFormData;
-      if (!contact_name || !street1 || !city || !state || !zip || !countyLocation || !head_count) {
+      const { name, street1, city, state, zip } = body as DriverFormData;
+      if (!name || !street1 || !city || !state || !zip) {
         return NextResponse.json(
-          { error: "Missing required fields for driver", missingFields: ['contact_name', 'street1', 'city', 'state', 'zip', 'countyLocation', 'head_count'].filter(field => !(body as DriverFormData)[field as keyof DriverFormData]) },
+          { error: "Missing required fields for driver", missingFields: ['contact_name', 'street1', 'city', 'state', 'zip'].filter(field => !(body as DriverFormData)[field as keyof DriverFormData]) },
           { status: 400 }
         );
       }
@@ -67,17 +67,9 @@ export async function POST(request: Request) {
       contact_number: phoneNumber,
       password: hashedPassword,
       type: userType as users_type,
-      name: body.contact_name,
-      company_name: 'company' in body ? body.company : undefined,
-      parking_loading: 'parking' in body ? body.parking : undefined,
-      counties: 'countiesServed' in body ? (body as VendorFormData | ClientFormData).countiesServed.join(", ") : undefined,
-      time_needed: 'timeNeeded' in body ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ") : undefined,
-      catering_brokerage: 'cateringBrokerage' in body ? (body as VendorFormData).cateringBrokerage?.join(", ") : undefined,
-      frequency: 'frequency' in body ? (body as VendorFormData | ClientFormData).frequency : undefined,
-      provide: 'provisions' in body ? (body as VendorFormData).provisions?.join(", ") : undefined,
-      head_count: 'head_count' in body ? body.head_count.toString() : undefined,
+      name: (body as any).name || (body as any).contact_name, // Use name or contact_name, whichever is present
+      company_name: userType !== 'driver' && 'company' in body ? body.company : undefined,
       status: users_status.pending,
-      website: 'website' in body ? body.website : undefined,
       street1: body.street1,
       street2: 'street2' in body ? body.street2 : undefined,
       city: body.city,
@@ -85,6 +77,22 @@ export async function POST(request: Request) {
       zip: body.zip,
       created_at: new Date(),
       updated_at: new Date(),
+    
+      // Conditional fields
+      ...(userType !== 'driver' && {
+        parking_loading: 'parking' in body ? body.parking : undefined,
+        counties: 'countiesServed' in body ? (body as VendorFormData | ClientFormData).countiesServed.join(", ") : undefined,
+        time_needed: 'timeNeeded' in body ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ") : undefined,
+        frequency: 'frequency' in body ? (body as VendorFormData | ClientFormData).frequency : undefined,
+        head_count: 'head_count' in body ? body.head_count.toString() : undefined,
+        website: 'website' in body ? body.website : undefined,
+      }),
+      
+      // Vendor-specific fields
+      ...(userType === 'vendor' && {
+        catering_brokerage: 'cateringBrokerage' in body ? (body as VendorFormData).cateringBrokerage?.join(", ") : undefined,
+        provide: 'provisions' in body ? (body as VendorFormData).provisions?.join(", ") : undefined,
+      }),
     };
     
     const newUser = await prisma.user.create({
