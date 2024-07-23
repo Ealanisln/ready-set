@@ -1,5 +1,5 @@
 // components/MainContent.tsx
-import React from 'react';
+import React from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { UserTable } from './UserTable';
-import { UserFilter } from './UserFilter';
+import { UserTable } from "./UserTable";
+import { UserFilter } from "./UserFilter";
 
 interface User {
   id: string;
@@ -31,7 +31,11 @@ interface MainContentProps {
   setFilter: (filter: string | null) => void;
 }
 
-export const MainContent: React.FC<MainContentProps> = ({ users, filter, setFilter }) => {
+export const MainContent: React.FC<MainContentProps> = ({
+  users,
+  filter,
+  setFilter,
+}) => {
   const filteredUsers = filter
     ? users.filter((user) => user.type === filter)
     : users;
@@ -63,7 +67,8 @@ export const MainContent: React.FC<MainContentProps> = ({ users, filter, setFilt
             </CardContent>
             <CardFooter>
               <div className="text-muted-foreground text-xs">
-                Showing <strong>1-10</strong> of <strong>32</strong> Users
+                Showing <strong>1-{Math.min(filteredUsers.length, 10)}</strong>{" "}
+                of <strong>{filteredUsers.length}</strong> Users
               </div>
             </CardFooter>
           </Card>

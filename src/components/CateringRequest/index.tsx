@@ -1,4 +1,5 @@
 "use client";
+import CateringRequestForm from "../CateringFormRequest";
 import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
@@ -12,17 +13,19 @@ const CateringRequest = () => {
       <div className="container">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="Pricing Table"
-            title="Our Pricing Plan"
-            paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+            subtitle="Catering request"
+            title="8-Point Checklist"
+            paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up.
+"
             center
           />
         </div>
 
         <div className="-mx-4 flex flex-wrap justify-center">
-          {pricingData.map((product, i) => (
+          <CateringRequestForm />
+          {/* {pricingData.map((product, i) => (
             <PricingBox key={i} product={product} />
-          ))}     
+          ))}      */}
         </div>
       </div>
     </section>

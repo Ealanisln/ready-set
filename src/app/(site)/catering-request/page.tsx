@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 const PricingPage = () => {
   return (
     <>
-      <Breadcrumb pageName="Catering request" />
       <CateringRequest />
       <Faq />
     </>
