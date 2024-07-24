@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
 type Order = {
@@ -34,10 +34,11 @@ const FormNextDay = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<Inputs>({
     defaultValues: {
-      date: persistentDate, // Set default from persistent state
-      helpdeskAgent: persistentHelpdeskAgent, // Set default from persistent state
+      date: persistentDate,
+      helpdeskAgent: persistentHelpdeskAgent,
       orders: [{}] as Order[],
     },
   });
@@ -50,7 +51,7 @@ const FormNextDay = () => {
   const onSubmit = (data: Inputs) => {
     const [year, month, day] = data.date.split("-").map(Number);
     const dateObj = new Date(year, month - 1, day);
-
+    
     const formattedDate = dateObj.toLocaleDateString("en-US", {
       weekday: "long",
       month: "numeric",
@@ -74,6 +75,7 @@ const FormNextDay = () => {
       }
       message += `\nORDER# ${order.orderNumber}\n`;
       message += `PICK UP: ${order.pickupTime}\n${order.restaurant} - ${order.restaurantAddress}\n`;
+      message += `\n`; // Add this line to insert an extra line break
       message += `DROP OFF: ${order.dropOffTimeStart} - ${order.dropOffTimeEnd}\n${order.company} - ${order.companyAddress}\n`;
       message += `\n PAY: $${order.totalPay}\n`;
       message += `HEADCOUNT: ${order.headcounts}\n`;
@@ -85,11 +87,24 @@ const FormNextDay = () => {
       .writeText(message)
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
-    setPersistentDate(data.date); // Update persistent date after form submission
-    setPersistentHelpdeskAgent(data.helpdeskAgent); // Update persistent helpdesk agent after form submission
 
-    reset();
-  };
+      setPersistentDate(data.date);
+      setPersistentHelpdeskAgent(data.helpdeskAgent);
+
+      setPersistentDate(data.date);
+      setPersistentHelpdeskAgent(data.helpdeskAgent);
+
+      reset({
+        date: data.date,
+        helpdeskAgent: data.helpdeskAgent,
+        driverName: '', // Reset driver name
+        orders: [{}] as Order[], // Reset orders
+      });  };
+
+      useEffect(() => {
+        setValue('date', persistentDate);
+        setValue('helpdeskAgent', persistentHelpdeskAgent);
+      }, [persistentDate, persistentHelpdeskAgent, setValue]);
 
   return (
     <div className="overflow-hidden py-8">

@@ -1,6 +1,13 @@
+'use client';
+
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
+import { Address } from '@/components/AddressManager/'; // Import the Address interface
+
+interface CateringRequestFormProps {
+  addresses: Address[];
+}
 
 interface FormData {
   pickUpLocation: string;
@@ -20,7 +27,7 @@ interface FormData {
   specialNotes?: string;
 }
 
-const CateringRequestForm: React.FC = () => {
+const CateringRequestForm: React.FC<CateringRequestFormProps> = ({ addresses }) => {
   const { data: session } = useSession();
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
 
@@ -48,23 +55,6 @@ const CateringRequestForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="pickUpLocation">Pick Up Location</label>
-        <Controller
-          name="pickUpLocation"
-          control={control}
-          rules={{ required: 'Pick Up Location is required' }}
-          render={({ field }) => (
-            <select {...field}>
-              <option value="">Please Select</option>
-              <option value="1120 Eaton, San Carlos, CA, 94070">1120 Eaton, San Carlos, CA, 94070</option>
-              {/* Add more options as needed */}
-            </select>
-          )}
-        />
-        {errors.pickUpLocation && <span>{errors.pickUpLocation.message}</span>}
-      </div>
-
       <div>
         <label htmlFor="brokerage">Brokerage / Direct</label>
         <Controller

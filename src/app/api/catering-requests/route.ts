@@ -1,56 +1,50 @@
-// pages/api/catering-requests.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
+// src/app/api/catering-requests/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { CateringRequestFormData } from '@/types/catering';
 
 const prisma = new PrismaClient();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const session = await getSession({ req });
+export async function POST(request: NextRequest) {
+  const session = await getServerSession();
 
   if (!session?.user?.id) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  if (req.method === 'POST') {
-    return handlePost(req, res, session.user.id);
-  } else if (req.method === 'GET') {
-    return handleGet(req, res, session.user.id);
-  } else {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-}
-
-async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: string) {
-  const cateringData: CateringRequestFormData = req.body;
+  const cateringData: CateringRequestFormData = await request.json();
+  
   try {
     const newCateringRequest = await prisma.catering_request.create({
       data: {
-        user: { connect: { id: userId } },
+        user: { connect: { id: session.user.id } },
         address: { connect: { id: BigInt(cateringData.address_id) } },
         // ... other fields ...
       },
     });
-    res.status(201).json(newCateringRequest);
+    return NextResponse.json(newCateringRequest, { status: 201 });
   } catch (error) {
     console.error('Error creating catering request:', error);
-    res.status(400).json({ error: 'Error creating catering request' });
+    return NextResponse.json({ error: 'Error creating catering request' }, { status: 400 });
   }
 }
 
-async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: string) {
+export async function GET(request: NextRequest) {
+  const session = await getServerSession();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
   try {
     const cateringRequests = await prisma.catering_request.findMany({
-      where: { user_id: userId },
+      where: { user_id: session.user.id },
       include: { address: true },
     });
-    res.status(200).json(cateringRequests);
+    return NextResponse.json(cateringRequests);
   } catch (error) {
     console.error('Error fetching catering requests:', error);
-    res.status(400).json({ error: 'Error fetching catering requests' });
+    return NextResponse.json({ error: 'Error fetching catering requests' }, { status: 400 });
   }
 }

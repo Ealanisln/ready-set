@@ -1,10 +1,19 @@
 "use client";
-import CateringRequestForm from "../CateringFormRequest";
+
+import CateringRequestForm from "./CateringFormRequest";
 import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
+import { useState } from "react";
+import AddressManager, { Address } from "../AddressManager";
 
 const CateringRequest = () => {
+
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
+  const handleAddressesLoaded = (loadedAddresses: Address[]) => {
+    setAddresses(loadedAddresses);
+  };
   return (
     <section
       id="pricing"
@@ -22,10 +31,9 @@ const CateringRequest = () => {
         </div>
 
         <div className="-mx-4 flex flex-wrap justify-center">
-          <CateringRequestForm />
-          {/* {pricingData.map((product, i) => (
-            <PricingBox key={i} product={product} />
-          ))}      */}
+        <AddressManager onAddressesLoaded={handleAddressesLoaded} />
+
+        <CateringRequestForm addresses={addresses} />
         </div>
       </div>
     </section>
