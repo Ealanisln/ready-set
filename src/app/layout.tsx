@@ -38,7 +38,10 @@ export default function RootLayout({
             <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
               <ToasterContext />
               {!isBackendAdminRoute && !isStudioRoute && <Header />}
+              <main className="flex-grow"> {/* Add this main element */}
+
               {children}
+              </main>
               {!isBackendAdminRoute && !isStudioRoute && <Footer />}
               <ScrollToTop />
             </ThemeProvider>

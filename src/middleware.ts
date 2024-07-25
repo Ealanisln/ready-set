@@ -13,8 +13,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (request.nextUrl.pathname.startsWith("/addresses")) {
+    if (token) {
+      return NextResponse.next();
+    } else {
+      // Redirect to login page
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+  }
+
   // For all other routes, allow access
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/:path*"] };
+export const config = { 
+  matcher: ["/admin/:path*", "/addresses/:path*"]
+};

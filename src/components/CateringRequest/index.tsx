@@ -4,16 +4,17 @@ import CateringRequestForm from "./CateringFormRequest";
 import SectionTitle from "../Common/SectionTitle";
 import PricingBox from "./PricingBox";
 import { pricingData } from "@/stripe/pricingData";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import AddressManager, { Address } from "../AddressManager";
 
 const CateringRequest = () => {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
 
-  const handleAddressesLoaded = (loadedAddresses: Address[]) => {
+  const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
-  };
+  }, []); 
+  
   return (
     <section
       id="pricing"

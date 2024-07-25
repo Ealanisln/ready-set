@@ -1,39 +1,50 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { PrismaClient } from "@prisma/client";
+import { authOptions } from "@/utils/auth";
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  if (req.method === 'GET') {
-    try {
-      const addresses = await prisma.address.findMany({
-        where: { user_id: session.user.id },
-      });
-      res.status(200).json(addresses);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching addresses' });
-    }
-  } else if (req.method === 'POST') {
-    const addressData = req.body;
-    try {
-      const newAddress = await prisma.address.create({
-        data: {
-          ...addressData,
-          user: { connect: { id: session.user.id } },
-        },
-      });
-      res.status(201).json(newAddress);
-    } catch (error) {
-      res.status(500).json({ error: 'Error creating address' });
-    }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+  try {
+    const addresses = await prisma.address.findMany({
+      where: { user_id: session.user.id },
+    });
+    return NextResponse.json(addresses);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Error fetching addresses" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  try {
+    const addressData = await request.json();
+    const newAddress = await prisma.address.create({
+      data: {
+        ...addressData,
+        user: { connect: { id: session.user.id } },
+      },
+    });
+    return NextResponse.json(newAddress, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Error creating address" },
+      { status: 500 },
+    );
   }
 }
