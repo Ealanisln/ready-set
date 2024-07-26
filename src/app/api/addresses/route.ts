@@ -13,37 +13,44 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const addresses = await prisma.address.findMany({
-      where: { user_id: session.user.id },
-    });
-    return NextResponse.json(addresses);
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Error fetching addresses" },
-      { status: 500 },
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  try {
-    const addressData = await request.json();
-    const newAddress = await prisma.address.create({
-      data: {
-        ...addressData,
-        user: { connect: { id: session.user.id } },
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        company_name: true,
+        street1: true,
+        street2: true,
+        city: true,
+        state: true,
+        zip: true,
+        location_number: true,
+        parking_loading: true,
+        counties: true,
       },
     });
-    return NextResponse.json(newAddress, { status: 201 });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const address = {
+      id: user.id,
+      vendor: user.company_name,
+      street1: user.street1,
+      street2: user.street2,
+      city: user.city,
+      state: user.state,
+      zip: user.zip,
+      location_number: user.location_number,
+      parking_loading: user.parking_loading,
+      county: user.counties, // Note: This might be a comma-separated string
+    };
+
+    return NextResponse.json([address]); // Wrap in array to match expected format
   } catch (error) {
+    console.error("Error fetching user address:", error);
     return NextResponse.json(
-      { error: "Error creating address" },
+      { error: "Error fetching user address" },
       { status: 500 },
     );
   }
