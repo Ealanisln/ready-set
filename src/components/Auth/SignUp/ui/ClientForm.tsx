@@ -57,6 +57,7 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmitWrapper)}>
+      <input type="hidden" {...register("userType")} value="client" />
       <CommonFields<ClientFormData> register={register} errors={errors} />
       <input
         {...register("parking")}

@@ -16,7 +16,6 @@ interface DriverFormData {
   zip: string;
 }
 
-
 interface DriverFormProps {
   onSubmit: (data: DriverFormData) => Promise<void>;
 }

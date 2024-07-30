@@ -3,9 +3,8 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import AddressManager from "@/components/AddressManager";
 import Breadcrumb from "@/components/Common/Breadcrumb";
-
+import UserAddresses from "@/components/AddressManager/UserAddresses"
 const AddressesPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -29,6 +28,8 @@ const AddressesPage = () => {
   return (
     <main>
       <Breadcrumb pageName="Addresses page" />
+      <h1>Your Addresses</h1>
+      <UserAddresses />
     </main>
   );
 };

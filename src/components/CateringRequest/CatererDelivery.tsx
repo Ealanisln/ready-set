@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import AddressManager, { Address } from "./index";
+import AddressManager, { Address } from "../AddressManager/index";
 
 interface CatererDeliveryFormData {
   pickUpLocation: string;
