@@ -1,20 +1,12 @@
-"use client";
-
 import CateringRequestForm from "./CateringFormRequest";
 import SectionTitle from "../Common/SectionTitle";
-import { useCallback, useState } from "react";
-import AddressManager, { Address } from "../AddressManager";
+
 
 const CateringRequest = () => {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
-    setAddresses(loadedAddresses);
-  }, []); 
-  
   return (
     <section
-      id="pricing"
-      className="relative z-20 overflow-hidden bg-white pb-12 pt-20 dark:bg-dark lg:pb-[90px] lg:pt-[120px]"
+      id="catering-request"
+      className="bg-gray-1 pb-8 pt-20 dark:bg-dark-2 lg:pb-[70px] lg:pt-[120px]"
     >
       <div className="container">
         <div className="mb-[60px]">
@@ -27,9 +19,8 @@ const CateringRequest = () => {
           />
         </div>
 
-        <div className="-mx-4 flex flex-wrap justify-center">
-        <AddressManager onAddressesLoaded={handleAddressesLoaded} />
-        <CateringRequestForm addresses={addresses} />
+        <div className="flex flex-col items-center space-y-8">
+          <CateringRequestForm />
         </div>
       </div>
     </section>

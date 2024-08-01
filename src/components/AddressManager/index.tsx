@@ -16,15 +16,17 @@ export interface Address {
   zip: string;
   location_number: string | null;
   parking_loading: string | null;
-  county: string; // Note: This might be a comma-separated string
+  county: string;
 }
 
 interface AddressManagerProps {
   onAddressesLoaded: (addresses: Address[]) => void;
+  onAddressSelected: (addressId: string) => void;
 }
 
 const AddressManager: React.FC<AddressManagerProps> = ({
   onAddressesLoaded,
+  onAddressSelected,
 }) => {
   const { data: session } = useSession();
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -124,18 +126,27 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   );
 
   return (
-    <div className="container mx-auto min-h-[calc(100vh-400px)] p-4">
-      <h2 className="mb-4 text-2xl font-bold">Pick Up Location</h2>
+    <div>
+      <h2 className="mb-6 text-3xl font-bold text-gray-800">
+        Pick Up Location
+      </h2>
       {error && <p className="mb-4 text-red-500">{error}</p>}
       {isLoading ? (
-        <p>Loading addresses...</p>
+        <p className="text-gray-600">Loading addresses...</p>
       ) : (
-        <div className="mb-4 flex items-center">
+        <div className="mb-6">
           <Controller
             name="pickUpLocation"
             control={control}
             render={({ field }) => (
-              <select {...field} className="flex-grow rounded-l border p-2">
+              <select
+                {...field}
+                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                onChange={(e) => {
+                  field.onChange(e);
+                  onAddressSelected(e.target.value); // Call this when an address is selected
+                }}
+              >
                 <option value="">Please Select</option>
                 {addresses.map((address) => (
                   <option key={address.id} value={address.id}>
@@ -148,14 +159,16 @@ const AddressManager: React.FC<AddressManagerProps> = ({
               </select>
             )}
           />
-          <Link
-            href="/addresses"
-            className="rounded-r bg-blue-500 px-4 py-2 text-white"
-          >
-            Manage Addresses
-          </Link>
         </div>
       )}
+      <div className="pb-6">
+        <Link
+          href="/addresses"
+          className="inline-block rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"
+        >
+          Manage Addresses
+        </Link>
+      </div>
 
       {showAddForm && (
         <AddAddressForm
