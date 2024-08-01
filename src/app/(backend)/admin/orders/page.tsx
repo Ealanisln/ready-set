@@ -1,9 +1,9 @@
-import { Dashboard } from '@/components/Dashboard'
+import { OrdersView } from '@/components/Orders'
 import React from 'react'
 
 const Orders = () => {
   return (
-   <Dashboard />
+   <OrdersView />
   )
 }
 

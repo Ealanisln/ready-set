@@ -104,8 +104,8 @@ const UserAddresses: React.FC = () => {
   if (!session) return <div>Please sign in to view addresses.</div>;
 
   return (
-    <div>
-      <h2 className="mb-4 text-2xl font-bold">Pick Up Location</h2>
+    <div className="pt-8">
+      <h2 className="mb-4 text-2xl font-bold">Edit or add your address</h2>
       <Button onClick={handleAddNewAddress} className="mb-4">
         + Add Address
       </Button>
@@ -117,7 +117,7 @@ const UserAddresses: React.FC = () => {
             <TableHead>Vendor</TableHead>
             <TableHead>Street</TableHead>
             <TableHead>City, State, Zip</TableHead>
-            <TableHead>Location Number, Parking / Loading</TableHead>
+            <TableHead>Phone number</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -128,7 +128,7 @@ const UserAddresses: React.FC = () => {
               <TableCell>{address.vendor}</TableCell>
               <TableCell>{`${address.street1}${address.street2 ? `, ${address.street2}` : ""}`}</TableCell>
               <TableCell>{`${address.city}, ${address.state}, ${address.zip}`}</TableCell>
-              <TableCell>{`${address.location_number || ""}, ${address.parking_loading || ""}`}</TableCell>
+              <TableCell>{`${address.location_number || ""} ${address.parking_loading || ""}`}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"

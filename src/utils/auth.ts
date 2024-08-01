@@ -17,8 +17,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-
-
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -89,7 +87,7 @@ export const authOptions: NextAuthOptions = {
         return {
           ...token,
           id: user.id,
-          type: user.type, // Add the user type to the token
+          type: user.type, 
         };
       }
       return token;
@@ -102,7 +100,7 @@ export const authOptions: NextAuthOptions = {
           user: {
             ...session.user,
             id: token.id,
-            type: token.type, // Add the user type to the session
+            type: token.type, 
           },
         };
       }

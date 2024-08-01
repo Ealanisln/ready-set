@@ -167,3 +167,42 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  if (session.user.type !== 'admin') {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+
+  try {
+    const cateringRequests = await prisma.catering_request.findMany({
+      orderBy: {
+        date: 'desc'
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    // Convert BigInt to string for JSON serialization
+    const serializedRequests = JSON.parse(JSON.stringify(cateringRequests, (key, value) =>
+      typeof value === "bigint" ? value.toString() : value
+    ));
+
+    return NextResponse.json(serializedRequests);
+  } catch (error) {
+    console.error("Error fetching catering requests:", error);
+    return NextResponse.json({ message: "Error fetching catering requests" }, { status: 500 });
+  }
+}

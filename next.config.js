@@ -14,6 +14,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/admin/orders/:order_number',
+        destination: '/admin/orders/[order_number]',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

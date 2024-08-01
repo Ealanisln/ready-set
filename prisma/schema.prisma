@@ -118,7 +118,7 @@ model catering_request {
   address_id          BigInt
   delivery_address_id BigInt
   brokerage           String?                     @db.VarChar(191)
-  order_number        String?                     @db.VarChar(191)
+  order_number        String                      @unique
   date                DateTime?                   @db.Date
   pickup_time         DateTime?                   @db.Time
   arrival_time        DateTime?                   @db.Time

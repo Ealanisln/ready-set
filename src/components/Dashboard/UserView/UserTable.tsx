@@ -1,4 +1,6 @@
 // components/UserTable.tsx
+'use client';
+
 import React, { useState } from 'react';
 import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
