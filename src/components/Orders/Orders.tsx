@@ -79,7 +79,7 @@ const Orders: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardFooter>
-              <Button>Create New Order</Button>
+              {/* <Button>Create New Order</Button> */}
             </CardFooter>
           </Card>
         </div>

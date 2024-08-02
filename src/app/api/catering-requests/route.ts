@@ -178,10 +178,14 @@ export async function GET(req: NextRequest) {
   if (session.user.type !== 'admin') {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
-
-
+  
   try {
+    const url = new URL(req.url);
+    const limit = url.searchParams.get('limit');
+    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+
     const cateringRequests = await prisma.catering_request.findMany({
+      take: parsedLimit,
       orderBy: {
         date: 'desc'
       },
@@ -191,7 +195,8 @@ export async function GET(req: NextRequest) {
             name: true,
             email: true
           }
-        }
+        },
+        delivery_address: true
       }
     });
 
