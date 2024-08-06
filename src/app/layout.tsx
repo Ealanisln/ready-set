@@ -11,6 +11,12 @@ import "../styles/prism-vsc-dark-plus.css";
 import ToasterContext from "./api/contex/ToasetContex";
 import { useEffect, useState } from "react";
 import PreLoader from "@/components/Common/PreLoader";
+import { Montserrat } from "next/font/google";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function RootLayout({
   children,
@@ -28,20 +34,25 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html suppressHydrationWarning={true} className="!scroll-smooth" lang="en">
+    <html
+      suppressHydrationWarning={true}
+      className={`!scroll-smooth ${montserrat.className}`}
+      lang="en"
+    >
       <head />
       <body>
         {loading ? (
           <PreLoader />
         ) : (
           <SessionProvider>
-            <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
+            <ThemeProvider
+              attribute="class"
+              enableSystem={true}
+              defaultTheme="light"
+            >
               <ToasterContext />
               {!isBackendAdminRoute && !isStudioRoute && <Header />}
-              <main className="flex-grow"> {/* Add this main element */}
-
-              {children}
-              </main>
+              <main className="flex-grow">{children}</main>
               {!isBackendAdminRoute && !isStudioRoute && <Footer />}
               <ScrollToTop />
             </ThemeProvider>

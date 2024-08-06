@@ -6,13 +6,17 @@
 
 @font-face {
   font-family: 'Kabel';
-  src: url('/fonts/KabelC-Demi.ttf') format('woff2');
+  src: url('/fonts/KabelC-Demi.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 body {
+  font-family: var(--font-montserrat);
+}
+
+h1, h2 {
   font-family: "Kabel", sans-serif;
 }
 
