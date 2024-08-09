@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 
-// GET: Fetch a user by ID
+// GET: Fetch a user by ID (only id and name)
 export async function GET(
   request: NextRequest,
   { params }: { params: { userId: string } },
@@ -12,12 +12,28 @@ export async function GET(
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      select: { 
+        id: true, 
+        name: true,
+        contact_name: true,
+        type: true
+      }
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    return NextResponse.json(user);
+
+    // Determine which name to use based on user type
+    let displayName = user.name;
+    if ((user.type === 'vendor' || user.type === 'client') && user.contact_name) {
+      displayName = user.contact_name;
+    }
+
+    return NextResponse.json({
+      id: user.id,
+      name: displayName
+    });
   } catch (error: unknown) {
     console.error("Error fetching user:", error);
     let errorMessage = "Failed to fetch user";
@@ -30,7 +46,6 @@ export async function GET(
     );
   }
 }
-
 // PUT: Update a user by ID
 export async function PUT(
   request: NextRequest,
