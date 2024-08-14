@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MoreVertical, Truck } from "lucide-react";
+import { MoreVertical, Truck, Edit } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -114,30 +109,22 @@ interface Address {
   updated_at: string;
 }
 
-interface Dispatch {
-  id: string;
-  driver: {
-    id: string;
-    name: string | null;
-    email: string | null;
-    contact_number: string | null;
-  };
-}
-
 const SingleOrder = () => {
   const [order, setOrder] = useState<CateringOrder | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [isDriverDialogOpen, setIsDriverDialogOpen] = useState(false);
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
-
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
       const orderNumber = window.location.pathname.split("/").pop();
       try {
         console.log("Fetching order number:", orderNumber);
-        const response = await fetch(`/api/catering-requests/${orderNumber}?include=dispatch.driver`);
+        const response = await fetch(
+          `/api/catering-requests/${orderNumber}?include=dispatch.driver`
+        );
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched order data:", data);
@@ -174,12 +161,13 @@ const SingleOrder = () => {
   }, []);
 
   useEffect(() => {
-    // Check if a driver is assigned when the order is loaded or updated
-    setIsDriverAssigned(!!order?.dispatch);
+    setIsDriverAssigned(order?.status === "assigned");
+    setSelectedDriver(order?.driver_id || null);
+    console.log("Driver assigned:", order?.status === "assigned");
   }, [order]);
 
-  const handleAssignDriver = async (driverId: string) => {
-    if (!order) return;
+  const handleAssignOrEditDriver = async () => {
+    if (!order || !selectedDriver) return;
 
     try {
       const response = await fetch("/api/catering-requests/assignDriver", {
@@ -187,21 +175,25 @@ const SingleOrder = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ orderId: order.id, driverId }),
+        body: JSON.stringify({ orderId: order.id, driverId: selectedDriver }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to assign driver");
+        throw new Error("Failed to assign/edit driver");
       }
 
       const updatedOrder = await response.json();
-      setOrder({ ...order, driver_id: driverId });
+      setOrder({ ...updatedOrder, status: "assigned", driver_id: selectedDriver });
       setIsDriverDialogOpen(false);
-      toast.success("Driver assigned successfully!");
+      toast.success(isDriverAssigned ? "Driver updated successfully!" : "Driver assigned successfully!");
     } catch (error) {
-      console.error("Failed to assign driver:", error);
-      toast.error("Failed to assign driver. Please try again.");
+      console.error("Failed to assign/edit driver:", error);
+      toast.error("Failed to assign/edit driver. Please try again.");
     }
+  };
+
+  const handleDriverSelection = (driverId: string) => {
+    setSelectedDriver(driverId);
   };
 
   if (isLoading) {
@@ -233,26 +225,26 @@ const SingleOrder = () => {
               open={isDriverDialogOpen}
               onOpenChange={setIsDriverDialogOpen}
             >
-             <DialogTrigger asChild>
+              <DialogTrigger asChild>
                 <Button
                   size="sm"
                   variant="outline"
                   className="flex items-center gap-1"
-                  disabled={isDriverAssigned}
+                  onClick={() => setIsDriverDialogOpen(true)}
                 >
-                  <Truck className="h-4 w-4" />
+                  {isDriverAssigned ? <Edit className="h-4 w-4" /> : <Truck className="h-4 w-4" />}
                   <span>
-                    {isDriverAssigned ? "Driver Assigned" : "Assign Driver"}
+                    {isDriverAssigned ? "Edit Driver" : "Assign Driver"}
                   </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
                   <DialogTitle>
-                    {order?.dispatch ? "Reassign Driver" : "Assign Driver"}
+                    {isDriverAssigned ? "Edit Driver Assignment" : "Assign Driver"}
                   </DialogTitle>
                   <DialogDescription>
-                    Select a driver to assign to this order.
+                    {isDriverAssigned ? "Modify the driver assignment for this order." : "Select a driver to assign to this order."}
                   </DialogDescription>
                 </DialogHeader>
                 <Table>
@@ -271,8 +263,11 @@ const SingleOrder = () => {
                         <TableCell>{driver.email}</TableCell>
                         <TableCell>{driver.contact_number}</TableCell>
                         <TableCell>
-                          <Button onClick={() => handleAssignDriver(driver.id)}>
-                            Assign
+                          <Button 
+                            onClick={() => handleDriverSelection(driver.id)}
+                            variant={selectedDriver === driver.id ? "default" : "outline"}
+                          >
+                            {selectedDriver === driver.id ? "Selected" : "Select"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -280,8 +275,11 @@ const SingleOrder = () => {
                   </TableBody>
                 </Table>
                 <DialogFooter>
-                  <Button onClick={() => setIsDriverDialogOpen(false)}>
-                    Close
+                  <Button onClick={handleAssignOrEditDriver} disabled={!selectedDriver}>
+                    {isDriverAssigned ? "Update Driver" : "Assign Driver"}
+                  </Button>
+                  <Button onClick={() => setIsDriverDialogOpen(false)} variant="outline">
+                    Cancel
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -440,10 +438,9 @@ const SingleOrder = () => {
             Status: <span className="font-semibold">{order.status}</span>
           </div>
         </CardFooter>
-        
       </Card>
       <div className="py-8">
-        <OrderStatusCard order={order}/>
+        <OrderStatusCard order={order} />
       </div>
     </main>
   );

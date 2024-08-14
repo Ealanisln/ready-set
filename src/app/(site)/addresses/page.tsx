@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import UserAddresses from "@/components/AddressManager/UserAddresses";
+
 const AddressesPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login");
+      router.push("/signin");
     }
   }, [status, router]);
 
@@ -26,8 +27,6 @@ const AddressesPage = () => {
   if (!session) {
     return null;
   }
-
-  console.log(session);
 
   return (
     <section id="catering-request" className="bg-gray-1 pb-8 dark:bg-dark-2">

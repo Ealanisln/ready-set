@@ -91,6 +91,7 @@ const CateringRequestForm: React.FC = () => {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
@@ -163,13 +164,19 @@ const CateringRequestForm: React.FC = () => {
             zip: "",
           },
         });
-
         // Show success notification
         toast.success("Catering request submitted successfully!");
       } else {
         const errorData = await response.json();
         console.error("Failed to create catering request", errorData);
-        toast.error("Failed to submit catering request. Please try again.");
+
+        if (errorData.message === "Order number already exists") {
+          setErrorMessage(
+            "This order number already exists. Please use a different order number.",
+          );
+        } else {
+          toast.error("Failed to submit catering request. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -182,6 +189,11 @@ const CateringRequestForm: React.FC = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-3xl space-y-6 px-4 py-8"
     >
+      {errorMessage && (
+        <div className="mb-4 rounded-md bg-red-100 p-4 text-red-700">
+          {errorMessage}
+        </div>
+      )}
       <div>
         <AddressManager
           onAddressesLoaded={handleAddressesLoaded}

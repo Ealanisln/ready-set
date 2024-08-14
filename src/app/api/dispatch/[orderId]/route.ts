@@ -1,4 +1,3 @@
-// src/app/api/dispatch/[orderId]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
@@ -10,10 +9,11 @@ export async function GET(
   const { orderId } = params;
   
   try {
-    // Fetch the dispatch with the specific ID
-    const dispatch = await prisma.dispatch.findUnique({
+    // Fetch the dispatch with the specific service_id (orderId)
+    const dispatch = await prisma.dispatch.findFirst({
       where: {
-        id: BigInt(orderId),  // Assuming 'id' is of type BigInt
+        service_id: BigInt(orderId),
+        service_type: 'catering', // Assuming this is for a catering request
       },
     });
 

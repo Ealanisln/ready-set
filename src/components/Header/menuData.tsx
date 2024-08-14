@@ -1,5 +1,33 @@
 import { Menu } from "@/types/menu";
 
+export const cateringRequestMenuItem: Menu = {
+  id: 3,
+  title: "Catering Request",
+  path: "/catering-request",
+  newTab: false,
+};
+
+export const adminMenuItem: Menu = {
+  id: 6,
+  title: "Admin",
+  path: "/admin",
+  newTab: false,
+};
+
+export const vendorMenuItem: Menu = {
+  id: 7,
+  title: "Vendor",
+  path: "/vendor",
+  newTab: false,
+};
+
+export const driverMenuItem: Menu = {
+  id: 8,
+  title: "Driver",
+  path: "/driver",
+  newTab: false,
+};
+
 const menuData: Menu[] = [
   {
     id: 1,
@@ -14,13 +42,7 @@ const menuData: Menu[] = [
     newTab: false,
   },
   {
-    id: 3,
-    title: "Catering Request",
-    path: "/catering-request",
-    newTab: false,
-  },
-  {
-    id: 5,
+    id: 4,
     title: "Contact",
     path: "/contact",
     newTab: false,
@@ -31,54 +53,6 @@ const menuData: Menu[] = [
     path: "/blog",
     newTab: false,
   },
-  {
-    id: 6,
-    title: "Pages",
-    newTab: false,
-    submenu: [
-      {
-        id: 61,
-        title: "About Page",
-        path: "/about",
-        newTab: false,
-      },
-      {
-        id: 62,
-        title: "Catering request",
-        path: "/catering-request",
-        newTab: false,
-      },
-      {
-        id: 63,
-        title: "Contact Page",
-        path: "/contact",
-        newTab: false,
-      },
-      {
-        id: 64,
-        title: "Blog Grid Page",
-        path: "/blog",
-        newTab: false,
-      },
-      {
-        id: 66,
-        title: "Sign Up Page",
-        path: "/signup",
-        newTab: false,
-      },
-      {
-        id: 67,
-        title: "Sign In Page",
-        path: "/signin",
-        newTab: false,
-      },
-      {
-        id: 68,
-        title: "Error Page",
-        path: "/error",
-        newTab: false,
-      },
-    ],
-  },
 ];
+
 export default menuData;
