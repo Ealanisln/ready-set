@@ -1,3 +1,4 @@
+// src/app/api/orders/[order_number]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
@@ -16,34 +17,44 @@ export async function GET(
   const { order_number } = params;
 
   try {
-    const cateringRequest = await prisma.catering_request.findFirst({
-      where: {
-        order_number: order_number
-      },
+    // Check for catering request
+    const cateringRequest = await prisma.catering_request.findUnique({
+      where: { order_number: order_number },
       include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          }
-        },
+        user: { select: { name: true, email: true } },
         address: true,
-        delivery_address: true
-      }
+        delivery_address: true,
+      },
     });
 
-    if (!cateringRequest) {
-      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    if (cateringRequest) {
+      const serializedRequest = JSON.parse(JSON.stringify(cateringRequest, (key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      ));
+      return NextResponse.json({ ...serializedRequest, order_type: 'catering' });
     }
 
-    // Convert BigInt to string for JSON serialization
-    const serializedRequest = JSON.parse(JSON.stringify(cateringRequest, (key, value) =>
-      typeof value === "bigint" ? value.toString() : value
-    ));
+    // Check for on-demand order
+    const onDemandOrder = await prisma.on_demand.findUnique({
+      where: { order_number: order_number },
+      include: {
+        user: { select: { name: true, email: true } },
+        address: true,
+      },
+    });
 
-    return NextResponse.json(serializedRequest);
+    if (onDemandOrder) {
+      const serializedOrder = JSON.parse(JSON.stringify(onDemandOrder, (key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      ));
+      return NextResponse.json({ ...serializedOrder, order_type: 'on_demand' });
+    }
+
+    // If no order found
+    return NextResponse.json({ message: "Order not found" }, { status: 404 });
+
   } catch (error) {
-    console.error("Error fetching catering request:", error);
-    return NextResponse.json({ message: "Error fetching catering request" }, { status: 500 });
+    console.error("Error fetching order:", error);
+    return NextResponse.json({ message: "Error fetching order" }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -14,8 +14,6 @@ import {
   Truck,
   Users,
 } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +36,8 @@ interface CateringOrder {
   id: string;
   order_number: string;
   status: string;
-  order_total: number;
-  // Add other properties as needed
+  order_total: string | number; // Changed to accept both string and number
+  order_type: string;
 }
 
 interface User {
@@ -49,7 +47,7 @@ interface User {
   contact_number: string;
   email: string;
   type: "vendor" | "client" | "driver" | "admin";
-  created_at?: Date;
+  created_at?: string;
 }
 
 export function DashboardHome() {
@@ -62,8 +60,8 @@ export function DashboardHome() {
     const fetchData = async () => {
       try {
         const [ordersResponse, usersResponse] = await Promise.all([
-          fetch("/api/catering-requests?limit=5"),
-          fetch("/api/users")
+          fetch("/api/orders?limit=5"),
+          fetch("/api/users"),
         ]);
 
         if (!ordersResponse.ok || !usersResponse.ok) {
@@ -72,7 +70,7 @@ export function DashboardHome() {
 
         const [ordersData, usersData] = await Promise.all([
           ordersResponse.json(),
-          usersResponse.json()
+          usersResponse.json(),
         ]);
 
         setRecentOrders(ordersData);
@@ -158,66 +156,74 @@ export function DashboardHome() {
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
         <Card className="lg:col-span-1">
-        <CardHeader>
-              <CardTitle>Recent Catering Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order Number</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <Link href={`/admin/orders/${order.order_number}`}>
-                          {order.order_number}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{order.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">${order.order_total}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Button asChild size="sm" className="mt-4 w-full">
-                <Link href="/admin/orders">View All Orders</Link>
-              </Button>
-            </CardContent>
-          </Card>
+    <CardHeader>
+      <CardTitle>Recent Orders</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Order Number</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {recentOrders.map((order) => (
+            <TableRow key={order.id}>
+              <TableCell>
+                <Link href={`/admin/orders/${order.order_number}`}>
+                  {order.order_number}
+                </Link>
+              </TableCell>
+              <TableCell>
+           {order.order_type}
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">{order.status}</Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                ${typeof order.order_total === 'string' 
+                  ? parseFloat(order.order_total).toFixed(2)
+                  : order.order_total.toFixed(2)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Button asChild size="sm" className="mt-4 w-full">
+        <Link href="/admin/orders">View All Orders</Link>
+      </Button>
+    </CardContent>
+  </Card>
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Recent Users</CardTitle>
             </CardHeader>
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Type</TableHead>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Type</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.slice(0, 5).map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name || user.contact_name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{user.type}</Badge>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.slice(0, 5).map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name || user.contact_name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{user.type}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Button asChild size="sm" className="mt-4 w-full">
-                <Link href="/admin/users">View All Users</Link>
-              </Button>
+                ))}
+              </TableBody>
+            </Table>
+            <Button asChild size="sm" className="mt-4 w-full">
+              <Link href="/admin/users">View All Users</Link>
+            </Button>
           </Card>
         </div>
       </main>

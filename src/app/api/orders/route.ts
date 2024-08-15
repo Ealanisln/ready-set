@@ -3,6 +3,50 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 import { prisma } from "@/utils/prismaDB";
 
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const url = new URL(req.url);
+  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+
+  try {
+    const orders = await prisma.$transaction([
+      prisma.catering_request.findMany({
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      }),
+      prisma.on_demand.findMany({
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      })
+    ]);
+
+    const allOrders = [...orders[0], ...orders[1]]
+      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+      .slice(0, limit);
+
+    const serializedOrders = allOrders.map(order => ({
+      ...JSON.parse(JSON.stringify(order, (key, value) =>
+        typeof value === 'bigint'
+          ? value.toString()
+          : value
+      )),
+      order_type: 'brokerage' in order ? 'catering' : 'on_demand',
+    }));
+
+    return NextResponse.json(serializedOrders, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return NextResponse.json({ message: "Error fetching orders" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
