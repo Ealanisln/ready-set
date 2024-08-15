@@ -15,6 +15,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Ready Set | Home",
   description: "On-demand courier that specializes in delivery for all your needs. We are Food Safety, and HIPPA Certified. Our team can meet all your Bay Area delivery needs.",
+  verification: {
+    google: 'googlee0278e60917faf19',
+  },
 };
 
 export default function Home() {

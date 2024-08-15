@@ -22,6 +22,7 @@ import {
   Settings,
   Truck,
   Users,
+  Zap,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
@@ -73,7 +74,14 @@ const NavBar = () => {
                 className="text-muted-foreground hover:text-foreground"
                 onClick={closeSheet}
               >
-                Orders
+                Catering orders
+              </Link>
+              <Link
+                href="/admin/ondemand-orders"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={closeSheet}
+              >
+                On-demand orders
               </Link>
               <Link
                 href="#"
@@ -137,10 +145,22 @@ const NavBar = () => {
                     className="bg-accent text-accent-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
                   >
                     <Truck className="h-5 w-5" />
-                    <span className="sr-only">Orders</span>
+                    <span className="sr-only">Catering orders</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Orders</TooltipContent>
+                <TooltipContent side="right">Catering orders</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/admin/ondemand-orders"
+                    className="bg-accent text-accent-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
+                  >
+                    <Zap className="h-5 w-5" />
+                    <span className="sr-only">On-demand orders</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">On-demand orders</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>

@@ -42,27 +42,62 @@ interface CateringOrder {
   // Add other properties as needed
 }
 
+interface User {
+  id: string;
+  name?: string;
+  contact_name?: string;
+  contact_number: string;
+  email: string;
+  type: "vendor" | "client" | "driver" | "admin";
+  created_at?: Date;
+}
 
 export function DashboardHome() {
   const [recentOrders, setRecentOrders] = useState<CateringOrder[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRecentOrders = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/catering-requests?limit=5");
-        if (response.ok) {
-          const data: CateringOrder[] = await response.json();
-          setRecentOrders(data);
-        } else {
-          console.error("Failed to fetch recent orders");
+        const [ordersResponse, usersResponse] = await Promise.all([
+          fetch("/api/catering-requests?limit=5"),
+          fetch("/api/users")
+        ]);
+
+        if (!ordersResponse.ok || !usersResponse.ok) {
+          throw new Error("One or more network responses were not ok");
         }
-      } catch (error) {
-        console.error("Error fetching recent orders:", error);
+
+        const [ordersData, usersData] = await Promise.all([
+          ordersResponse.json(),
+          usersResponse.json()
+        ]);
+
+        setRecentOrders(ordersData);
+        setUsers(usersData);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchRecentOrders();
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col sm:pl-14">
@@ -121,9 +156,9 @@ export function DashboardHome() {
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-        <Card x-chunk="dashboard-01-chunk-6">
-            <CardHeader>
+        <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+        <Card className="lg:col-span-1">
+        <CardHeader>
               <CardTitle>Recent Catering Orders</CardTitle>
             </CardHeader>
             <CardContent>
@@ -156,87 +191,33 @@ export function DashboardHome() {
               </Button>
             </CardContent>
           </Card>
-          <Card x-chunk="dashboard-01-chunk-5">
+          <Card className="lg:col-span-1">
             <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
+              <CardTitle>Recent Users</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-8">
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                  <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Olivia Martin
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    olivia.martin@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$1,999.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/02.png" alt="Avatar" />
-                  <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Jackson Lee
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    jackson.lee@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/03.png" alt="Avatar" />
-                  <AvatarFallback>IN</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Isabella Nguyen
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    isabella.nguyen@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$299.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/04.png" alt="Avatar" />
-                  <AvatarFallback>WK</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    William Kim
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    will@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$99.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                  <AvatarFallback>SD</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Sofia Davis
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    sofia.davis@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-            </CardContent>
+            <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Type</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.slice(0, 5).map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.name || user.contact_name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{user.type}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Button asChild size="sm" className="mt-4 w-full">
+                <Link href="/admin/users">View All Users</Link>
+              </Button>
           </Card>
         </div>
       </main>

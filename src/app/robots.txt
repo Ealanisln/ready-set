@@ -2,4 +2,5 @@ User-Agent: *
 Allow: /
 Disallow: /private/
 
-Sitemap: https://acme.com/sitemap.xml
+Sitemap: https://ready-set.vercel.app/sitemap.xml
+
