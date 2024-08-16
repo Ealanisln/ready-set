@@ -198,7 +198,7 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
           disabled={isLoading}
           className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
         >
-          {isLoading ? "Registering..." : "Register as Vendor"}
+          {isLoading ? "Registering..." : "Register as Client"}
         </button>
       </div>
     </form>

@@ -16,12 +16,12 @@ const SingleFeature = ({ feature }: { feature: Feature }) => {
         <p className="mb-8 text-body-color dark:text-dark-6 lg:mb-11">
           {paragraph}
         </p>
-        <Link
+        {/* <Link
           href={btnLink}
           className="text-base font-medium text-dark hover:text-primary dark:text-white dark:hover:text-primary"
         >
           {btn}
-        </Link>
+        </Link> */}
       </div>
     </div>
   );
