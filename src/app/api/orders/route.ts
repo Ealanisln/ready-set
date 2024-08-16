@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
-import { prisma } from "@/utils/prismaDB";
+import { Prisma, PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+// Define types for our order objects
+type CateringOrder = Prisma.catering_requestGetPayload<{
+  include: { user: { select: { name: true, email: true } } }
+}>;
+
+type OnDemandOrder = Prisma.on_demandGetPayload<{
+  include: { user: { select: { name: true, email: true } } }
+}>;
+
+type Order = CateringOrder | OnDemandOrder;
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -12,22 +25,33 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+  const type = url.searchParams.get('type');
+  const page = parseInt(url.searchParams.get('page') || '1', 10);
+  const skip = (page - 1) * limit;
 
   try {
-    const orders = await prisma.$transaction([
-      prisma.catering_request.findMany({
-        take: limit,
-        orderBy: { created_at: 'desc' },
-        include: { user: { select: { name: true, email: true } } },
-      }),
-      prisma.on_demand.findMany({
-        take: limit,
-        orderBy: { created_at: 'desc' },
-        include: { user: { select: { name: true, email: true } } },
-      })
-    ]);
+    let cateringOrders: CateringOrder[] = [];
+    let onDemandOrders: OnDemandOrder[] = [];
 
-    const allOrders = [...orders[0], ...orders[1]]
+    if (type === 'all' || type === 'catering' || !type) {
+      cateringOrders = await prisma.catering_request.findMany({
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      });
+    }
+
+    if (type === 'all' || type === 'on_demand' || !type) {
+      onDemandOrders = await prisma.on_demand.findMany({
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      });
+    }
+
+    const allOrders: Order[] = [...cateringOrders, ...onDemandOrders]
       .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
       .slice(0, limit);
 
