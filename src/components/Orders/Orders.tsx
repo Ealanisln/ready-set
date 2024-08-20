@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -27,10 +25,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListFilter, File } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 interface Order {
   id: string;
@@ -51,11 +49,14 @@ const Orders: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [typeFilter, setTypeFilter] = useState<"all" | "catering" | "on_demand">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "completed">("all");
 
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
-      const apiUrl = `/api/orders?page=${page}&limit=${limit}${typeFilter !== "all" ? `&type=${typeFilter}` : ""}`;
+      const apiUrl = `/api/orders?page=${page}&limit=${limit}${
+        typeFilter !== "all" ? `&type=${typeFilter}` : ""
+      }${statusFilter !== "all" ? `&status=${statusFilter}` : ""}`;
       console.log("Fetching orders with URL:", apiUrl);
       try {
         const response = await fetch(apiUrl);
@@ -73,14 +74,20 @@ const Orders: React.FC = () => {
     };
 
     fetchOrders();
-  }, [page, limit, typeFilter]);
+  }, [page, limit, typeFilter, statusFilter]);
 
   const handleNextPage = () => setPage((prev) => prev + 1);
   const handlePrevPage = () => setPage((prev) => Math.max(1, prev - 1));
 
   const handleTypeFilter = (type: "all" | "catering" | "on_demand") => {
-    console.log("Changing filter to:", type);
+    console.log("Changing type filter to:", type);
     setTypeFilter(type);
+    setPage(1);
+  };
+
+  const handleStatusFilter = (status: "all" | "active" | "completed") => {
+    console.log("Changing status filter to:", status);
+    setStatusFilter(status);
     setPage(1);
   };
 
@@ -112,7 +119,7 @@ const Orders: React.FC = () => {
             </CardHeader>
           </Card>
         </div>
-        <Tabs defaultValue="all">
+        <Tabs defaultValue="all" onValueChange={(value) => handleStatusFilter(value as "all" | "active" | "completed")}>
           <div className="flex items-center">
             <TabsList>
               <TabsTrigger value="all">All Orders</TabsTrigger>
@@ -161,85 +168,146 @@ const Orders: React.FC = () => {
             </div>
           </div>
           <TabsContent value="all">
-            <Card>
-              <CardHeader className="px-7">
-                <CardTitle>All Orders</CardTitle>
-                <CardDescription>
-                  {typeFilter === "all" 
-                    ? "All orders from the database." 
-                    : `Filtered ${typeFilter} orders from the database.`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div>Loading orders...</div>
-                ) : (
-                  <>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Order Number</TableHead>
-                          <TableHead className="hidden sm:table-cell">Type</TableHead>
-                          <TableHead className="hidden sm:table-cell">Status</TableHead>
-                          <TableHead className="hidden md:table-cell">Date</TableHead>
-                          <TableHead className="text-right">Total</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell>
-                              <Link
-                                href={`/admin/orders/${order.order_number}`}
-                                className="font-medium hover:underline"
-                              >
-                                {order.order_number}
-                              </Link>
-                              <br />
-                              <div className="text-muted-foreground hidden text-sm md:inline">
-                                {order.client_attention}
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell">
-                              <Badge className={`${getOrderTypeBadgeClass(order.order_type)}`}>
-                                {order.order_type}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell">
-                              <Badge
-                                className="text-xs"
-                                variant={order.status === "active" ? "secondary" : "outline"}
-                              >
-                                {order.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              {new Date(order.date).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              $
-                              {typeof order.order_total === "string"
-                                ? parseFloat(order.order_total).toFixed(2)
-                                : order.order_total.toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    <div className="mt-4 flex justify-between">
-                      <Button onClick={handlePrevPage} disabled={page === 1}>
-                        Previous
-                      </Button>
-                      <Button onClick={handleNextPage}>Next</Button>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+            <OrdersTable 
+              orders={orders} 
+              isLoading={isLoading} 
+              typeFilter={typeFilter} 
+              statusFilter={statusFilter}
+              handlePrevPage={handlePrevPage}
+              handleNextPage={handleNextPage}
+              page={page}
+              getOrderTypeBadgeClass={getOrderTypeBadgeClass}
+            />
+          </TabsContent>
+          <TabsContent value="active">
+            <OrdersTable 
+              orders={orders.filter(order => order.status === "active")} 
+              isLoading={isLoading} 
+              typeFilter={typeFilter} 
+              statusFilter={statusFilter}
+              handlePrevPage={handlePrevPage}
+              handleNextPage={handleNextPage}
+              page={page}
+              getOrderTypeBadgeClass={getOrderTypeBadgeClass}
+            />
+          </TabsContent>
+          <TabsContent value="completed">
+            <OrdersTable 
+              orders={orders.filter(order => order.status === "completed")} 
+              isLoading={isLoading} 
+              typeFilter={typeFilter} 
+              statusFilter={statusFilter}
+              handlePrevPage={handlePrevPage}
+              handleNextPage={handleNextPage}
+              page={page}
+              getOrderTypeBadgeClass={getOrderTypeBadgeClass}
+            />
           </TabsContent>
         </Tabs>
       </div>
     </main>
+  );
+};
+
+interface OrdersTableProps {
+  orders: Order[];
+  isLoading: boolean;
+  typeFilter: string;
+  statusFilter: string;
+  handlePrevPage: () => void;
+  handleNextPage: () => void;
+  page: number;
+  getOrderTypeBadgeClass: (type: "catering" | "on_demand") => string;
+}
+
+const OrdersTable: React.FC<OrdersTableProps> = ({ 
+  orders, 
+  isLoading, 
+  typeFilter, 
+  statusFilter,
+  handlePrevPage,
+  handleNextPage,
+  page,
+  getOrderTypeBadgeClass
+}) => {
+  return (
+    <Card>
+      <CardHeader className="px-7">
+        <CardTitle>
+          {statusFilter === "all" ? "All Orders" : `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Orders`}
+        </CardTitle>
+        <CardDescription>
+          {typeFilter === "all" 
+            ? `${statusFilter === "all" ? "All" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} orders from the database.` 
+            : `Filtered ${typeFilter} ${statusFilter === "all" ? "" : statusFilter} orders from the database.`}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div>Loading orders...</div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order Number</TableHead>
+                  <TableHead className="hidden sm:table-cell">Type</TableHead>
+                  <TableHead className="hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <Link
+                        href={`/admin/orders/${order.order_number}`}
+                        className="font-medium hover:underline"
+                      >
+                        {order.order_number}
+                      </Link>
+                      <br />
+                      <div className="text-muted-foreground hidden text-sm md:inline">
+                        {order.client_attention}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge className={`${getOrderTypeBadgeClass(order.order_type)}`}>
+                        {order.order_type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge
+                        className="text-xs"
+                        variant={order.status === "active" ? "secondary" : "outline"}
+                      >
+                        {order.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {new Date(order.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      $
+                      {typeof order.order_total === "string"
+                        ? parseFloat(order.order_total).toFixed(2)
+                        : order.order_total.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="mt-4 flex justify-between">
+              <Button onClick={handlePrevPage} disabled={page === 1}>
+                Previous
+              </Button>
+              <Button onClick={handleNextPage}>Next</Button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

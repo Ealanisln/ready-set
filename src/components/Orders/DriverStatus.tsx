@@ -4,18 +4,28 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 interface DriverStatusCardProps {
   order: {
     id: string;
+    status: string;
     user_id: string;
-    user_type: string;
-    service_id: string;
-    service_type: string;
-    created_at: string | null;
+    pickup_time: string;
+    arrival_time: string;
+    complete_time: string;
     updated_at: string | null;
+    dispatch: {
+      driver: {
+        id: string;
+        name: string | null;
+        email: string | null;
+        contact_number: string | null;
+      };
+    }[];
   };
 }
 
 interface DriverInfo {
   id: string;
   name: string | null;
+  email: string | null;
+  contact_number: string | null;
 }
 
 const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
@@ -44,37 +54,26 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
           const errorText = await dispatchResponse.text();
           console.error("Dispatch response error:", errorText);
           throw new Error(
-            `Failed to fetch dispatch info: ${dispatchResponse.status} ${errorText}`
+            `Failed to fetch dispatch info: ${dispatchResponse.status} ${errorText}`,
           );
         }
 
         const dispatchData = await dispatchResponse.json();
         console.log("Dispatch data:", dispatchData);
 
-        if (dispatchData && dispatchData.driver_id) {
-          console.log(
-            "Fetching driver info for driver ID:",
-            dispatchData.driver_id
-          );
-          const driverResponse = await fetch(
-            `/api/users/${dispatchData.driver_id}`
-          );
-          console.log("Driver response status:", driverResponse.status);
-
-          if (!driverResponse.ok) {
-            const errorText = await driverResponse.text();
-            console.error("Driver response error:", errorText);
-            throw new Error(
-              `Failed to fetch driver info: ${driverResponse.status} ${errorText}`
-            );
-          }
-
-          const driverData = await driverResponse.json();
-          console.log("Driver data:", driverData);
-
+        if (dispatchData && dispatchData.driver) {
           setDriverInfo({
-            id: dispatchData.driver_id,
-            name: driverData.name,
+            id: dispatchData.driver.id,
+            name: dispatchData.driver.name,
+            email: dispatchData.driver.email,
+            contact_number: dispatchData.driver.contact_number,
+          });
+          
+          console.log("Set driver info:", {
+            id: dispatchData.driver.id,
+            name: dispatchData.driver.name,
+            email: dispatchData.driver.email,
+            contact_number: dispatchData.driver.contact_number,
           });
         } else {
           console.log("No driver assigned to this order");
@@ -84,13 +83,8 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
       } catch (error) {
         console.error("Error in fetchDriverInfo:", error);
         setError(
-          error instanceof Error 
-            ? error.message 
-            : "An unknown error occurred"
+          error instanceof Error ? error.message : "An unknown error occurred",
         );
-        if (error instanceof Error && error.message.includes("already assigned")) {
-          setDriverInfo(null);  // Clear any existing driver info
-        }
       } finally {
         setIsLoading(false);
       }
@@ -100,6 +94,8 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
       fetchDriverInfo();
     }
   }, [order.id]);
+
+  console.log("Current driverInfo state:", driverInfo);
 
   return (
     <Card className="mx-auto w-full max-w-5xl">
@@ -112,7 +108,10 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
         ) : error ? (
           <div>Error: {error}</div>
         ) : noDispatchFound ? (
-          <div>No dispatch found for this order. A driver has not been assigned yet.</div>
+          <div>
+            No dispatch found for this order. A driver has not been assigned
+            yet.
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div>
@@ -122,11 +121,13 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({ order }) => {
               </span>
             </div>
             <div>
-              Created At:{" "}
+              Driver Email:{" "}
+              <span className="font-medium">{driverInfo?.email || "N/A"}</span>
+            </div>
+            <div>
+              Driver Contact:{" "}
               <span className="font-medium">
-                {order.created_at
-                  ? new Date(order.created_at).toLocaleString()
-                  : "N/A"}
+                {driverInfo?.contact_number || "N/A"}
               </span>
             </div>
             <div>

@@ -24,6 +24,18 @@ export async function GET(
         user: { select: { name: true, email: true } },
         address: true,
         delivery_address: true,
+        dispatch: {
+          include: {
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                contact_number: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -40,6 +52,18 @@ export async function GET(
       include: {
         user: { select: { name: true, email: true } },
         address: true,
+        dispatch: {
+          include: {
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                contact_number: true,
+              },
+            },
+          },
+        },
       },
     });
 

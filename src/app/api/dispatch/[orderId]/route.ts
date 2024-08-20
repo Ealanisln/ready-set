@@ -9,11 +9,20 @@ export async function GET(
   const { orderId } = params;
   
   try {
-    // Fetch the dispatch with the specific service_id (orderId)
+    // Fetch the dispatch with the specific service_id (orderId) and include driver details
     const dispatch = await prisma.dispatch.findFirst({
       where: {
         service_id: BigInt(orderId),
-        service_type: 'catering', // Assuming this is for a catering request
+      },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            contact_number: true,
+          },
+        },
       },
     });
 
@@ -25,6 +34,11 @@ export async function GET(
       ...dispatch,
       id: dispatch.id.toString(),
       service_id: dispatch.service_id.toString(),
+      driver_id: dispatch.driver_id.toString(),
+      driver: {
+        ...dispatch.driver,
+        id: dispatch.driver.id.toString(),
+      },
     });
   } catch (error) {
     console.error("Error fetching dispatch:", error);

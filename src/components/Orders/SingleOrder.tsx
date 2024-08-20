@@ -47,6 +47,10 @@ interface Driver {
   contact_number: string | null;
 }
 
+interface Dispatch {
+  driver: Driver;
+}
+
 interface Order {
   id: string;
   guid: string | null;
@@ -72,26 +76,21 @@ interface Order {
   driver_id: string;
   tip: string;
   user: {
-    name: string;
-    email: string;
+    name: string | null;
+    email: string | null;
   };
   address: Address;
   delivery_address?: Address;
-  dispatch?: {
+  dispatch: {
     driver: Driver;
-  } | null;
-  order_type: 'catering' | 'on_demand';
-  // On-demand specific fields
+  }[];
+  order_type: "catering" | "on_demand";
   item_delivered?: string;
   vehicle_type?: string;
   length?: string;
   width?: string;
   height?: string;
   weight?: string;
-  // Additional fields required by OrderStatusCard
-  user_type: string;
-  service_id: string;
-  service_type: string;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -126,7 +125,9 @@ const SingleOrder = () => {
       const orderNumber = window.location.pathname.split("/").pop();
       try {
         console.log("Fetching order number:", orderNumber);
-        const response = await fetch(`/api/orders/${orderNumber}?include=dispatch.driver`);
+        const response = await fetch(
+          `/api/orders/${orderNumber}?include=dispatch.driver`,
+        );
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched order data:", data);
@@ -172,7 +173,7 @@ const SingleOrder = () => {
     if (!order || !selectedDriver) return;
 
     try {
-      const response = await fetch("/api//assignDriver", {
+      const response = await fetch("/api/orders/assignDriver", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -185,9 +186,17 @@ const SingleOrder = () => {
       }
 
       const updatedOrder = await response.json();
-      setOrder({ ...updatedOrder, status: "assigned", driver_id: selectedDriver });
+      setOrder({
+        ...updatedOrder,
+        status: "assigned",
+        driver_id: selectedDriver,
+      });
       setIsDriverDialogOpen(false);
-      toast.success(isDriverAssigned ? "Driver updated successfully!" : "Driver assigned successfully!");
+      toast.success(
+        isDriverAssigned
+          ? "Driver updated successfully!"
+          : "Driver assigned successfully!",
+      );
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
       toast.error("Failed to assign/edit driver. Please try again.");
@@ -234,7 +243,11 @@ const SingleOrder = () => {
                   className="flex items-center gap-1"
                   onClick={() => setIsDriverDialogOpen(true)}
                 >
-                  {isDriverAssigned ? <Edit className="h-4 w-4" /> : <Truck className="h-4 w-4" />}
+                  {isDriverAssigned ? (
+                    <Edit className="h-4 w-4" />
+                  ) : (
+                    <Truck className="h-4 w-4" />
+                  )}
                   <span>
                     {isDriverAssigned ? "Edit Driver" : "Assign Driver"}
                   </span>
@@ -243,10 +256,14 @@ const SingleOrder = () => {
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
                   <DialogTitle>
-                    {isDriverAssigned ? "Edit Driver Assignment" : "Assign Driver"}
+                    {isDriverAssigned
+                      ? "Edit Driver Assignment"
+                      : "Assign Driver"}
                   </DialogTitle>
                   <DialogDescription>
-                    {isDriverAssigned ? "Modify the driver assignment for this order." : "Select a driver to assign to this order."}
+                    {isDriverAssigned
+                      ? "Modify the driver assignment for this order."
+                      : "Select a driver to assign to this order."}
                   </DialogDescription>
                 </DialogHeader>
                 <Table>
@@ -265,11 +282,17 @@ const SingleOrder = () => {
                         <TableCell>{driver.email}</TableCell>
                         <TableCell>{driver.contact_number}</TableCell>
                         <TableCell>
-                          <Button 
+                          <Button
                             onClick={() => handleDriverSelection(driver.id)}
-                            variant={selectedDriver === driver.id ? "default" : "outline"}
+                            variant={
+                              selectedDriver === driver.id
+                                ? "default"
+                                : "outline"
+                            }
                           >
-                            {selectedDriver === driver.id ? "Selected" : "Select"}
+                            {selectedDriver === driver.id
+                              ? "Selected"
+                              : "Select"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -277,10 +300,16 @@ const SingleOrder = () => {
                   </TableBody>
                 </Table>
                 <DialogFooter>
-                  <Button onClick={handleAssignOrEditDriver} disabled={!selectedDriver}>
+                  <Button
+                    onClick={handleAssignOrEditDriver}
+                    disabled={!selectedDriver}
+                  >
                     {isDriverAssigned ? "Update Driver" : "Assign Driver"}
                   </Button>
-                  <Button onClick={() => setIsDriverDialogOpen(false)} variant="outline">
+                  <Button
+                    onClick={() => setIsDriverDialogOpen(false)}
+                    variant="outline"
+                  >
                     Cancel
                   </Button>
                 </DialogFooter>
@@ -306,52 +335,68 @@ const SingleOrder = () => {
             <div>
               <h3 className="mb-2 font-semibold">Order Details</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                {order.order_type === 'catering' && (
+                {order.order_type === "catering" && (
                   <>
                     {order.headcount && (
                       <div>
-                        Headcount: <span className="font-medium">{order.headcount}</span>
+                        Headcount:{" "}
+                        <span className="font-medium">{order.headcount}</span>
                       </div>
                     )}
                     {order.need_host && (
                       <div>
-                        Need Host: <span className="font-medium">{order.need_host}</span>
+                        Need Host:{" "}
+                        <span className="font-medium">{order.need_host}</span>
                       </div>
                     )}
                     {order.number_of_host && (
                       <div>
-                        Number of Hosts: <span className="font-medium">{order.number_of_host}</span>
+                        Number of Hosts:{" "}
+                        <span className="font-medium">
+                          {order.number_of_host}
+                        </span>
                       </div>
                     )}
                   </>
                 )}
-                {order.order_type === 'on_demand' && (
+                {order.order_type === "on_demand" && (
                   <>
                     {order.item_delivered && (
                       <div>
-                        Item Delivered: <span className="font-medium">{order.item_delivered}</span>
+                        Item Delivered:{" "}
+                        <span className="font-medium">
+                          {order.item_delivered}
+                        </span>
                       </div>
                     )}
                     {order.vehicle_type && (
                       <div>
-                        Vehicle Type: <span className="font-medium">{order.vehicle_type}</span>
+                        Vehicle Type:{" "}
+                        <span className="font-medium">
+                          {order.vehicle_type}
+                        </span>
                       </div>
                     )}
                     {order.length && order.width && order.height && (
                       <div>
-                        Dimensions: <span className="font-medium">{order.length} x {order.width} x {order.height}</span>
+                        Dimensions:{" "}
+                        <span className="font-medium">
+                          {order.length} x {order.width} x {order.height}
+                        </span>
                       </div>
                     )}
                     {order.weight && (
                       <div>
-                        Weight: <span className="font-medium">{order.weight}</span>
+                        Weight:{" "}
+                        <span className="font-medium">{order.weight}</span>
                       </div>
                     )}
                   </>
                 )}
                 {order.hours_needed && (
                   <div>
-                    Hours Needed: <span className="font-medium">{order.hours_needed}</span>
+                    Hours Needed:{" "}
+                    <span className="font-medium">{order.hours_needed}</span>
                   </div>
                 )}
               </div>
@@ -368,7 +413,7 @@ const SingleOrder = () => {
                   <div>Tip: ${order.tip}</div>
                 </div>
               </div>
-              {order.order_type === 'catering' && order.brokerage && (
+              {order.order_type === "catering" && order.brokerage && (
                 <div>
                   <h3 className="mb-2 font-semibold">Brokerage</h3>
                   <div className="text-sm">{order.brokerage}</div>
@@ -389,13 +434,14 @@ const SingleOrder = () => {
                         <br />
                       </>
                     )}
-                    {order.address.city}, {order.address.state} {order.address.zip}
+                    {order.address.city}, {order.address.state}{" "}
+                    {order.address.zip}
                   </address>
                 ) : (
                   <p className="text-sm">No pickup address available</p>
                 )}
               </div>
-              {order.order_type === 'catering' && order.delivery_address && (
+              {order.order_type === "catering" && order.delivery_address && (
                 <div>
                   <h3 className="mb-2 font-semibold">Delivery Address</h3>
                   <address className="text-sm not-italic">
@@ -407,7 +453,8 @@ const SingleOrder = () => {
                         <br />
                       </>
                     )}
-                    {order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.zip}
+                    {order.delivery_address.city},{" "}
+                    {order.delivery_address.state} {order.delivery_address.zip}
                   </address>
                 </div>
               )}
@@ -418,10 +465,23 @@ const SingleOrder = () => {
               <h3 className="mb-2 font-semibold">Customer Information</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  Customer: <span className="font-medium">{order.user.name}</span>
+                  Customer:{" "}
+                  <span className="font-medium">
+                    {order.user?.name || "N/A"}
+                  </span>
                 </div>
                 <div>
-                  Email: <a href={`mailto:${order.user.email}`} className="font-medium">{order.user.email}</a>
+                  Email:{" "}
+                  {order.user?.email ? (
+                    <a
+                      href={`mailto:${order.user.email}`}
+                      className="font-medium"
+                    >
+                      {order.user.email}
+                    </a>
+                  ) : (
+                    <span className="font-medium">N/A</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -430,27 +490,21 @@ const SingleOrder = () => {
               <h3 className="mb-2 font-semibold">Additional Information</h3>
               <div className="grid gap-2 text-sm">
                 <div>
-                  Client Attention: <span className="font-medium">{order.client_attention}</span>
+                  Client Attention:{" "}
+                  <span className="font-medium">{order.client_attention}</span>
                 </div>
                 <div>
-                  Pickup Notes: <span className="font-medium">{order.pickup_notes}</span>
+                  Pickup Notes:{" "}
+                  <span className="font-medium">{order.pickup_notes}</span>
                 </div>
                 <div>
-                  Special Notes: <span className="font-medium">{order.special_notes}</span>
+                  Special Notes:{" "}
+                  <span className="font-medium">{order.special_notes}</span>
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
-        {order?.dispatch && (
-          <div className="mt-4">
-            <h3 className="font-semibold">Assigned Driver</h3>
-            <p>Name: {order.dispatch.driver.name}</p>
-            <p>Email: {order.dispatch.driver.email}</p>
-            <p>Contact: {order.dispatch.driver.contact_number}</p>
-          </div>
-        )}
-
         <CardFooter className="bg-muted/50 flex flex-row items-center border-t px-6 py-3">
           <div className="text-md text-muted-foreground">
             Status: <span className="font-semibold">{order.status}</span>

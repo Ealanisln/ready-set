@@ -12,6 +12,7 @@ const SignupPage = () => {
     <>
       <Breadcrumb pageName="Sign Up Page" />
       <SignUp />
+      {/* <MultiSignup /> */}
     </>
   );
 };
