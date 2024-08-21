@@ -343,42 +343,7 @@ const CombinedOrderForm: React.FC = () => {
             </>
           )}
 
-          <div>
-            <label htmlFor="delivery_address" className="mb-2 block text-sm font-medium text-gray-700">
-              Delivery Address
-            </label>
-            <Controller
-              name="delivery_address"
-              control={control}
-              rules={{ required: "Delivery Address is required for catering orders" }}
-              render={({ field }) => (
-                <select
-                  onChange={(e) => {
-                    const selectedAddress = addresses.find((addr) => addr.id === e.target.value);
-                    if (selectedAddress) {
-                      field.onChange({
-                        id: selectedAddress.id,
-                        street1: selectedAddress.street1,
-                        street2: selectedAddress.street2 || null,
-                        city: selectedAddress.city,
-                        state: selectedAddress.state,
-                        zip: selectedAddress.zip,
-                      });
-                    }
-                  }}
-                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                >
-                  <option value="">Select delivery address</option>
-                  {addresses.map((address) => (
-                    <option key={address.id} value={address.id}>
-                      {`${address.street1}, ${address.city}, ${address.state} ${address.zip}`}
-                    </option>
-                  ))}
-                </select>
-              )}
-            />
-            {errors.delivery_address && <span className="text-sm text-red-500">{errors.delivery_address.message}</span>}
-          </div>
+         
         </>
       )}
 
