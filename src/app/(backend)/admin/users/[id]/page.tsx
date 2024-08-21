@@ -1,4 +1,4 @@
-// users > [id] 
+// users > [id]
 
 "use client";
 
@@ -89,9 +89,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
         const response = await fetch(`/api/users/${params.id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
-
+  
         // Set form values
-        setValue("displayName", data.name || data.contact_name || "");
+        setValue("displayName", data.displayName || data.contact_name || "");
         setValue("company_name", data.company_name || "");
         setValue("contact_number", data.contact_number || "");
         setValue("email", data.email || "");
@@ -104,29 +104,22 @@ export default function EditUser({ params }: { params: { id: string } }) {
         setValue("parking_loading", data.parking_loading || "");
         setValue("type", data.type || "");
         setValue("status", data.status || "pending");
-
+  
+        // Only set timeNeeded and countiesServed if the user is a vendor or client
+        if (data.type === "vendor" || data.type === "client") {
+          setValue("timeNeeded", data.timeNeeded || []);
+          setValue("countiesServed", data.countiesServed || []);
+        }
+  
         // Vendor specific fields
         if (data.type === "vendor") {
-          setValue(
-            "countiesServed",
-            data.counties ? data.counties.split(", ") : [],
-          );
-          setValue("timeNeeded", data.time_needed ? [data.time_needed] : []);
-          setValue(
-            "cateringBrokerage",
-            data.catering_brokerage ? data.catering_brokerage.split(", ") : [],
-          );
+          setValue("cateringBrokerage", data.cateringBrokerage || []);
           setValue("frequency", data.frequency || "");
-          setValue("provisions", data.provide ? [data.provide] : []);
+          setValue("provisions", data.provide ? data.provide.split(", ") : []);
         }
-
+  
         if (data.type === "client") {
           setValue("head_count", data.head_count || "");
-          setValue(
-            "countiesServed",
-            data.counties ? data.counties.split(", ") : [],
-          );
-          setValue("timeNeeded", data.time_needed ? [data.time_needed] : []);
           setValue("frequency", data.frequency || "");
         }
       } catch (error) {
@@ -135,9 +128,11 @@ export default function EditUser({ params }: { params: { id: string } }) {
         setLoading(false);
       }
     };
-
+  
     fetchUser();
   }, [params.id, setValue]);
+  
+  
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
@@ -169,16 +164,12 @@ export default function EditUser({ params }: { params: { id: string } }) {
       }
 
       const updatedUser = await response.json();
-      setValue(
-        "displayName",
-        updatedUser.name || updatedUser.contact_name || "",
-      );
+      console.log("Updated user:", updatedUser);
 
       toast.success("User saved successfully!");
       reset(updatedUser);
 
       setHasUnsavedChanges(false);
-      reset(data);
       router.push("/admin/users");
     } catch (error) {
       console.error("Error updating user:", error);

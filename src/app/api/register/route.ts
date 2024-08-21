@@ -1,6 +1,12 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma, users_status, users_type, addresses_status } from "@prisma/client";
+import {
+  PrismaClient,
+  Prisma,
+  users_status,
+  users_type,
+  addresses_status,
+} from "@prisma/client";
 import {
   VendorFormData,
   ClientFormData,
@@ -163,7 +169,10 @@ export async function POST(request: Request) {
       contact_number: phoneNumber,
       password: hashedPassword,
       type: userType as users_type,
-      name: (body as any).name || (body as any).contact_name, // Use name or contact_name, whichever is present
+      name:
+        userType === "driver"
+          ? (body as DriverFormData).name
+          : (body as VendorFormData | ClientFormData).contact_name,
       company_name:
         userType !== "driver" && "company" in body ? body.company : undefined,
       status: users_status.pending,
@@ -216,17 +225,17 @@ export async function POST(request: Request) {
 
     const addressData: Prisma.addressCreateInput = {
       user: {
-        connect: { id: newUser.id }
+        connect: { id: newUser.id },
       },
-      county: "Main Address",       
-      vendor: userType === 'vendor' ? newUser.company_name : null,
+      county: "Main Address",
+      vendor: userType === "vendor" ? newUser.company_name : null,
       street1: body.street1,
-      street2: 'street2' in body ? body.street2 : null,
+      street2: "street2" in body ? body.street2 : null,
       city: body.city,
       state: body.state,
       zip: body.zip,
-      location_number: 'location_number' in body ? body.location_number : null,
-      parking_loading: 'parking' in body ? body.parking : null,
+      location_number: "location_number" in body ? body.location_number : null,
+      parking_loading: "parking" in body ? body.parking : null,
       status: addresses_status.active,
       created_at: new Date(),
       updated_at: new Date(),

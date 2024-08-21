@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -70,21 +70,23 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
               rules={{
                 required: "Please select at least one time option",
               }}
-              render={({ field }) => (
-                <>
-                  <CheckboxGroup
-                    {...field}
-                    control={control}
-                    options={TIME_NEEDED}
-                    label="Time Needed"
-                  />
-                  {errors.timeNeeded && (
-                    <p className="mt-2 text-red-500">
-                      {errors.timeNeeded.message}
-                    </p>
-                  )}
-                </>
-              )}
+              render={({ field }) => {
+                return (
+                  <>
+                    <CheckboxGroup
+                      {...field}
+                      control={control}
+                      options={TIME_NEEDED}
+                      label="Time Needed"
+                    />
+                    {errors.timeNeeded && (
+                      <p className="mt-2 text-red-500">
+                        {errors.timeNeeded.message}
+                      </p>
+                    )}
+                  </>
+                );
+              }}
             />
           </div>
 
@@ -139,55 +141,55 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
           </div>
 
           {userType === "vendor" && (
+  <div>
+    <Controller
+      name="provisions"
+      control={control}
+      rules={{
+        required: "Please select at least one provision",
+      }}
+      render={({ field }) => (
+        <>
+          <CheckboxGroup
+            name={field.name}
+            control={control}
+            options={PROVISIONS}
+            label="Do you provide"
+          />
+          {errors.provisions && (
+            <p className="mt-2 text-red-500">
+              {errors.provisions.message}
+            </p>
+          )}
+        </>
+      )}
+    />
+  </div>
+)}
+
+          {userType === "client" && (
             <div>
               <Controller
-                name="provisions"
+                name="head_count"
                 control={control}
-                rules={{
-                  required: "Please select at least one provision",
-                }}
+                rules={{ required: "Please select a headcount" }}
                 render={({ field }) => (
                   <>
-                    <CheckboxGroup
+                    <RadioGroup
                       {...field}
                       control={control}
-                      options={PROVISIONS}
-                      label="Do you provide"
+                      options={HEAD_COUNT}
+                      label="Headcount"
                     />
-                    {errors.provisions && (
+                    {errors.head_count && (
                       <p className="mt-2 text-red-500">
-                        {errors.provisions.message}
+                        {errors.head_count.message}
                       </p>
                     )}
                   </>
                 )}
               />
             </div>
-          )}
-
-          {userType === "client" && (
-            <div>
-            <Controller
-              name="head_count"
-              control={control}
-              rules={{ required: "Please select a headcount" }}
-              render={({ field }) => (
-                <>
-                  <RadioGroup
-                    {...field}
-                    control={control}
-                    options={HEAD_COUNT}
-                    label="Headcount"
-                  />
-                  {errors.head_count && (
-                    <p className="mt-2 text-red-500">
-                      {errors.head_count.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          </div>
           )}
         </div>
       </CardContent>

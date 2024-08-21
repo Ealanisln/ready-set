@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 
 // GET: Fetch a user by ID (only id and name)
 export async function GET(
@@ -12,28 +13,48 @@ export async function GET(
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { 
-        id: true, 
+      select: {
+        id: true,
         name: true,
         contact_name: true,
-        type: true
-      }
+        email: true,
+        contact_number: true,
+        type: true,
+        company_name: true,
+        website: true,
+        street1: true,
+        street2: true,
+        city: true,
+        state: true,
+        zip: true,
+        parking_loading: true,
+        counties: true,
+        time_needed: true,
+        catering_brokerage: true,
+        frequency: true,
+        provide: true,
+        head_count: true,
+        status: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Determine which name to use based on user type
-    let displayName = user.name;
-    if ((user.type === 'vendor' || user.type === 'client') && user.contact_name) {
-      displayName = user.contact_name;
-    }
+    // Process the user data to match the component's expectations
+    const processedUser = {
+      ...user,
+      displayName: user.type === "driver" ? user.name : user.contact_name,
+      countiesServed: user.counties ? user.counties.split(", ") : [],
+      timeNeeded: user.time_needed ? user.time_needed.split(", ") : [],
+      cateringBrokerage: user.catering_brokerage
+        ? user.catering_brokerage.split(", ")
+        : [],
+        provisions: user.provide ? user.provide.split(", ") : [], // Change this line
+      };
 
-    return NextResponse.json({
-      id: user.id,
-      name: displayName
-    });
+    return NextResponse.json(processedUser);
   } catch (error: unknown) {
     console.error("Error fetching user:", error);
     let errorMessage = "Failed to fetch user";
@@ -54,39 +75,55 @@ export async function PUT(
   const { userId } = params;
   try {
     const data = await request.json();
+    console.log("Received data:", data);
 
-    let processedData = { ...data };
+    let processedData: any = { ...data };
 
-    // Handle name fields based on user type
-    if (data.type === "driver") {
-      if (data.name) {
-        processedData.name = data.name;
-      }
-      delete processedData.contact_name;
-    } else if (data.type === "vendor" || data.type === "client") {
-      if (data.contact_name) {
-        processedData.contact_name = data.contact_name;
-      }
-      delete processedData.name;
+    // Map fields to match Prisma schema
+    if (processedData.countiesServed) {
+      processedData.counties = processedData.countiesServed.join(", ");
+      delete processedData.countiesServed;
     }
-    // Process array fields
-    processedData.counties = data.countiesServed
-      ? data.countiesServed.join(", ")
-      : "";
-    processedData.time_needed = data.timeNeeded
-      ? data.timeNeeded.join(", ")
-      : "";
-    processedData.catering_brokerage = data.cateringBrokerage
-      ? data.cateringBrokerage.join(", ")
-      : "";
-    processedData.provide = data.provisions ? data.provisions.join(", ") : "";
+    if (processedData.timeNeeded) {
+      processedData.time_needed = processedData.timeNeeded.join(", ");
+      delete processedData.timeNeeded;
+    }
+    if (processedData.cateringBrokerage) {
+      processedData.catering_brokerage = processedData.cateringBrokerage.join(", ");
+      delete processedData.cateringBrokerage;
+    }
+    if (processedData.provisions) {
+      processedData.provide = processedData.provisions.join(", ");
+      delete processedData.provisions;
+    }
+    if (processedData.displayName) {
+      if (processedData.type === 'vendor') {
+        processedData.name = processedData.displayName;
+        delete processedData.contact_name;
+      } else if (processedData.type === 'client') {
+        processedData.contact_name = processedData.displayName;
+        delete processedData.name;
+      } else if (processedData.type === 'driver') {
+        processedData.name = processedData.displayName;
+        delete processedData.contact_name;
+      }
+      delete processedData.displayName;
+    }
 
-    // Remove fields that shouldn't be directly updated
-    delete processedData.countiesServed;
-    delete processedData.timeNeeded;
-    delete processedData.cateringBrokerage;
-    delete processedData.provisions;
-    delete processedData.id; // Ensure we're not trying to update the ID
+    // Remove any fields that are not in the Prisma schema
+    const allowedFields = [
+      'name', 'email', 'type', 'company_name', 'contact_name', 'contact_number',
+      'website', 'street1', 'street2', 'city', 'state', 'zip', 'location_number',
+      'parking_loading', 'counties', 'time_needed', 'catering_brokerage',
+      'frequency', 'provide', 'head_count', 'status'
+    ];
+    Object.keys(processedData).forEach((key) => {
+      if (!allowedFields.includes(key)) {
+        delete processedData[key];
+      }
+    });
+
+    console.log("Processed data:", processedData);
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -96,15 +133,19 @@ export async function PUT(
       },
     });
 
+    console.log("Updated user:", updatedUser);
+
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {
     console.error("Error updating user:", error);
-
     let errorMessage = "Failed to update user";
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma error code:", error.code);
+      console.error("Prisma error message:", error.message);
+    }
     return NextResponse.json(
       { error: "Failed to update user", details: errorMessage },
       { status: 500 },
