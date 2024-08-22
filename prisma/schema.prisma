@@ -262,4 +262,5 @@ enum users_type {
   client
   driver
   admin
+  helpdesk
 }

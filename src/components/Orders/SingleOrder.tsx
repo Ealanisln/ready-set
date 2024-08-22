@@ -59,6 +59,7 @@ interface Order {
   delivery_address_id?: string;
   brokerage?: string;
   order_number: string;
+  driver_status: string;
   date: string;
   pickup_time: string;
   arrival_time: string;
@@ -111,6 +112,20 @@ interface Address {
   created_at: string;
   updated_at: string;
 }
+
+enum DriverStatus {
+  not_started = "not_started",
+  arrived_at_vendor = "arrived_at_vendor",
+  en_route_to_client = "en_route_to_client",
+  arrived_to_client = "arrived_to_client",
+}
+
+const driverStatusMap: Record<DriverStatus, string> = {
+  [DriverStatus.not_started]: "📋 Not Started",
+  [DriverStatus.arrived_at_vendor]: "🏪 At Vendor",
+  [DriverStatus.en_route_to_client]: "🚚 On the Way",
+  [DriverStatus.arrived_to_client]: "🏁 Arrived",
+};
 
 const SingleOrder = () => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -205,6 +220,31 @@ const SingleOrder = () => {
 
   const handleDriverSelection = (driverId: string) => {
     setSelectedDriver(driverId);
+  };
+
+  const updateDriverStatus = async (newStatus: DriverStatus) => {
+    if (!order) return;
+
+    try {
+      const response = await fetch(`/api/orders/${order.order_number}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ driver_status: newStatus }),
+      });
+
+      if (response.ok) {
+        const updatedOrder = await response.json();
+        setOrder(updatedOrder);
+        toast.success("Driver status updated successfully!");
+      } else {
+        throw new Error("Failed to update driver status");
+      }
+    } catch (error) {
+      console.error("Error updating driver status:", error);
+      toast.error("Failed to update driver status. Please try again.");
+    }
   };
 
   if (isLoading) {
@@ -503,11 +543,50 @@ const SingleOrder = () => {
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            <div className="mt-6 flex justify-center">
+              <Card className="w-full max-w-md">
+                <CardContent className="pt-6">
+                  <div>
+                    <h3 className="mb-2 text-center font-semibold">
+                      Driver Status
+                    </h3>
+                    <div className="flex flex-col items-center gap-4">
+                      <span className="text-lg font-medium">
+                        {order &&
+                          driverStatusMap[order.driver_status as DriverStatus]}
+                      </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline">Update Status</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {Object.entries(driverStatusMap).map(
+                            ([status, label]) => (
+                              <DropdownMenuItem
+                                key={status}
+                                onClick={() =>
+                                  updateDriverStatus(status as DriverStatus)
+                                }
+                              >
+                                {label}
+                              </DropdownMenuItem>
+                            ),
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="bg-muted/50 flex flex-row items-center border-t px-6 py-3">
           <div className="text-md text-muted-foreground">
-            Status: <span className="font-semibold">{order.status}</span>
+            Order status: <span className="font-semibold">{order.status}</span>
           </div>
         </CardFooter>
       </Card>
