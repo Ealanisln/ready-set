@@ -13,6 +13,7 @@ import {
   VendorFormData,
   ClientFormData,
   DriverFormData,
+  HelpdeskFormData,
   userTypes,
 } from "./FormSchemas";
 import { getBottomText } from "./utils";
@@ -20,6 +21,7 @@ import Link from "next/link";
 import Image from "next/image";
 import CirclePattern from "./ui/CirclePattern";
 import CirclePatternSecond from "./ui/CirclePatternSecond";
+import HelpDeskForm from "./ui/HelpDeskForm";
 
 const SignUp = () => {
   const [loading, setLoading] = useState(false);
@@ -79,6 +81,14 @@ const SignUp = () => {
       userType: "driver",
     } as FormDataUnion);
   };
+
+  const onSubmitHelpDesk = async (data: HelpdeskFormData) => {
+    await onSubmit({
+      ...data,
+      userType: "helpdesk",
+    } as FormDataUnion);
+  };
+
   return (
     <section className="bg-[#F4F7FF] py-4 dark:bg-dark lg:py-8">
       <div className="container">
@@ -140,6 +150,9 @@ const SignUp = () => {
                     )}
                     {userType === "driver" && (
                       <DriverForm onSubmit={onSubmitDriver} />
+                    )}
+                    {userType === "helpdesk" && (
+                      <HelpDeskForm onSubmit={onSubmitHelpDesk} />
                     )}
                     <div className="flex justify-between pt-4">
                       <button

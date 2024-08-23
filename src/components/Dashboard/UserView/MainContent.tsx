@@ -21,7 +21,7 @@ interface User {
   contact_name?: string;
   contact_number: string;
   email: string;
-  type: "vendor" | "client" | "driver" | "admin";
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk";
   created_at?: Date;
 }
 

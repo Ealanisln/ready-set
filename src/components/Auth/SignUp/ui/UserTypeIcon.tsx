@@ -1,4 +1,4 @@
-import { Store, User, Truck } from "lucide-react";
+import { Store, User, Truck, Computer } from "lucide-react";
 import { UserType } from "../FormSchemas";
 
 interface UserTypeIconProps {
@@ -12,6 +12,7 @@ const UserTypeIcon: React.FC<UserTypeIconProps> = ({ type, onClick }) => {
     vendor: Store,
     client: User,
     driver: Truck,
+    helpdesk: Computer,
   }[type];
 
   return (

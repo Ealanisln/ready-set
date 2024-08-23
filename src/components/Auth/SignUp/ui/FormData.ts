@@ -79,7 +79,7 @@ export interface FormData {
   email: string;
   phoneNumber: string;
   password: string;
-  userType: "vendor" | "client" | "driver";
+  userType: "vendor" | "client" | "driver" | "helpdesk";
   company: string;
   parking?: string;
   countiesServed?: (typeof COUNTIES)[number][];
@@ -142,5 +142,10 @@ export interface ClientFormData {
 
 export interface DriverFormData extends FormData {
   userType: "driver";
+  name: string;  // Make sure this is included
+}
+
+export interface HelpDeskFormData extends FormData {
+  userType: "helpdesk";
   name: string;  // Make sure this is included
 }

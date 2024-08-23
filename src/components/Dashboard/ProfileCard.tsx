@@ -40,7 +40,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
                 control={control}
                 defaultValue=""
                 rules={{ 
-                  required: userType !== "driver" ? "Company name is required" : false 
+                  required: userType !== "driver" && userType !== 'helpdesk' ? "Company name is required" : false 
                 }}
                 render={({ field, fieldState: { error } }) => (
                   <>

@@ -114,19 +114,47 @@ export const driverSchema = z.object({
   zip: z.string().min(1, "Zip code is required"),
 });
 
-export const userTypes = ["vendor", "client", "driver"] as const;
+// New helpdesk schema
+export const helpdeskSchema = z.object({
+  userType: z.literal("helpdesk"),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .refine((value) => phoneRegex.test(value), {
+      message: "Invalid phone number format",
+    }),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(
+      /^(?=.*[@$!%*?&]).{8,}$/,
+      "Password must be at least 8 characters long and contain at least one special character",
+    ),
+  street1: z.string().min(1, "Street address is required"),
+  street2: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zip: z.string().min(1, "Zip code is required"),
+});
+
+export const userTypes = ["vendor", "client", "driver", "helpdesk"] as const;
 export type UserType = (typeof userTypes)[number];
 
 export const formSchema = z.discriminatedUnion("userType", [
   clientSchema,
   driverSchema,
+  helpdeskSchema,
 ]);
-export type FormDataUnion = VendorFormData | ClientFormData | DriverFormData;
+
+export type FormDataUnion = VendorFormData | ClientFormData | DriverFormData | HelpdeskFormData;
 
 export type DriverFormData = z.infer<typeof driverSchema>;
 export type VendorFormData = z.infer<typeof vendorSchema>;
 export type ClientFormData = z.infer<typeof clientSchema>;
+export type HelpdeskFormData = z.infer<typeof helpdeskSchema>;
 
 export type UserFormValues = {
-  type: "vendor" | "client" | "driver";
-} & (VendorFormData | ClientFormData | DriverFormData);
+  type: "vendor" | "client" | "driver" | "helpdesk";
+} & (VendorFormData | ClientFormData | DriverFormData | HelpdeskFormData);

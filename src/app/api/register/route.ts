@@ -11,11 +11,12 @@ import {
   VendorFormData,
   ClientFormData,
   DriverFormData,
+  HelpDeskFormData,
 } from "@/components/Auth/SignUp/ui/FormData";
 
 const prisma = new PrismaClient();
 
-type RequestBody = VendorFormData | ClientFormData | DriverFormData;
+type RequestBody = VendorFormData | ClientFormData | DriverFormData | HelpDeskFormData;
 
 export async function POST(request: Request) {
   try {
@@ -147,6 +148,26 @@ export async function POST(request: Request) {
           { status: 400 },
         );
       }
+    } else if (userType === "helpdesk") {
+      const { name, street1, city, state, zip } = body as HelpDeskFormData;
+      if (!name || !street1 || !city || !state || !zip) {
+        return NextResponse.json(
+          {
+            error: "Missing required fields for helpdesk",
+            missingFields: [
+              "name",
+              "street1",
+              "city",
+              "state",
+              "zip",
+            ].filter(
+              (field) =>
+                !(body as HelpDeskFormData)[field as keyof HelpDeskFormData],
+            ),
+          },
+          { status: 400 },
+        );
+      }
     }
 
     const exist = await prisma.user.findUnique({
@@ -169,9 +190,9 @@ export async function POST(request: Request) {
       contact_number: phoneNumber,
       password: hashedPassword,
       type: userType as users_type,
-      name:
-        userType === "driver"
-          ? (body as DriverFormData).name
+      name: 
+        userType === "driver" || userType === "helpdesk"
+          ? (body as DriverFormData | HelpDeskFormData).name
           : (body as VendorFormData | ClientFormData).contact_name,
       company_name:
         userType !== "driver" && "company" in body ? body.company : undefined,
@@ -202,7 +223,7 @@ export async function POST(request: Request) {
             ? (body as VendorFormData | ClientFormData).frequency
             : undefined,
         head_count:
-          "head_count" in body ? body.head_count.toString() : undefined,
+          "head_count" in body ? body.head_count?.toString() : undefined,
         website: "website" in body ? body.website : undefined,
       }),
 

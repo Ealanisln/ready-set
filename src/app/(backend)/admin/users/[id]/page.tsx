@@ -30,7 +30,7 @@ interface User {
   contact_name?: string;
   email: string;
   contact_number: string;
-  type: "driver" | "vendor" | "client";
+  type: "driver" | "vendor" | "client" | "helpdesk";
   company_name?: string;
   website?: string;
   street1: string;
@@ -91,7 +91,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
         const data = await response.json();
   
         // Set form values
-        setValue("displayName", data.displayName || data.contact_name || "");
+        setValue("displayName", data.displayName || data.contact_name || data.name || "");
         setValue("company_name", data.company_name || "");
         setValue("contact_number", data.contact_number || "");
         setValue("email", data.email || "");
@@ -140,9 +140,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
 
       delete (submitData as any).displayName;
 
-      if (data.type === "driver") {
+      if (data.type === "driver" || data.type === "helpdesk") {
         submitData.name = data.displayName;
         delete submitData.contact_name;
+        delete submitData.company_name; 
       } else if (data.type === "vendor" || data.type === "client") {
         submitData.contact_name = data.displayName;
         delete submitData.name;
@@ -170,7 +171,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
       reset(updatedUser);
 
       setHasUnsavedChanges(false);
-      router.push("/admin/users");
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Failed to save user. Please try again.");
