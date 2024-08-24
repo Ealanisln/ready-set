@@ -6,7 +6,9 @@ import toast from "react-hot-toast";
 import VendorForm from "./ui/VendorForm";
 import ClientForm from "./ui/ClientForm";
 import DriverForm from "./ui/DriverForm";
-import UserTypeIcon from "./ui/UserTypeIcon";
+import HelpDeskForm from "./ui/HelpDeskForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   UserType,
   FormDataUnion,
@@ -21,12 +23,11 @@ import Link from "next/link";
 import Image from "next/image";
 import CirclePattern from "./ui/CirclePattern";
 import CirclePatternSecond from "./ui/CirclePatternSecond";
-import HelpDeskForm from "./ui/HelpDeskForm";
 
 const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [userType, setUserType] = useState<UserType | null>(null);
+  const [userType, setUserType] = useState<UserType>("vendor");
 
   const onSubmit = async (data: FormDataUnion) => {
     console.log("SignUp: onSubmit called with data:", data);
@@ -76,17 +77,11 @@ const SignUp = () => {
   };
 
   const onSubmitDriver = async (data: DriverFormData) => {
-    await onSubmit({
-      ...data,
-      userType: "driver",
-    } as FormDataUnion);
+    await onSubmit({ ...data, userType: "driver" } as FormDataUnion);
   };
 
   const onSubmitHelpDesk = async (data: HelpdeskFormData) => {
-    await onSubmit({
-      ...data,
-      userType: "helpdesk",
-    } as FormDataUnion);
+    await onSubmit({ ...data, userType: "helpdesk" } as FormDataUnion);
   };
 
   return (
@@ -116,56 +111,37 @@ const SignUp = () => {
                   />
                 </Link>
               </div>
-              <div className="mx-auto max-w-md p-4 sm:p-6 lg:p-8">
-                {!userType ? (
-                  <div>
-                    <h2 className="mb-4 text-center text-xl font-semibold sm:text-2xl">
-                      Choose Account Type
-                    </h2>
-                    <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+              <Card className="w-full max-w-4xl mx-auto">
+                <CardHeader>
+                  <CardTitle>User Registration</CardTitle>
+                  <CardDescription>Please select your user type and fill out the appropriate form.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs value={userType} onValueChange={(value) => setUserType(value as UserType)}>
+                    <TabsList className="grid w-full grid-cols-4">
                       {userTypes.map((type) => (
-                        <UserTypeIcon
-                          key={type}
-                          type={type}
-                          isSelected={false}
-                          onClick={() => setUserType(type)}
-                        />
+                        <TabsTrigger key={type} value={type}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </TabsTrigger>
                       ))}
+                    </TabsList>
+                    <div className="mt-6">
+                      <TabsContent value="vendor">
+                        <VendorForm onSubmit={onSubmitVendor} />
+                      </TabsContent>
+                      <TabsContent value="client">
+                        <ClientForm onSubmit={onSubmitClient} />
+                      </TabsContent>
+                      <TabsContent value="driver">
+                        <DriverForm onSubmit={onSubmitDriver} />
+                      </TabsContent>
+                      <TabsContent value="helpdesk">
+                        <HelpDeskForm onSubmit={onSubmitHelpDesk} />
+                      </TabsContent>
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    <h2 className="mb-4 text-xl font-semibold">
-                      {userType.charAt(0).toUpperCase() + userType.slice(1)}{" "}
-                      Registration
-                    </h2>
-                    <p className="mb-4 text-sm text-gray-600">
-                      {getBottomText(userType)}
-                    </p>
-                    {userType === "vendor" && (
-                      <VendorForm onSubmit={onSubmitVendor} />
-                    )}
-                    {userType === "client" && (
-                      <ClientForm onSubmit={onSubmitClient} />
-                    )}
-                    {userType === "driver" && (
-                      <DriverForm onSubmit={onSubmitDriver} />
-                    )}
-                    {userType === "helpdesk" && (
-                      <HelpDeskForm onSubmit={onSubmitHelpDesk} />
-                    )}
-                    <div className="flex justify-between pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setUserType(null)}
-                        className="rounded bg-gray-200 px-4 py-2"
-                      >
-                        Back
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  </Tabs>
+                </CardContent>
+              </Card>
               <p className="text-body-secondary mb-4 py-8 text-base">
                 By creating an account you are agree with our{" "}
                 <a href="/#" className="text-primary hover:underline">
@@ -176,13 +152,9 @@ const SignUp = () => {
                   Policy
                 </a>
               </p>
-
               <p className="text-body-secondary text-base">
                 Already have an account?
-                <Link
-                  href="/signin"
-                  className="pl-2 text-primary hover:underline"
-                >
+                <Link href="/signin" className="pl-2 text-primary hover:underline">
                   Sign In
                 </Link>
               </p>

@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import SingleOrder from "@/components/Orders/SingleOrder";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +12,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export function OrdersView() {
+const OrderPage = () => {
+  const [orderNumber, setOrderNumber] = useState("");
+
+  useEffect(() => {
+    // Get the order number from the URL
+    const pathSegments = window.location.pathname.split("/");
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    setOrderNumber(lastSegment);
+  }, []);
+
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -17,24 +30,26 @@ export function OrdersView() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
+                  <Link href="/admin/">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="#">Orders</Link>
+                  <Link href="/admin/orders">Orders</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Recent Orders</BreadcrumbPage>
+                <BreadcrumbPage>Order {orderNumber}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        {/* <Orders /> */}
+        <SingleOrder />
       </div>
     </div>
   );
-}
+};
+
+export default OrderPage;

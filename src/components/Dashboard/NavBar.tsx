@@ -70,14 +70,14 @@ const NavBar = () => {
                 Home
               </Link>
               <Link
-                href="/admin/orders"
+                href="/admin/catering-orders"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={closeSheet}
               >
                 Catering orders
               </Link>
               <Link
-                href="/admin/ondemand-orders"
+                href="/admin/on-demand-orders"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={closeSheet}
               >
@@ -141,7 +141,7 @@ const NavBar = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href="/admin/orders"
+                    href="/admin/catering-orders"
                     className="bg-accent text-accent-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
                   >
                     <Truck className="h-5 w-5" />
@@ -153,7 +153,7 @@ const NavBar = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href="/admin/ondemand-orders"
+                    href="/admin/on-demand-orders"
                     className="bg-accent text-accent-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
                   >
                     <Zap className="h-5 w-5" />

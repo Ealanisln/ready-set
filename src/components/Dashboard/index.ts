@@ -1,7 +1,6 @@
 export { default as AddressCard } from './AddressCard';
 export * from './DashboardHome';
 export { default as NavBar } from './NavBar';
-export { default as Orders } from '../Orders/Orders';
 export { default as ProfileCard } from './ProfileCard';
 export * from './Settings';
 export * from './UnsavedChangesAlert';

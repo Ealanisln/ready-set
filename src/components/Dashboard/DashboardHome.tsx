@@ -157,7 +157,7 @@ export function DashboardHome() {
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
         <Card className="lg:col-span-1">
     <CardHeader>
-      <CardTitle>Recent Orders</CardTitle>
+      <CardTitle>Recent Catering Orders</CardTitle>
     </CardHeader>
     <CardContent>
       <Table>
@@ -193,7 +193,7 @@ export function DashboardHome() {
         </TableBody>
       </Table>
       <Button asChild size="sm" className="mt-4 w-full">
-        <Link href="/admin/orders">View All Orders</Link>
+        <Link href="/admin/catering-orders">View Catering Orders</Link>
       </Button>
     </CardContent>
   </Card>
