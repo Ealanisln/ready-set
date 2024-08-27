@@ -11,9 +11,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-// Define the user status type based on your schema
-type UserStatus = "active" | "pending" | "deleted";
-
 // Define the props interface for the component
 interface UserStatusCardProps {
   user: {

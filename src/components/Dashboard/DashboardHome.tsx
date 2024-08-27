@@ -60,7 +60,7 @@ export function DashboardHome() {
     const fetchData = async () => {
       try {
         const [ordersResponse, usersResponse] = await Promise.all([
-          fetch("/api/orders?limit=5"),
+          fetch("/api/orders/catering-orders?recentOnly=true"),
           fetch("/api/users"),
         ]);
 
@@ -173,7 +173,7 @@ export function DashboardHome() {
           {recentOrders.map((order) => (
             <TableRow key={order.id}>
               <TableCell>
-                <Link href={`/admin/orders/${order.order_number}`}>
+                <Link href={`/admin/catering-orders/${order.order_number}`}>
                   {order.order_number}
                 </Link>
               </TableCell>

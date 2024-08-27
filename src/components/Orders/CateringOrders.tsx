@@ -136,7 +136,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, isLoading }) => {
           <TableRow key={order.id}>
             <TableCell>
               <Link
-                href={`/admin/orders/${order.order_number}`}
+                href={`/admin/catering-orders/${order.order_number}`}
                 className="font-medium hover:underline"
               >
                 {order.order_number}

@@ -36,7 +36,7 @@ const OrderPage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/admin/orders">Orders</Link>
+                  <Link href="/admin/catering-orders">Catering orders</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

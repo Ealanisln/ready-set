@@ -74,7 +74,8 @@ interface Order {
   image: string | null;
   status: "active" | "assigned" | "cancelled" | "completed";
   order_total: string;
-  driver_id: string;
+  driver_id?: string;
+  driverInfo?: Driver;
   tip: string;
   user: {
     name: string | null;
@@ -134,19 +135,28 @@ const SingleOrder = () => {
   const [isDriverDialogOpen, setIsDriverDialogOpen] = useState(false);
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
-
+  const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
+  const [driverAssignmentKey, setDriverAssignmentKey] = useState(0);
+  const [shouldRefetch, setShouldRefetch] = useState(0);
+  
   useEffect(() => {
     const fetchOrder = async () => {
       const orderNumber = window.location.pathname.split("/").pop();
       try {
-        console.log("Fetching order number:", orderNumber);
         const response = await fetch(
           `/api/orders/${orderNumber}?include=dispatch.driver`,
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched order data:", data);
           setOrder(data);
+          // Check if dispatch array exists and has at least one driver
+          if (
+            data.dispatch &&
+            data.dispatch.length > 0 &&
+            data.dispatch[0].driver
+          ) {
+            setDriverInfo(data.dispatch[0].driver);
+          }
         } else {
           console.error("Failed to fetch catering order");
         }
@@ -179,10 +189,10 @@ const SingleOrder = () => {
   }, []);
 
   useEffect(() => {
-    setIsDriverAssigned(order?.status === "assigned");
-    setSelectedDriver(order?.driver_id || null);
-    console.log("Driver assigned:", order?.status === "assigned");
-  }, [order]);
+    const driverAssigned = !!driverInfo;
+    setIsDriverAssigned(driverAssigned);
+    setSelectedDriver(driverInfo?.id || null);
+  }, [order, driverInfo]);
 
   const handleAssignOrEditDriver = async () => {
     if (!order || !selectedDriver) return;
@@ -193,7 +203,11 @@ const SingleOrder = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ orderId: order.id, driverId: selectedDriver }),
+        body: JSON.stringify({
+          orderId: order.id,
+          driverId: selectedDriver,
+          orderType: order.order_type, // Add this line
+        }),
       });
 
       if (!response.ok) {
@@ -201,23 +215,26 @@ const SingleOrder = () => {
       }
 
       const updatedOrder = await response.json();
-      setOrder({
-        ...updatedOrder,
-        status: "assigned",
-        driver_id: selectedDriver,
-      });
+      setOrder(updatedOrder);
+      const newDriverInfo =
+        drivers.find((driver) => driver.id === selectedDriver) || null;
+      setDriverInfo(newDriverInfo);
       setIsDriverDialogOpen(false);
       toast.success(
         isDriverAssigned
           ? "Driver updated successfully!"
           : "Driver assigned successfully!",
       );
+
+      setOrder(updatedOrder);
+      setDriverInfo(newDriverInfo);
+      setDriverAssignmentKey(prevKey => prevKey + 1);
+
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
       toast.error("Failed to assign/edit driver. Please try again.");
     }
   };
-
   const handleDriverSelection = (driverId: string) => {
     setSelectedDriver(driverId);
   };
@@ -271,6 +288,8 @@ const SingleOrder = () => {
               Date: {new Date(order.date).toLocaleDateString()}
             </CardDescription>
           </div>
+          <div>Debug: isDriverAssigned = {isDriverAssigned.toString()}</div>
+
           <div className="flex items-center gap-2">
             <Dialog
               open={isDriverDialogOpen}
@@ -283,14 +302,12 @@ const SingleOrder = () => {
                   className="flex items-center gap-1"
                   onClick={() => setIsDriverDialogOpen(true)}
                 >
-                  {isDriverAssigned ? (
+                  {driverInfo ? (
                     <Edit className="h-4 w-4" />
                   ) : (
                     <Truck className="h-4 w-4" />
                   )}
-                  <span>
-                    {isDriverAssigned ? "Edit Driver" : "Assign Driver"}
-                  </span>
+                  <span>{driverInfo ? "Edit Driver" : "Assign Driver"}</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[625px]">
@@ -591,7 +608,7 @@ const SingleOrder = () => {
         </CardFooter>
       </Card>
       <div className="py-8">
-        <OrderStatusCard order={order} />
+        <OrderStatusCard order={order} key={driverAssignmentKey}  />
       </div>
     </main>
   );
