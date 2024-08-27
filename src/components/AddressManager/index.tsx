@@ -127,9 +127,9 @@ const AddressManager: React.FC<AddressManagerProps> = ({
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-bold text-gray-800">
+      {/* <h2 className="mb-6 text-xl font-bold text-gray-800">
         Pick Up Location
-      </h2>
+      </h2> */}
       {error && <p className="mb-4 text-red-500">{error}</p>}
       {isLoading ? (
         <p className="text-gray-600">Loading addresses...</p>

@@ -114,8 +114,17 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
+    // Safely convert addressId to BigInt
+    let bigIntId: bigint;
+    try {
+      bigIntId = BigInt(addressId);
+    } catch (error) {
+      console.error("Error converting addressId to BigInt:", error);
+      return NextResponse.json({ error: "Invalid address ID format" }, { status: 400 });
+    }
+
     const address = await prisma.address.findUnique({
-      where: { id: BigInt(addressId) },
+      where: { id: bigIntId },
     });
 
     if (!address) {
@@ -127,7 +136,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.address.delete({
-      where: { id: BigInt(addressId) },
+      where: { id: bigIntId },
     });
 
     return NextResponse.json({ message: "Address deleted successfully" });
@@ -139,7 +148,6 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
