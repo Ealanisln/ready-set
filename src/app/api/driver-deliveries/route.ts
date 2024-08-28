@@ -38,26 +38,26 @@ export async function GET(req: NextRequest) {
     // Fetch dispatches for the current driver
     const driverDispatches = await prisma.dispatch.findMany({
       where: {
-        driver_id: session.user.id
+        driverId: session.user.id
       },
       select: {
-        service_id: true,
-        service_type: true
+        cateringRequestId: true,
+        on_demandId: true
       }
     });
 
-    // Separate catering and on-demand service IDs
+    // Separate catering and on-demand IDs
     const cateringIds = driverDispatches
-      .filter(d => d.service_type === 'catering')
-      .map(d => d.service_id);
+      .filter(d => d.cateringRequestId !== null)
+      .map(d => d.cateringRequestId!);
     const onDemandIds = driverDispatches
-      .filter(d => d.service_type === 'ondemand')
-      .map(d => d.service_id);
+      .filter(d => d.on_demandId !== null)
+      .map(d => d.on_demandId!);
 
     // Fetch catering deliveries
     const cateringDeliveries = await prisma.catering_request.findMany({
       where: {
-        id: { in: cateringIds.map(id => BigInt(id.toString())) }
+        id: { in: cateringIds }
       },
       include: {
         user: { select: { name: true, email: true } },
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     // Fetch on-demand deliveries
     const onDemandDeliveries = await prisma.on_demand.findMany({
       where: {
-        id: { in: onDemandIds.map(id => BigInt(id.toString())) }
+        id: { in: onDemandIds }
       },
       include: {
         user: { select: { name: true, email: true } },

@@ -1,69 +1,67 @@
-// app/api/orders/assignDriver/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
+import { Prisma } from "@prisma/client";
+
+function serializeData(obj: any): any {
+  if (typeof obj === "bigint") {
+    return Number(obj);
+  } else if (obj instanceof Date) {
+    return obj.toISOString();
+  } else if (obj instanceof Prisma.Decimal) {
+    return obj.toNumber();
+  } else if (Array.isArray(obj)) {
+    return obj.map(serializeData);
+  } else if (typeof obj === "object" && obj !== null) {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        serializeData(value),
+      ]),
+    );
+  }
+  return obj;
+}
 
 export async function POST(request: Request) {
   const { orderId, driverId } = await request.json();
 
   if (!orderId || !driverId) {
-    return NextResponse.json({ error: "Missing orderId or driverId" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing orderId or driverId" },
+      { status: 400 },
+    );
   }
 
-  function serializeBigInt(obj: any): any {
-    if (typeof obj === "bigint") {
-      return obj.toString();
-    } else if (Array.isArray(obj)) {
-      return obj.map(serializeBigInt);
-    } else if (typeof obj === "object" && obj !== null) {
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [
-          key,
-          serializeBigInt(value),
-        ]),
-      );
-    }
-    return obj;
-  }
+  console.log("Order ID:", orderId);
+  console.log("Driver ID:", driverId);
 
   try {
     const result = await prisma.$transaction(async (prisma) => {
-      // Determine order type and get order details
-      let order: any;
-      let orderType: 'catering' | 'ondemand';
-
-      order = await prisma.catering_request.findUnique({
+      // Check if the catering request exists
+      const cateringRequest = await prisma.catering_request.findUnique({
         where: { id: BigInt(orderId) },
-        select: { user_id: true },
       });
 
-      if (order) {
-        orderType = 'catering';
-      } else {
-        order = await prisma.on_demand.findUnique({
-          where: { id: BigInt(orderId) },
-          select: { user_id: true },
-        });
-        
-        if (order) {
-          orderType = 'ondemand';
-        } else {
-          throw new Error("Order not found");
-        }
+      if (!cateringRequest) {
+        throw new Error("Catering request not found");
       }
 
-      // Check if a dispatch exists
+      console.log("Catering Request:", serializeData(cateringRequest));
+
+      // Check if a dispatch already exists
       let dispatch = await prisma.dispatch.findFirst({
         where: {
-          service_id: BigInt(orderId),
-          service_type: orderType,
+          cateringRequestId: BigInt(orderId),
         },
       });
+
+      console.log("Existing Dispatch:", serializeData(dispatch));
 
       if (dispatch) {
         // Update existing dispatch
         dispatch = await prisma.dispatch.update({
           where: { id: dispatch.id },
-          data: { driver_id: driverId },
+          data: { driverId: driverId },
           include: {
             driver: {
               select: {
@@ -79,10 +77,9 @@ export async function POST(request: Request) {
         // Create new dispatch
         dispatch = await prisma.dispatch.create({
           data: {
-            user_id: order.user_id,
-            service_id: BigInt(orderId),
-            service_type: orderType,
-            driver_id: driverId,
+            cateringRequestId: BigInt(orderId),
+            driverId: driverId,
+            userId: cateringRequest.user_id,
           },
           include: {
             driver: {
@@ -97,31 +94,35 @@ export async function POST(request: Request) {
         });
       }
 
-      // Update the order status to 'assigned'
-      let updatedOrder;
-      if (orderType === 'catering') {
-        updatedOrder = await prisma.catering_request.update({
-          where: { id: BigInt(orderId) },
-          data: { status: "assigned" },
-        });
-      } else {
-        updatedOrder = await prisma.on_demand.update({
-          where: { id: BigInt(orderId) },
-          data: { status: "assigned" },
-        });
-      }
+      // Update the catering request status
+      const updatedOrder = await prisma.catering_request.update({
+        where: { id: BigInt(orderId) },
+        data: { status: "assigned" },
+      });
 
       return { updatedOrder, dispatch };
     });
 
     // Serialize the result before sending the response
-    const serializedResult = serializeBigInt(result);
+    const serializedResult = serializeData(result);
     return NextResponse.json(serializedResult);
-  } catch (error: unknown) {
-    console.error("Error in POST /api/orders/assignDriver:", error);
-    if (error instanceof Error) {
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma Error:", error.message);
+      console.error("Error Code:", error.code);
+      console.error("Meta:", error.meta);
+      return NextResponse.json(
+        { error: `Database error: ${error.message}` },
+        { status: 500 },
+      );
+    } else if (error instanceof Error) {
+      console.error("Error:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+    console.error("Unknown error:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 },
+    );
   }
 }

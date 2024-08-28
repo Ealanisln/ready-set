@@ -12,7 +12,7 @@ import ToasterContext from "./api/contex/ToasetContex";
 import { useEffect, useState } from "react";
 import PreLoader from "@/components/Common/PreLoader";
 import { Montserrat } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { Analytics } from "@vercel/analytics/react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -54,7 +54,7 @@ export default function RootLayout({
               <ToasterContext />
               {!isBackendAdminRoute && !isStudioRoute && <Header />}
               <main className="flex-grow">{children}</main>
-              <GoogleAnalytics gaId="G-QN5G3JHVMP" />
+              <Analytics />
               {!isBackendAdminRoute && !isStudioRoute && <Footer />}
               <ScrollToTop />
             </ThemeProvider>
