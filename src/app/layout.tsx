@@ -13,18 +13,12 @@ import { useEffect, useState } from "react";
 import PreLoader from "@/components/Common/PreLoader";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { Metadata } from "next";
+import CustomHead from './custom-head'
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
 });
-
-export const metadata: Metadata = {
-  verification: {
-    google: 'K01RCQMD4FEM4sUEQhgn1hzQT6qd8yFqZdqzvpIUX6s',
-  },
-}
 
 export default function RootLayout({
   children,
@@ -60,6 +54,7 @@ export default function RootLayout({
             >
               <ToasterContext />
               {!isBackendAdminRoute && !isStudioRoute && <Header />}
+              <CustomHead />
               <main className="flex-grow">{children}</main>
               <Analytics />
               {!isBackendAdminRoute && !isStudioRoute && <Footer />}
