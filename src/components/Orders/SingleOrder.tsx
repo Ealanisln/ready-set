@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MoreVertical, Truck, Edit } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/table";
 import OrderStatusCard from "./DriverStatus";
 import toast from "react-hot-toast";
+import DriverStatusCard from "./DriverStatus";
 
 interface Driver {
   id: string;
@@ -136,39 +137,43 @@ const SingleOrder = () => {
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
-  const [driverAssignmentKey, setDriverAssignmentKey] = useState(0);
-  const [shouldRefetch, setShouldRefetch] = useState(0);
-  
-  useEffect(() => {
-    const fetchOrder = async () => {
-      const orderNumber = window.location.pathname.split("/").pop();
-      try {
-        const response = await fetch(
-          `/api/orders/${orderNumber}?include=dispatch.driver`,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setOrder(data);
-          // Check if dispatch array exists and has at least one driver
-          if (
-            data.dispatch &&
-            data.dispatch.length > 0 &&
-            data.dispatch[0].driver
-          ) {
-            setDriverInfo(data.dispatch[0].driver);
-          }
-        } else {
-          console.error("Failed to fetch catering order");
-        }
-      } catch (error) {
-        console.error("Error fetching catering order:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchOrder();
+  const fetchOrderDetails = useCallback(async () => {
+    setIsLoading(true);
+    const orderNumber = window.location.pathname.split("/").pop();
+    try {
+      const response = await fetch(
+        `/api/orders/${orderNumber}?include=dispatch.driver`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setOrder(data);
+        if (
+          data.dispatch &&
+          data.dispatch.length > 0 &&
+          data.dispatch[0].driver
+        ) {
+          setDriverInfo(data.dispatch[0].driver);
+          setIsDriverAssigned(true);
+        } else {
+          setDriverInfo(null);
+          setIsDriverAssigned(false);
+        }
+      } else {
+        console.error("Failed to fetch order");
+        toast.error("Failed to load order details");
+      }
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      toast.error("An error occurred while loading order details");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchOrderDetails();
+  }, [fetchOrderDetails]);
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -179,20 +184,16 @@ const SingleOrder = () => {
           setDrivers(data);
         } else {
           console.error("Failed to fetch drivers");
+          toast.error("Failed to load available drivers");
         }
       } catch (error) {
         console.error("Error fetching drivers:", error);
+        toast.error("An error occurred while loading drivers");
       }
     };
 
     fetchDrivers();
   }, []);
-
-  useEffect(() => {
-    const driverAssigned = !!driverInfo;
-    setIsDriverAssigned(driverAssigned);
-    setSelectedDriver(driverInfo?.id || null);
-  }, [order, driverInfo]);
 
   const handleAssignOrEditDriver = async () => {
     if (!order || !selectedDriver) return;
@@ -200,13 +201,11 @@ const SingleOrder = () => {
     try {
       const response = await fetch("/api/orders/assignDriver", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
           driverId: selectedDriver,
-          orderType: order.order_type, // Add this line
+          orderType: order.order_type,
         }),
       });
 
@@ -214,27 +213,19 @@ const SingleOrder = () => {
         throw new Error("Failed to assign/edit driver");
       }
 
-      const updatedOrder = await response.json();
-      setOrder(updatedOrder);
-      const newDriverInfo =
-        drivers.find((driver) => driver.id === selectedDriver) || null;
-      setDriverInfo(newDriverInfo);
+      await fetchOrderDetails(); // Re-fetch the entire order details
       setIsDriverDialogOpen(false);
       toast.success(
         isDriverAssigned
           ? "Driver updated successfully!"
           : "Driver assigned successfully!",
       );
-
-      setOrder(updatedOrder);
-      setDriverInfo(newDriverInfo);
-      setDriverAssignmentKey(prevKey => prevKey + 1);
-
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
       toast.error("Failed to assign/edit driver. Please try again.");
     }
   };
+
   const handleDriverSelection = (driverId: string) => {
     setSelectedDriver(driverId);
   };
@@ -608,7 +599,7 @@ const SingleOrder = () => {
         </CardFooter>
       </Card>
       <div className="py-8">
-        <OrderStatusCard order={order} key={driverAssignmentKey}  />
+        <DriverStatusCard order={order} driverInfo={driverInfo} />
       </div>
     </main>
   );
