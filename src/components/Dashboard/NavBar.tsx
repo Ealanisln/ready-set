@@ -37,7 +37,6 @@ import {
 } from "../ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
 
-
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const closeSheet = () => setIsOpen(false);
@@ -220,14 +219,14 @@ const NavBar = () => {
 
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
           <form className="ml-auto flex-1 sm:flex-initial">
-            <div className="relative">
+            {/* <div className="relative">
               <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
               <Input
                 type="search"
                 placeholder="Search products..."
                 className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
               />
-            </div>
+            </div> */}
           </form>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -240,11 +239,13 @@ const NavBar = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link href="/admin/settings">
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
               </Link>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>Sign out</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>
+                Sign out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

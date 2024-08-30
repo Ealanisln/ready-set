@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import DriverOrder from "@/components/Driver/DriverOrder";
+import { BreadcrumbNavigation } from "@/components/Dashboard";
+import Breadcrumb from "@/components/Common/Breadcrumb";
 
 const OrderPage = () => {
   const [orderNumber, setOrderNumber] = useState("");
@@ -15,9 +16,14 @@ const OrderPage = () => {
   }, []);
 
   return (
-    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <DriverOrder />
+    <div className="relative z-10 overflow-hidden pb-[60px] pt-[120px] dark:bg-dark md:pt-[130px] lg:pt-[160px]">
+      <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-stroke/0 via-stroke to-stroke/0 dark:via-dark-3"></div>
+      <div className="container">
+        <div className="-mx-4 flex flex-wrap items-center">
+          <div className="w-full px-4">
+            <DriverOrder />
+          </div>
+        </div>
       </div>
     </div>
   );

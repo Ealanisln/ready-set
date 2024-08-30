@@ -4,7 +4,12 @@ import {
   CardHeader,
   CardContent,
   CardFooter,
+  CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,14 +18,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  FileTextIcon,
+  CarIcon,
+  UsersIcon,
+  CheckIcon,
+} from "lucide-react";
 
-// Update type definitions
 type OrderStatus = "active" | "assigned" | "cancelled" | "completed";
 type DriverStatus =
+  | "assigned"
   | "arrived_at_vendor"
   | "en_route_to_client"
   | "arrived_to_client"
+  | "completed"
   | null;
 type OrderType = "catering" | "on_demand";
 
@@ -57,24 +70,21 @@ interface OnDemandOrder extends BaseOrder {
 
 type Order = CateringOrder | OnDemandOrder;
 
-const SingleOrder: React.FC = () => {
-  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+const driverStatuses = {
+  "on_demand": ["assigned", "arrived_at_vendor", "en_route_to_client", "arrived_to_client", "completed"],
+  "catering": ["assigned", "arrived_at_vendor", "en_route_to_client", "arrived_to_client", "completed"]
+};
+
+const DriverDashboard: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get the order number from the URL
-    const pathSegments = window.location.pathname.split("/");
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    setOrderNumber(lastSegment);
-  }, []);
-
-  useEffect(() => {
     const fetchOrder = async () => {
-      if (!orderNumber) return;
-
       try {
+        // In a real application, you'd get the order number from the URL or props
+        const orderNumber = "SV-80002"; // Example order number
         const response = await fetch(`/api/orders/${orderNumber}`);
         if (!response.ok) {
           throw new Error("Failed to fetch order");
@@ -89,13 +99,13 @@ const SingleOrder: React.FC = () => {
     };
 
     fetchOrder();
-  }, [orderNumber]);
+  }, []);
 
   const updateDriverStatus = async (newStatus: DriverStatus) => {
-    if (!orderNumber) return;
+    if (!order) return;
 
     try {
-      const response = await fetch(`/api/orders/${orderNumber}`, {
+      const response = await fetch(`/api/orders/${order.order_number}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -118,162 +128,139 @@ const SingleOrder: React.FC = () => {
   if (error) return <div>Error: {error}</div>;
   if (!order) return <div>Order not found</div>;
 
+  const currentStatusIndex = driverStatuses[order.order_type].indexOf(order.driver_status || "assigned");
+
   return (
-    <section id="contact" className="relative py-20 md:py-[120px]">
-    <div className="absolute left-0 top-0 -z-[1] h-full w-full dark:bg-dark"></div>
-    <div className="absolute left-0 top-0 -z-[1] h-1/2 w-full bg-[#E9F9FF] dark:bg-dark-700 lg:h-[45%] xl:h-1/2"></div>
-    <div className="container px-4">
-    <div className="flex justify-center items-center">
-    <Card className="w-full max-w-3xl">
-            <CardHeader className="flex items-center justify-between">
-              <div className="grid gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Order #</span>
-                  <span>{order.order_number}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Order Type:</span>
-                  <span>
-                    {order.order_type === "catering" ? "Catering" : "On Demand"}
-                  </span>
-                </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">Order Dashboard</h1>
+      <Card className="w-full max-w-3xl mx-auto">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl">Order #{order.order_number}</CardTitle>
+            <Badge variant={order.order_type === "catering" ? "secondary" : "default"} className="text-sm">
+              {order.order_type === "catering" ? "Catering" : "On Demand"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <CalendarIcon className="text-muted-foreground" />
+              <span>{new Date(order.date).toLocaleDateString()}</span>
+            </div>
+            <Badge variant="outline" className="text-sm">
+              {order.status}
+            </Badge>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <MapPinIcon className="text-muted-foreground" />
+                <span className="font-semibold">Pickup Location</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Order Status:</span>
-                <span>{order.status}</span>
+              <p className="text-sm">{`${order.address.street1}, ${order.address.city}, ${order.address.state} ${order.address.zip}`}</p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <MapPinIcon className="text-muted-foreground" />
+                <span className="font-semibold">Delivery Location</span>
               </div>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-1">
-                  <span className="font-medium">Order Date:</span>
-                  <span>{new Date(order.date).toLocaleDateString()}</span>
-                </div>
-                <div className="grid gap-1">
-                  <span className="font-medium">Pickup Location:</span>
-                  <span>{`${order.address.street1}, ${order.address.city}, ${order.address.state} ${order.address.zip}`}</span>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-1">
-                  <span className="font-medium">Delivery Location:</span>
-                  <span>
-                    {order.delivery_address
-                      ? `${order.delivery_address.street1}, ${order.delivery_address.city}, ${order.delivery_address.state} ${order.delivery_address.zip}`
-                      : "N/A"}
-                  </span>
-                </div>
-                <div className="grid gap-1">
-                  <span className="font-medium">Total:</span>
-                  <span>${Number(order.order_total).toFixed(2)}</span>
-                </div>
-              </div>
-              {order.order_type === "catering" && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="grid gap-1">
-                    <span className="font-medium">Headcount:</span>
-                    <span>{(order as CateringOrder).headcount || "N/A"}</span>
-                  </div>
-                  <div className="grid gap-1">
-                    <span className="font-medium">Need Host:</span>
-                    <span>{(order as CateringOrder).need_host || "N/A"}</span>
+              <p className="text-sm">
+                {order.delivery_address
+                  ? `${order.delivery_address.street1}, ${order.delivery_address.city}, ${order.delivery_address.state} ${order.delivery_address.zip}`
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <span className="text-sm text-muted-foreground">Total</span>
+              <p className="font-semibold">${Number(order.order_total).toFixed(2)}</p>
+            </div>
+            {order.order_type === "on_demand" ? (
+              <>
+                <div>
+                  <span className="text-sm text-muted-foreground">Item Delivered</span>
+                  <div className="flex items-center space-x-1">
+                    <FileTextIcon className="h-4 w-4" />
+                    <span>{order.item_delivered || "N/A"}</span>
                   </div>
                 </div>
-              )}
-              {order.order_type === "on_demand" && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="grid gap-1">
-                    <span className="font-medium">Item Delivered:</span>
-                    <span>{(order as OnDemandOrder).item_delivered || "N/A"}</span>
-                  </div>
-                  <div className="grid gap-1">
-                    <span className="font-medium">Vehicle Type:</span>
-                    <span>{(order as OnDemandOrder).vehicle_type || "N/A"}</span>
+                <div>
+                  <span className="text-sm text-muted-foreground">Vehicle Type</span>
+                  <div className="flex items-center space-x-1">
+                    <CarIcon className="h-4 w-4" />
+                    <span>{order.vehicle_type || "N/A"}</span>
                   </div>
                 </div>
-              )}
-              <div className="grid gap-1">
-                <span className="font-medium">Special Notes:</span>
-                <span>{order.special_notes || "N/A"}</span>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="grid gap-1">
-                <span className="font-medium">Driver Status:</span>
-                <span>{order.driver_status || "Not started"}</span>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm">Update Driver Status</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[200px]">
-                  <DropdownMenuLabel>Update Driver Status</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {(
-                    [
-                      "arrived_at_vendor",
-                      "en_route_to_client",
-                      "arrived_to_client",
-                    ] as const
-                  ).map((status) => (
-                    <DropdownMenuItem
-                      key={status}
-                      onSelect={() => updateDriverStatus(status)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{status.replace(/_/g, " ")}</span>
-                        {order.driver_status === status && (
-                          <CheckIcon className="h-4 w-4" />
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardFooter>
-          </Card>
+              </>
+            ) : (
+              <>
+                <div>
+                  <span className="text-sm text-muted-foreground">Headcount</span>
+                  <div className="flex items-center space-x-1">
+                    <UsersIcon className="h-4 w-4" />
+                    <span>{order.headcount || "N/A"}</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Need Host</span>
+                  <p>{order.need_host || "N/A"}</p>
+                </div>
+              </>
+            )}
+            <div>
+              <span className="text-sm text-muted-foreground">Special Notes</span>
+              <p>{order.special_notes || "N/A"}</p>
+            </div>
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Driver Status</span>
+              <span className="text-sm text-muted-foreground">
+                {currentStatusIndex + 1} of {driverStatuses[order.order_type].length} steps completed
+              </span>
+            </div>
+            <Progress 
+              value={(currentStatusIndex + 1) / driverStatuses[order.order_type].length * 100} 
+              className="w-full" 
+            />
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Assigned</span>
+              <span>Completed</span>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-full">Update Driver Status</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuLabel>Update Driver Status</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {driverStatuses[order.order_type].map((status) => (
+                <DropdownMenuItem
+                  key={status}
+                  onSelect={() => updateDriverStatus(status as DriverStatus)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{status.replace(/_/g, " ")}</span>
+                    {order.driver_status === status && (
+                      <CheckIcon className="h-4 w-4" />
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardFooter>
+      </Card>
     </div>
-    </div>
-    </section>
   );
 };
 
-export default SingleOrder;
-
-function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
+export default DriverDashboard;
