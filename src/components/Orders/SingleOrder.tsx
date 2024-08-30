@@ -148,6 +148,8 @@ const SingleOrder = () => {
       if (response.ok) {
         const data = await response.json();
         setOrder(data);
+        console.log("Fetched order data:", data);
+
         if (
           data.dispatch &&
           data.dispatch.length > 0 &&
@@ -155,9 +157,12 @@ const SingleOrder = () => {
         ) {
           setDriverInfo(data.dispatch[0].driver);
           setIsDriverAssigned(true);
+          console.log("Driver info set:", data.dispatch[0].driver);
         } else {
           setDriverInfo(null);
           setIsDriverAssigned(false);
+          console.log("No driver info found in dispatch:", data.dispatch);
+
         }
       } else {
         console.error("Failed to fetch order");
@@ -470,7 +475,7 @@ const SingleOrder = () => {
             </div>
             <Separator />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
+            <div>
                 <h3 className="mb-2 font-semibold">Pickup Address</h3>
                 {order.address ? (
                   <address className="text-sm not-italic">
@@ -489,7 +494,7 @@ const SingleOrder = () => {
                   <p className="text-sm">No pickup address available</p>
                 )}
               </div>
-              {order.order_type === "catering" && order.delivery_address && (
+              {order.delivery_address && (
                 <div>
                   <h3 className="mb-2 font-semibold">Delivery Address</h3>
                   <address className="text-sm not-italic">

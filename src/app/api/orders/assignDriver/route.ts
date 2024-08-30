@@ -23,36 +23,48 @@ function serializeData(obj: any): any {
 }
 
 export async function POST(request: Request) {
-  const { orderId, driverId } = await request.json();
+  const { orderId, driverId, orderType } = await request.json();
 
-  if (!orderId || !driverId) {
+  if (!orderId || !driverId || !orderType) {
     return NextResponse.json(
-      { error: "Missing orderId or driverId" },
+      { error: "Missing orderId, driverId, or orderType" },
       { status: 400 },
     );
   }
 
   console.log("Order ID:", orderId);
   console.log("Driver ID:", driverId);
+  console.log("Order Type:", orderType);
 
   try {
     const result = await prisma.$transaction(async (prisma) => {
-      // Check if the catering request exists
-      const cateringRequest = await prisma.catering_request.findUnique({
-        where: { id: BigInt(orderId) },
-      });
+      let order;
+      let dispatch;
 
-      if (!cateringRequest) {
-        throw new Error("Catering request not found");
+      // Fetch the order based on orderType
+      if (orderType === "catering") {
+        order = await prisma.catering_request.findUnique({
+          where: { id: BigInt(orderId) },
+        });
+      } else if (orderType === "on_demand") {
+        order = await prisma.on_demand.findUnique({
+          where: { id: BigInt(orderId) },
+        });
+      } else {
+        throw new Error("Invalid order type");
       }
 
-      console.log("Catering Request:", serializeData(cateringRequest));
+      if (!order) {
+        throw new Error(`${orderType} order not found`);
+      }
+
+      console.log("Order:", serializeData(order));
 
       // Check if a dispatch already exists
-      let dispatch = await prisma.dispatch.findFirst({
-        where: {
-          cateringRequestId: BigInt(orderId),
-        },
+      dispatch = await prisma.dispatch.findFirst({
+        where: orderType === "catering"
+          ? { cateringRequestId: BigInt(orderId) }
+          : { on_demandId: BigInt(orderId) },
       });
 
       console.log("Existing Dispatch:", serializeData(dispatch));
@@ -75,12 +87,16 @@ export async function POST(request: Request) {
         });
       } else {
         // Create new dispatch
+        const dispatchData = {
+          driverId: driverId,
+          userId: order.user_id,
+          ...(orderType === "catering"
+            ? { cateringRequestId: BigInt(orderId) }
+            : { on_demandId: BigInt(orderId) }),
+        };
+
         dispatch = await prisma.dispatch.create({
-          data: {
-            cateringRequestId: BigInt(orderId),
-            driverId: driverId,
-            userId: cateringRequest.user_id,
-          },
+          data: dispatchData,
           include: {
             driver: {
               select: {
@@ -94,11 +110,18 @@ export async function POST(request: Request) {
         });
       }
 
-      // Update the catering request status
-      const updatedOrder = await prisma.catering_request.update({
-        where: { id: BigInt(orderId) },
-        data: { status: "assigned" },
-      });
+      console.log("Updated/Created Dispatch:", serializeData(dispatch));
+
+      // Update the order status
+      const updatedOrder = await (orderType === "catering"
+        ? prisma.catering_request.update({
+            where: { id: BigInt(orderId) },
+            data: { status: "assigned" },
+          })
+        : prisma.on_demand.update({
+            where: { id: BigInt(orderId) },
+            data: { status: "assigned" },
+          }));
 
       return { updatedOrder, dispatch };
     });
