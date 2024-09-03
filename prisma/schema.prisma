@@ -210,9 +210,11 @@ model on_demand {
 }
 
 enum driver_status {
+  assigned
   arrived_at_vendor
   en_route_to_client
   arrived_to_client
+  completed
 }
 
 enum addresses_status {

@@ -40,6 +40,7 @@ import {
 import OrderStatusCard from "./DriverStatus";
 import toast from "react-hot-toast";
 import DriverStatusCard from "./DriverStatus";
+import { Progress } from "../ui/progress";
 
 interface Driver {
   id: string;
@@ -129,6 +130,13 @@ const driverStatusMap: Record<DriverStatus, string> = {
   [DriverStatus.arrived_to_client]: "🏁 Arrived",
 };
 
+const driverStatusProgress: Record<DriverStatus, number> = {
+  [DriverStatus.not_started]: 0,
+  [DriverStatus.arrived_at_vendor]: 33,
+  [DriverStatus.en_route_to_client]: 66,
+  [DriverStatus.arrived_to_client]: 100,
+};
+
 const SingleOrder = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -137,6 +145,10 @@ const SingleOrder = () => {
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
+
+  const getProgressValue = (status: DriverStatus) => {
+    return driverStatusProgress[status] || 0;
+  };
 
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
@@ -560,7 +572,7 @@ const SingleOrder = () => {
             <Separator />
 
             <div className="mt-6 flex justify-center">
-              <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md">
                 <CardContent className="pt-6">
                   <div>
                     <h3 className="mb-2 text-center font-semibold">
@@ -571,6 +583,10 @@ const SingleOrder = () => {
                         {order &&
                           driverStatusMap[order.driver_status as DriverStatus]}
                       </span>
+                      <Progress 
+                        value={getProgressValue(order.driver_status as DriverStatus)} 
+                        className="w-full"
+                      />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline">Update Status</Button>

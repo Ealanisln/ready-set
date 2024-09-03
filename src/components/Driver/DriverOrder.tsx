@@ -70,9 +70,21 @@ interface OnDemandOrder extends BaseOrder {
 
 type Order = CateringOrder | OnDemandOrder;
 
-const driverStatuses = {
-  "on_demand": ["assigned", "arrived_at_vendor", "en_route_to_client", "arrived_to_client", "completed"],
-  "catering": ["assigned", "arrived_at_vendor", "en_route_to_client", "arrived_to_client", "completed"]
+const driverStatuses: Record<OrderType, DriverStatus[]> = {
+  on_demand: [
+    "assigned",
+    "arrived_at_vendor",
+    "en_route_to_client",
+    "arrived_to_client",
+    "completed",
+  ],
+  catering: [
+    "assigned",
+    "arrived_at_vendor",
+    "en_route_to_client",
+    "arrived_to_client",
+    "completed",
+  ],
 };
 
 const DriverDashboard: React.FC = () => {
@@ -82,9 +94,9 @@ const DriverDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
+      const orderNumber = window.location.pathname.split("/").pop();
+
       try {
-        // In a real application, you'd get the order number from the URL or props
-        const orderNumber = "SV-80002"; // Example order number
         const response = await fetch(`/api/orders/${orderNumber}`);
         if (!response.ok) {
           throw new Error("Failed to fetch order");
@@ -128,22 +140,31 @@ const DriverDashboard: React.FC = () => {
   if (error) return <div>Error: {error}</div>;
   if (!order) return <div>Order not found</div>;
 
-  const currentStatusIndex = driverStatuses[order.order_type].indexOf(order.driver_status || "assigned");
+  const currentStatusIndex = driverStatuses[order.order_type].indexOf(
+    order.driver_status || "assigned",
+  );
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Order Dashboard</h1>
-      <Card className="w-full max-w-3xl mx-auto">
+      <h1 className="mb-6 text-center text-3xl font-bold">Order Dashboard</h1>
+      <Card className="mx-auto w-full max-w-3xl">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl">Order #{order.order_number}</CardTitle>
-            <Badge variant={order.order_type === "catering" ? "secondary" : "default"} className="text-sm">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl">
+              Order #{order.order_number}
+            </CardTitle>
+            <Badge
+              variant={
+                order.order_type === "catering" ? "secondary" : "default"
+              }
+              className="text-sm"
+            >
               {order.order_type === "catering" ? "Catering" : "On Demand"}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <CalendarIcon className="text-muted-foreground" />
               <span>{new Date(order.date).toLocaleDateString()}</span>
@@ -153,7 +174,7 @@ const DriverDashboard: React.FC = () => {
             </Badge>
           </div>
           <Separator />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <MapPinIcon className="text-muted-foreground" />
@@ -174,22 +195,28 @@ const DriverDashboard: React.FC = () => {
             </div>
           </div>
           <Separator />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
-              <span className="text-sm text-muted-foreground">Total</span>
-              <p className="font-semibold">${Number(order.order_total).toFixed(2)}</p>
+              <span className="text-muted-foreground text-sm">Total</span>
+              <p className="font-semibold">
+                ${Number(order.order_total).toFixed(2)}
+              </p>
             </div>
             {order.order_type === "on_demand" ? (
               <>
                 <div>
-                  <span className="text-sm text-muted-foreground">Item Delivered</span>
+                  <span className="text-muted-foreground text-sm">
+                    Item Delivered
+                  </span>
                   <div className="flex items-center space-x-1">
                     <FileTextIcon className="h-4 w-4" />
                     <span>{order.item_delivered || "N/A"}</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Vehicle Type</span>
+                  <span className="text-muted-foreground text-sm">
+                    Vehicle Type
+                  </span>
                   <div className="flex items-center space-x-1">
                     <CarIcon className="h-4 w-4" />
                     <span>{order.vehicle_type || "N/A"}</span>
@@ -199,36 +226,47 @@ const DriverDashboard: React.FC = () => {
             ) : (
               <>
                 <div>
-                  <span className="text-sm text-muted-foreground">Headcount</span>
+                  <span className="text-muted-foreground text-sm">
+                    Headcount
+                  </span>
                   <div className="flex items-center space-x-1">
                     <UsersIcon className="h-4 w-4" />
                     <span>{order.headcount || "N/A"}</span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Need Host</span>
+                  <span className="text-muted-foreground text-sm">
+                    Need Host
+                  </span>
                   <p>{order.need_host || "N/A"}</p>
                 </div>
               </>
             )}
             <div>
-              <span className="text-sm text-muted-foreground">Special Notes</span>
+              <span className="text-muted-foreground text-sm">
+                Special Notes
+              </span>
               <p>{order.special_notes || "N/A"}</p>
             </div>
           </div>
           <Separator />
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="font-semibold">Driver Status</span>
-              <span className="text-sm text-muted-foreground">
-                {currentStatusIndex + 1} of {driverStatuses[order.order_type].length} steps completed
+              <span className="text-muted-foreground text-sm">
+                {currentStatusIndex + 1} of{" "}
+                {driverStatuses[order.order_type].length} steps completed
               </span>
             </div>
-            <Progress 
-              value={(currentStatusIndex + 1) / driverStatuses[order.order_type].length * 100} 
-              className="w-full" 
+            <Progress
+              value={
+                ((currentStatusIndex + 1) /
+                  driverStatuses[order.order_type].length) *
+                100
+              }
+              className="w-full"
             />
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex justify-between text-sm">
               <span>Assigned</span>
               <span>Completed</span>
             </div>
@@ -248,7 +286,7 @@ const DriverDashboard: React.FC = () => {
                   onSelect={() => updateDriverStatus(status as DriverStatus)}
                 >
                   <div className="flex items-center justify-between">
-                    <span>{status.replace(/_/g, " ")}</span>
+                    <span>{status?.replace(/_/g, " ")}</span>
                     {order.driver_status === status && (
                       <CheckIcon className="h-4 w-4" />
                     )}
