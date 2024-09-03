@@ -265,6 +265,7 @@ const DriverDashboard: React.FC = () => {
                 100
               }
               className="w-full"
+              indicatorClassName="bg-yellow-400"
             />
             <div className="text-muted-foreground flex justify-between text-sm">
               <span>Assigned</span>

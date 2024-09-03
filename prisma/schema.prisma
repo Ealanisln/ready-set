@@ -9,48 +9,48 @@ datasource db {
 }
 
 model user {
-  id                    String             @id @default(cuid())
+  id                    String       @id @default(cuid())
   guid                  String?
   name                  String?
-  email                 String?            @unique
+  email                 String?      @unique
   emailVerified         DateTime?
   image                 String?
   password              String?
-  passwordResetToken    String?            @unique
+  passwordResetToken    String?      @unique
   passwordResetTokenExp DateTime?
-  type                  users_type         @default(vendor)
-  company_name          String?            @db.VarChar(191)
-  contact_name          String?            @db.VarChar(191)
-  contact_number        String?            @db.VarChar(191)
-  website               String?            @db.VarChar(191)
-  street1               String?            @db.VarChar(191)
-  street2               String?            @db.VarChar(191)
-  city                  String?            @db.VarChar(191)
-  state                 String?            @db.VarChar(191)
-  zip                   String?            @db.VarChar(191)
-  location_number       String?            @db.VarChar(191)
-  parking_loading       String?            @db.VarChar(191)
+  type                  users_type   @default(vendor)
+  company_name          String?      @db.VarChar(191)
+  contact_name          String?      @db.VarChar(191)
+  contact_number        String?      @db.VarChar(191)
+  website               String?      @db.VarChar(191)
+  street1               String?      @db.VarChar(191)
+  street2               String?      @db.VarChar(191)
+  city                  String?      @db.VarChar(191)
+  state                 String?      @db.VarChar(191)
+  zip                   String?      @db.VarChar(191)
+  location_number       String?      @db.VarChar(191)
+  parking_loading       String?      @db.VarChar(191)
   counties              String?
   time_needed           String?
   catering_brokerage    String?
   frequency             String?
   provide               String?
-  head_count            String?            @db.VarChar(191)
+  head_count            String?      @db.VarChar(191)
   photo_vehicle         String?
   photo_license         String?
   photo_insurance       String?
-  status                users_status       @default(pending)
+  status                users_status @default(pending)
   side_notes            String?
   confirmation_code     String?
-  remember_token        String?            @db.VarChar(100)
-  created_at            DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  remember_token        String?      @db.VarChar(100)
+  created_at            DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
   accounts              account[]
   addresses             address[]
   sessions              session[]
 
   driver_dispatches     dispatch[]         @relation("DriverRelation")
-  dispatcher_dispatches dispatch[]         @relation("DispatcherRelation")  // Relation matches the field in dispatch
+  dispatcher_dispatches dispatch[]         @relation("DispatcherRelation") // Relation matches the field in dispatch
   catering_requests     catering_request[]
   on_demands            on_demand[]
 }
@@ -131,7 +131,7 @@ model catering_request {
   special_notes       String?
   image               String?
   status              catering_requests_status?   @default(active)
-  driver_status       driver_status?
+  driver_status       driver_status?              @default(assigned)
   order_total         Decimal?                    @default(0.00) @db.Decimal(10, 2)
   tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
   created_at          DateTime                    @default(now()) @db.Timestamptz(6)
@@ -144,21 +144,21 @@ model catering_request {
 }
 
 model dispatch {
-  id                 String             @id @default(cuid())
-  createdAt          DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
-  
-  cateringRequestId  BigInt?
-  cateringRequest    catering_request?  @relation("DispatchToCateringRequest", fields: [cateringRequestId], references: [id])
-  
-  driverId           String?
-  driver             user?              @relation("DriverRelation", fields: [driverId], references: [id])
-  
-  userId             String?
-  dispatcher         user?              @relation("DispatcherRelation", fields: [userId], references: [id])  // Added the relation field here
-  
-  on_demandId        BigInt?
-  on_demand          on_demand?         @relation(fields: [on_demandId], references: [id])
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  cateringRequestId BigInt?
+  cateringRequest   catering_request? @relation("DispatchToCateringRequest", fields: [cateringRequestId], references: [id])
+
+  driverId String?
+  driver   user?   @relation("DriverRelation", fields: [driverId], references: [id])
+
+  userId     String?
+  dispatcher user?   @relation("DispatcherRelation", fields: [userId], references: [id]) // Added the relation field here
+
+  on_demandId BigInt?
+  on_demand   on_demand? @relation(fields: [on_demandId], references: [id])
 }
 
 model failed_job {
@@ -195,7 +195,7 @@ model on_demand {
   special_notes       String?
   image               String?
   status              on_demand_status       @default(active)
-  driver_status       driver_status?
+  driver_status       driver_status?         @default(assigned)
   order_total         Decimal?               @default(0.00) @db.Decimal(10, 2)
   tip                 Decimal?               @default(0.00) @db.Decimal(10, 2)
   length              String?                @db.VarChar(191)

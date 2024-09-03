@@ -37,20 +37,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import OrderStatusCard from "./DriverStatus";
 import toast from "react-hot-toast";
 import DriverStatusCard from "./DriverStatus";
-import { Progress } from "../ui/progress";
 
 interface Driver {
   id: string;
   name: string | null;
   email: string | null;
   contact_number: string | null;
-}
-
-interface Dispatch {
-  driver: Driver;
 }
 
 interface Order {
@@ -146,10 +140,6 @@ const SingleOrder = () => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
 
-  const getProgressValue = (status: DriverStatus) => {
-    return driverStatusProgress[status] || 0;
-  };
-
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
     const orderNumber = window.location.pathname.split("/").pop();
@@ -174,7 +164,6 @@ const SingleOrder = () => {
           setDriverInfo(null);
           setIsDriverAssigned(false);
           console.log("No driver info found in dispatch:", data.dispatch);
-
         }
       } else {
         console.error("Failed to fetch order");
@@ -247,7 +236,7 @@ const SingleOrder = () => {
     setSelectedDriver(driverId);
   };
 
-  const updateDriverStatus = async (newStatus: DriverStatus) => {
+  const updateDriverStatus = async (newStatus: string) => {
     if (!order) return;
 
     try {
@@ -296,8 +285,6 @@ const SingleOrder = () => {
               Date: {new Date(order.date).toLocaleDateString()}
             </CardDescription>
           </div>
-          <div>Debug: isDriverAssigned = {isDriverAssigned.toString()}</div>
-
           <div className="flex items-center gap-2">
             <Dialog
               open={isDriverDialogOpen}
@@ -487,7 +474,7 @@ const SingleOrder = () => {
             </div>
             <Separator />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
+              <div>
                 <h3 className="mb-2 font-semibold">Pickup Address</h3>
                 {order.address ? (
                   <address className="text-sm not-italic">
@@ -568,49 +555,6 @@ const SingleOrder = () => {
                 </div>
               </div>
             </div>
-
-            <Separator />
-
-            <div className="mt-6 flex justify-center">
-            <Card className="w-full max-w-md">
-                <CardContent className="pt-6">
-                  <div>
-                    <h3 className="mb-2 text-center font-semibold">
-                      Driver Status
-                    </h3>
-                    <div className="flex flex-col items-center gap-4">
-                      <span className="text-lg font-medium">
-                        {order &&
-                          driverStatusMap[order.driver_status as DriverStatus]}
-                      </span>
-                      <Progress 
-                        value={getProgressValue(order.driver_status as DriverStatus)} 
-                        className="w-full"
-                      />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline">Update Status</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          {Object.entries(driverStatusMap).map(
-                            ([status, label]) => (
-                              <DropdownMenuItem
-                                key={status}
-                                onClick={() =>
-                                  updateDriverStatus(status as DriverStatus)
-                                }
-                              >
-                                {label}
-                              </DropdownMenuItem>
-                            ),
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </CardContent>
         <CardFooter className="bg-muted/50 flex flex-row items-center border-t px-6 py-3">
@@ -620,7 +564,11 @@ const SingleOrder = () => {
         </CardFooter>
       </Card>
       <div className="py-8">
-        <DriverStatusCard order={order} driverInfo={driverInfo} />
+        <DriverStatusCard
+          order={order}
+          driverInfo={driverInfo}
+          updateDriverStatus={updateDriverStatus}
+        />
       </div>
     </main>
   );
