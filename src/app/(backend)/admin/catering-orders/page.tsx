@@ -1,5 +1,5 @@
 import { BreadcrumbNavigation } from "@/components/Dashboard";
-import CateringOrdersPage from "@/components/Orders/CateringOrders";
+import CateringOrdersPage  from "@/components/Orders/CateringOrders/CateringOrdersPage";
 import React from "react";
 
 const Orders = () => {

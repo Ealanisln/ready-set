@@ -1,43 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Truck,
-  Users,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Activity, DollarSign, TrendingUp, Users } from "lucide-react";
+
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
+import { MetricCard } from "./ui/MetricCard";
+import { RecentOrdersTable } from "./ui/RecentOrders";
+import { RecentUsersTable } from "./ui/RecentUsersTable";
+import { DashboardCard } from "./ui/DashboardCard";
 
 interface CateringOrder {
   id: string;
   order_number: string;
   status: string;
-  order_total: string | number; // Changed to accept both string and number
+  order_total: string | number;
   order_type: string;
 }
 
@@ -56,8 +32,11 @@ export function DashboardHome() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { metrics, loading: metricsLoading, error: metricsError } = useDashboardMetrics();
-
+  const {
+    metrics,
+    loading: metricsLoading,
+    error: metricsError,
+  } = useDashboardMetrics();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,9 +80,13 @@ export function DashboardHome() {
   }
 
   if (metricsLoading) {
-    return <div>Loading metrics...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Loading metrics...</p>
+      </div>
+    );
   }
-  
+
   if (metricsError) {
     return <div>Error loading metrics: {metricsError}</div>;
   }
@@ -111,127 +94,48 @@ export function DashboardHome() {
   return (
     <div className="flex min-h-screen w-full flex-col sm:pl-14">
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-          <DollarSign className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">${metrics.totalRevenue.toFixed(2)}</div>
-          <p className="text-muted-foreground text-xs">
-            +20.1% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Deliveries Requests</CardTitle>
-          <Users className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+{metrics.deliveriesRequests}</div>
-          <p className="text-muted-foreground text-xs">
-            +180.1% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Sales Totals</CardTitle>
-          <CreditCard className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+{metrics.salesTotal}</div>
-          <p className="text-muted-foreground text-xs">
-            +19% from last month
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total of vendors</CardTitle>
-          <Activity className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+{metrics.totalVendors}</div>
-          <p className="text-muted-foreground text-xs">
-            +201 since last hour
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Total Revenue"
+            value={`$${metrics.totalRevenue.toFixed(2)}`}
+            icon={DollarSign}
+            change="+20.1% from last month"
+          />
+          <MetricCard
+            title="Deliveries Requests"
+            value={`+${metrics.deliveriesRequests}`}
+            icon={Users}
+            change="+180.1% from last month"
+          />
+          <MetricCard
+            title="Sales Totals"
+            value={`+${metrics.salesTotal}`}
+            icon={TrendingUp}
+            change="+180.1% from last month"
+          />
+          <MetricCard
+            title="Total Vendors"
+            value={`+${metrics.totalVendors}`}
+            icon={Activity}
+            change="+180.1% from last month"
+          />
+          {/* Add the other two MetricCards similarly */}
+        </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
-        <Card className="lg:col-span-1">
-    <CardHeader>
-      <CardTitle>Recent Catering Orders</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Order Number</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {recentOrders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell>
-                <Link href={`/admin/catering-orders/${order.order_number}`}>
-                  {order.order_number}
-                </Link>
-              </TableCell>
-              <TableCell>
-           {order.order_type}
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline">{order.status}</Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                ${typeof order.order_total === 'string' 
-                  ? parseFloat(order.order_total).toFixed(2)
-                  : order.order_total.toFixed(2)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Button asChild size="sm" className="mt-4 w-full">
-        <Link href="/admin/catering-orders">View Catering Orders</Link>
-      </Button>
-    </CardContent>
-  </Card>
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Recent Users</CardTitle>
-            </CardHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Type</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.slice(0, 5).map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name || user.contact_name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{user.type}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <Button asChild size="sm" className="mt-4 w-full">
-              <Link href="/admin/users">View All Users</Link>
-            </Button>
-          </Card>
+          <DashboardCard
+            title="Recent Catering Orders"
+            linkText="View Catering Orders"
+            linkHref="/admin/catering-orders"
+          >
+            <RecentOrdersTable orders={recentOrders} />
+          </DashboardCard>
+          <DashboardCard
+            title="Recent Users"
+            linkText="View All Users"
+            linkHref="/admin/users"
+          >
+            <RecentUsersTable users={users.slice(0, 5)} />
+          </DashboardCard>
         </div>
       </main>
     </div>
