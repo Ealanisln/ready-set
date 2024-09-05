@@ -24,11 +24,11 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
 
   return (
     <Tabs value={statusFilter} onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}>
-      <TabsList>
+      {/* <TabsList>
         <TabsTrigger value="all">All Orders</TabsTrigger>
         <TabsTrigger value="active">Active</TabsTrigger>
         <TabsTrigger value="completed">Completed</TabsTrigger>
-      </TabsList>
+      </TabsList> */}
       <TabsContent value={statusFilter}>
         <Table>
           <TableHeader>

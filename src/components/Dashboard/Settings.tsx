@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,37 +15,65 @@ import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 interface UserData {
-  accountName: string;
+  id: string;
+  name: string;
   email: string;
-  type?: 'admin' | 'driver' | 'vendor' | 'client'; // Add this line
+  type: string;
+  contact_number: string;
+  street1: string;
+  street2: string;
+  city: string;
+  state: string;
+  zip: string;
 }
-
 
 export function SettingsUser() {
   const [userData, setUserData] = useState<UserData>({
-    accountName: "",
+    id: "",
+    name: "",
     email: "",
+    type: "",
+    contact_number: "",
+    street1: "",
+    street2: "",
+    city: "",
+    state: "",
+    zip: "",
   });
 
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/user");
-        if (!response.ok) throw new Error("Failed to fetch user");
+        // Assuming the user ID is 1, adjust if needed
+        const response = await fetch("/api/user/1");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-  
+        console.log("Fetched user data:", data);
+    
         setUserData({
-          accountName: data.name || data.contact_name || "",
+          id: data.id,
+          name: data.name || "",
           email: data.email || "",
+          type: data.type || "",
+          contact_number: data.contact_number || "",
+          street1: data.street1 || "",
+          street2: data.street2 || "",
+          city: data.city || "",
+          state: data.state || "",
+          zip: data.zip || "",
         });
       } catch (error) {
         console.error("Error fetching user:", error);
+        toast.error("Failed to load user data. Please try again.");
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchUser();
   }, []);
 
@@ -60,18 +87,14 @@ export function SettingsUser() {
   
   const handleSave = async () => {
     try {
-      const response = await fetch("/api/user", {
+      const response = await fetch(`/api/user/${userData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountName: userData.accountName,
-          email: userData.email,
-        }),
+        body: JSON.stringify(userData),
       });
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response:", errorData);
         throw new Error(errorData.error || "Failed to update user");
       }
   
@@ -81,15 +104,9 @@ export function SettingsUser() {
       setUserData(updatedUser);
     } catch (error) {
       console.error("Error updating user:", error);
-      if (error instanceof Error) {
-        console.error("Error details:", error.message);
-      }
-      toast.error("Failed to save user. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to save user. Please try again.");
     }
   };
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -98,10 +115,7 @@ export function SettingsUser() {
           <h1 className="text-3xl font-semibold">Settings</h1>
         </div>
         <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]">
-          <nav
-            className="text-muted-foreground grid gap-4 text-sm"
-            x-chunk="dashboard-04-chunk-0"
-          >
+          <nav className="text-muted-foreground grid gap-4 text-sm">
             <Link href="#" className="font-semibold text-primary">
               General
             </Link>
@@ -112,40 +126,89 @@ export function SettingsUser() {
             <Link href="#">Advanced</Link>
           </nav>
           <div className="grid gap-6">
-            <Card x-chunk="dashboard-04-chunk-1">
+            <Card>
               <CardHeader>
                 <CardTitle>Account</CardTitle>
-                <CardDescription>This is your account name</CardDescription>
+                <CardDescription>Manage your account details</CardDescription>
               </CardHeader>
               <CardContent>
-              <Input 
-                placeholder="Account Name" 
-                name="accountName"
-                value={userData.accountName}
-                onChange={handleInputChange}
-              />
+                <form className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                    <Input 
+                      id="name"
+                      name="name"
+                      value={userData.name}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                    <Input
+                      id="email"
+                      name="email"
+                      value={userData.email}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="contact_number" className="block text-sm font-medium text-gray-700">Contact Number</label>
+                    <Input
+                      id="contact_number"
+                      name="contact_number"
+                      value={userData.contact_number}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="street1" className="block text-sm font-medium text-gray-700">Street 1</label>
+                    <Input
+                      id="street1"
+                      name="street1"
+                      value={userData.street1}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="street2" className="block text-sm font-medium text-gray-700">Street 2</label>
+                    <Input
+                      id="street2"
+                      name="street2"
+                      value={userData.street2}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                    <Input
+                      id="city"
+                      name="city"
+                      value={userData.city}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
+                    <Input
+                      id="state"
+                      name="state"
+                      value={userData.state}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="zip" className="block text-sm font-medium text-gray-700">ZIP Code</label>
+                    <Input
+                      id="zip"
+                      name="zip"
+                      value={userData.zip}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </form>
               </CardContent>
               <CardFooter className="border-t px-6 py-4">
-              <Button onClick={handleSave}>Save</Button>
-            </CardFooter>
-            </Card>
-            <Card x-chunk="dashboard-04-chunk-2">
-              <CardHeader>
-                <CardTitle>E-mail</CardTitle>
-                <CardDescription>This is your admin e-mail.</CardDescription>
-              </CardHeader>
-              <CardContent>
-              <form className="flex flex-col gap-4">
-                <Input
-                  placeholder="Email"
-                  name="email"
-                  value={userData.email}
-                  onChange={handleInputChange}
-                />
-              </form>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-              <Button onClick={handleSave}>Save</Button>
+                <Button onClick={handleSave}>Save Changes</Button>
               </CardFooter>
             </Card>
           </div>
