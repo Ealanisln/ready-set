@@ -1,3 +1,4 @@
+// src/components/Dashboard/AdminView/Settings.tsx
 "use client";
 
 import Link from "next/link";
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ChangeEvent, useEffect, useState } from "react";
+import { PasswordChange } from "./PasswordChange";
 import toast from "react-hot-toast";
 
 interface UserData {
@@ -52,8 +54,7 @@ export function SettingsUser() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Fetched user data:", data);
-    
+
         setUserData({
           id: data.id,
           name: data.name || "",
@@ -84,7 +85,7 @@ export function SettingsUser() {
       [name]: value,
     }));
   };
-  
+
   const handleSave = async () => {
     try {
       const response = await fetch(`/api/user/${userData.id}`, {
@@ -92,19 +93,23 @@ export function SettingsUser() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update user");
       }
-  
+
       const updatedUser = await response.json();
       console.log("Updated user:", updatedUser);
       toast.success("User saved successfully!");
       setUserData(updatedUser);
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save user. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to save user. Please try again.",
+      );
     }
   };
 
@@ -119,14 +124,14 @@ export function SettingsUser() {
             <Link href="#" className="font-semibold text-primary">
               General
             </Link>
-            <Link href="#">Security</Link>
-            <Link href="#">Integrations</Link>
+            <Link href="#security">Security</Link>
+            {/* <Link href="#">Integrations</Link>
             <Link href="#">Support</Link>
             <Link href="#">Organizations</Link>
-            <Link href="#">Advanced</Link>
+            <Link href="#">Advanced</Link> */}
           </nav>
           <div className="grid gap-6">
-            <Card>
+            <Card id="general">
               <CardHeader>
                 <CardTitle>Account</CardTitle>
                 <CardDescription>Manage your account details</CardDescription>
@@ -134,8 +139,13 @@ export function SettingsUser() {
               <CardContent>
                 <form className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-                    <Input 
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Name
+                    </label>
+                    <Input
                       id="name"
                       name="name"
                       value={userData.name}
@@ -143,7 +153,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Email
+                    </label>
                     <Input
                       id="email"
                       name="email"
@@ -152,7 +167,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="contact_number" className="block text-sm font-medium text-gray-700">Contact Number</label>
+                    <label
+                      htmlFor="contact_number"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Contact Number
+                    </label>
                     <Input
                       id="contact_number"
                       name="contact_number"
@@ -161,7 +181,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="street1" className="block text-sm font-medium text-gray-700">Street 1</label>
+                    <label
+                      htmlFor="street1"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Street 1
+                    </label>
                     <Input
                       id="street1"
                       name="street1"
@@ -170,7 +195,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="street2" className="block text-sm font-medium text-gray-700">Street 2</label>
+                    <label
+                      htmlFor="street2"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Street 2
+                    </label>
                     <Input
                       id="street2"
                       name="street2"
@@ -179,7 +209,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      City
+                    </label>
                     <Input
                       id="city"
                       name="city"
@@ -188,7 +223,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
+                    <label
+                      htmlFor="state"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      State
+                    </label>
                     <Input
                       id="state"
                       name="state"
@@ -197,7 +237,12 @@ export function SettingsUser() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="zip" className="block text-sm font-medium text-gray-700">ZIP Code</label>
+                    <label
+                      htmlFor="zip"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      ZIP Code
+                    </label>
                     <Input
                       id="zip"
                       name="zip"
@@ -210,6 +255,15 @@ export function SettingsUser() {
               <CardFooter className="border-t px-6 py-4">
                 <Button onClick={handleSave}>Save Changes</Button>
               </CardFooter>
+            </Card>
+            <Card id="security">
+              <CardHeader>
+                <CardTitle>Security</CardTitle>
+                <CardDescription>Manage your account security settings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PasswordChange />
+              </CardContent>
             </Card>
           </div>
         </div>

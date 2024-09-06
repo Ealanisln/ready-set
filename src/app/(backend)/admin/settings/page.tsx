@@ -1,5 +1,5 @@
 import { BreadcrumbNavigation } from '@/components/Dashboard'
-import { SettingsUser } from '@/components/Dashboard/Settings'
+import { SettingsUser } from '@/components/Dashboard/AdminView/Settings'
 import React from 'react'
 
 const page = () => {
