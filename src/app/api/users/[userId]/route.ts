@@ -3,6 +3,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from "@/utils/auth";
+
+// Helper function to check admin authorization
+async function checkAuthorization(requestedUserId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  // Allow access if the user is requesting their own profile
+  if (session.user.id === requestedUserId) {
+    return null;
+  }
+  
+  // Allow access if the user is an admin
+  if (session.user.type === 'admin') {
+    return null;
+  }
+  
+  // Deny access for all other cases
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+}
 
 // GET: Fetch a user by ID (only id and name)
 export async function GET(
@@ -10,6 +33,9 @@ export async function GET(
   { params }: { params: { userId: string } },
 ) {
   const { userId } = params;
+  const authResponse = await checkAuthorization(userId);
+  if (authResponse) return authResponse;
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -51,8 +77,8 @@ export async function GET(
       cateringBrokerage: user.catering_brokerage
         ? user.catering_brokerage.split(", ")
         : [],
-        provisions: user.provide ? user.provide.split(", ") : [], // Change this line
-      };
+      provisions: user.provide ? user.provide.split(", ") : [],
+    };
 
     return NextResponse.json(processedUser);
   } catch (error: unknown) {
@@ -67,12 +93,17 @@ export async function GET(
     );
   }
 }
+
 // PUT: Update a user by ID
 export async function PUT(
   request: NextRequest,
   { params }: { params: { userId: string } },
 ) {
   const { userId } = params;
+
+  const authResponse = await checkAuthorization(userId);
+  if (authResponse) return authResponse;
+
   try {
     const data = await request.json();
     console.log("Received data:", data);
@@ -158,6 +189,11 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { userId: string } },
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.type !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { userId } = params;
   try {
     await prisma.user.delete({
