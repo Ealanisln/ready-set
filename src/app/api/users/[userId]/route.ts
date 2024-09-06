@@ -106,7 +106,6 @@ export async function PUT(
 
   try {
     const data = await request.json();
-    console.log("Received data:", data);
 
     let processedData: any = { ...data };
 
@@ -154,7 +153,6 @@ export async function PUT(
       }
     });
 
-    console.log("Processed data:", processedData);
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -164,7 +162,6 @@ export async function PUT(
       },
     });
 
-    console.log("Updated user:", updatedUser);
 
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {

@@ -8,32 +8,26 @@ import { authOptions } from "@/utils/auth";
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    console.log("Session:", session); // Log the session
 
     if (!session || !session.user) {
-      console.log("No session or user");
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     if (!session.user.email) {
-      console.log("No email in session");
       return NextResponse.json(
         { error: "User email not found" },
         { status: 400 },
       );
     }
 
-    console.log("Searching for user with email:", session.user.email);
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
     if (!user) {
-      console.log("User not found in database");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log("User found:", user);
     return NextResponse.json(user);
   } catch (error: unknown) {
     console.error("Error fetching current user:", error);
@@ -61,7 +55,6 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = await request.json();
-    console.log("Received data:", data);
 
     // Fetch the current user to get their type
     const currentUser = await prisma.user.findUnique({
@@ -90,14 +83,12 @@ export async function PUT(request: NextRequest) {
       (updateData[key] === undefined || updateData[key] === null) && delete updateData[key]
     );
 
-    console.log("Update data:", updateData);
 
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: updateData,
     });
 
-    console.log("Updated user:", updatedUser);
 
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {

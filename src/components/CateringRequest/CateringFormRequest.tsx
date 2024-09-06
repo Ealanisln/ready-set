@@ -110,7 +110,6 @@ const CombinedOrderForm: React.FC = () => {
   const needHost = watch("need_host");
 
   const onSubmit = async (data: FormData) => {
-    console.log("Submitting data:", data);
   
     if (!session?.user?.id) {
       console.error("User not authenticated");

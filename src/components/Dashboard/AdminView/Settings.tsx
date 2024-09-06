@@ -100,7 +100,6 @@ export function SettingsUser() {
       }
 
       const updatedUser = await response.json();
-      console.log("Updated user:", updatedUser);
       toast.success("User saved successfully!");
       setUserData(updatedUser);
     } catch (error) {
@@ -255,15 +254,6 @@ export function SettingsUser() {
               <CardFooter className="border-t px-6 py-4">
                 <Button onClick={handleSave}>Save Changes</Button>
               </CardFooter>
-            </Card>
-            <Card id="security">
-              <CardHeader>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>Manage your account security settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PasswordChange />
-              </CardContent>
             </Card>
           </div>
         </div>

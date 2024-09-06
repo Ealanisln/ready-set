@@ -150,7 +150,6 @@ const SingleOrder = () => {
       if (response.ok) {
         const data = await response.json();
         setOrder(data);
-        console.log("Fetched order data:", data);
 
         if (
           data.dispatch &&
@@ -159,11 +158,9 @@ const SingleOrder = () => {
         ) {
           setDriverInfo(data.dispatch[0].driver);
           setIsDriverAssigned(true);
-          console.log("Driver info set:", data.dispatch[0].driver);
         } else {
           setDriverInfo(null);
           setIsDriverAssigned(false);
-          console.log("No driver info found in dispatch:", data.dispatch);
         }
       } else {
         console.error("Failed to fetch order");

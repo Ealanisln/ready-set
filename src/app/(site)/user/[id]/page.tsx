@@ -16,13 +16,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useForm, SubmitHandler } from "react-hook-form";
-import PageHeader from "@/components/Header/PageHeader";
 import ProfileCard from "@/components/Dashboard/ProfileCard";
 import AddressCard from "@/components/Dashboard/AddressCard";
 import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsCard";
-import UserStatusCard from "@/components/Dashboard/UserStatusCard";
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
+import { PasswordChange } from "@/components/Dashboard/AdminView/PasswordChange";
 
 interface User {
   id: string;
@@ -172,7 +171,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
       }
 
       const updatedUser = await response.json();
-      console.log("Updated user:", updatedUser);
 
       toast.success("User saved successfully!");
       reset(updatedUser);
@@ -192,14 +190,14 @@ export default function EditUser({ params }: { params: { id: string } }) {
     reset(); // Reset the form
     setHasUnsavedChanges(false);
     toast("Changes discarded", { icon: "🔄" });
-    router.push("/admin/users");
+    router.push("/");
   };
 
   const handleDiscard = () => {
     reset(); // Reset the form
     setHasUnsavedChanges(false);
     toast("Changes discarded", { icon: "🔄" });
-    router.push("/admin/users");
+    router.push("/");
   };
 
   async function updateUserStatus(
@@ -278,7 +276,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   </Button>
                 )}
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                  Type of account
+                  Edit your user info
                 </h1>
                 <Badge variant="outline" className="ml-auto sm:ml-0">
                   {watchedValues.type}
@@ -321,18 +319,18 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   )}
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                  <UserStatusCard
+                  {/* <UserStatusCard
                     user={{ ...watchedValues, id: params.id }}
                     onStatusChange={handleStatusChange}
-                  />
+                  /> */}
                   <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
                   >
                     <CardHeader>
-                      <CardTitle>User Images</CardTitle>
+                      <CardTitle>User Docs</CardTitle>
                       <CardDescription>
-                        Lipsum dolor sit amet, consectetur adipiscing elit
+                        Add your documents here
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -371,6 +369,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       </div>
                     </CardContent>
                   </Card>
+                  <PasswordChange />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 md:hidden">

@@ -10,10 +10,9 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ToasterContext from "./api/contex/ToasetContex";
 import { useEffect, useState } from "react";
-import PreLoader from "@/components/Common/PreLoader";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import CustomHead from './custom-head'
+import CustomHead from "./custom-head";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -43,25 +42,21 @@ export default function RootLayout({
     >
       <head />
       <body>
-        {loading ? (
-          <PreLoader />
-        ) : (
-          <SessionProvider>
-            <ThemeProvider
-              attribute="class"
-              enableSystem={true}
-              defaultTheme="light"
-            >
-              <ToasterContext />
-              {!isBackendAdminRoute && !isStudioRoute && <Header />}
-              <CustomHead />
-              <main className="flex-grow">{children}</main>
-              <Analytics />
-              {!isBackendAdminRoute && !isStudioRoute && <Footer />}
-              <ScrollToTop />
-            </ThemeProvider>
-          </SessionProvider>
-        )}
+        <SessionProvider>
+          <ThemeProvider
+            attribute="class"
+            enableSystem={true}
+            defaultTheme="light"
+          >
+            <ToasterContext />
+            {!isBackendAdminRoute && !isStudioRoute && <Header />}
+            <CustomHead />
+            <main className="flex-grow">{children}</main>
+            <Analytics />
+            {!isBackendAdminRoute && !isStudioRoute && <Footer />}
+            <ScrollToTop />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

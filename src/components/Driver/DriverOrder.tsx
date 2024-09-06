@@ -136,9 +136,23 @@ const DriverDashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!order) return <div>Order not found</div>;
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Loading...</p>
+      </div>
+    );
+  if (error) return;
+  <div className="flex h-screen items-center justify-center">
+    <p className="ml-4 text-lg font-semibold">Error: {error}</p>
+  </div>;
+
+  if (!order)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Sorry, order not found.</p>
+      </div>
+    );
 
   const currentStatusIndex = driverStatuses[order.order_type].indexOf(
     order.driver_status || "assigned",

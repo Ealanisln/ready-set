@@ -96,13 +96,13 @@ const NavBar = () => {
               >
                 Customers
               </Link> */}
-              <Link
+              {/* <Link
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={closeSheet}
               >
                 Analytics
-              </Link>
+              </Link> */}
               <Link
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
@@ -185,7 +185,7 @@ const NavBar = () => {
                 </TooltipTrigger>
                 <TooltipContent side="right">Customers</TooltipContent>
               </Tooltip> */}
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
                     href="#"
@@ -196,7 +196,7 @@ const NavBar = () => {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">Analytics</TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
             </TooltipProvider>
           </nav>
           <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">

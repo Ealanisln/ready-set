@@ -21,7 +21,6 @@ type RequestBody = VendorFormData | ClientFormData | DriverFormData | HelpDeskFo
 export async function POST(request: Request) {
   try {
     const body: RequestBody = await request.json();
-    console.log("Received body:", JSON.stringify(body, null, 2));
 
     const { email, phoneNumber, password, userType } = body;
 
@@ -266,7 +265,6 @@ export async function POST(request: Request) {
       data: addressData,
     });
 
-    console.log("User creation successful");
     return NextResponse.json(
       { message: "User created successfully!" },
       { status: 200 },

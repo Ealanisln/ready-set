@@ -165,7 +165,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
       }
 
       const updatedUser = await response.json();
-      console.log("Updated user:", updatedUser);
 
       toast.success("User saved successfully!");
       reset(updatedUser);

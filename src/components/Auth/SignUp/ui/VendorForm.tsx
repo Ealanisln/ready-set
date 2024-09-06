@@ -37,26 +37,15 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
     },
   });
 
-  console.log("Form State:", {
-    values: control._formValues,
-    errors: errors,
-    isValid: Object.keys(errors).length === 0,
-  });
-
   const onSubmitWrapper = async (data: VendorFormData) => {
-    console.log("Form data:", JSON.stringify(data, null, 2));
 
     Object.entries(data).forEach(([key, value]) => {
-      console.log(`${key}:`, value);
     });
 
     setIsLoading(true);
     try {
-      console.log("Form submission started");
       await onSubmit(data);
-      console.log("Form submission completed");
     } catch (error) {
-      console.error("Form submission error:", error);
     } finally {
       setIsLoading(false);
     }

@@ -32,9 +32,6 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log("Order ID:", orderId);
-  console.log("Driver ID:", driverId);
-  console.log("Order Type:", orderType);
 
   try {
     const result = await prisma.$transaction(async (prisma) => {
@@ -58,7 +55,6 @@ export async function POST(request: Request) {
         throw new Error(`${orderType} order not found`);
       }
 
-      console.log("Order:", serializeData(order));
 
       // Check if a dispatch already exists
       dispatch = await prisma.dispatch.findFirst({
@@ -67,7 +63,6 @@ export async function POST(request: Request) {
           : { on_demandId: BigInt(orderId) },
       });
 
-      console.log("Existing Dispatch:", serializeData(dispatch));
 
       if (dispatch) {
         // Update existing dispatch
@@ -109,8 +104,6 @@ export async function POST(request: Request) {
           },
         });
       }
-
-      console.log("Updated/Created Dispatch:", serializeData(dispatch));
 
       // Update the order status
       const updatedOrder = await (orderType === "catering"

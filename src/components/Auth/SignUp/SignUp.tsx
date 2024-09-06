@@ -30,11 +30,9 @@ const SignUp = () => {
   const [userType, setUserType] = useState<UserType>("vendor");
 
   const onSubmit = async (data: FormDataUnion) => {
-    console.log("SignUp: onSubmit called with data:", data);
     setLoading(true);
 
     try {
-      console.log("SignUp: Sending registration request");
       const response = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -43,7 +41,6 @@ const SignUp = () => {
         body: JSON.stringify(data),
       });
 
-      console.log("SignUp: Registration response received:", response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -52,7 +49,6 @@ const SignUp = () => {
       }
 
       const responseData = await response.json();
-      console.log("SignUp: Registration successful:", responseData);
 
       toast.success("Successfully registered");
       setLoading(false);

@@ -31,15 +31,11 @@ const HelpDeskForm: React.FC<HelpDeskFormProps> = ({ onSubmit }) => {
   });
 
   const onSubmitWrapper = async (data: HelpDeskFormData) => {
-    console.log("Form data:", JSON.stringify(data, null, 2));
 
     setIsLoading(true);
     try {
-      console.log("Form submission started");
       await onSubmit(data);
-      console.log("Form submission completed");
     } catch (error) {
-      console.error("Form submission error:", error);
     } finally {
       setIsLoading(false);
     }

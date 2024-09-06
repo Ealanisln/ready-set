@@ -6,7 +6,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import menuData, { cateringRequestMenuItem, adminMenuItem, vendorMenuItem, driverMenuItem } from "./menuData";
+import menuData, {
+  cateringRequestMenuItem,
+  adminMenuItem,
+  vendorMenuItem,
+  driverMenuItem,
+} from "./menuData";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -44,14 +49,14 @@ const Header = () => {
   // Check if the user is a CLIENT
   const userType = session?.user?.type;
 
- // Create a new menu array with conditional items based on user type
- const updatedMenuData = [
-  ...menuData,
-  ...(userType === "client" ? [cateringRequestMenuItem] : []),
-  ...(userType === "admin" ? [adminMenuItem] : []),
-  ...(userType === "vendor" ? [vendorMenuItem] : []),
-  ...(userType === "driver" ? [driverMenuItem] : []),
-];
+  // Create a new menu array with conditional items based on user type
+  const updatedMenuData = [
+    ...menuData,
+    ...(userType === "client" ? [cateringRequestMenuItem] : []),
+    ...(userType === "admin" ? [adminMenuItem] : []),
+    ...(userType === "vendor" ? [vendorMenuItem] : []),
+    ...(userType === "driver" ? [driverMenuItem] : []),
+  ];
 
   const { theme, setTheme } = useTheme();
 
@@ -300,13 +305,17 @@ const Header = () => {
 
                 {session?.user ? (
                   <>
-                    <p
-                      className={`loginBtn px-7 py-3 text-base font-medium ${
-                        !sticky && pathUrl === "/" ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {session?.user?.name}
-                    </p>
+                    <Link href={`/user/${session.user.id}`}>
+                      <p
+                        className={`loginBtn px-7 py-3 text-base font-medium ${
+                          !sticky && pathUrl === "/"
+                            ? "text-white"
+                            : "text-black"
+                        }`}
+                      >
+                        {session.user.name}
+                      </p>
+                    </Link>
                     {pathUrl !== "/" || sticky ? (
                       <button
                         onClick={() => signOut()}

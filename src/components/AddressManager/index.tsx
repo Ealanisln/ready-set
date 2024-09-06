@@ -40,11 +40,9 @@ const AddressManager: React.FC<AddressManagerProps> = ({
 
   const fetchAddresses = useCallback(async () => {
     if (!session?.user?.id) {
-      console.log("No user ID available");
       return;
     }
     if (addressesLoaded) {
-      console.log("Addresses already loaded");
       return;
     }
 
@@ -54,7 +52,6 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       const response = await fetch(`/api/addresses`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Fetched addresses:", data);
         setAddresses(data);
         onAddressesLoaded(data);
         setAddressesLoaded(true);
@@ -94,7 +91,6 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   }, [session?.user?.id]);
 
   useEffect(() => {
-    console.log("Session user ID:", session?.user?.id);
     if (session?.user?.id) {
       fetchAddresses();
       fetchAllowedCounties();

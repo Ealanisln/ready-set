@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import sgMail from '@sendgrid/mail';
 
 type EmailPayload = {
   to: string;
@@ -6,24 +6,26 @@ type EmailPayload = {
   html: string;
 };
 
-// Replace with your SMTP credentials
-const smtpOptions = {
-  host: process.env.EMAIL_SERVER_HOST,
-  port: parseInt(process.env.EMAIL_SERVER_PORT || "2525"),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_PASSWORD,
-  },
-};
+// Set SendGrid API key
+sgMail.setApiKey(process.env.SEND_API_KEY || '');
 
 export const sendEmail = async (data: EmailPayload) => {
-  const transporter = nodemailer.createTransport({
-    ...smtpOptions,
-  });
+  const msg = {
+    to: data.to,
+    from: process.env.EMAIL_FROM || 'emmanuel@alanis.dev', // Use a verified sender email
+    subject: data.subject,
+    html: data.html,
+  };
 
-  return await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
-    ...data,
-  });
+  try {
+    const response = await sgMail.send(msg);
+    console.log('Email sent successfully', response);
+    return response;
+  } catch (error: any) {
+    console.error('Error sending email:');
+    if (error.response) {
+      console.error(error.response.body);
+    }
+    throw error;
+  }
 };

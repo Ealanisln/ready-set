@@ -53,8 +53,15 @@ const ResetPassword = ({ token }: { token: string }) => {
     e.preventDefault();
     setLoader(true);
 
-    if (data.newPassword === "") {
-      toast.error("Please enter your password.");
+    if (data.newPassword === "" || data.ReNewPassword === "") {
+      toast.error("Please enter and confirm your new password.");
+      setLoader(false);
+      return;
+    }
+
+    if (data.newPassword !== data.ReNewPassword) {
+      toast.error("Passwords do not match.");
+      setLoader(false);
       return;
     }
 
@@ -108,10 +115,10 @@ const ResetPassword = ({ token }: { token: string }) => {
               <form onSubmit={handleSubmit}>
                 <div className="mb-[22px]">
                   <input
-                    type="text"
+                    type="password"
                     placeholder="New password"
                     name="newPassword"
-                    value={data?.newPassword}
+                    value={data.newPassword}
                     onChange={handleChange}
                     required
                     className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
@@ -120,10 +127,10 @@ const ResetPassword = ({ token }: { token: string }) => {
 
                 <div className="mb-[22px]">
                   <input
-                    type="text"
-                    placeholder="New password"
-                    name="newPassword"
-                    value={data?.newPassword}
+                    type="password"
+                    placeholder="Confirm new password"
+                    name="ReNewPassword"
+                    value={data.ReNewPassword}
                     onChange={handleChange}
                     required
                     className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"

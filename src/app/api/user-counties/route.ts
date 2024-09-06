@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
-  console.log('API route hit:', request.method, request.url);
 
   const session = await getServerSession(authOptions);
 

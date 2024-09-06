@@ -36,18 +36,11 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
 
   // Add this wrapper function
   const onSubmitWrapper = async (data: ClientFormData) => {
-    console.log("Form data:", JSON.stringify(data, null, 2));
-
-    Object.entries(data).forEach(([key, value]) => {
-      console.log(`${key}:`, value);
-    });
+    Object.entries(data).forEach(([key, value]) => {});
 
     setIsLoading(true);
     try {
-      console.log("Form submission started");
-      console.log("Form data:", data);
       await onSubmit(data);
-      console.log("Form submission completed");
     } catch (error) {
       console.error("Form submission error:", error);
     } finally {

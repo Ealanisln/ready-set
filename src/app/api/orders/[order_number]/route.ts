@@ -68,7 +68,6 @@ export async function GET(
     }
 
     const { order_number } = params;
-    console.log(`Fetching order: ${order_number}`);
 
     let order: Order | null = null;
 
@@ -96,7 +95,6 @@ export async function GET(
 
     if (cateringRequest) {
       order = { ...cateringRequest, order_type: "catering" };
-      console.log('Fetched catering order:', serializeBigInt(order));
     } else {
       // If not found, try to find on-demand order
       const onDemandOrder = await prisma.on_demand.findUnique({
@@ -129,7 +127,6 @@ export async function GET(
         }
 
         order = { ...onDemandOrder, delivery_address, order_type: "on_demand" };
-        console.log('Fetched on_demand order:', serializeBigInt(order));
       }
     }
 
@@ -138,7 +135,6 @@ export async function GET(
       return NextResponse.json(serializedOrder);
     }
 
-    console.log(`Order not found: ${order_number}`);
     return NextResponse.json({ message: "Order not found" }, { status: 404 });
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -171,7 +167,6 @@ export async function PATCH(
       );
     }
 
-    console.log(`Updating order: ${order_number}`, { status, driver_status });
 
     let updatedOrder: Order | null = null;
 
@@ -235,12 +230,10 @@ export async function PATCH(
     }
 
     if (updatedOrder) {
-      console.log('Updated order:', serializeBigInt(updatedOrder));
       const serializedOrder = serializeBigInt(updatedOrder);
       return NextResponse.json(serializedOrder);
     }
 
-    console.log(`Order not found for update: ${order_number}`);
     return NextResponse.json({ message: "Order not found" }, { status: 404 });
   } catch (error) {
     console.error("Error updating order:", error);
