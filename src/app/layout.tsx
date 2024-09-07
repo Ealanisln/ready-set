@@ -13,6 +13,9 @@ import { useEffect, useState } from "react";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import CustomHead from "./custom-head";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -48,6 +51,9 @@ export default function RootLayout({
             enableSystem={true}
             defaultTheme="light"
           >
+            <NextSSRPlugin
+              routerConfig={extractRouterConfig(ourFileRouter)}
+            />
             <ToasterContext />
             {!isBackendAdminRoute && !isStudioRoute && <Header />}
             <CustomHead />
