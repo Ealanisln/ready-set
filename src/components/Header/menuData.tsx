@@ -7,6 +7,13 @@ export const cateringRequestMenuItem: Menu = {
   newTab: false,
 };
 
+export const onDemandMenuItem: Menu = {
+  id: 9,
+  title: "On-demand",
+  path: "/on-demand",
+  newTab: false,
+};
+
 export const adminMenuItem: Menu = {
   id: 6,
   title: "Admin",

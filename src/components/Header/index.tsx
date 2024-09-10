@@ -11,6 +11,7 @@ import menuData, {
   adminMenuItem,
   vendorMenuItem,
   driverMenuItem,
+  onDemandMenuItem,
 } from "./menuData";
 
 const Header = () => {
@@ -52,7 +53,7 @@ const Header = () => {
   // Create a new menu array with conditional items based on user type
   const updatedMenuData = [
     ...menuData,
-    ...(userType === "client" ? [cateringRequestMenuItem] : []),
+    ...(userType === "client" ? [cateringRequestMenuItem, onDemandMenuItem] : []),
     ...(userType === "admin" ? [adminMenuItem] : []),
     ...(userType === "vendor" ? [vendorMenuItem] : []),
     ...(userType === "driver" ? [driverMenuItem] : []),
