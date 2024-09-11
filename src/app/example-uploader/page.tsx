@@ -1,22 +1,34 @@
 "use client";
 
-import { UploadButton } from "@/utils/uploadthing";
+import { useUploadFile } from "@/hooks/use-upload-file";
+import { FileUploader } from "@/components/Uploader/file-uploader";
 
-export default function Home() {
+import { UploadedFilesCard } from "@/components/Uploader/uploaded-files-card";
+import Breadcrumb from "@/components/Common/Breadcrumb";
+
+export function BasicUploader() {
+  const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
+    "fileUploader",
+    { defaultUploadedFiles: [] },
+  );
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <UploadButton
-        endpoint="imageUploader"
-        onClientUploadComplete={(res) => {
-          // Do something with the response
-          console.log("Files: ", res);
-          alert("Upload Completed");
-        }}
-        onUploadError={(error: Error) => {
-          // Do something with the error.
-          alert(`ERROR! ${error.message}`);
+    <div>
+      <Breadcrumb pageName="Uploader Page" />
+      <FileUploader
+        maxFileCount={4}
+        maxSize={4 * 1024 * 1024}
+        progresses={progresses}
+        onUpload={onUpload}
+        disabled={isUploading}
+        accept={{
+          "image/*": [],
+          "application/pdf": [],
         }}
       />
-    </main>
+      <UploadedFilesCard uploadedFiles={uploadedFiles} />
+    </div>
   );
 }
+
+export default BasicUploader;

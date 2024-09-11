@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "driver_status" AS ENUM ('arrived_at_vendor', 'en_route_to_client', 'arrived_to_client');
+
+-- CreateEnum
 CREATE TYPE "addresses_status" AS ENUM ('active', 'inactive');
 
 -- CreateEnum
@@ -23,7 +26,7 @@ CREATE TYPE "on_demand_vehicle_type" AS ENUM ('Car', 'Van', 'Truck');
 CREATE TYPE "users_status" AS ENUM ('active', 'pending', 'deleted');
 
 -- CreateEnum
-CREATE TYPE "users_type" AS ENUM ('vendor', 'client', 'driver', 'admin');
+CREATE TYPE "users_type" AS ENUM ('vendor', 'client', 'driver', 'admin', 'helpdesk');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -61,8 +64,8 @@ CREATE TABLE "user" (
     "side_notes" TEXT,
     "confirmation_code" TEXT,
     "remember_token" VARCHAR(100),
-    "created_at" TIMESTAMPTZ(6),
-    "updated_at" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -122,7 +125,7 @@ CREATE TABLE "address" (
     "created_at" TIMESTAMPTZ(6),
     "updated_at" TIMESTAMPTZ(6),
 
-    CONSTRAINT "idx_16458_primary" PRIMARY KEY ("id")
+    CONSTRAINT "address_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -132,11 +135,11 @@ CREATE TABLE "catering_request" (
     "user_id" TEXT NOT NULL,
     "address_id" BIGINT NOT NULL,
     "brokerage" VARCHAR(191),
-    "order_number" VARCHAR(191),
+    "order_number" TEXT NOT NULL,
     "date" DATE,
-    "pickup_time" TIME,
-    "arrival_time" TIME,
-    "complete_time" TIME,
+    "pickup_time" TIME(6),
+    "arrival_time" TIME(6),
+    "complete_time" TIME(6),
     "headcount" VARCHAR(191),
     "need_host" "catering_requests_need_host" NOT NULL DEFAULT 'no',
     "hours_needed" VARCHAR(191),
@@ -148,24 +151,25 @@ CREATE TABLE "catering_request" (
     "status" "catering_requests_status" DEFAULT 'active',
     "order_total" DECIMAL(10,2) DEFAULT 0.00,
     "tip" DECIMAL(10,2) DEFAULT 0.00,
-    "created_at" TIMESTAMPTZ(6),
-    "updated_at" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "delivery_address_id" BIGINT NOT NULL,
+    "driver_status" "driver_status",
 
-    CONSTRAINT "idx_16474_primary" PRIMARY KEY ("id")
+    CONSTRAINT "catering_request_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "dispatch" (
-    "id" BIGSERIAL NOT NULL,
-    "user_id" TEXT NOT NULL,
-    "user_type" "dispatches_user_type" NOT NULL DEFAULT 'vendor',
-    "service_id" BIGINT NOT NULL,
-    "service_type" "dispatches_service_type" NOT NULL DEFAULT 'catering',
-    "driver_id" TEXT NOT NULL,
-    "created_at" TIMESTAMPTZ(6),
-    "updated_at" TIMESTAMPTZ(6),
+    "id" TEXT NOT NULL,
+    "cateringRequestId" BIGINT,
+    "createdAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "driverId" TEXT,
+    "on_demandId" BIGINT,
+    "updatedAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" TEXT,
 
-    CONSTRAINT "idx_16494_primary" PRIMARY KEY ("id")
+    CONSTRAINT "dispatch_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -177,7 +181,7 @@ CREATE TABLE "failed_job" (
     "exception" TEXT NOT NULL,
     "failed_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "idx_16501_primary" PRIMARY KEY ("id")
+    CONSTRAINT "failed_job_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -186,7 +190,7 @@ CREATE TABLE "migrations" (
     "migration" VARCHAR(191) NOT NULL,
     "batch" BIGINT NOT NULL,
 
-    CONSTRAINT "idx_16509_primary" PRIMARY KEY ("id")
+    CONSTRAINT "migrations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -195,29 +199,31 @@ CREATE TABLE "on_demand" (
     "guid" TEXT,
     "user_id" TEXT NOT NULL,
     "address_id" BIGINT NOT NULL,
-    "order_number" VARCHAR(191),
-    "date" DATE,
-    "pickup_time" TIME,
-    "arrival_time" TIME,
-    "complete_time" TIME,
+    "order_number" VARCHAR(191) NOT NULL,
+    "date" DATE NOT NULL,
+    "pickup_time" TIME(6) NOT NULL,
+    "arrival_time" TIME(6) NOT NULL,
+    "complete_time" TIME(6),
     "hours_needed" VARCHAR(191),
     "item_delivered" VARCHAR(191),
     "vehicle_type" "on_demand_vehicle_type" NOT NULL DEFAULT 'Car',
-    "client_attention" TEXT,
+    "client_attention" TEXT NOT NULL,
     "pickup_notes" TEXT,
     "special_notes" TEXT,
     "image" TEXT,
-    "status" "on_demand_status" DEFAULT 'active',
+    "status" "on_demand_status" NOT NULL DEFAULT 'active',
     "order_total" DECIMAL(10,2) DEFAULT 0.00,
     "tip" DECIMAL(10,2) DEFAULT 0.00,
     "length" VARCHAR(191),
     "width" VARCHAR(191),
     "height" VARCHAR(191),
     "weight" VARCHAR(191),
-    "created_at" TIMESTAMPTZ(6),
-    "updated_at" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "delivery_address_id" BIGINT NOT NULL,
+    "driver_status" "driver_status",
 
-    CONSTRAINT "idx_16514_primary" PRIMARY KEY ("id")
+    CONSTRAINT "on_demand_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -238,6 +244,12 @@ CREATE UNIQUE INDEX "verification_token_token_key" ON "verification_token"("toke
 -- CreateIndex
 CREATE UNIQUE INDEX "verification_token_identifier_token_key" ON "verification_token"("identifier", "token");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "catering_request_order_number_key" ON "catering_request"("order_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "on_demand_order_number_key" ON "on_demand"("order_number");
+
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -248,19 +260,28 @@ ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "address" ADD CONSTRAINT "address_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "catering_request" ADD CONSTRAINT "catering_request_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "catering_request" ADD CONSTRAINT "catering_request_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "address"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "catering_request" ADD CONSTRAINT "catering_request_delivery_address_id_fkey" FOREIGN KEY ("delivery_address_id") REFERENCES "address"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_driver_id_fkey" FOREIGN KEY ("driver_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "catering_request" ADD CONSTRAINT "catering_request_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "on_demand" ADD CONSTRAINT "on_demand_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_cateringRequestId_fkey" FOREIGN KEY ("cateringRequestId") REFERENCES "catering_request"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_driverId_fkey" FOREIGN KEY ("driverId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_on_demandId_fkey" FOREIGN KEY ("on_demandId") REFERENCES "on_demand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dispatch" ADD CONSTRAINT "dispatch_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "on_demand" ADD CONSTRAINT "on_demand_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "address"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "on_demand" ADD CONSTRAINT "on_demand_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

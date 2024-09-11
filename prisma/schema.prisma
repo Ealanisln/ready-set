@@ -1,272 +1,283 @@
+// This is your updated Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+    provider  = "postgresql"
+    url       = env("POSTGRES_PRISMA_URL")
+    directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model user {
-  id                    String       @id @default(cuid())
-  guid                  String?
-  name                  String?
-  email                 String?      @unique
-  emailVerified         DateTime?
-  image                 String?
-  password              String?
-  passwordResetToken    String?      @unique
-  passwordResetTokenExp DateTime?
-  type                  users_type   @default(vendor)
-  company_name          String?      @db.VarChar(191)
-  contact_name          String?      @db.VarChar(191)
-  contact_number        String?      @db.VarChar(191)
-  website               String?      @db.VarChar(191)
-  street1               String?      @db.VarChar(191)
-  street2               String?      @db.VarChar(191)
-  city                  String?      @db.VarChar(191)
-  state                 String?      @db.VarChar(191)
-  zip                   String?      @db.VarChar(191)
-  location_number       String?      @db.VarChar(191)
-  parking_loading       String?      @db.VarChar(191)
-  counties              String?
-  time_needed           String?
-  catering_brokerage    String?
-  frequency             String?
-  provide               String?
-  head_count            String?      @db.VarChar(191)
-  photo_vehicle         String?
-  photo_license         String?
-  photo_insurance       String?
-  status                users_status @default(pending)
-  side_notes            String?
-  confirmation_code     String?
-  remember_token        String?      @db.VarChar(100)
-  created_at            DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
-  accounts              account[]
-  addresses             address[]
-  sessions              session[]
+    id                    String             @id @default(cuid())
+    guid                  String?
+    name                  String?
+    email                 String?            @unique
+    emailVerified         DateTime?
+    image                 String?
+    password              String?
+    passwordResetToken    String?            @unique
+    passwordResetTokenExp DateTime?
+    type                  users_type         @default(vendor)
+    company_name          String?            @db.VarChar(191)
+    contact_name          String?            @db.VarChar(191)
+    contact_number        String?            @db.VarChar(191)
+    website               String?            @db.VarChar(191)
+    street1               String?            @db.VarChar(191)
+    street2               String?            @db.VarChar(191)
+    city                  String?            @db.VarChar(191)
+    state                 String?            @db.VarChar(191)
+    zip                   String?            @db.VarChar(191)
+    location_number       String?            @db.VarChar(191)
+    parking_loading       String?            @db.VarChar(191)
+    counties              String?
+    time_needed           String?
+    catering_brokerage    String?
+    frequency             String?
+    provide               String?
+    head_count            String?            @db.VarChar(191)
+    photo_vehicle         String?
+    photo_license         String?
+    photo_insurance       String?
+    status                users_status       @default(pending)
+    side_notes            String?
+    confirmation_code     String?
+    remember_token        String?            @db.VarChar(100)
+    created_at            DateTime           @default(now()) @db.Timestamptz(6)
+    updated_at            DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+    accounts              account[]
+    addresses             address[]
+    catering_requests     catering_request[]
+    driver_dispatches     dispatch[]         @relation("DriverRelation")
+    dispatcher_dispatches dispatch[]         @relation("DispatcherRelation")
+    on_demands            on_demand[]
+    sessions              session[]
+    file_uploads          file_upload[]
+}
 
-  driver_dispatches     dispatch[]         @relation("DriverRelation")
-  dispatcher_dispatches dispatch[]         @relation("DispatcherRelation") // Relation matches the field in dispatch
-  catering_requests     catering_request[]
-  on_demands            on_demand[]
+model file_upload {
+    id         String   @id @default(cuid())
+    userId     String
+    fileName   String
+    fileType   String
+    fileSize   Int
+    fileUrl    String
+    uploadedAt DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    user       user     @relation(fields: [userId], references: [id])
 }
 
 model account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?
+    access_token      String?
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?
+    session_state     String?
+    user              user    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+    @@unique([provider, providerAccountId])
 }
 
 model session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model verification_token {
-  id         String   @id @default(cuid())
-  identifier String
-  token      String   @unique
-  expires    DateTime
+    id         String   @id @default(cuid())
+    identifier String
+    token      String   @unique
+    expires    DateTime
 
-  @@unique([identifier, token])
+    @@unique([identifier, token])
 }
 
 model address {
-  id                BigInt             @id(map: "idx_16458_primary") @default(autoincrement())
-  user_id           String
-  county            String?            @db.VarChar(191)
-  vendor            String?
-  street1           String?            @db.VarChar(191)
-  street2           String?            @db.VarChar(191)
-  city              String?            @db.VarChar(191)
-  state             String?            @db.VarChar(191)
-  zip               String?            @db.VarChar(191)
-  location_number   String?            @db.VarChar(191)
-  parking_loading   String?            @db.VarChar(191)
-  status            addresses_status   @default(inactive)
-  created_at        DateTime?          @db.Timestamptz(6)
-  updated_at        DateTime?          @db.Timestamptz(6)
-  user              user               @relation(fields: [user_id], references: [id])
-  pickup_requests   catering_request[] @relation("PickupAddress")
-  delivery_requests catering_request[] @relation("DeliveryAddress")
-  on_demands        on_demand[]
+    id                BigInt             @id @default(autoincrement())
+    user_id           String
+    county            String?            @db.VarChar(191)
+    vendor            String?
+    street1           String?            @db.VarChar(191)
+    street2           String?            @db.VarChar(191)
+    city              String?            @db.VarChar(191)
+    state             String?            @db.VarChar(191)
+    zip               String?            @db.VarChar(191)
+    location_number   String?            @db.VarChar(191)
+    parking_loading   String?            @db.VarChar(191)
+    status            addresses_status   @default(inactive)
+    created_at        DateTime?          @db.Timestamptz(6)
+    updated_at        DateTime?          @db.Timestamptz(6)
+    user              user               @relation(fields: [user_id], references: [id])
+    pickup_requests   catering_request[] @relation("PickupAddress")
+    delivery_requests catering_request[] @relation("DeliveryAddress")
+    on_demands        on_demand[]
 }
 
 model catering_request {
-  id                  BigInt                      @id(map: "idx_16474_primary") @default(autoincrement())
-  guid                String?
-  user_id             String
-  address_id          BigInt
-  brokerage           String?                     @db.VarChar(191)
-  order_number        String                      @unique
-  date                DateTime?                   @db.Date
-  pickup_time         DateTime?                   @db.Time(6)
-  arrival_time        DateTime?                   @db.Time(6)
-  complete_time       DateTime?                   @db.Time(6)
-  headcount           String?                     @db.VarChar(191)
-  need_host           catering_requests_need_host @default(no)
-  hours_needed        String?                     @db.VarChar(191)
-  number_of_host      String?                     @db.VarChar(191)
-  client_attention    String?
-  pickup_notes        String?
-  special_notes       String?
-  image               String?
-  status              catering_requests_status?   @default(active)
-  driver_status       driver_status?              @default(assigned)
-  order_total         Decimal?                    @default(0.00) @db.Decimal(10, 2)
-  tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
-  created_at          DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
-  delivery_address_id BigInt
-  dispatch            dispatch[]                  @relation("DispatchToCateringRequest")
-  address             address                     @relation("PickupAddress", fields: [address_id], references: [id])
-  delivery_address    address                     @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
-  user                user                        @relation(fields: [user_id], references: [id])
+    id                  BigInt                      @id @default(autoincrement())
+    guid                String?
+    user_id             String
+    address_id          BigInt
+    brokerage           String?                     @db.VarChar(191)
+    order_number        String                      @unique
+    date                DateTime?                   @db.Date
+    pickup_time         DateTime?                   @db.Time(6)
+    arrival_time        DateTime?                   @db.Time(6)
+    complete_time       DateTime?                   @db.Time(6)
+    headcount           String?                     @db.VarChar(191)
+    need_host           catering_requests_need_host @default(no)
+    hours_needed        String?                     @db.VarChar(191)
+    number_of_host      String?                     @db.VarChar(191)
+    client_attention    String?
+    pickup_notes        String?
+    special_notes       String?
+    image               String?
+    status              catering_requests_status?   @default(active)
+    order_total         Decimal?                    @default(0.00) @db.Decimal(10, 2)
+    tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
+    created_at          DateTime                    @default(now()) @db.Timestamptz(6)
+    updated_at          DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
+    delivery_address_id BigInt
+    driver_status       driver_status?
+    address             address                     @relation("PickupAddress", fields: [address_id], references: [id])
+    delivery_address    address                     @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
+    user                user                        @relation(fields: [user_id], references: [id])
+    dispatch            dispatch[]                  @relation("DispatchToCateringRequest")
 }
 
 model dispatch {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  cateringRequestId BigInt?
-  cateringRequest   catering_request? @relation("DispatchToCateringRequest", fields: [cateringRequestId], references: [id])
-
-  driverId String?
-  driver   user?   @relation("DriverRelation", fields: [driverId], references: [id])
-
-  userId     String?
-  dispatcher user?   @relation("DispatcherRelation", fields: [userId], references: [id]) // Added the relation field here
-
-  on_demandId BigInt?
-  on_demand   on_demand? @relation(fields: [on_demandId], references: [id])
+    id                String            @id @default(cuid())
+    cateringRequestId BigInt?
+    createdAt         DateTime          @default(now()) @db.Timestamptz(6)
+    driverId          String?
+    on_demandId       BigInt?
+    updatedAt         DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+    userId            String?
+    cateringRequest   catering_request? @relation("DispatchToCateringRequest", fields: [cateringRequestId], references: [id])
+    driver            user?             @relation("DriverRelation", fields: [driverId], references: [id])
+    on_demand         on_demand?        @relation(fields: [on_demandId], references: [id])
+    dispatcher        user?             @relation("DispatcherRelation", fields: [userId], references: [id])
 }
 
 model failed_job {
-  id         BigInt   @id(map: "idx_16501_primary") @default(autoincrement())
-  connection String
-  queue      String
-  payload    String
-  exception  String
-  failed_at  DateTime @default(now()) @db.Timestamptz(6)
+    id         BigInt   @id @default(autoincrement())
+    connection String
+    queue      String
+    payload    String
+    exception  String
+    failed_at  DateTime @default(now()) @db.Timestamptz(6)
 }
 
 model migrations {
-  id        BigInt @id(map: "idx_16509_primary") @default(autoincrement())
-  migration String @db.VarChar(191)
-  batch     BigInt
+    id        BigInt @id @default(autoincrement())
+    migration String @db.VarChar(191)
+    batch     BigInt
 }
 
 model on_demand {
-  id                  BigInt                 @id(map: "idx_16514_primary") @default(autoincrement())
-  guid                String?
-  user_id             String
-  address_id          BigInt
-  order_number        String                 @unique @db.VarChar(191)
-  date                DateTime               @db.Date
-  pickup_time         DateTime               @db.Time(6)
-  arrival_time        DateTime               @db.Time(6)
-  complete_time       DateTime?              @db.Time(6)
-  hours_needed        String?                @db.VarChar(191)
-  item_delivered      String?                @db.VarChar(191)
-  vehicle_type        on_demand_vehicle_type @default(Car)
-  client_attention    String
-  delivery_address_id BigInt
-  pickup_notes        String?
-  special_notes       String?
-  image               String?
-  status              on_demand_status       @default(active)
-  driver_status       driver_status?         @default(assigned)
-  order_total         Decimal?               @default(0.00) @db.Decimal(10, 2)
-  tip                 Decimal?               @default(0.00) @db.Decimal(10, 2)
-  length              String?                @db.VarChar(191)
-  width               String?                @db.VarChar(191)
-  height              String?                @db.VarChar(191)
-  weight              String?                @db.VarChar(191)
-  created_at          DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
-  address             address                @relation(fields: [address_id], references: [id])
-  user                user                   @relation(fields: [user_id], references: [id])
-  dispatch            dispatch[]
+    id                  BigInt                 @id @default(autoincrement())
+    guid                String?
+    user_id             String
+    address_id          BigInt
+    order_number        String                 @unique @db.VarChar(191)
+    date                DateTime               @db.Date
+    pickup_time         DateTime               @db.Time(6)
+    arrival_time        DateTime               @db.Time(6)
+    complete_time       DateTime?              @db.Time(6)
+    hours_needed        String?                @db.VarChar(191)
+    item_delivered      String?                @db.VarChar(191)
+    vehicle_type        on_demand_vehicle_type @default(Car)
+    client_attention    String
+    pickup_notes        String?
+    special_notes       String?
+    image               String?
+    status              on_demand_status       @default(active)
+    order_total         Decimal?               @default(0.00) @db.Decimal(10, 2)
+    tip                 Decimal?               @default(0.00) @db.Decimal(10, 2)
+    length              String?                @db.VarChar(191)
+    width               String?                @db.VarChar(191)
+    height              String?                @db.VarChar(191)
+    weight              String?                @db.VarChar(191)
+    created_at          DateTime               @default(now()) @db.Timestamptz(6)
+    updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+    delivery_address_id BigInt
+    driver_status       driver_status?
+    dispatch            dispatch[]
+    address             address                @relation(fields: [address_id], references: [id])
+    user                user                   @relation(fields: [user_id], references: [id])
 }
 
 enum driver_status {
-  assigned
-  arrived_at_vendor
-  en_route_to_client
-  arrived_to_client
-  completed
+    assigned
+    arrived_at_vendor
+    en_route_to_client
+    arrived_to_client
+    completed
 }
 
 enum addresses_status {
-  active
-  inactive
+    active
+    inactive
 }
 
 enum catering_requests_need_host {
-  yes
-  no
+    yes
+    no
 }
 
 enum catering_requests_status {
-  active
-  assigned
-  cancelled
-  completed
+    active
+    assigned
+    cancelled
+    completed
 }
 
 enum dispatches_service_type {
-  catering
-  ondemand
+    catering
+    ondemand
 }
 
 enum dispatches_user_type {
-  vendor
-  client
+    vendor
+    client
 }
 
 enum on_demand_status {
-  active
-  assigned
-  cancelled
-  completed
+    active
+    assigned
+    cancelled
+    completed
 }
 
 enum on_demand_vehicle_type {
-  Car
-  Van
-  Truck
+    Car
+    Van
+    Truck
 }
 
 enum users_status {
-  active
-  pending
-  deleted
+    active
+    pending
+    deleted
 }
 
 enum users_type {
-  vendor
-  client
-  driver
-  admin
-  helpdesk
+    vendor
+    client
+    driver
+    admin
+    helpdesk
 }

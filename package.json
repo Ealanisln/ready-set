@@ -6,14 +6,19 @@
     "dev": "next dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "bun prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "bun prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
+    "@faker-js/faker": "^9.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@next/third-parties": "^14.2.6",
     "@portabletext/react": "^3.1.0",
-    "@prisma/client": "^5.18.0",
+    "@prisma/client": "^5.19.1",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
@@ -22,6 +27,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-progress": "^1.1.0",
+    "@radix-ui/react-scroll-area": "^1.1.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
@@ -59,6 +65,7 @@
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
+    "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.52.2",
     "react-hot-toast": "^2.4.1",
     "remark": "^15.0.1",
@@ -75,7 +82,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20.16.1",
+    "@types/node": "^22.5.4",
     "@types/nodemailer": "^6.4.15",
     "@types/prismjs": "^1.26.4",
     "@types/react": "^18.3.4",
@@ -86,6 +93,6 @@
     "postcss": "^8.4.41",
     "prisma": "^5.18.0",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   }
 }
