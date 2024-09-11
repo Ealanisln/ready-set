@@ -2,14 +2,13 @@
 
 import { useUploadFile } from "@/hooks/use-upload-file";
 import { FileUploader } from "@/components/Uploader/file-uploader";
-
 import { UploadedFilesCard } from "@/components/Uploader/uploaded-files-card";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 
-export function BasicUploader() {
+export default function Page() {
   const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
     "fileUploader",
-    { defaultUploadedFiles: [] },
+    { defaultUploadedFiles: [] }
   );
 
   return (
@@ -30,5 +29,3 @@ export function BasicUploader() {
     </div>
   );
 }
-
-export default BasicUploader;
