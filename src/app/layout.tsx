@@ -16,6 +16,7 @@ import CustomHead from "./custom-head";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
             <CustomHead />
             <main className="flex-grow">{children}</main>
             <Analytics />
+            <SpeedInsights />
             {!isBackendAdminRoute && !isStudioRoute && <Footer />}
             <ScrollToTop />
           </ThemeProvider>
