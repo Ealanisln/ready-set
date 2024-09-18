@@ -12,11 +12,10 @@ import ToasterContext from "./api/contex/ToasetContex";
 import { useEffect, useState } from "react";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import CustomHead from "./custom-head";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -52,12 +51,9 @@ export default function RootLayout({
             enableSystem={true}
             defaultTheme="light"
           >
-            <NextSSRPlugin
-              routerConfig={extractRouterConfig(ourFileRouter)}
-            />
+            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
             <ToasterContext />
             {!isBackendAdminRoute && !isStudioRoute && <Header />}
-            <CustomHead />
             <main className="flex-grow">{children}</main>
             <Analytics />
             <SpeedInsights />
