@@ -1,5 +1,6 @@
-// components/MainContent.tsx
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,12 @@ export const MainContent: React.FC<MainContentProps> = ({
     ? users.filter((user) => user.type === filter)
     : users;
 
+  const [paginationInfo, setPaginationInfo] = useState({ start: 0, end: 0, total: 0 });
+
+  const handlePaginationChange = (start: number, end: number, total: number) => {
+    setPaginationInfo({ start, end, total });
+  };
+
   return (
     <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
       <Tabs defaultValue="all">
@@ -63,12 +70,12 @@ export const MainContent: React.FC<MainContentProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <UserTable users={filteredUsers} />
+              <UserTable users={filteredUsers} onPaginationChange={handlePaginationChange} />
             </CardContent>
             <CardFooter>
               <div className="text-muted-foreground text-xs">
-                Showing <strong>1-{Math.min(filteredUsers.length, 10)}</strong>{" "}
-                of <strong>{filteredUsers.length}</strong> Users
+                Showing <strong>{paginationInfo.start}-{paginationInfo.end}</strong>{" "}
+                of <strong>{paginationInfo.total}</strong> Users
               </div>
             </CardFooter>
           </Card>

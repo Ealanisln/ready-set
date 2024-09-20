@@ -9,9 +9,7 @@ import AddressInfo from "./ui/AddressInfo";
 import CustomerInfo from "./ui/CustomerInfo";
 import AdditionalInfo from "./ui/AdditionalInfo";
 import { Order, Driver } from "@/types/order";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 
 const SingleOrder: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -27,7 +25,7 @@ const SingleOrder: React.FC = () => {
     const orderNumber = window.location.pathname.split("/").pop();
     try {
       const response = await fetch(
-        `/api/orders/${orderNumber}?include=dispatch.driver`
+        `/api/orders/${orderNumber}?include=dispatch.driver`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -110,7 +108,7 @@ const SingleOrder: React.FC = () => {
       toast.success(
         isDriverAssigned
           ? "Driver updated successfully!"
-          : "Driver assigned successfully!"
+          : "Driver assigned successfully!",
       );
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
@@ -171,12 +169,15 @@ const SingleOrder: React.FC = () => {
         <CardContent className="pt-6">
           <OrderDetails order={order} />
           <Separator />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 py-4">
+          <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-2">
             {order.address && (
               <AddressInfo address={order.address} title="Pickup Address" />
             )}
             {order.delivery_address && (
-              <AddressInfo address={order.delivery_address} title="Delivery Address" />
+              <AddressInfo
+                address={order.delivery_address}
+                title="Delivery Address"
+              />
             )}
           </div>
           <Separator className="my-4" />
@@ -201,50 +202,15 @@ const SingleOrder: React.FC = () => {
           updateDriverStatus={updateDriverStatus}
         />
       </div>
-      <Dialog open={isDriverDialogOpen} onOpenChange={setIsDriverDialogOpen}>
-        <DialogContent className="sm:max-w-[625px]">
-          <DialogHeader>
-            <DialogTitle>
-              {isDriverAssigned ? "Edit Driver Assignment" : "Assign Driver"}
-            </DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {drivers.map((driver) => (
-                <TableRow key={driver.id}>
-                  <TableCell>{driver.name}</TableCell>
-                  <TableCell>{driver.email}</TableCell>
-                  <TableCell>{driver.contact_number}</TableCell>
-                  <TableCell>
-                    <Button
-                      onClick={() => handleDriverSelection(driver.id)}
-                      variant={selectedDriver === driver.id ? "default" : "outline"}
-                    >
-                      {selectedDriver === driver.id ? "Selected" : "Select"}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <DialogFooter>
-            <Button onClick={handleAssignOrEditDriver} disabled={!selectedDriver}>
-              {isDriverAssigned ? "Update Driver" : "Assign Driver"}
-            </Button>
-            <Button onClick={() => setIsDriverDialogOpen(false)} variant="outline">
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DriverAssignmentDialog
+        isOpen={isDriverDialogOpen}
+        onOpenChange={setIsDriverDialogOpen}
+        isDriverAssigned={isDriverAssigned}
+        drivers={drivers}
+        selectedDriver={selectedDriver}
+        onDriverSelection={handleDriverSelection}
+        onAssignOrEditDriver={handleAssignOrEditDriver}
+      />
     </main>
   );
 };
