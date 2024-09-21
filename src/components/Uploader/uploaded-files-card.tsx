@@ -29,12 +29,12 @@ export function UploadedFilesCard({ uploadedFiles }: UploadedFilesCardProps) {
             <div className="flex w-max space-x-2.5">
               {uploadedFiles.map((file) => (
                 <div key={file.key} className="relative aspect-video w-64">
-                  {file.url.toLowerCase().endsWith('.pdf') ? (
+                  {file.url && file.url.toLowerCase().endsWith('.pdf') ? (
                     <a href={file.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-full bg-gray-100 rounded-md">
                       <FileText size={48} />
                       <span className="ml-2 text-sm">{file.name}</span>
                     </a>
-                  ) : (
+                  ) : file.url ? (
                     <Image
                       src={file.url}
                       alt={file.name}
@@ -43,6 +43,10 @@ export function UploadedFilesCard({ uploadedFiles }: UploadedFilesCardProps) {
                       loading="lazy"
                       className="rounded-md object-cover"
                     />
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gray-100 rounded-md">
+                      <span className="text-sm text-gray-500">No URL available</span>
+                    </div>
                   )}
                 </div>
               ))}

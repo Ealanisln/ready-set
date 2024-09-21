@@ -4,11 +4,21 @@ import { useUploadFile } from "@/hooks/use-upload-file";
 import { FileUploader } from "@/components/Uploader/file-uploader";
 import { UploadedFilesCard } from "@/components/Uploader/uploaded-files-card";
 import Breadcrumb from "@/components/Common/Breadcrumb";
+import { useSession } from "next-auth/react";  // Import useSession
 
 export default function Page() {
+  const { data: session } = useSession();  // Get the session
+  const userId = session?.user?.id;  // Get the user ID from the session
+
   const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
     "fileUploader",
-    { defaultUploadedFiles: [] }
+    { 
+      defaultUploadedFiles: [],
+      userId: userId,  // Provide the userId
+      maxFileCount: 4,
+      maxFileSize: 4 * 1024 * 1024,
+      allowedFileTypes: ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'],
+    }
   );
 
   return (
