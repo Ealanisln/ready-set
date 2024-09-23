@@ -1,19 +1,14 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, users_type } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
-  }
-
-  const { userId } = req.query;
-  const { newRole } = req.body;
+export async function POST(request: NextRequest) {
+  const { userId, newRole } = await request.json();
 
   // Validate that newRole is a valid users_type
   if (!Object.values(users_type).includes(newRole as users_type)) {
-    return res.status(400).json({ message: 'Invalid role' });
+    return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
   }
 
   try {
@@ -22,9 +17,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: { type: newRole as users_type },
     });
 
-    res.status(200).json(updatedUser);
+    return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('Error updating user role:', error);
-    res.status(500).json({ message: 'Error updating user role' });
+    return NextResponse.json({ message: 'Error updating user role' }, { status: 500 });
   }
 }
