@@ -27,7 +27,6 @@ export const RecentUsersTable: React.FC<RecentUsersTableProps> = ({ users }) => 
     <TableHeader>
       <TableRow>
         <TableHead>Name</TableHead>
-        <TableHead>Email</TableHead>
         <TableHead>Type</TableHead>
       </TableRow>
     </TableHeader>
@@ -35,7 +34,6 @@ export const RecentUsersTable: React.FC<RecentUsersTableProps> = ({ users }) => 
       {users.map((user) => (
         <TableRow key={user.id}>
           <TableCell>{user.name || user.contact_name}</TableCell>
-          <TableCell>{user.email}</TableCell>
           <TableCell>
             <Badge variant="outline">{user.type}</Badge>
           </TableCell>

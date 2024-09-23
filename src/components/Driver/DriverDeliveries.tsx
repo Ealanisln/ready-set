@@ -61,6 +61,7 @@ const DriverDeliveries: React.FC = () => {
         }
         const data: Delivery[] = await response.json();
         setDeliveries(data);
+        console.log(data);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
