@@ -10,7 +10,7 @@ interface User {
   contact_name?: string;
   contact_number: string;
   email: string;
-  type: "vendor" | "client" | "driver" | "admin" | "helpdesk";
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
   created_at?: Date;
 }
 
@@ -19,7 +19,6 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
-
 
   useEffect(() => {
     const fetchUsers = async () => {

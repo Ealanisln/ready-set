@@ -280,4 +280,5 @@ enum users_type {
     driver
     admin
     helpdesk
+    super_admin
 }

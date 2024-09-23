@@ -19,6 +19,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { PaginationWrapper } from './PaginationWrapper'; 
 
@@ -28,16 +31,23 @@ interface User {
   contact_name?: string;
   contact_number: string;
   email: string;
-  type: "vendor" | "client" | "driver" | "admin" | "helpdesk";
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
   created_at?: Date;
 }
 
 interface UserTableProps {
   users: User[];
   onPaginationChange: (start: number, end: number, total: number) => void;
+  currentUserRole: "admin" | "super_admin";
+  onRoleChange: (userId: string, newRole: User['type']) => Promise<void>;
 }
 
-export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange }) => {
+export const UserTable: React.FC<UserTableProps> = ({ 
+  users, 
+  onPaginationChange, 
+  currentUserRole,
+  onRoleChange 
+}) => {
   const [sortColumn, setSortColumn] = useState<keyof User>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,6 +89,15 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
     onPaginationChange(newStartIndex + 1, newEndIndex, sortedUsers.length);
   };
 
+  const handleRoleChange = async (userId: string, newRole: User['type']) => {
+    try {
+      await onRoleChange(userId, newRole);
+      // Optionally, you can update the local state here if needed
+    } catch (error) {
+      console.error("Failed to change user role:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
+  };
 
   return (
     <>
@@ -144,6 +163,21 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
                     <Link href={`/admin/users/${user.id}`}>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                     </Link>
+                    {currentUserRole === "super_admin" && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          {["vendor", "client", "driver", "admin", "helpdesk"].map((role) => (
+                            <DropdownMenuItem 
+                              key={role}
+                              onClick={() => handleRoleChange(user.id, role as User['type'])}
+                            >
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -152,11 +186,11 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
         </TableBody>
       </Table>
       <div className="flex items-center justify-between space-x-2 py-4">
-      <PaginationWrapper
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <PaginationWrapper
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ interface User {
   contact_name?: string;
   contact_number: string;
   email: string;
-  type: "vendor" | "client" | "driver" | "admin" | "helpdesk";
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
   created_at?: Date;
 }
 
@@ -37,14 +37,64 @@ export const MainContent: React.FC<MainContentProps> = ({
   filter,
   setFilter,
 }) => {
+  const [currentUserRole, setCurrentUserRole] = useState<"admin" | "super_admin">("admin");
+  const [paginationInfo, setPaginationInfo] = useState({
+    start: 0,
+    end: 0,
+    total: 0,
+  });
+
   const filteredUsers = filter
     ? users.filter((user) => user.type === filter)
     : users;
 
-  const [paginationInfo, setPaginationInfo] = useState({ start: 0, end: 0, total: 0 });
+  useEffect(() => {
+    // Fetch current user role
+    const fetchCurrentUserRole = async () => {
+      try {
+        // Replace this with your actual API call or auth logic
+        const response = await fetch("/api/current-user-role");
+        const data = await response.json();
+        setCurrentUserRole(data.role);
+      } catch (error) {
+        console.error("Error fetching current user role:", error);
+        // Handle error (e.g., show an error message to the user)
+      }
+    };
 
-  const handlePaginationChange = (start: number, end: number, total: number) => {
+    fetchCurrentUserRole();
+  }, []);
+
+  const handlePaginationChange = (
+    start: number,
+    end: number,
+    total: number,
+  ) => {
     setPaginationInfo({ start, end, total });
+  };
+
+  const handleRoleChange = async (userId: string, newRole: User["type"]) => {
+    try {
+      // Implement the API call to change the user's role
+      const response = await fetch(`/api/users/${userId}/change-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newRole }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to change user role");
+      }
+
+      // You might want to trigger a re-fetch of users here or update the parent state
+      // For now, we'll just log a success message
+      console.log(`User ${userId} role updated to ${newRole}`);
+    } catch (error) {
+      console.error("Error changing user role:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
   };
 
   return (
@@ -70,11 +120,19 @@ export const MainContent: React.FC<MainContentProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <UserTable users={filteredUsers} onPaginationChange={handlePaginationChange} />
+              <UserTable
+                users={filteredUsers}
+                onPaginationChange={handlePaginationChange}
+                currentUserRole={currentUserRole}
+                onRoleChange={handleRoleChange}
+              />
             </CardContent>
             <CardFooter>
               <div className="text-muted-foreground text-xs">
-                Showing <strong>{paginationInfo.start}-{paginationInfo.end}</strong>{" "}
+                Showing{" "}
+                <strong>
+                  {paginationInfo.start}-{paginationInfo.end}
+                </strong>{" "}
                 of <strong>{paginationInfo.total}</strong> Users
               </div>
             </CardFooter>
