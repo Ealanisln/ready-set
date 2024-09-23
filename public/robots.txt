@@ -1,5 +1,3 @@
 User-Agent: *
-Allow: /
-Disallow: /private/
-
+Disallow:
 Sitemap: https://ready-set.vercel.app/sitemap.xml
