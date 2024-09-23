@@ -61,6 +61,8 @@ const Header = () => {
 
   const { theme, setTheme } = useTheme();
 
+  console.log(session);
+
   return (
     <>
       <header

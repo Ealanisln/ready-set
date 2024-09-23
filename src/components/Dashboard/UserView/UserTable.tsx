@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from "next/link";
 import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PaginationWrapper } from './PaginationWrapper'; 
 
 interface User {
   id: string;
@@ -51,17 +52,19 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
     }
   };
 
-  const sortUsers = (a: User, b: User) => {
-    const getName = (user: User) => (user.name || user.contact_name || '').toLowerCase();
-    const valueA = sortColumn === 'name' ? getName(a) : ((a[sortColumn] as string) || '').toLowerCase();
-    const valueB = sortColumn === 'name' ? getName(b) : ((b[sortColumn] as string) || '').toLowerCase();
-    
-    return sortDirection === 'asc' 
-      ? valueA.localeCompare(valueB) 
-      : valueB.localeCompare(valueA);
-  };
-
-  const sortedUsers = [...users].sort(sortUsers);
+  const sortedUsers = useMemo(() => {
+    const sortUsers = (a: User, b: User) => {
+      const getName = (user: User) => (user.name || user.contact_name || '').toLowerCase();
+      const valueA = sortColumn === 'name' ? getName(a) : ((a[sortColumn] as string) || '').toLowerCase();
+      const valueB = sortColumn === 'name' ? getName(b) : ((b[sortColumn] as string) || '').toLowerCase();
+      
+      return sortDirection === 'asc' 
+        ? valueA.localeCompare(valueB) 
+        : valueB.localeCompare(valueA);
+    };
+  
+    return [...users].sort(sortUsers);
+  }, [users, sortColumn, sortDirection]);
 
   // Pagination logic
   const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
@@ -69,12 +72,13 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
   const endIndex = Math.min(startIndex + itemsPerPage, sortedUsers.length);
   const currentUsers = sortedUsers.slice(startIndex, endIndex);
 
-  const goToNextPage = () => setCurrentPage((page) => Math.min(page + 1, totalPages));
-  const goToPreviousPage = () => setCurrentPage((page) => Math.max(page - 1, 1));
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const newStartIndex = (page - 1) * itemsPerPage;
+    const newEndIndex = Math.min(newStartIndex + itemsPerPage, sortedUsers.length);
+    onPaginationChange(newStartIndex + 1, newEndIndex, sortedUsers.length);
+  };
 
-  useEffect(() => {
-    onPaginationChange(startIndex + 1, endIndex, sortedUsers.length);
-  }, [currentPage, sortedUsers, onPaginationChange, startIndex, endIndex]);
 
   return (
     <>
@@ -148,27 +152,11 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onPaginationChange 
         </TableBody>
       </Table>
       <div className="flex items-center justify-between space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={goToPreviousPage}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Previous
-        </Button>
-        <div className="text-sm font-medium">
-          Page {currentPage} of {totalPages}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={goToNextPage}
-          disabled={currentPage === totalPages}
-        >
-          Next
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+      <PaginationWrapper
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
       </div>
     </>
   );
