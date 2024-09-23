@@ -15,6 +15,20 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
   const fileType = file.name.endsWith('.pdf') ? 'pdf' : 'image';
 
   try {
+    // Check if a file with the same name and user ID already exists
+    const existingFile = await prisma.file_upload.findFirst({
+      where: {
+        userId: metadata.userId,
+        fileName: file.name,
+        fileUrl: file.url,
+      },
+    });
+
+    if (existingFile) {
+      console.log("File already exists in database:", existingFile);
+      return { uploadedBy: metadata.userId, fileType: fileType, fileId: existingFile.id };
+    }
+
     const newFileUpload = await prisma.file_upload.create({
       data: {
         userId: metadata.userId,
