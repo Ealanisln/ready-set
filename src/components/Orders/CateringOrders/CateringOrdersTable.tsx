@@ -18,17 +18,18 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
   statusFilter,
   onStatusFilterChange,
 }) => {
+  console.log("CateringOrdersTable rendered with:", { orders, isLoading, statusFilter });
+
   if (isLoading) {
     return <div>Loading catering orders...</div>;
   }
 
+  if (orders.length === 0) {
+    return <div>No orders found.</div>;
+  }
+
   return (
     <Tabs value={statusFilter} onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}>
-      {/* <TabsList>
-        <TabsTrigger value="all">All Orders</TabsTrigger>
-        <TabsTrigger value="active">Active</TabsTrigger>
-        <TabsTrigger value="completed">Completed</TabsTrigger>
-      </TabsList> */}
       <TabsContent value={statusFilter}>
         <Table>
           <TableHeader>

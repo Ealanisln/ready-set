@@ -10,6 +10,7 @@ const useCateringOrders = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -17,15 +18,28 @@ const useCateringOrders = () => {
       const apiUrl = `/api/orders/catering-orders?page=${page}&limit=${limit}${
         statusFilter !== "all" ? `&status=${statusFilter}` : ""
       }`;
+      console.log("Fetching orders from:", apiUrl);
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error("Failed to fetch catering orders");
         }
-        const data: Order[] = await response.json();
-        setOrders(data);
+        const data = await response.json();
+        console.log("Received data:", data);
+        
+        if (Array.isArray(data)) {
+          setOrders(data);
+          setTotalPages(Math.ceil(data.length / limit));
+        } else if (data && Array.isArray(data.orders)) {
+          setOrders(data.orders);
+          setTotalPages(Math.ceil((data.totalCount || data.orders.length) / limit));
+        } else {
+          throw new Error("Unexpected data format received from API");
+        }
       } catch (error) {
+        console.error("Error fetching orders:", error);
         setError(error instanceof Error ? error.message : "An error occurred");
+        setOrders([]);
       } finally {
         setIsLoading(false);
       }
@@ -34,24 +48,31 @@ const useCateringOrders = () => {
     fetchOrders();
   }, [page, limit, statusFilter]);
 
-  const handleNextPage = useCallback(() => setPage((prev) => prev + 1), []);
-  const handlePrevPage = useCallback(() => setPage((prev) => Math.max(1, prev - 1)), []);
+  const handlePageChange = useCallback((newPage: number) => {
+    console.log("Page changed to:", newPage);
+    setPage(newPage);
+  }, []);
 
   const handleStatusFilter = useCallback((status: StatusFilter) => {
+    console.log("Status filter changed to:", status);
     setStatusFilter(status);
     setPage(1);
   }, []);
 
-  return useMemo(() => ({
+  const result = useMemo(() => ({
     orders,
     isLoading,
     error,
     page,
+    totalPages,
     statusFilter,
-    handleNextPage,
-    handlePrevPage,
+    handlePageChange,
     handleStatusFilter,
-  }), [orders, isLoading, error, page, statusFilter, handleNextPage, handlePrevPage, handleStatusFilter]);
+  }), [orders, isLoading, error, page, totalPages, statusFilter, handlePageChange, handleStatusFilter]);
+
+  console.log("useCateringOrders hook result:", result);
+
+  return result;
 };
 
 export default useCateringOrders;

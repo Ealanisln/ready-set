@@ -13,9 +13,9 @@ const CateringOrdersPage: React.FC = () => {
     isLoading,
     error,
     page,
+    totalPages,
     statusFilter,
-    handleNextPage,
-    handlePrevPage,
+    handlePageChange,
     handleStatusFilter,
   } = useCateringOrders();
 
@@ -35,9 +35,9 @@ const CateringOrdersPage: React.FC = () => {
             onStatusFilterChange={handleStatusFilter}
           />
           <CateringOrdersPagination
-            page={page}
-            onPrevPage={handlePrevPage}
-            onNextPage={handleNextPage}
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </CardContent>
       </Card>
