@@ -1,7 +1,7 @@
 // app/api/users/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/utils/prismaDB';
-import { getServerSession } from 'next-auth/next';
+import { NextResponse } from "next/server";
+import { prisma } from "@/utils/prismaDB";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 
 // GET: Fetch all users
@@ -9,8 +9,11 @@ export async function GET() {
   try {
     // Check if the user is authenticated and authorized
     const session = await getServerSession(authOptions);
-    if (!session || session.user.type !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (
+      !session ||
+      (session.user.type !== "admin" && session.user.type !== "super_admin")
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const users = await prisma.user.findMany({
@@ -49,8 +52,11 @@ export async function GET() {
     });
     return NextResponse.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -59,12 +65,12 @@ export async function POST(request: Request) {
   try {
     // Check if the user is authenticated and authorized
     const session = await getServerSession(authOptions);
-    if (!session || session.user.type !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session || session.user.type !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const data = await request.json();
-    const newUser = await prisma.user.create({ 
+    const newUser = await prisma.user.create({
       data,
       select: {
         id: true,
@@ -73,11 +79,14 @@ export async function POST(request: Request) {
         type: true,
         status: true,
         created_at: true,
-      }
+      },
     });
     return NextResponse.json(newUser);
   } catch (error) {
-    console.error('Error creating user:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error creating user:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

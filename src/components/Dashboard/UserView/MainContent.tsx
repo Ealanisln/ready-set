@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { UserTable } from "./UserTable";
 import { UserFilter } from "./UserFilter";
+import { useSession } from "next-auth/react";
 
 interface User {
   id: string;
@@ -48,23 +49,6 @@ export const MainContent: React.FC<MainContentProps> = ({
     ? users.filter((user) => user.type === filter)
     : users;
 
-  useEffect(() => {
-    // Fetch current user role
-    const fetchCurrentUserRole = async () => {
-      try {
-        // Replace this with your actual API call or auth logic
-        const response = await fetch("/api/current-user-role");
-        const data = await response.json();
-        setCurrentUserRole(data.role);
-      } catch (error) {
-        console.error("Error fetching current user role:", error);
-        // Handle error (e.g., show an error message to the user)
-      }
-    };
-
-    fetchCurrentUserRole();
-  }, []);
-
   const handlePaginationChange = (
     start: number,
     end: number,
@@ -72,6 +56,10 @@ export const MainContent: React.FC<MainContentProps> = ({
   ) => {
     setPaginationInfo({ start, end, total });
   };
+
+  const { data: session } = useSession();
+
+  console.log(session)
 
   const handleRoleChange = async (userId: string, newRole: User["type"]) => {
     try {
@@ -116,7 +104,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             <CardHeader>
               <CardTitle>Users</CardTitle>
               <CardDescription>
-                Manage your users and view their sales performance.
+                Manage your users and edit their information.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -124,7 +112,6 @@ export const MainContent: React.FC<MainContentProps> = ({
                 users={filteredUsers}
                 onPaginationChange={handlePaginationChange}
                 currentUserRole={currentUserRole}
-                onRoleChange={handleRoleChange}
               />
             </CardContent>
             <CardFooter>

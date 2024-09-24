@@ -1,9 +1,8 @@
-// users > [id]
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { ChevronLeft, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +29,7 @@ interface User {
   contact_name?: string;
   email: string;
   contact_number: string;
-  type: "driver" | "vendor" | "client" | "helpdesk";
+  type: "driver" | "vendor" | "client" | "helpdesk" | "admin" | "super_admin";
   company_name?: string;
   website?: string;
   street1: string;
@@ -55,6 +54,7 @@ interface UserFormValues extends User {
 
 export default function EditUser({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -89,9 +89,13 @@ export default function EditUser({ params }: { params: { id: string } }) {
         const response = await fetch(`/api/users/${params.id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
-  
+
         // Set form values
-        setValue("displayName", data.displayName || data.contact_name || data.name || "");
+        setValue("id", data.id);
+        setValue(
+          "displayName",
+          data.displayName || data.contact_name || data.name || "",
+        );
         setValue("company_name", data.company_name || "");
         setValue("contact_number", data.contact_number || "");
         setValue("email", data.email || "");
@@ -104,20 +108,20 @@ export default function EditUser({ params }: { params: { id: string } }) {
         setValue("parking_loading", data.parking_loading || "");
         setValue("type", data.type || "");
         setValue("status", data.status || "pending");
-  
+
         // Only set timeNeeded and countiesServed if the user is a vendor or client
         if (data.type === "vendor" || data.type === "client") {
           setValue("timeNeeded", data.timeNeeded || []);
           setValue("countiesServed", data.countiesServed || []);
         }
-  
+
         // Vendor specific fields
         if (data.type === "vendor") {
           setValue("cateringBrokerage", data.cateringBrokerage || []);
           setValue("frequency", data.frequency || "");
           setValue("provisions", data.provide ? data.provide.split(", ") : []);
         }
-  
+
         if (data.type === "client") {
           setValue("head_count", data.head_count || "");
           setValue("frequency", data.frequency || "");
@@ -128,11 +132,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
         setLoading(false);
       }
     };
-  
+
     fetchUser();
   }, [params.id, setValue]);
-  
-  
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
@@ -143,7 +145,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       if (data.type === "driver" || data.type === "helpdesk") {
         submitData.name = data.displayName;
         delete submitData.contact_name;
-        delete submitData.company_name; 
+        delete submitData.company_name;
       } else if (data.type === "vendor" || data.type === "client") {
         submitData.contact_name = data.displayName;
         delete submitData.name;
@@ -193,42 +195,34 @@ export default function EditUser({ params }: { params: { id: string } }) {
   };
 
   const handleDiscard = () => {
-    reset(); // Reset the form
     setHasUnsavedChanges(false);
     toast("Changes discarded", { icon: "🔄" });
     router.push("/admin/users");
   };
 
-  async function updateUserStatus(
-    userId: string,
-    newStatus: "active" | "pending" | "deleted",
-  ): Promise<void> {
-    const response = await fetch("/api/users/updateUserStatus", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, newStatus }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Response status:", response.status);
-      console.error("Response text:", text);
-      throw new Error(
-        `Failed to update user status: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = await response.json();
-    return data;
-  }
-
-  const handleStatusChange = async (
-    newStatus: "active" | "pending" | "deleted",
-  ) => {
+  const handleStatusChange = async (newStatus: "active" | "pending" | "deleted") => {
     try {
-      await updateUserStatus(params.id, newStatus);
+      const response = await fetch("/api/users/updateUserStatus", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          userId: params.id, 
+          newStatus: newStatus 
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Response status:", response.status);
+        console.error("Response data:", errorData);
+        throw new Error(
+          `Failed to update user status: ${response.status} ${response.statusText}`
+        );
+      }
+  
+      const data = await response.json();
       // Update local state
       setValue("status", newStatus);
       toast.success("User status updated successfully!");
@@ -237,6 +231,34 @@ export default function EditUser({ params }: { params: { id: string } }) {
       toast.error("Failed to update user status. Please try again.");
     }
   };
+
+  const handleRoleChange = async (newRole: string) => {
+    try {
+      const response = await fetch(`/api/users/${params.id}/change-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newRole }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Failed to update user role: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      // Update local state
+      setValue("type", newRole as User["type"]);
+      toast.success("User role updated successfully!");
+    } catch (error) {
+      console.error("Failed to update user role:", error);
+      toast.error("Failed to update user role. Please try again.");
+    }
+  };
+
 
   if (loading) {
     return (
@@ -324,8 +346,14 @@ export default function EditUser({ params }: { params: { id: string } }) {
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                   <UserStatusCard
-                    user={{ ...watchedValues, id: params.id }}
+                    user={{
+                      id: params.id,
+                      status: watchedValues.status,
+                      type: watchedValues.type,
+                    }}
                     onStatusChange={handleStatusChange}
+                    onRoleChange={handleRoleChange}
+                    currentUserRole={session?.user?.type || ""}
                   />
                   <Card
                     className="overflow-hidden"

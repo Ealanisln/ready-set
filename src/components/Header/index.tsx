@@ -53,15 +53,17 @@ const Header = () => {
   // Create a new menu array with conditional items based on user type
   const updatedMenuData = [
     ...menuData,
-    ...(userType === "client" ? [cateringRequestMenuItem, onDemandMenuItem] : []),
-    ...(userType === "admin" ? [adminMenuItem] : []),
+    ...(userType === "client"
+      ? [cateringRequestMenuItem, onDemandMenuItem]
+      : []),
+    ...(userType === "admin" || userType === "super_admin"
+      ? [adminMenuItem]
+      : []),
     ...(userType === "vendor" ? [vendorMenuItem] : []),
     ...(userType === "driver" ? [driverMenuItem] : []),
   ];
 
   const { theme, setTheme } = useTheme();
-
-  console.log(session);
 
   return (
     <>

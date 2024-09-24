@@ -39,14 +39,13 @@ interface UserTableProps {
   users: User[];
   onPaginationChange: (start: number, end: number, total: number) => void;
   currentUserRole: "admin" | "super_admin";
-  onRoleChange: (userId: string, newRole: User['type']) => Promise<void>;
 }
 
 export const UserTable: React.FC<UserTableProps> = ({ 
   users, 
   onPaginationChange, 
   currentUserRole,
-  onRoleChange 
+   
 }) => {
   const [sortColumn, setSortColumn] = useState<keyof User>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -87,16 +86,6 @@ export const UserTable: React.FC<UserTableProps> = ({
     const newStartIndex = (page - 1) * itemsPerPage;
     const newEndIndex = Math.min(newStartIndex + itemsPerPage, sortedUsers.length);
     onPaginationChange(newStartIndex + 1, newEndIndex, sortedUsers.length);
-  };
-
-  const handleRoleChange = async (userId: string, newRole: User['type']) => {
-    try {
-      await onRoleChange(userId, newRole);
-      // Optionally, you can update the local state here if needed
-    } catch (error) {
-      console.error("Failed to change user role:", error);
-      // Handle error (e.g., show an error message to the user)
-    }
   };
 
   return (
@@ -163,21 +152,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                     <Link href={`/admin/users/${user.id}`}>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                     </Link>
-                    {currentUserRole === "super_admin" && (
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          {["vendor", "client", "driver", "admin", "helpdesk"].map((role) => (
-                            <DropdownMenuItem 
-                              key={role}
-                              onClick={() => handleRoleChange(user.id, role as User['type'])}
-                            >
-                              {role.charAt(0).toUpperCase() + role.slice(1)}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

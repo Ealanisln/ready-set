@@ -1,4 +1,3 @@
-// app/api/users/[userId]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
@@ -18,8 +17,8 @@ async function checkAuthorization(requestedUserId: string) {
     return null;
   }
   
-  // Allow access if the user is an admin
-  if (session.user.type === 'admin') {
+  // Allow access if the user is an admin or super_admin
+  if (session.user.type === 'admin' || session.user.type === 'super_admin') {
     return null;
   }
   
@@ -93,6 +92,7 @@ export async function GET(
     );
   }
 }
+
 
 // PUT: Update a user by ID
 export async function PUT(
