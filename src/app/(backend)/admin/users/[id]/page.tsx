@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { ChevronLeft, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,9 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import UserStatusCard from "@/components/Dashboard/UserStatusCard";
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
+import { FileUploader } from "@/components/Uploader/file-uploader";
+import UserFilesDisplay from "@/components/User/user-files-display";
+import { useUploadFile } from "@/hooks/use-upload-file";
 
 interface User {
   id: string;
@@ -57,6 +59,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const userId = session?.user?.id;
 
   const {
     control,
@@ -259,6 +264,26 @@ export default function EditUser({ params }: { params: { id: string } }) {
     }
   };
 
+  const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
+    "fileUploader",
+    {
+      defaultUploadedFiles: [],
+      userId: userId ?? "",
+      maxFileCount: 4,
+      maxFileSize: 4 * 1024 * 1024,
+      allowedFileTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "application/pdf",
+      ],
+    },
+  );
+
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
 
   if (loading) {
     return (
@@ -355,50 +380,35 @@ export default function EditUser({ params }: { params: { id: string } }) {
                     onRoleChange={handleRoleChange}
                     currentUserRole={session?.user?.type || ""}
                   />
-                  <Card
+                 <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
                   >
                     <CardHeader>
-                      <CardTitle>User Images</CardTitle>
-                      <CardDescription>
-                        Lipsum dolor sit amet, consectetur adipiscing elit
-                      </CardDescription>
+                      <CardTitle>User Docs</CardTitle>
+                      <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-2">
-                        <Image
-                          alt="User image"
-                          className="aspect-square w-full rounded-md object-cover"
-                          height="300"
-                          src="/images/placeholder.svg"
-                          width="300"
+                      <div className="py-4">
+                        <FileUploader
+                          maxFileCount={4}
+                          maxSize={4 * 1024 * 1024}
+                          progresses={progresses}
+                          onUpload={onUpload}
+                          disabled={isUploading}
+                          accept={{
+                            "image/*": [],
+                            "application/pdf": [],
+                          }}
                         />
-                        <div className="grid grid-cols-3 gap-2">
-                          <button>
-                            <Image
-                              alt="User image"
-                              className="aspect-square w-full rounded-md object-cover"
-                              height="84"
-                              src="/images/placeholder.svg"
-                              width="84"
-                            />
-                          </button>
-                          <button>
-                            <Image
-                              alt="User image"
-                              className="aspect-square w-full rounded-md object-cover"
-                              height="84"
-                              src="/images/placeholder.svg"
-                              width="84"
-                            />
-                          </button>
-                          <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                            <Upload className="text-muted-foreground h-4 w-4" />
-                            <span className="sr-only">Upload</span>
-                          </button>
-                        </div>
                       </div>
+                      <div className="py-2">
+                {userId ? (
+                  <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
+                ) : (
+                  <p>Loading user information...</p>
+                )}
+              </div>
                     </CardContent>
                   </Card>
                   <Card x-chunk="dashboard-07-chunk-5">

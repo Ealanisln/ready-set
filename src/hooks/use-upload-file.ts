@@ -1,100 +1,88 @@
-import * as React from "react";
-import type { UploadedFile } from "@/types/uploaded-file";
-import toast from "react-hot-toast";
-import type { UploadFilesOptions } from "uploadthing/types";
+import * as React from "react"
+import type { UploadedFile } from "@/types/uploaded-file"
+import { toast } from "@/components/ui/use-toast"
+import type { UploadFilesOptions } from "uploadthing/types"
 
-import { getErrorMessage } from "@/lib/handle-error";
-import { uploadFiles } from "@/lib/uploadthing";
-import { type OurFileRouter } from "@/app/api/uploadthing/core";
-
-type UploadOptionsType = UploadFilesOptions<OurFileRouter, keyof OurFileRouter>;
+import { getErrorMessage } from "@/lib/handle-error"
+import { uploadFiles } from "@/lib/uploadthing"
+import { type OurFileRouter } from "@/app/api/uploadthing/core"
 
 interface UseUploadFileProps {
   defaultUploadedFiles?: UploadedFile[]
+  userId?: string
   maxFileCount?: number
   maxFileSize?: number
   allowedFileTypes?: string[]
-  userId?: string  // Make userId optional
-  headers?: UploadOptionsType['headers']
-  onUploadBegin?: UploadOptionsType['onUploadBegin']
-  onUploadProgress?: UploadOptionsType['onUploadProgress']
-  skipPolling?: UploadOptionsType['skipPolling']
+  onUploadBegin?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["onUploadBegin"]
+  onUploadProgress?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["onUploadProgress"]
+  headers?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["headers"]
+  skipPolling?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["skipPolling"]
 }
 
 export function useUploadFile(
   endpoint: keyof OurFileRouter,
-  { 
-    defaultUploadedFiles = [], 
-    maxFileCount = 4,
-    maxFileSize = 4 * 1024 * 1024, // 4MB
-    allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'],
+  {
+    defaultUploadedFiles = [],
     userId,
-    headers,
+    maxFileCount,
+    maxFileSize,
+    allowedFileTypes,
     onUploadBegin,
     onUploadProgress,
+    headers,
     skipPolling,
-  }: UseUploadFileProps = {} 
+  }: UseUploadFileProps = {}
 ) {
   const [uploadedFiles, setUploadedFiles] =
-    React.useState<UploadedFile[]>(defaultUploadedFiles);
-  const [progresses, setProgresses] = React.useState<Record<string, number>>(
-    {},
-  );
-  const [isUploading, setIsUploading] = React.useState(false);
+    React.useState<UploadedFile[]>(defaultUploadedFiles)
+  const [progresses, setProgresses] = React.useState<Record<string, number>>({})
+  const [isUploading, setIsUploading] = React.useState(false)
 
   async function onUpload(files: File[]) {
-    // Validation logic remains the same...
+    // Client-side validation
+    if (maxFileCount && files.length > maxFileCount) {
+      toast({ title: "Error", description: `You can only upload up to ${maxFileCount} files.`, variant: "destructive" })
+      return
+    }
 
-    setIsUploading(true);
+    const invalidFiles = files.filter(file => {
+      if (maxFileSize && file.size > maxFileSize) return true
+      if (allowedFileTypes && !allowedFileTypes.includes(file.type)) return true
+      return false
+    })
+
+    if (invalidFiles.length > 0) {
+      toast({ title: "Error", description: "Some files are invalid. Please check file types and sizes.", variant: "destructive" })
+      return
+    }
+
+    setIsUploading(true)
     try {
+      // Add userId to headers if provided
+      const updatedHeaders = userId
+        ? { ...headers, "X-User-Id": userId }
+        : headers
+
       const res = await uploadFiles(endpoint, {
         files,
-        headers,
+        headers: updatedHeaders,
         onUploadBegin,
         skipPolling,
-        onUploadProgress: (opts) => {
+        onUploadProgress: (opts:any) => {
           setProgresses((prev) => ({
             ...prev,
-            [opts.file]: opts.progress,
-          }));
-          onUploadProgress?.(opts);
+            [opts.file.name]: opts.progress,
+          }))
+          onUploadProgress?.(opts)
         },
-      });
+      })
 
-      // Save uploaded files to the database
-      const savedFiles = await saveFilesToDatabase(res, userId);
-
-      setUploadedFiles((prev) => {
-        return prev ? [...prev, ...savedFiles] : savedFiles;
-      });
+      setUploadedFiles((prev) => (prev ? [...prev, ...res] : res))
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      toast({ title: "Error", description: getErrorMessage(err), variant: "destructive" })
     } finally {
-      setProgresses({});
-      setIsUploading(false);
-    }
-  }
-
-  // Updated function to save files to the database
-  async function saveFilesToDatabase(files: UploadedFile[], userId?: string) {
-    try {
-      const response = await fetch("/api/save-uploaded-files", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ files, userId }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save files to database");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error saving files to database:", error);
-      toast.error("Failed to save file information");
-      return files; // Return original files if saving to database fails
+      setProgresses({})
+      setIsUploading(false)
     }
   }
 
@@ -103,5 +91,5 @@ export function useUploadFile(
     uploadedFiles,
     progresses,
     isUploading,
-  };
+  }
 }

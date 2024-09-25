@@ -17,6 +17,7 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: File[];
   onValueChange?: (files: File[]) => void;
   onUpload?: (files: File[]) => Promise<void>;
+  onUploadSuccess?: () => void; // Add this new prop
   progresses?: Record<string, number>;
   accept?: DropzoneProps["accept"];
   maxSize?: DropzoneProps["maxSize"];
@@ -30,6 +31,7 @@ export function FileUploader(props: FileUploaderProps) {
     value: valueProp,
     onValueChange,
     onUpload,
+    onUploadSuccess, // Add this new prop
     progresses,
     accept = {
       "image/*": [],
@@ -88,13 +90,14 @@ export function FileUploader(props: FileUploaderProps) {
           loading: `Uploading ${target}...`,
           success: () => {
             setFiles([]);
+            onUploadSuccess?.(); // Call onUploadSuccess here
             return `${target} uploaded`;
           },
           error: `Failed to upload ${target}`,
         });
       }
     },
-    [files, maxFileCount, multiple, onUpload, setFiles]
+    [files, maxFileCount, multiple, onUpload, setFiles, onUploadSuccess] // Add onUploadSuccess to the dependency array
   );
 
   function onRemove(index: number) {
