@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, Upload } from "lucide-react";
@@ -22,6 +22,10 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
 import { PasswordChange } from "@/components/Dashboard/AdminView/PasswordChange";
+import { FileUploader } from "@/components/Uploader/file-uploader";
+import { useSession } from "next-auth/react";
+import { useUploadFile } from "@/hooks/use-upload-file";
+import UserFilesDisplay from "@/components/User/user-files-display";
 
 interface User {
   id: string;
@@ -56,6 +60,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   const {
     control,
@@ -225,19 +233,26 @@ export default function EditUser({ params }: { params: { id: string } }) {
     return data;
   }
 
-  const handleStatusChange = async (
-    newStatus: "active" | "pending" | "deleted",
-  ) => {
-    try {
-      await updateUserStatus(params.id, newStatus);
-      // Update local state
-      setValue("status", newStatus);
-      toast.success("User status updated successfully!");
-    } catch (error) {
-      console.error("Failed to update user status:", error);
-      toast.error("Failed to update user status. Please try again.");
-    }
-  };
+  const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
+    "fileUploader",
+    {
+      defaultUploadedFiles: [],
+      userId: userId ?? "",
+      maxFileCount: 4,
+      maxFileSize: 4 * 1024 * 1024,
+      allowedFileTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "application/pdf",
+      ],
+    },
+  );
+  
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
 
   if (loading) {
     return (
@@ -329,44 +344,30 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   >
                     <CardHeader>
                       <CardTitle>User Docs</CardTitle>
-                      <CardDescription>
-                        Add your documents here
-                      </CardDescription>
+                      <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-2">
-                        <Image
-                          alt="User image"
-                          className="aspect-square w-full rounded-md object-cover"
-                          height="300"
-                          src="/images/placeholder.svg"
-                          width="300"
-                        />
-                        <div className="grid grid-cols-3 gap-2">
-                          <button>
-                            <Image
-                              alt="User image"
-                              className="aspect-square w-full rounded-md object-cover"
-                              height="84"
-                              src="/images/placeholder.svg"
-                              width="84"
-                            />
-                          </button>
-                          <button>
-                            <Image
-                              alt="User image"
-                              className="aspect-square w-full rounded-md object-cover"
-                              height="84"
-                              src="/images/placeholder.svg"
-                              width="84"
-                            />
-                          </button>
-                          <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
-                            <Upload className="text-muted-foreground h-4 w-4" />
-                            <span className="sr-only">Upload</span>
-                          </button>
-                        </div>
+                      <div className="py-4">
+                      <FileUploader
+                  maxFileCount={4}
+                  maxSize={4 * 1024 * 1024}
+                  progresses={progresses}
+                  onUpload={onUpload}
+                  disabled={isUploading}
+                  onUploadSuccess={handleUploadSuccess}
+                  accept={{
+                    "image/*": [],
+                    "application/pdf": [],
+                  }}
+                />
                       </div>
+                      <div className="py-2">
+                {userId ? (
+                  <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
+                ) : (
+                  <p>Loading user information...</p>
+                )}
+              </div>
                     </CardContent>
                   </Card>
                   <PasswordChange />

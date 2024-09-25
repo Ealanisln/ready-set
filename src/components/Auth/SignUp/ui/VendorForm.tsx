@@ -18,6 +18,7 @@ interface VendorFormProps {
 }
 
 const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
@@ -51,33 +52,57 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
     }
   };
 
+  const handleNext = () => {
+    setCurrentStep(2);
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(1);
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmitWrapper)}>
-      <input type="hidden" {...register("userType")} value="vendor" />
-      <CommonFields<VendorFormData> register={register} errors={errors} />
-      <input
-        {...register("parking")}
-        placeholder="Parking / Loading (Optional)"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
-      />
-      {errors.parking && (
-        <p className="mb-4 text-red-500">{errors.parking.message as string}</p>
-      )}
+    <input type="hidden" {...register("userType")} value="vendor" />
 
-      <div className="my-6 flex items-center">
-        <div className="flex-grow border-t border-gray-300"></div>
-        <span className="mx-4 flex-shrink text-gray-600">
-          Additional Information
-        </span>
-        <div className="flex-grow border-t border-gray-300"></div>
-      </div>
+    {currentStep === 1 && (
+      <>
+        <CommonFields<VendorFormData> register={register} errors={errors} />
+        <input
+          {...register("parking")}
+          placeholder="Parking / Loading (Optional)"
+          className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        />
+        {errors.parking && (
+          <p className="mb-4 text-red-500">{errors.parking.message as string}</p>
+        )}
+        <div className="pt-6">
+          <button
+            type="button"
+            onClick={handleNext}
+            className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition"
+          >
+            Next
+          </button>
+        </div>
+      </>
+    )}
 
-      <input
-        {...register("company")}
-        placeholder="Company Name"
-        required
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
-      />
+    {currentStep === 2 && (
+      <>
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t border-gray-300"></div>
+          <span className="mx-4 flex-shrink text-gray-600">
+            Additional Information
+          </span>
+          <div className="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        <input
+          {...register("company")}
+          placeholder="Company Name"
+          required
+          className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        />
 
       <input
         {...register("contact_name")}
@@ -174,16 +199,24 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
           </ul>
         </div>
       )}
-
-      <div className="pt-6">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
-        >
-          {isLoading ? "Registering..." : "Register as Vendor"}
-        </button>
-      </div>
+          <div className="pt-6 flex justify-between">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="hover:bg-gray-300 w-1/2 mr-2 rounded-md bg-gray-200 px-5 py-3 text-base font-semibold text-gray-700 transition"
+            >
+              Previous
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="hover:bg-primary-dark w-1/2 rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
+            >
+              {isLoading ? "Registering..." : "Register as Vendor"}
+            </button>
+          </div>
+        </>
+      )}
     </form>
   );
 };
