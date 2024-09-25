@@ -1,17 +1,29 @@
 import { Menu } from "@/types/menu";
 
 export const cateringRequestMenuItem: Menu = {
-  id: 3,
-  title: "Catering Request",
-  path: "/catering-request",
+  id: 10,
+  title: "Orders",
   newTab: false,
-};
-
-export const onDemandMenuItem: Menu = {
-  id: 9,
-  title: "On-demand",
-  path: "/on-demand",
-  newTab: false,
+  submenu: [
+    {
+      id: 3,
+      title: "Catering Request",
+      path: "/catering-request",
+      newTab: false,
+    },
+    {
+      id: 9,
+      title: "On-demand",
+      path: "/on-demand",
+      newTab: false,
+    },
+    {
+      id: 10,  // Changed from 9 to avoid duplicate IDs
+      title: "Order status",
+      path: "/order-status",
+      newTab: false,
+    },
+  ]
 };
 
 export const adminMenuItem: Menu = {

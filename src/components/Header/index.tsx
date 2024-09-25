@@ -11,7 +11,6 @@ import menuData, {
   adminMenuItem,
   vendorMenuItem,
   driverMenuItem,
-  onDemandMenuItem,
 } from "./menuData";
 
 const Header = () => {
@@ -53,9 +52,7 @@ const Header = () => {
   // Create a new menu array with conditional items based on user type
   const updatedMenuData = [
     ...menuData,
-    ...(userType === "client"
-      ? [cateringRequestMenuItem, onDemandMenuItem]
-      : []),
+    ...(userType === "client" ? [cateringRequestMenuItem] : []),
     ...(userType === "admin" || userType === "super_admin"
       ? [adminMenuItem]
       : []),
@@ -206,7 +203,7 @@ const Header = () => {
                           {pathUrl !== "/" ? (
                             <button
                               onClick={() => handleSubmenu(index)}
-                              className={`ud-menu-scroll flex items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
+                              className={`ud-menu-scroll flex items-center justify-between py-2 text-base text-black group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
                             >
                               {menuItem.title}
                               <span className="pl-1">
@@ -231,7 +228,7 @@ const Header = () => {
                               className={`ud-menu-scroll flex items-center justify-between py-2 text-base lg:inline-flex lg:px-0 lg:py-6 ${
                                 sticky
                                   ? "text-black group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                  : "text-white"
+                                  : "dark:text-white"
                               }`}
                             >
                               {menuItem.title}
