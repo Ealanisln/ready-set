@@ -5,56 +5,76 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-type DriverInfo = {
-  id: string;
-  name: string | null;
-  email: string | null;
-  contact_number: string | null;
+type CateringRequest = Prisma.catering_requestGetPayload<{
+  include: {
+    user: { select: { name: true; email: true } };
+    address: true;
+    delivery_address: true;
+    dispatch: {
+      include: {
+        driver: {
+          select: {
+            id: true;
+            name: true;
+            email: true;
+            contact_number: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+type OnDemandOrder = Prisma.on_demandGetPayload<{
+  include: {
+    user: { select: { name: true; email: true } };
+    address: true;
+    dispatch: {
+      include: {
+        driver: {
+          select: {
+            id: true;
+            name: true;
+            email: true;
+            contact_number: true;
+          };
+        };
+      };
+    };
+  };
+}> & {
+  delivery_address?: Prisma.addressGetPayload<{}> | null;
 };
 
-type AddressInfo = {
-  id: bigint;
-  street1: string | null;
-  street2: string | null;
-  city: string | null;
-  state: string | null;
-  zip: string | null;
-};
+type Order =
+  | (CateringRequest & { order_type: "catering" })
+  | (OnDemandOrder & { order_type: "on_demand" });
 
-type Order = {
-  id: bigint;
-  order_number: string;
-  date: Date | null;
-  status: string | null;  // Changed to allow null
-  driver_status: string | null;
-  order_total: Prisma.Decimal | null;
-  special_notes: string | null;
-  address: AddressInfo;
-  delivery_address: AddressInfo | null;
-  user: { name: string | null; email: string | null };
-  created_at: Date;
-  order_type: "catering" | "on_demand";
-  driver: DriverInfo | null;
-};
+function serializeBigInt(data: any): any {
+  return JSON.parse(JSON.stringify(data, (_, value) =>
+    typeof value === "bigint" ? value.toString() : 
+    value === null ? null : value
+  ));
+}
 
-export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user?.id) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  const url = new URL(req.url);
-  const limit = parseInt(url.searchParams.get("limit") || "10", 10);
-  const page = parseInt(url.searchParams.get("page") || "1", 10);
-  const skip = (page - 1) * limit;
-
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { order_number: string } },
+) {
   try {
-    // Fetch catering orders
-    const cateringOrders = await prisma.catering_request.findMany({
-      where: {
-        user_id: session.user.id,
-      },
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { order_number } = params;
+
+    let order: Order | null = null;
+
+    // Try to find catering request
+    const cateringRequest = await prisma.catering_request.findUnique({
+      where: { order_number },
       include: {
         user: { select: { name: true, email: true } },
         address: true,
@@ -72,99 +92,59 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: {
-        created_at: 'desc',
-      },
     });
 
-    // Fetch on-demand orders
-    const onDemandOrders = await prisma.on_demand.findMany({
-      where: {
-        user_id: session.user.id,
-      },
-      include: {
-        user: { select: { name: true, email: true } },
-        address: true,
-        dispatch: {
-          include: {
-            driver: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                contact_number: true,
+    if (cateringRequest) {
+      order = {
+        ...cateringRequest,
+        order_type: "catering",
+      };
+    } else {
+      // If not found, try to find on-demand order
+      const onDemandOrder = await prisma.on_demand.findUnique({
+        where: { order_number },
+        include: {
+          user: { select: { name: true, email: true } },
+          address: true,
+          dispatch: {
+            include: {
+              driver: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  contact_number: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+      });
 
-    // Fetch delivery addresses for on-demand orders
-    const onDemandDeliveryAddresses = await prisma.address.findMany({
-      where: {
-        id: { in: onDemandOrders.map((d) => d.delivery_address_id).filter((id): id is bigint => id !== null) },
-      },
-    });
+      if (onDemandOrder) {
+        // Fetch the delivery address if delivery_address_id exists
+        let delivery_address = null;
+        if (onDemandOrder.delivery_address_id) {
+          delivery_address = await prisma.address.findUnique({
+            where: { id: onDemandOrder.delivery_address_id },
+          });
+        }
 
-    // Combine and sort orders
-    const allOrders: Order[] = [
-      ...cateringOrders.map((o): Order => ({
-        id: o.id,
-        order_number: o.order_number,
-        date: o.date,
-        status: o.status,
-        driver_status: o.driver_status,
-        order_total: o.order_total,
-        special_notes: o.special_notes,
-        address: o.address,
-        delivery_address: o.delivery_address,
-        user: o.user,
-        created_at: o.created_at,
-        order_type: "catering",
-        driver: o.dispatch[0]?.driver || null,
-      })),
-      ...onDemandOrders.map((o): Order => {
-        const deliveryAddress = onDemandDeliveryAddresses.find(
-          (addr) => addr.id === o.delivery_address_id
-        );
-        return {
-          id: o.id,
-          order_number: o.order_number,
-          date: o.date,
-          status: o.status,
-          driver_status: o.driver_status,
-          order_total: o.order_total,
-          special_notes: o.special_notes,
-          address: o.address,
-          delivery_address: deliveryAddress || null,
-          user: o.user,
-          created_at: o.created_at,
-          order_type: "on_demand",
-          driver: o.dispatch[0]?.driver || null,
-        };
-      }),
-    ]
-      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
-      .slice(skip, skip + limit);
+        order = { ...onDemandOrder, delivery_address, order_type: "on_demand" };
+      }
+    }
 
-    const serializedOrders = allOrders.map((order) => ({
-      ...JSON.parse(
-        JSON.stringify(order, (key, value) =>
-          typeof value === "bigint" ? value.toString() : value
-        )
-      ),
-    }));
+    if (order) {
+      const serializedOrder = serializeBigInt(order);
+      return NextResponse.json(serializedOrder);
+    }
 
-    return NextResponse.json(serializedOrders, { status: 200 });
+    return NextResponse.json({ message: "Order not found" }, { status: 404 });
   } catch (error) {
-    console.error("Error fetching user orders:", error);
+    console.error("Error fetching order:", error);
     return NextResponse.json(
-      { message: "Error fetching user orders" },
-      { status: 500 }
+      { message: "Error fetching order", error: (error as Error).message },
+      { status: 500 },
     );
   }
 }

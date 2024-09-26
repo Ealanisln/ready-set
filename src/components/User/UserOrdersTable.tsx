@@ -53,7 +53,7 @@ const ClientOrders: React.FC = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
-      const apiUrl = `/api/orders?page=${page}&limit=${limit}`;
+      const apiUrl = `/api/user-orders?page=${page}&limit=${limit}`;
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
