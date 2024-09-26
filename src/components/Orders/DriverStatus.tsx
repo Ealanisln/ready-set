@@ -22,7 +22,7 @@ interface DriverStatusCardProps {
   order: {
     id: string;
     status: string;
-    driver_status: string;
+    driver_status: string | null;
     user_id: string;
     pickup_time: string;
     arrival_time: string;
@@ -54,8 +54,12 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
   driverInfo,
   updateDriverStatus,
 }) => {
-  const getProgressValue = (status: string) => {
-    return driverStatusProgress[status] || 0;
+  const getProgressValue = (status: string | null) => {
+    return driverStatusProgress[status || 'assigned'] || 0;
+  };
+
+  const getDisplayStatus = (status: string | null) => {
+    return status ? driverStatusMap[status] || status : driverStatusMap['assigned'];
   };
 
   return (
@@ -99,7 +103,7 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
                   variant="outline"
                   className={cn("px-4 py-2 text-lg font-medium", {
                     "border-yellow-300 bg-yellow-100 text-yellow-800":
-                      order.driver_status === "assigned",
+                      order.driver_status === "assigned" || !order.driver_status,
                     "border-blue-300 bg-blue-100 text-blue-800":
                       order.driver_status === "arrived_at_vendor",
                     "border-green-300 bg-green-100 text-green-800":
@@ -110,12 +114,12 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
                       order.driver_status === "completed",
                   })}
                 >
-                  {driverStatusMap[order.driver_status] || order.driver_status}
+                  {getDisplayStatus(order.driver_status)}
                 </Badge>
               </div>
               <Progress
                 value={getProgressValue(order.driver_status)}
-                className="w-ful"
+                className="w-full"
                 indicatorClassName="bg-yellow-400"
               />
               <div className="text-muted-foreground flex justify-between text-xs">

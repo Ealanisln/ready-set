@@ -26,16 +26,15 @@ import {
   UsersIcon,
   CheckIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type OrderStatus = "active" | "assigned" | "cancelled" | "completed";
-type DriverStatus =
-  | "assigned"
-  | "arrived_at_vendor"
-  | "en_route_to_client"
-  | "arrived_to_client"
-  | "completed"
-  | null;
-type OrderType = "catering" | "on_demand";
+// Shared types
+interface Driver {
+  id: string;
+  name: string | null;
+  email: string | null;
+  contact_number: string | null;
+}
 
 interface Address {
   street1?: string;
@@ -43,54 +42,187 @@ interface Address {
   state?: string;
   zip?: string;
 }
-
 interface BaseOrder {
   id: string;
   order_number: string;
   date: string;
-  status: OrderStatus;
-  driver_status: DriverStatus;
+  status: string;
+  driver_status: string | null;
   order_total: string;
   special_notes: string | null;
   address: Address;
   delivery_address: Address | null;
+  user_id: string;
+  pickup_time: string;
+  arrival_time: string;
+  complete_time: string;
+  updated_at: string | null;
+  dispatch: Array<{
+    driver: Driver;
+  }>;
 }
 
 interface CateringOrder extends BaseOrder {
   order_type: "catering";
-  headcount?: string | null;
-  need_host?: "yes" | "no" | null;
+  headcount: string | null;
+  need_host: "yes" | "no" | null;
+  brokerage: string | null;
 }
 
 interface OnDemandOrder extends BaseOrder {
   order_type: "on_demand";
-  item_delivered?: string | null;
-  vehicle_type?: "Car" | "Van" | "Truck" | null;
+  item_delivered: string | null;
+  vehicle_type: "Car" | "Van" | "Truck" | null;
 }
 
 type Order = CateringOrder | OnDemandOrder;
 
-const driverStatuses: Record<OrderType, DriverStatus[]> = {
-  on_demand: [
-    "assigned",
-    "arrived_at_vendor",
-    "en_route_to_client",
-    "arrived_to_client",
-    "completed",
-  ],
-  catering: [
-    "assigned",
-    "arrived_at_vendor",
-    "en_route_to_client",
-    "arrived_to_client",
-    "completed",
-  ],
+// DriverStatusCard component
+interface DriverStatusCardProps {
+  order: {
+    id: string;
+    status: string;
+    driver_status: string | null;
+    user_id: string;
+    pickup_time: string;
+    arrival_time: string;
+    complete_time: string;
+    updated_at: string | null;
+  };
+  driverInfo: Driver | null;
+  updateDriverStatus: (newStatus: string) => Promise<void>;
+}
+
+const driverStatusMap: Record<string, string> = {
+  assigned: "🚗 Assigned",
+  arrived_at_vendor: "🏪 At Vendor",
+  en_route_to_client: "🚚 On the Way",
+  arrived_to_client: "🏁 Arrived",
+  completed: "✅ Completed",
 };
 
+const driverStatusProgress: Record<string, number> = {
+  assigned: 0,
+  arrived_at_vendor: 25,
+  en_route_to_client: 50,
+  arrived_to_client: 75,
+  completed: 100,
+};
+
+const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
+  order,
+  driverInfo,
+  updateDriverStatus,
+}) => {
+  const getProgressValue = (status: string | null) => {
+    return driverStatusProgress[status || 'assigned'] || 0;
+  };
+
+  const getDisplayStatus = (status: string | null) => {
+    return status ? driverStatusMap[status] || status : driverStatusMap['assigned'];
+  };
+
+  return (
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Driver Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {driverInfo ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                Driver Name:{" "}
+                <span className="font-medium">
+                  {driverInfo.name || "Not assigned"}
+                </span>
+              </div>
+              <div>
+                Driver Email:{" "}
+                <span className="font-medium">{driverInfo.email || "N/A"}</span>
+              </div>
+              <div>
+                Driver Contact:{" "}
+                <span className="font-medium">
+                  {driverInfo.contact_number || "N/A"}
+                </span>
+              </div>
+              <div>
+                Updated At:{" "}
+                <span className="font-medium">
+                  {order.updated_at
+                    ? new Date(order.updated_at).toLocaleString()
+                    : "N/A"}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2 py-4">
+              <div className="flex flex-col items-center justify-center">
+                <span className="mb-2 text-xl font-medium">Drive Status</span>
+                <div className="flex justify-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Update Status</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {Object.entries(driverStatusMap).map(([status, label]) => (
+                    <DropdownMenuItem
+                      key={status}
+                      onClick={() => updateDriverStatus(status)}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+              </div>
+              <Progress
+                value={getProgressValue(order.driver_status)}
+                className="w-full"
+                indicatorClassName="bg-yellow-400"
+              />
+              <div className="text-muted-foreground flex justify-between text-xs">
+                <span>Not Started</span>
+                <span>Completed</span>
+              </div>
+            </div>
+            <div className="flex justify-center">
+
+            <Badge
+                  variant="outline"
+                  className={cn("px-4 py-2 text-lg font-medium", {
+                    "border-yellow-300 bg-yellow-100 text-yellow-800":
+                      order.driver_status === "assigned" || !order.driver_status,
+                    "border-blue-300 bg-blue-100 text-blue-800":
+                      order.driver_status === "arrived_at_vendor",
+                    "border-green-300 bg-green-100 text-green-800":
+                      order.driver_status === "en_route_to_client",
+                    "border-purple-300 bg-purple-100 text-purple-800":
+                      order.driver_status === "arrived_to_client",
+                    "border-gray-300 bg-gray-100 text-gray-800":
+                      order.driver_status === "completed",
+                  })}
+                >
+                  {getDisplayStatus(order.driver_status)}
+                </Badge>
+                </div>
+           
+          </div>
+        ) : (
+          <div>No driver assigned to this order.</div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// DriverDashboard component
 const DriverDashboard: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -103,6 +235,13 @@ const DriverDashboard: React.FC = () => {
         }
         const data: Order = await response.json();
         setOrder(data);
+        
+        // Extract driver info from the dispatch array
+        if (data.dispatch && data.dispatch.length > 0 && data.dispatch[0].driver) {
+          setDriverInfo(data.dispatch[0].driver);
+        } else {
+          setDriverInfo(null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -113,7 +252,7 @@ const DriverDashboard: React.FC = () => {
     fetchOrder();
   }, []);
 
-  const updateDriverStatus = async (newStatus: DriverStatus) => {
+  const updateDriverStatus = async (newStatus: string) => {
     if (!order) return;
 
     try {
@@ -131,21 +270,24 @@ const DriverDashboard: React.FC = () => {
 
       const updatedOrder: Order = await response.json();
       setOrder(updatedOrder);
+      if (updatedOrder.dispatch && updatedOrder.dispatch.length > 0 && updatedOrder.dispatch[0].driver) {
+        setDriverInfo(updatedOrder.dispatch[0].driver);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
-
   if (loading)
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="ml-4 text-lg font-semibold">Loading...</p>
       </div>
     );
-  if (error) return;
-  <div className="flex h-screen items-center justify-center">
-    <p className="ml-4 text-lg font-semibold">Error: {error}</p>
-  </div>;
+  if (error) return (
+    <div className="flex h-screen items-center justify-center">
+      <p className="ml-4 text-lg font-semibold">Error: {error}</p>
+    </div>
+  );
 
   if (!order)
     return (
@@ -153,10 +295,6 @@ const DriverDashboard: React.FC = () => {
         <p className="ml-4 text-lg font-semibold">Sorry, order not found.</p>
       </div>
     );
-
-  const currentStatusIndex = driverStatuses[order.order_type].indexOf(
-    order.driver_status || "assigned",
-  );
 
   return (
     <div className="container mx-auto p-4">
@@ -168,9 +306,7 @@ const DriverDashboard: React.FC = () => {
               Order #{order.order_number}
             </CardTitle>
             <Badge
-              variant={
-                order.order_type === "catering" ? "secondary" : "default"
-              }
+              variant={order.order_type === "catering" ? "secondary" : "default"}
               className="text-sm"
             >
               {order.order_type === "catering" ? "Catering" : "On Demand"}
@@ -263,55 +399,24 @@ const DriverDashboard: React.FC = () => {
               <p>{order.special_notes || "N/A"}</p>
             </div>
           </div>
-          <Separator />
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Driver Status</span>
-              <span className="text-muted-foreground text-sm">
-                {currentStatusIndex + 1} of{" "}
-                {driverStatuses[order.order_type].length} steps completed
-              </span>
-            </div>
-            <Progress
-              value={
-                ((currentStatusIndex + 1) /
-                  driverStatuses[order.order_type].length) *
-                100
-              }
-              className="w-full"
-              indicatorClassName="bg-yellow-400"
-            />
-            <div className="text-muted-foreground flex justify-between text-sm">
-              <span>Assigned</span>
-              <span>Completed</span>
-            </div>
-          </div>
         </CardContent>
-        <CardFooter>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full">Update Driver Status</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuLabel>Update Driver Status</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {driverStatuses[order.order_type].map((status) => (
-                <DropdownMenuItem
-                  key={status}
-                  onSelect={() => updateDriverStatus(status as DriverStatus)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{status?.replace(/_/g, " ")}</span>
-                    {order.driver_status === status && (
-                      <CheckIcon className="h-4 w-4" />
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardFooter>
       </Card>
+      <div className="py-8">
+        <DriverStatusCard
+          order={{
+            id: order.id,
+            status: order.status,
+            driver_status: order.driver_status,
+            user_id: order.user_id,
+            pickup_time: order.pickup_time,
+            arrival_time: order.arrival_time,
+            complete_time: order.complete_time,
+            updated_at: order.updated_at,
+          }}
+          driverInfo={driverInfo}
+          updateDriverStatus={updateDriverStatus}
+        />
+      </div>
     </div>
   );
 };
