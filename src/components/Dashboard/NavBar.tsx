@@ -243,7 +243,7 @@ const NavBar = () => {
               </Link>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/', redirect:true })}>
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>

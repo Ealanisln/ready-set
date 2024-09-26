@@ -56,7 +56,7 @@ const Header = () => {
     ...(userType === "admin" || userType === "super_admin"
       ? [adminMenuItem]
       : []),
-    ...(userType === "vendor" ? [cateringRequestMenuItem] : []),
+    ...(userType === "vendor" ? [vendorMenuItem] : []),
     ...(userType === "driver" ? [driverMenuItem] : []),
   ];
 
@@ -320,14 +320,14 @@ const Header = () => {
                     </Link>
                     {pathUrl !== "/" || sticky ? (
                       <button
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ callbackUrl: '/', redirect:true })}
                         className="signUpBtn rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
                       >
                         Sign Out
                       </button>
                     ) : (
                       <button
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ callbackUrl: '/', redirect:true })}
                         className="signUpBtn rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white"
                       >
                         Sign Out

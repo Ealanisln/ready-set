@@ -143,7 +143,7 @@ const SingleTeam = ({ team }: { team: TeamType }) => {
             <p>{description}</p>
           </div>
         </div>
-        <div className="flex justify-center space-x-4">
+        {/* <div className="flex justify-center space-x-4">
           <a
             href={facebookLink}
             target="_blank"
@@ -168,7 +168,7 @@ const SingleTeam = ({ team }: { team: TeamType }) => {
           >
             Instagram
           </a>
-        </div>
+        </div> */}
       </DialogContent>
     </Dialog>
   );
