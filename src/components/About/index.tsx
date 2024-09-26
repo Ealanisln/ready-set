@@ -12,28 +12,47 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]">
-                  Our Professional Standards - Ready Set Delivery
+                  At Ready-Set, Delivering Excellence Across the San Francisco
+                  Bay Area and Austin
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
-                  Ready Set treats your business as an extension of our own.
-                  Each driver undergoes comprehensive training programs to
-                  maximize the client experience. Our drivers are also required
-                  to abide by the Health Insurance Portability and
-                  Accountability Act (HIPAA).
+                  We&apos;re more than just a delivery service; we&apos;re your
+                  dedicated partner for getting things where they need to be, on
+                  time and with care. If you need a delivery solution,
+                  contracted work for an event, or some help with your
+                  day-to-day operations, we&apos;ve got you covered.
                   <br /> <br />
-                  In addition, our drivers must obtain a Food Handlers
-                  Certificate in compliance with California standards, adhere to
-                  a dress code, wear disposable gloves, and maintain proper
-                  handling equipment for the safety of our clients and their
-                  guests.
+                  With a team committed to excellence and a passion for
+                  convenience, we specialize in providing exceptional same-day
+                  delivery, emergency deliveries, catering delivery & setup, or
+                  any package delivery you need. Our experienced couriers are
+                  ready to pick up and deliver your items with care and speed,
+                  ensuring your <strong>delivery in Austin</strong>, the{" "}
+                  <strong>Bay Area</strong>, or <strong>San Francisco</strong>{" "}
+                  is seamless and efficient.
+                </p>
+                <p className="mb-10 text-lg leading-relaxed text-body-color dark:text-dark-6">
+                  <strong>Your Business is Our Priority</strong>
                 </p>
 
-                <a
+                <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
+                  At Ready-Set, we treat your business as an extension of our
+                  own. Each driver undergoes comprehensive training programs to
+                  maximize the client experience. Our drivers are also required
+                  to abide by the Health Insurance Portability and
+                  Accountability Act (HIPAA) and obtain a Food Handlers
+                  Certificate in compliance with California standards. They
+                  adhere to a dress code, wear disposable gloves, and maintain
+                  proper handling equipment for the safety of our clients and
+                  their guests.
+                </p>
+
+                {/* <a
                   href="/#"
                   className="inline-flex items-center justify-center rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white duration-300 hover:bg-primary/90"
                 >
                   Know More
-                </a>
+                </a> */}
               </div>
             </div>
 
