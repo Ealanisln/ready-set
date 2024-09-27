@@ -63,7 +63,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const userId = session?.user?.id;
+  const userId = params.id;
+
+  console.log(userId);
 
   const {
     control,

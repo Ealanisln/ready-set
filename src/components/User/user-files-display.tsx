@@ -31,7 +31,7 @@ interface TransformedFile {
 
 interface UserFilesDisplayProps {
   userId: string;
-  refreshTrigger: number; // New prop to trigger refresh
+  refreshTrigger: number; 
 }
 
 const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({

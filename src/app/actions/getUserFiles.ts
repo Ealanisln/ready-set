@@ -12,13 +12,13 @@ export type UserFile = {
   category: string;
 };
 
-export async function getUserFiles(userId: string) {
+export async function getUserFiles(entityId: string) {
   'use server'
 
   try {
     const userFiles = await prisma.file_upload.findMany({
       where: {
-        userId: userId,
+        entityId: entityId,
       },
       select: {
         id: true,
@@ -32,11 +32,9 @@ export async function getUserFiles(userId: string) {
       },
     });
 
-    // revalidatePath('/user-files'); 
-
     return userFiles;
   } catch (error) {
-    console.error('Error fetching user files:', error);
-    throw new Error('Failed to fetch user files');
+    console.error('Error fetching entity files:', error);
+    throw new Error('Failed to fetch entity files');
   }
 }
