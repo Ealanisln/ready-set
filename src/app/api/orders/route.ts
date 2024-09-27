@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
       width,
       height,
       weight,
+      fileUploads, // New field for file uploads
     } = data;
 
     // Validate required fields
@@ -257,6 +258,22 @@ export async function POST(req: NextRequest) {
             order_total: parsedOrderTotal,
             tip: parsedTip,
             status: "active",
+            fileUploads: {
+              connectOrCreate: fileUploads.map((file: { name: string; url: string; size: number }) => ({
+                where: { fileUrl: file.url },
+                create: {
+                  userId: session.user.id,
+                  fileName: file.name,
+                  fileUrl: file.url,
+                  fileSize: file.size,
+                  fileType: file.name.split('.').pop() || 'unknown',
+                  uploadedAt: new Date(),
+                },
+              })),
+            },
+          },
+          include: {
+            fileUploads: true,
           },
         });
       } else if (order_type === "on_demand") {

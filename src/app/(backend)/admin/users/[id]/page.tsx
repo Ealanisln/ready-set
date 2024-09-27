@@ -1,3 +1,5 @@
+// src/app/(backend)/admin/users/[id]/page.tsx
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -24,6 +26,7 @@ import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert"
 import { FileUploader } from "@/components/Uploader/file-uploader";
 import UserFilesDisplay from "@/components/User/user-files-display";
 import { useUploadFile } from "@/hooks/use-upload-file";
+import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 
 interface User {
   id: string;
@@ -205,28 +208,30 @@ export default function EditUser({ params }: { params: { id: string } }) {
     router.push("/admin/users");
   };
 
-  const handleStatusChange = async (newStatus: "active" | "pending" | "deleted") => {
+  const handleStatusChange = async (
+    newStatus: "active" | "pending" | "deleted",
+  ) => {
     try {
       const response = await fetch("/api/users/updateUserStatus", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          userId: params.id, 
-          newStatus: newStatus 
+        body: JSON.stringify({
+          userId: params.id,
+          newStatus: newStatus,
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Response status:", response.status);
         console.error("Response data:", errorData);
         throw new Error(
-          `Failed to update user status: ${response.status} ${response.statusText}`
+          `Failed to update user status: ${response.status} ${response.statusText}`,
         );
       }
-  
+
       const data = await response.json();
       // Update local state
       setValue("status", newStatus);
@@ -250,7 +255,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          `Failed to update user role: ${response.status} ${response.statusText}`
+          `Failed to update user role: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -264,26 +269,41 @@ export default function EditUser({ params }: { params: { id: string } }) {
     }
   };
 
-  const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
-    "fileUploader",
-    {
-      defaultUploadedFiles: [],
-      userId: userId ?? "",
-      maxFileCount: 4,
-      maxFileSize: 4 * 1024 * 1024,
-      allowedFileTypes: [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "application/pdf",
-      ],
-    },
-  );
+  const useUploadFileHook = (category: string) => {
+    const { onUpload, progresses, isUploading } = useUploadFile(
+      "fileUploader",
+      {
+        defaultUploadedFiles: [],
+        userId: userId ?? "",
+        maxFileCount: 1,
+        maxFileSize: 3 * 1024 * 1024,
+        allowedFileTypes: [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "application/pdf",
+        ],
+        category: category,
+        entityType: "user",
+        entityId: params.id,
+      },
+    );
+    return {
+      onUpload,
+      progresses,
+      isUploading,
+      category,
+      entityType: "user",
+      entityId: params.id,
+    };
+  };
 
-  const handleUploadSuccess = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-  }, []);
-
+  const uploadHooks = {
+    driver_photo: useUploadFileHook("driver_photo"),
+    insurance_photo: useUploadFileHook("insurance_photo"),
+    vehicle_photo: useUploadFileHook("vehicle_photo"),
+    license_photo: useUploadFileHook("license_photo"),
+  };
 
   if (loading) {
     return (
@@ -380,7 +400,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                     onRoleChange={handleRoleChange}
                     currentUserRole={session?.user?.type || ""}
                   />
-                 <Card
+                  <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
                   >
@@ -389,26 +409,17 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="py-4">
-                        <FileUploader
-                          maxFileCount={4}
-                          maxSize={4 * 1024 * 1024}
-                          progresses={progresses}
-                          onUpload={onUpload}
-                          disabled={isUploading}
-                          accept={{
-                            "image/*": [],
-                            "application/pdf": [],
-                          }}
-                        />
-                      </div>
+                      <UserProfileUploads uploadHooks={uploadHooks} />
                       <div className="py-2">
-                {userId ? (
-                  <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
-                ) : (
-                  <p>Loading user information...</p>
-                )}
-              </div>
+                        {userId ? (
+                          <UserFilesDisplay
+                            userId={userId}
+                            refreshTrigger={refreshTrigger}
+                          />
+                        ) : (
+                          <p>Loading user information...</p>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                   <Card x-chunk="dashboard-07-chunk-5">

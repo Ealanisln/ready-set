@@ -56,7 +56,7 @@ const Header = () => {
     ...(userType === "admin" || userType === "super_admin"
       ? [adminMenuItem]
       : []),
-    ...(userType === "vendor" ? [vendorMenuItem] : []),
+    ...(userType === "vendor" ? [cateringRequestMenuItem] : []),
     ...(userType === "driver" ? [driverMenuItem] : []),
   ];
 

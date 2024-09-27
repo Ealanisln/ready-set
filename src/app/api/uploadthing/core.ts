@@ -9,7 +9,18 @@ export const ourFileRouter = {
       const { getServerAuth } = await import('@/server/auth');
       const user = await getServerAuth(req);
       if (!user) throw new UploadThingError("Unauthorized");
-      return { userId: user.id };
+
+      // Extract custom headers using the get method
+      const category = req.headers.get("x-category");
+      const entityType = req.headers.get("x-entity-type");
+      const entityId = req.headers.get("x-entity-id");
+
+      return { 
+        userId: user.id,
+        category: category || 'uncategorized',
+        entityType: entityType || 'user',
+        entityId: entityId || user.id
+      };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const { handleUploadComplete } = await import('@/server/upload');

@@ -3,6 +3,10 @@ import { useForm, Controller } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
+import { FileUploader } from "../Uploader/file-uploader";
+import { useUploadFile } from "@/hooks/use-upload-file";
+import UserFilesDisplay from "../User/user-files-display";
+import { UploadedFile } from "@/types/upload";
 
 interface CateringFormData {
   brokerage: string;
@@ -87,12 +91,35 @@ const CateringOrderForm: React.FC = () => {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
   }, []);
 
+  const userId = session?.user?.id;
+
   const needHost = watch("need_host");
+
+  // const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
+  //   "fileUploader",
+  //   {
+  //     defaultUploadedFiles: [],
+  //     userId: userId ?? "",
+  //     maxFileCount: 4,
+  //     maxFileSize: 4 * 1024 * 1024,
+  //     allowedFileTypes: [
+  //       "image/jpeg",
+  //       "image/png",
+  //       "image/gif",
+  //       "application/pdf",
+  //     ],
+  //   },
+  // );
+
+  const handleFileUploadSuccess = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   const onSubmit = async (data: CateringFormData) => {
     if (!session?.user?.id) {
@@ -135,12 +162,18 @@ const CateringOrderForm: React.FC = () => {
             zip: data.delivery_address.zip,
           },
           tip: data.tip ? parseFloat(data.tip) : undefined,
+          // fileUploads: uploadedFiles.map((file: UploadedFile) => ({
+          //   name: file.name,
+          //   url: file.url,
+          //   size: file.size,
+          // })),
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
         reset();
+        setRefreshTrigger((prev) => prev + 1);
         toast.success("Catering request submitted successfully!");
       } else {
         const errorData = await response.json();
@@ -159,6 +192,8 @@ const CateringOrderForm: React.FC = () => {
       toast.error("An error occurred. Please try again.");
     }
   };
+
+ 
 
   return (
     <form
@@ -653,6 +688,28 @@ const CateringOrderForm: React.FC = () => {
           )}
         />
       </div>
+
+      <div className="py-4">
+        {/* <FileUploader
+          maxFileCount={4}
+          maxSize={4 * 1024 * 1024}
+          progresses={progresses}
+          onUpload={onUpload}
+          disabled={isUploading}
+          accept={{
+            "image/*": [],
+            "application/pdf": [],
+          }}
+          onUploadSuccess={handleFileUploadSuccess}
+        /> */}
+      </div>
+      {/* <div className="py-2">
+        {userId ? (
+          <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
+        ) : (
+          <p>Loading user information...</p>
+        )}
+      </div> */}
 
       <button
         type="submit"

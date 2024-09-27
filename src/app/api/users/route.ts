@@ -1,4 +1,3 @@
-// app/api/users/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { getServerSession } from "next-auth/next";
@@ -19,6 +18,7 @@ export async function GET() {
     const users = await prisma.user.findMany({
       select: {
         id: true,
+        guid: true,
         name: true,
         email: true,
         emailVerified: true,
@@ -41,13 +41,19 @@ export async function GET() {
         frequency: true,
         provide: true,
         head_count: true,
-        photo_vehicle: true,
-        photo_license: true,
-        photo_insurance: true,
         status: true,
         side_notes: true,
         created_at: true,
         updated_at: true,
+        file_uploads: {
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            fileUrl: true,
+            category: true,
+          },
+        },
       },
     });
     return NextResponse.json(users);
@@ -71,14 +77,36 @@ export async function POST(request: Request) {
 
     const data = await request.json();
     const newUser = await prisma.user.create({
-      data,
+      data: {
+        ...data,
+        file_uploads: {
+          create: data.file_uploads?.map((file: any) => ({
+            fileName: file.fileName,
+            fileType: file.fileType,
+            fileSize: file.fileSize,
+            fileUrl: file.fileUrl,
+            entityType: "user",
+            category: file.category,
+          })),
+        },
+      },
       select: {
         id: true,
+        guid: true,
         name: true,
         email: true,
         type: true,
         status: true,
         created_at: true,
+        file_uploads: {
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            fileUrl: true,
+            category: true,
+          },
+        },
       },
     });
     return NextResponse.json(newUser);

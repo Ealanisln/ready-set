@@ -1,3 +1,4 @@
+// src/server/upload.ts
 import { PrismaClient } from '@prisma/client';
 import { UploadMetadata, UploadedFile } from '@/types/upload';
 
@@ -36,6 +37,9 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
         fileType: fileType,
         fileSize: file.size,
         fileUrl: file.url,
+        entityType: metadata.entityType || 'user', // Default to 'user' if not provided
+        category: metadata.category || 'uncategorized', // Default to 'uncategorized' if not provided
+        entityId: metadata.entityId || metadata.userId, // Default to userId if not provided
       },
     });
 

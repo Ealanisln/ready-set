@@ -1,3 +1,4 @@
+// src/hooks/use-upload-file.ts
 import * as React from "react"
 import type { UploadedFile } from "@/types/uploaded-file"
 import { toast } from "@/components/ui/use-toast"
@@ -17,6 +18,9 @@ interface UseUploadFileProps {
   onUploadProgress?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["onUploadProgress"]
   headers?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["headers"]
   skipPolling?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["skipPolling"]
+  category: string
+  entityType: string
+  entityId: string
 }
 
 export function useUploadFile(
@@ -31,7 +35,10 @@ export function useUploadFile(
     onUploadProgress,
     headers,
     skipPolling,
-  }: UseUploadFileProps = {}
+    category,
+    entityType,
+    entityId,
+  }: UseUploadFileProps
 ) {
   const [uploadedFiles, setUploadedFiles] =
     React.useState<UploadedFile[]>(defaultUploadedFiles)
@@ -58,10 +65,20 @@ export function useUploadFile(
 
     setIsUploading(true)
     try {
-      // Add userId to headers if provided
-      const updatedHeaders = userId
-        ? { ...headers, "X-User-Id": userId }
-        : headers
+      // Add userId, category, entityType, and entityId to headers if they are defined
+      const customHeaders: Record<string, string> = {
+        "X-Category": category,
+        "X-Entity-Type": entityType,
+        "X-Entity-Id": entityId,
+      }
+      if (userId) {
+        customHeaders["X-User-Id"] = userId
+      }
+
+      const updatedHeaders = {
+        ...headers,
+        ...customHeaders,
+      }
 
       const res = await uploadFiles(endpoint, {
         files,

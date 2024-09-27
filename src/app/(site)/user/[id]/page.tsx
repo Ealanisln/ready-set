@@ -4,7 +4,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { ChevronLeft, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,10 +21,10 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
 import { PasswordChange } from "@/components/Dashboard/AdminView/PasswordChange";
-import { FileUploader } from "@/components/Uploader/file-uploader";
 import { useSession } from "next-auth/react";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserFilesDisplay from "@/components/User/user-files-display";
+import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 
 interface User {
   id: string;
@@ -64,6 +63,53 @@ export default function EditUser({ params }: { params: { id: string } }) {
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
+
+  const useUploadFileHook = (category: string) => {
+    console.log("Creating upload hook for category:", category);
+    const { onUpload, progresses, isUploading } = useUploadFile(
+      "fileUploader",
+      {
+        defaultUploadedFiles: [],
+        userId: userId ?? "",
+        maxFileCount: 1,
+        maxFileSize: 3 * 1024 * 1024,
+        allowedFileTypes: [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "application/pdf",
+        ],
+        category: category,
+        entityType: "user",
+        entityId: params.id,
+      },
+    );
+    return { 
+      onUpload: (files: File[]) => {
+        console.log("Uploading files for category:", category);
+        return onUpload(files);
+      }, 
+      progresses, 
+      isUploading, 
+      category,
+      entityType: "user",
+      entityId: params.id
+    };
+  };
+
+  const uploadHooks = {
+    driver_photo: useUploadFileHook("driver_photo"),
+    insurance_photo: useUploadFileHook("insurance_photo"),
+    vehicle_photo: useUploadFileHook("vehicle_photo"),
+    license_photo: useUploadFileHook("license_photo"),
+  };
+
+  const uploadFields = [
+    { name: "driver_photo", label: "Driver Photo" },
+    { name: "insurance_photo", label: "Insurance Photo" },
+    { name: "vehicle_photo", label: "Vehicle Photo" },
+    { name: "license_photo", label: "Driver License Photo" },
+  ];
 
   const {
     control,
@@ -208,51 +254,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
     router.push("/");
   };
 
-  async function updateUserStatus(
-    userId: string,
-    newStatus: "active" | "pending" | "deleted",
-  ): Promise<void> {
-    const response = await fetch("/api/users/updateUserStatus", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, newStatus }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Response status:", response.status);
-      console.error("Response text:", text);
-      throw new Error(
-        `Failed to update user status: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = await response.json();
-    return data;
-  }
-
-  const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
-    "fileUploader",
-    {
-      defaultUploadedFiles: [],
-      userId: userId ?? "",
-      maxFileCount: 4,
-      maxFileSize: 4 * 1024 * 1024,
-      allowedFileTypes: [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "application/pdf",
-      ],
-    },
-  );
-  
   const handleUploadSuccess = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
   }, []);
-
 
   if (loading) {
     return (
@@ -334,10 +338,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   )}
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                  {/* <UserStatusCard
-                    user={{ ...watchedValues, id: params.id }}
-                    onStatusChange={handleStatusChange}
-                  /> */}
                   <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
@@ -347,27 +347,18 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="py-4">
-                      <FileUploader
-                  maxFileCount={4}
-                  maxSize={4 * 1024 * 1024}
-                  progresses={progresses}
-                  onUpload={onUpload}
-                  disabled={isUploading}
-                  onUploadSuccess={handleUploadSuccess}
-                  accept={{
-                    "image/*": [],
-                    "application/pdf": [],
-                  }}
-                />
-                      </div>
+                      <UserProfileUploads uploadHooks={uploadHooks} />
+
                       <div className="py-2">
-                {userId ? (
-                  <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
-                ) : (
-                  <p>Loading user information...</p>
-                )}
-              </div>
+                        {userId ? (
+                          <UserFilesDisplay
+                            userId={userId}
+                            refreshTrigger={refreshTrigger}
+                          />
+                        ) : (
+                          <p>Loading user information...</p>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                   <PasswordChange />
