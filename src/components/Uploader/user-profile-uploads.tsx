@@ -1,4 +1,5 @@
-// In UserProfileUploads.tsx
+// src/components/Uploader/user-profile-uploads.tsx
+
 import React from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
 
@@ -13,17 +14,38 @@ interface UploadHook {
 
 interface UserProfileUploadsProps {
   uploadHooks: Record<string, UploadHook>;
+  userType:
+    | "vendor"
+    | "client"
+    | "driver"
+    | "admin"
+    | "helpdesk"
+    | "super_admin";
+  onUploadSuccess: () => void; // Add this to props to notify parent
 }
-const uploadFields = [
+
+const driverUploadFields = [
   { name: "driver_photo", label: "Driver Photo" },
   { name: "insurance_photo", label: "Insurance Photo" },
   { name: "vehicle_photo", label: "Vehicle Photo" },
   { name: "license_photo", label: "Driver License Photo" },
 ];
 
+const generalUploadFields = [{ name: "general_files", label: "User Files" }];
+
 const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
   uploadHooks,
+  userType,
+  onUploadSuccess,
 }) => {
+  const uploadFields =
+    userType === "driver" ? driverUploadFields : generalUploadFields;
+
+  const handleUpload = async (hook: UploadHook, files: File[]) => {
+    await hook.onUpload(files);
+    onUploadSuccess(); // Notify parent on upload success
+  };
+
   return (
     <div>
       {uploadFields.map((field) => {
@@ -34,7 +56,7 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
           <div key={field.name} className="mb-4">
             <h3 className="mb-2 text-lg font-semibold">{field.label}</h3>
             <FileUploader
-              onUpload={hook.onUpload}
+              onUpload={(files) => handleUpload(hook, files)}
               progresses={hook.progresses}
               isUploading={hook.isUploading}
               accept={{

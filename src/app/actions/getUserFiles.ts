@@ -1,7 +1,6 @@
 'use server';
 
 import { PrismaClient } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +9,7 @@ export type UserFile = {
   fileName: string;
   fileType: string;
   fileUrl: string;
+  category: string;
 };
 
 export async function getUserFiles(userId: string) {
@@ -25,6 +25,7 @@ export async function getUserFiles(userId: string) {
         fileName: true,
         fileType: true,
         fileUrl: true,
+        category: true,
       },
       orderBy: {
         uploadedAt: 'desc',

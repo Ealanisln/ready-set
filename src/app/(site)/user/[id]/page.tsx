@@ -84,16 +84,16 @@ export default function EditUser({ params }: { params: { id: string } }) {
         entityId: params.id,
       },
     );
-    return { 
+    return {
       onUpload: (files: File[]) => {
         console.log("Uploading files for category:", category);
         return onUpload(files);
-      }, 
-      progresses, 
-      isUploading, 
+      },
+      progresses,
+      isUploading,
       category,
       entityType: "user",
-      entityId: params.id
+      entityId: params.id,
     };
   };
 
@@ -102,14 +102,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
     insurance_photo: useUploadFileHook("insurance_photo"),
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
+    general_files: useUploadFileHook("general_files"),
   };
 
-  const uploadFields = [
-    { name: "driver_photo", label: "Driver Photo" },
-    { name: "insurance_photo", label: "Insurance Photo" },
-    { name: "vehicle_photo", label: "Vehicle Photo" },
-    { name: "license_photo", label: "Driver License Photo" },
-  ];
 
   const {
     control,
@@ -336,19 +331,15 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       watchedValues={watchedValues}
                     />
                   )}
-                </div>
-                <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                   <Card
                     className="overflow-hidden"
                     x-chunk="dashboard-07-chunk-4"
                   >
                     <CardHeader>
-                      <CardTitle>User Docs</CardTitle>
-                      <CardDescription>Add your documents here</CardDescription>
+                      <CardTitle>Uploaded Files</CardTitle>
+                      <CardDescription>View your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UserProfileUploads uploadHooks={uploadHooks} />
-
                       <div className="py-2">
                         {userId ? (
                           <UserFilesDisplay
@@ -361,6 +352,33 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+                <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+                  <Card
+                    className="overflow-hidden"
+                    x-chunk="dashboard-07-chunk-4"
+                  >
+                    <CardHeader>
+                      <CardTitle>Upload Files</CardTitle>
+                      <CardDescription>Add your documents here</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                    <UserProfileUploads
+                        uploadHooks={uploadHooks}
+                        userType={
+                          watchedValues.type as
+                            | "vendor"
+                            | "client"
+                            | "driver"
+                            | "admin"
+                            | "helpdesk"
+                            | "super_admin"
+                        }
+                        onUploadSuccess={handleUploadSuccess}  
+                      />
+                    </CardContent>
+                  </Card>
+                  
                   <PasswordChange />
                 </div>
               </div>

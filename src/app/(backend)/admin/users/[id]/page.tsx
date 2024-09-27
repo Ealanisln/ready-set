@@ -23,7 +23,6 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import UserStatusCard from "@/components/Dashboard/UserStatusCard";
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
-import { FileUploader } from "@/components/Uploader/file-uploader";
 import UserFilesDisplay from "@/components/User/user-files-display";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
@@ -208,6 +207,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
     router.push("/admin/users");
   };
 
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
   const handleStatusChange = async (
     newStatus: "active" | "pending" | "deleted",
   ) => {
@@ -303,6 +306,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
     insurance_photo: useUploadFileHook("insurance_photo"),
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
+    general_files: useUploadFileHook("general_files"),
   };
 
   if (loading) {
@@ -388,6 +392,27 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       watchedValues={watchedValues}
                     />
                   )}
+                  <Card
+                    className="overflow-hidden"
+                    x-chunk="dashboard-07-chunk-4"
+                  >
+                    <CardHeader>
+                      <CardTitle>Uploaded Files</CardTitle>
+                      <CardDescription>View your documents here</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="py-2">
+                        {userId ? (
+                          <UserFilesDisplay
+                            userId={userId}
+                            refreshTrigger={refreshTrigger}
+                          />
+                        ) : (
+                          <p>Loading user information...</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                   <UserStatusCard
@@ -409,8 +434,20 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <UserProfileUploads uploadHooks={uploadHooks} />
-                      <div className="py-2">
+                      <UserProfileUploads
+                        uploadHooks={uploadHooks}
+                        userType={
+                          watchedValues.type as
+                            | "vendor"
+                            | "client"
+                            | "driver"
+                            | "admin"
+                            | "helpdesk"
+                            | "super_admin"
+                        }
+                        onUploadSuccess={handleUploadSuccess}  
+                      />
+                      {/* <div className="py-2">
                         {userId ? (
                           <UserFilesDisplay
                             userId={userId}
@@ -419,7 +456,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                         ) : (
                           <p>Loading user information...</p>
                         )}
-                      </div>
+                      </div> */}
                     </CardContent>
                   </Card>
                   <Card x-chunk="dashboard-07-chunk-5">

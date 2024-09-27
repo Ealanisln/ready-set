@@ -1,3 +1,4 @@
+// src/components/User/user-files-display.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
@@ -25,6 +26,7 @@ interface TransformedFile {
   name: string;
   url: string;
   type: "image" | "pdf" | string;
+  category: string;
 }
 
 interface UserFilesDisplayProps {
@@ -32,7 +34,10 @@ interface UserFilesDisplayProps {
   refreshTrigger: number; // New prop to trigger refresh
 }
 
-const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({ userId, refreshTrigger }) => {
+const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({
+  userId,
+  refreshTrigger,
+}) => {
   const [userFiles, setUserFiles] = useState<TransformedFile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,14 +47,14 @@ const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({ userId, refreshTrig
       setIsLoading(true);
       try {
         const files = await getUserFiles(userId);
-        const transformedFiles: TransformedFile[] = files.map(
-          (file: UserFile) => ({
-            key: file.id,
-            name: file.fileName,
-            url: file.fileUrl,
-            type: file.fileType,
-          }),
-        );
+        const transformedFiles: TransformedFile[] = files.map((file) => ({
+          key: file.id,
+          name: file.fileName,
+          url: file.fileUrl,
+          type: file.fileType,
+          category: file.category ?? "Uncategorized", // Provide fallback for null
+        }));
+
         setUserFiles(transformedFiles);
       } catch (err) {
         setError(
@@ -203,6 +208,9 @@ const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({ userId, refreshTrig
                 <div className="min-w-0 flex-grow">
                   <p className="truncate text-sm font-medium">{file.name}</p>
                   <p className="text-xs text-gray-500">{file.type}</p>
+                  <p className="text-xs text-gray-400">
+                    Category: {file.category}
+                  </p>
                 </div>
                 <Button
                   variant="ghost"
