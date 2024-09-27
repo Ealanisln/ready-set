@@ -3,12 +3,9 @@ import { useForm, Controller } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
-import { FileUploader } from "../Uploader/file-uploader";
-import { useUploadFile } from "@/hooks/use-upload-file";
-import UserFilesDisplay from "../User/user-files-display";
-import { UploadedFile } from "@/types/upload";
 
-interface CateringFormData {
+interface FormData {
+  order_type: "catering" | "on_demand";
   brokerage: string;
   order_number: string;
   address_id: string;
@@ -17,8 +14,8 @@ interface CateringFormData {
   pickup_time: string;
   arrival_time: string;
   complete_time?: string;
-  headcount: string;
-  need_host: "yes" | "no";
+  headcount?: string;
+  need_host?: "yes" | "no";
   hours_needed?: string;
   number_of_host?: string;
   client_attention: string;
@@ -26,6 +23,12 @@ interface CateringFormData {
   special_notes?: string;
   order_total: string;
   tip?: string;
+  item_delivered?: string;
+  vehicle_type?: "Car" | "Van" | "Truck";
+  length?: string;
+  width?: string;
+  height?: string;
+  weight?: string;
   address: {
     id: string;
     street1: string;
@@ -44,7 +47,7 @@ interface CateringFormData {
   };
 }
 
-const CateringOrderForm: React.FC = () => {
+const CombinedOrderForm: React.FC = () => {
   const { data: session } = useSession();
   const {
     control,
@@ -53,8 +56,9 @@ const CateringOrderForm: React.FC = () => {
     watch,
     setValue,
     reset,
-  } = useForm<CateringFormData>({
+  } = useForm<FormData>({
     defaultValues: {
+      order_type: "catering",
       brokerage: "",
       order_number: "",
       date: "",
@@ -70,6 +74,12 @@ const CateringOrderForm: React.FC = () => {
       special_notes: "",
       order_total: "",
       tip: "",
+      item_delivered: "",
+      vehicle_type: "Car",
+      length: "",
+      width: "",
+      height: "",
+      weight: "",
       address: {
         id: "",
         street1: "",
@@ -91,37 +101,15 @@ const CateringOrderForm: React.FC = () => {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
   }, []);
 
-  const userId = session?.user?.id;
-
+  const orderType = watch("order_type");
   const needHost = watch("need_host");
 
-  // const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
-  //   "fileUploader",
-  //   {
-  //     defaultUploadedFiles: [],
-  //     userId: userId ?? "",
-  //     maxFileCount: 4,
-  //     maxFileSize: 4 * 1024 * 1024,
-  //     allowedFileTypes: [
-  //       "image/jpeg",
-  //       "image/png",
-  //       "image/gif",
-  //       "application/pdf",
-  //     ],
-  //   },
-  // );
-
-  const handleFileUploadSuccess = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1);
-  }, []);
-
-  const onSubmit = async (data: CateringFormData) => {
+  const onSubmit = async (data: FormData) => {
     if (!session?.user?.id) {
       console.error("User not authenticated");
       return;
@@ -131,7 +119,7 @@ const CateringOrderForm: React.FC = () => {
       toast.error("Please select a pickup address");
       return;
     }
-    if (!data.delivery_address) {
+    if (data.order_type === "catering" && !data.delivery_address) {
       console.error("Delivery address not selected for catering order");
       toast.error("Please select a delivery address for catering order");
       return;
@@ -144,7 +132,6 @@ const CateringOrderForm: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          order_type: "catering",
           address: {
             id: data.address.id,
             street1: data.address.street1,
@@ -162,29 +149,27 @@ const CateringOrderForm: React.FC = () => {
             zip: data.delivery_address.zip,
           },
           tip: data.tip ? parseFloat(data.tip) : undefined,
-          // fileUploads: uploadedFiles.map((file: UploadedFile) => ({
-          //   name: file.name,
-          //   url: file.url,
-          //   size: file.size,
-          // })),
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        reset();
-        setRefreshTrigger((prev) => prev + 1);
-        toast.success("Catering request submitted successfully!");
+        reset(); // Reset the form
+        toast.success(
+          `${data.order_type === "catering" ? "Catering" : "On-demand"} request submitted successfully!`,
+        );
       } else {
         const errorData = await response.json();
-        console.error("Failed to create catering request", errorData);
+        console.error(`Failed to create ${data.order_type} request`, errorData);
 
         if (errorData.message === "Order number already exists") {
           setErrorMessage(
             "This order number already exists. Please use a different order number.",
           );
         } else {
-          toast.error("Failed to submit catering request. Please try again.");
+          toast.error(
+            `Failed to submit ${data.order_type} request. Please try again.`,
+          );
         }
       }
     } catch (error) {
@@ -192,8 +177,6 @@ const CateringOrderForm: React.FC = () => {
       toast.error("An error occurred. Please try again.");
     }
   };
-
- 
 
   return (
     <form
@@ -206,12 +189,25 @@ const CateringOrderForm: React.FC = () => {
         </div>
       )}
 
-      <label
-        htmlFor="date"
-        className="mb-2 block text-sm font-medium text-gray-700"
-      >
-        Pickup location
-      </label>
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          Order Type
+        </label>
+        <Controller
+          name="order_type"
+          control={control}
+          rules={{ required: "Order type is required" }}
+          render={({ field }) => (
+            <select
+              {...field}
+              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+            >
+              <option value="catering">Catering</option>
+              <option value="on_demand">On-Demand</option>
+            </select>
+          )}
+        />
+      </div>
 
       <AddressManager
         onAddressesLoaded={handleAddressesLoaded}
@@ -267,6 +263,282 @@ const CateringOrderForm: React.FC = () => {
         )}
       </div>
 
+      {orderType === "catering" && (
+        <>
+          {/* Catering-specific fields */}
+          <div>
+            <label
+              htmlFor="headcount"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Headcount
+            </label>
+            <Controller
+              name="headcount"
+              control={control}
+              rules={{ required: "Headcount is required for catering orders" }}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="number"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+            {errors.headcount && (
+              <span className="text-sm text-red-500">
+                {errors.headcount.message}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Do you need a Host?
+            </label>
+            <Controller
+              name="need_host"
+              control={control}
+              render={({ field }) => (
+                <div className="flex space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      {...field}
+                      value="yes"
+                      checked={field.value === "yes"}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700">Yes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      {...field}
+                      value="no"
+                      checked={field.value === "no"}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700">No</span>
+                  </label>
+                </div>
+              )}
+            />
+          </div>
+
+          {needHost === "yes" && (
+            <>
+              <div>
+                <label
+                  htmlFor="hours_needed"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Hours Needed
+                </label>
+                <Controller
+                  name="hours_needed"
+                  control={control}
+                  rules={{
+                    required: "Hours Needed is required",
+                    max: { value: 24, message: "Maximum 24 hours" },
+                  }}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="number"
+                      min="1"
+                      max="24"
+                      className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                    />
+                  )}
+                />
+                {errors.hours_needed && (
+                  <span className="text-sm text-red-500">
+                    {errors.hours_needed.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="number_of_host"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  How many Hosts do you need?
+                </label>
+                <Controller
+                  name="number_of_host"
+                  control={control}
+                  rules={{
+                    required: "Number of Hosts is required",
+                    max: { value: 10, message: "Maximum 10 hosts" },
+                  }}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="number"
+                      min="1"
+                      max="10"
+                      className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                    />
+                  )}
+                />
+                {errors.number_of_host && (
+                  <span className="text-sm text-red-500">
+                    {errors.number_of_host.message}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {orderType === "on_demand" && (
+        <>
+          {/* On-demand specific fields */}
+          <div>
+            <label
+              htmlFor="item_delivered"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Item Delivered
+            </label>
+            <Controller
+              name="item_delivered"
+              control={control}
+              rules={{
+                required: "Item Delivered is required for on-demand orders",
+              }}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+            {errors.item_delivered && (
+              <span className="text-sm text-red-500">
+                {errors.item_delivered.message}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="vehicle_type"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Vehicle Type
+            </label>
+            <Controller
+              name="vehicle_type"
+              control={control}
+              rules={{
+                required: "Vehicle Type is required for on-demand orders",
+              }}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="Car">Car</option>
+                  <option value="Van">Van</option>
+                  <option value="Truck">Truck</option>
+                </select>
+              )}
+            />
+            {errors.vehicle_type && (
+              <span className="text-sm text-red-500">
+                {errors.vehicle_type.message}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="length"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Length (optional)
+            </label>
+            <Controller
+              name="length"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="width"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Width (optional)
+            </label>
+            <Controller
+              name="width"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="height"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Height (optional)
+            </label>
+            <Controller
+              name="height"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="weight"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Weight (optional)
+            </label>
+            <Controller
+              name="weight"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+              )}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Common fields for both order types */}
       <div>
         <label
           htmlFor="order_number"
@@ -388,132 +660,6 @@ const CateringOrderForm: React.FC = () => {
           )}
         />
       </div>
-
-      <div>
-        <label
-          htmlFor="headcount"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Headcount
-        </label>
-        <Controller
-          name="headcount"
-          control={control}
-          rules={{ required: "Headcount is required for catering orders" }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="number"
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
-          )}
-        />
-        {errors.headcount && (
-          <span className="text-sm text-red-500">
-            {errors.headcount.message}
-          </span>
-        )}
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Do you need a Host?
-        </label>
-        <Controller
-          name="need_host"
-          control={control}
-          render={({ field }) => (
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  {...field}
-                  value="yes"
-                  checked={field.value === "yes"}
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-700">Yes</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  {...field}
-                  value="no"
-                  checked={field.value === "no"}
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-700">No</span>
-              </label>
-            </div>
-          )}
-        />
-      </div>
-
-      {needHost === "yes" && (
-        <>
-          <div>
-            <label
-              htmlFor="hours_needed"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Hours Needed
-            </label>
-            <Controller
-              name="hours_needed"
-              control={control}
-              rules={{
-                required: "Hours Needed is required",
-                max: { value: 24, message: "Maximum 24 hours" },
-              }}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  type="number"
-                  min="1"
-                  max="24"
-                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                />
-              )}
-            />
-            {errors.hours_needed && (
-              <span className="text-sm text-red-500">
-                {errors.hours_needed.message}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="number_of_host"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              How many Hosts do you need?
-            </label>
-            <Controller
-              name="number_of_host"
-              control={control}
-              rules={{
-                required: "Number of Hosts is required",
-                max: { value: 10, message: "Maximum 10 hosts" },
-              }}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  type="number"
-                  min="1"
-                  max="10"
-                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                />
-              )}
-            />
-            {errors.number_of_host && (
-              <span className="text-sm text-red-500">
-                {errors.number_of_host.message}
-              </span>
-            )}
-          </div>
-        </>
-      )}
 
       <div>
         <label
@@ -689,36 +835,14 @@ const CateringOrderForm: React.FC = () => {
         />
       </div>
 
-      <div className="py-4">
-        {/* <FileUploader
-          maxFileCount={4}
-          maxSize={4 * 1024 * 1024}
-          progresses={progresses}
-          onUpload={onUpload}
-          disabled={isUploading}
-          accept={{
-            "image/*": [],
-            "application/pdf": [],
-          }}
-          onUploadSuccess={handleFileUploadSuccess}
-        /> */}
-      </div>
-      {/* <div className="py-2">
-        {userId ? (
-          <UserFilesDisplay userId={userId} refreshTrigger={refreshTrigger} />
-        ) : (
-          <p>Loading user information...</p>
-        )}
-      </div> */}
-
       <button
         type="submit"
         className="w-full rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"
       >
-        Submit Catering Request
+        Submit {orderType === "catering" ? "Catering" : "On-Demand"} Request
       </button>
     </form>
   );
 };
 
-export default CateringOrderForm;
+export default CombinedOrderForm;
