@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     } else {
       // Redirect to unauthorized page
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/signin", request.url));
     }
   }
 
@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     } else {
       // Redirect to unauthorized page
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/signin", request.url));
     }
   }
 
