@@ -12,6 +12,7 @@ interface User {
   email: string;
   type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
   created_at?: Date;
+  status: "active" | "pending" | "deleted"; // Add this line
 }
 
 export default function Users() {
@@ -28,7 +29,12 @@ export default function Users() {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        setUsers(data);
+        // Ensure that each user has a status field
+        const usersWithStatus = data.map((user: User) => ({
+          ...user,
+          status: user.status || "active" // Default to "active" if status is not provided
+        }));
+        setUsers(usersWithStatus);
       } catch (error: any) {
         setError(error.message);
       } finally {

@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get('page') || '1', 10);
   const skip = (page - 1) * limit;
   const status = url.searchParams.get('status');
-  const recentOnly = url.searchParams.get('recentOnly') === 'true';
 
   try {
     let whereClause: any = {};
@@ -27,10 +26,14 @@ export async function GET(req: NextRequest) {
 
     const cateringOrders = await prisma.catering_request.findMany({
       where: whereClause,
-      skip: recentOnly ? 0 : skip,
-      take: recentOnly ? 5 : limit,
+      skip,
+      take: limit,
       orderBy: { created_at: 'desc' },
-      include: { user: { select: { name: true, email: true } } },
+      include: { 
+        user: { select: { name: true, email: true } },
+        address: true,
+        delivery_address: true
+      },
     });
 
     const serializedOrders = cateringOrders.map(order => ({
@@ -46,5 +49,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching catering orders:", error);
     return NextResponse.json({ message: "Error fetching catering orders" }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
