@@ -24,13 +24,16 @@ export async function GET(req: NextRequest) {
       whereClause.status = status;
     }
 
-    const onDemandOrders = await prisma.on_demand.findMany({
-      where: whereClause,
-      skip,
-      take: limit,
-      orderBy: { created_at: 'desc' },
-      include: { user: { select: { name: true, email: true } } },
-    });
+    const [onDemandOrders, totalCount] = await Promise.all([
+      prisma.on_demand.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+      }),
+      prisma.on_demand.count({ where: whereClause }),
+    ]);
 
     const serializedOrders = onDemandOrders.map(order => ({
       ...JSON.parse(JSON.stringify(order, (key, value) =>
@@ -38,10 +41,14 @@ export async function GET(req: NextRequest) {
           ? value.toString()
           : value
       )),
-      order_type: 'on_demand',
+      order_type: 'ondemand',
+      client_name: order.user.name,
     }));
 
-    return NextResponse.json(serializedOrders, { status: 200 });
+    return NextResponse.json({
+      orders: serializedOrders,
+      totalCount,
+    }, { status: 200 });
   } catch (error) {
     console.error("Error fetching on-demand orders:", error);
     return NextResponse.json({ message: "Error fetching on-demand orders" }, { status: 500 });

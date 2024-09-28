@@ -30,75 +30,104 @@ import {
 
 interface Order {
   id: string;
+  user_id: string;
   order_number: string;
-  status: 'active' | 'assigned' | 'cancelled' | 'completed';
-  event_date: string;
+  brokerage?: string;
+  status: string;
+  date: string;
   order_total: string | number;
-  client_name: string;
+  client_attention: string;
 }
 
-const OrdersPage: React.FC = () => {
-  const [orderType, setOrderType] = useState<'catering' | 'ondemand'>('catering');
+const OnDemandOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'assigned' | 'cancelled' | 'completed'>('all');
+  const [limit] = useState(10);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "completed">("all");
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
+      const apiUrl = `/api/orders/on-demand-orders?page=${page}&limit=${limit}${statusFilter !== "all" ? `&status=${statusFilter}` : ""}`;
+      console.log("Fetching orders from:", apiUrl);
       try {
-        const response = await fetch(`/api/orders/${orderType}-orders?page=${page}&status=${statusFilter}`);
-        if (!response.ok) throw new Error(`Failed to fetch ${orderType} orders`);
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error("Failed to fetch on-demand orders");
+        }
         const data = await response.json();
-        setOrders(data.orders || []);
-        setTotalPages(Math.ceil(data.totalCount / 10));
+        console.log("Received data:", data);
+        
+        // Check if data is an array (direct orders) or an object with orders property
+        const ordersData = Array.isArray(data) ? data : data.orders || [];
+        setOrders(ordersData);
+        
+        // Calculate total pages based on the data
+        const totalCount = Array.isArray(data) ? data.length : data.totalCount || ordersData.length;
+        setTotalPages(Math.ceil(totalCount / limit));
+        
+        console.log("Updated state:", { orders: ordersData, totalPages: Math.ceil(totalCount / limit) });
       } catch (error) {
+        console.error("Error fetching orders:", error);
         setError(error instanceof Error ? error.message : "An error occurred");
+        setOrders([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrders();
-  }, [orderType, page, statusFilter]);
+  }, [page, limit, statusFilter]);
 
-  const handlePageChange = (newPage: number) => setPage(newPage);
-  const handleStatusFilter = (status: 'all' | 'active' | 'assigned' | 'cancelled' | 'completed') => {
+  const handlePageChange = (newPage: number) => {
+    console.log("Changing to page:", newPage);
+    setPage(newPage);
+  };
+
+  const handleStatusFilter = (status: "all" | "active" | "completed") => {
+    console.log("Changing status filter to:", status);
     setStatusFilter(status);
     setPage(1);
   };
 
-  if (error) return <div>Error: {error}</div>;
+  console.log("Current state:", { orders, isLoading, error, page, statusFilter, totalPages });
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <main className="container mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle>On-demand Orders</CardTitle>
-          <CardDescription>Manage all orders across the platform.</CardDescription>
+          <CardTitle>On-Demand Orders</CardTitle>
+          <CardDescription>Manage all on-demand orders across the platform.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="catering" onValueChange={(value) => setOrderType(value as 'catering' | 'ondemand')}>
-            <TabsContent value="catering">
-              <OrdersTable
-                orders={orders}
-                isLoading={isLoading}
-                statusFilter={statusFilter}
-                handleStatusFilter={handleStatusFilter}
-                orderType="catering"
-              />
-            </TabsContent>
-            <TabsContent value="ondemand">
-              <OrdersTable
-                orders={orders}
-                isLoading={isLoading}
-                statusFilter={statusFilter}
-                handleStatusFilter={handleStatusFilter}
-                orderType="ondemand"
-              />
+          <Tabs defaultValue="all" onValueChange={(value) => handleStatusFilter(value as "all" | "active" | "completed")}>
+            <div className="flex items-center mb-4">
+              <TabsList>
+                <TabsTrigger value="all">All Orders</TabsTrigger>
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value={statusFilter}>
+              {isLoading ? (
+                <div>Loading on-demand orders...</div>
+              ) : orders.length > 0 ? (
+                <OrdersTable 
+                  orders={statusFilter === "all" 
+                    ? orders 
+                    : orders.filter(order => order.status === statusFilter)
+                  } 
+                />
+              ) : (
+                <div>No orders found.</div>
+              )}
             </TabsContent>
           </Tabs>
           {!isLoading && orders.length > 0 && (
@@ -137,64 +166,56 @@ const OrdersPage: React.FC = () => {
 
 interface OrdersTableProps {
   orders: Order[];
-  isLoading: boolean;
-  statusFilter: 'all' | 'active' | 'assigned' | 'cancelled' | 'completed';
-  handleStatusFilter: (status: 'all' | 'active' | 'assigned' | 'cancelled' | 'completed') => void;
-  orderType: 'catering' | 'ondemand';
 }
 
-const OrdersTable: React.FC<OrdersTableProps> = ({ orders, isLoading, statusFilter, handleStatusFilter, orderType }) => {
+const OrdersTable: React.FC<OrdersTableProps> = ({ orders }) => {
   return (
-    <>
-      <Tabs defaultValue="all" onValueChange={(value) => handleStatusFilter(value as 'all' | 'active' | 'assigned' | 'cancelled' | 'completed')}>
-        <TabsList>
-          <TabsTrigger value="all">All Orders</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="assigned">Assigned</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-        </TabsList>
-        <TabsContent value={statusFilter}>
-          {isLoading ? (
-            <div>Loading orders...</div>
-          ) : orders.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order Number</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Event Date</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <Link href={`/admin/${orderType}-orders/${order.order_number}`} className="font-medium hover:underline">
-                        {order.order_number}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={order.status === "active" ? "secondary" : "outline"}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell>{new Date(order.event_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{order.client_name}</TableCell>
-                    <TableCell className="text-right">
-                      ${typeof order.order_total === "string" ? parseFloat(order.order_total).toFixed(2) : order.order_total.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div>No orders found.</div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Order Number</TableHead>
+          <TableHead className="hidden sm:table-cell">Status</TableHead>
+          <TableHead className="hidden md:table-cell">Date</TableHead>
+          <TableHead className="text-right">Total</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {orders.map((order) => (
+          <TableRow key={order.id}>
+            <TableCell>
+              <Link
+                href={`/admin/on-demand-orders/${order.order_number}`}
+                className="font-medium hover:underline"
+              >
+                {order.order_number}
+              </Link>
+              <br />
+              <div className="text-muted-foreground hidden text-sm md:inline">
+                {order.client_attention}
+              </div>
+            </TableCell>
+            <TableCell className="hidden sm:table-cell">
+              <Badge
+                className="text-xs"
+                variant={order.status === "active" ? "secondary" : "outline"}
+              >
+                {order.status}
+              </Badge>
+            </TableCell>
+            <TableCell className="hidden md:table-cell">
+              {new Date(order.date).toLocaleDateString()}
+            </TableCell>
+            <TableCell className="text-right">
+              $
+              {typeof order.order_total === "string"
+                ? parseFloat(order.order_total).toFixed(2)
+                : order.order_total.toFixed(2)}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
 
-export default OrdersPage;
+export default OnDemandOrdersPage;
