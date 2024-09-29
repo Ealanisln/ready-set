@@ -14,6 +14,7 @@ export const COUNTIES: readonly Option[] = [
   { label: "San Francisco", value: "San Francisco" },
   { label: "San Mateo", value: "San Mateo" },
   { label: "Santa Clara", value: "Santa Clara" },
+  { label: "Santa Cruz", value: "Santa Cruz" },
   { label: "Solano", value: "Solano" },
   { label: "Sonoma", value: "Sonoma" },
 ] as const;
@@ -49,7 +50,7 @@ export const PROVISIONS: readonly Option[] = [
   { label: "Utensils", value: "Utensils" },
   { label: "Labels", value: "Labels" },
   { label: "Napkins", value: "Napkins" },
-  { label: "Serving Utencils", value: "Serving Utencils" },
+  { label: "Serving Utensils", value: "Serving Utensils" },
   { label: "Place Settings", value: "Place Settings" },
   // Add other provisions
 ] as const;
