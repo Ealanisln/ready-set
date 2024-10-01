@@ -7,7 +7,7 @@ const teamData: TeamType[] = [
     id: 1,
     name: "Efren Melchor III",
     designation: "Market and Social Media Coordinator",
-    image: "/images/team/Melchor_EfrenIII.png",
+    image: "/images/team/Melchor_Efren III.png",
     skills: ["Marketing Data Analysis", "Email Campaign Management", "Lead Management & Prospecting"],
     description: "Committed to continuous learning and delivering top-notch service with enthusiasm for new opportunities.",
     facebookLink: "/#",
