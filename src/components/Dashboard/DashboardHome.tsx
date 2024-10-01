@@ -8,6 +8,9 @@ import { MetricCard } from "./ui/MetricCard";
 import { RecentOrdersTable } from "./ui/RecentOrders";
 import { RecentUsersTable } from "./ui/RecentUsersTable";
 import { DashboardCard } from "./ui/DashboardCard";
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 interface CateringOrder {
   id: string;
@@ -107,19 +110,30 @@ export function DashboardHome() {
             icon={Users}
             change="+180.1% from last month"
           />
-          <MetricCard
+          {/* <MetricCard
             title="Sales Totals"
             value={`+${metrics.salesTotal}`}
             icon={TrendingUp}
             change="+180.1% from last month"
-          />
+          /> */}
           <MetricCard
             title="Total Vendors"
             value={`+${metrics.totalVendors}`}
             icon={Activity}
             change="+180.1% from last month"
           />
-          {/* Add the other two MetricCards similarly */}
+          <Card className="w-full max-w-sm">
+            <CardContent className="space-y-2 pt-6">
+              <Link href="/catering-request" className="block w-full">
+                <Button className="w-full">Create new order</Button>
+              </Link>
+              {/* <Link href="#" className="block w-full">
+                <Button className="w-full" variant="ghost">
+                  New user
+                </Button>
+              </Link> */}
+            </CardContent>
+          </Card>
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
           <DashboardCard
