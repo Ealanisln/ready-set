@@ -188,7 +188,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
   };
 
   const breadcrumbs = [
-    { href: "/admin/dashboard", label: "Dashboard" },
+    { href: "/admin/", label: "Dashboard" },
     { href: "/admin/users", label: "Users" },
   ];
 
