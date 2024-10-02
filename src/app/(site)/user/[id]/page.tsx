@@ -1,10 +1,8 @@
-// src/app/(site)/user/[id]/page.tsx
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Upload } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,30 +27,33 @@ import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 interface User {
   id: string;
   name?: string;
-  contact_name?: string;
-  email: string;
-  contact_number: string;
-  type: "driver" | "vendor" | "client" | "helpdesk";
+  email?: string;
+  emailVerified?: Date;
+  image?: string;
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
   company_name?: string;
+  contact_name?: string;
+  contact_number?: string;
   website?: string;
-  street1: string;
+  street1?: string;
   street2?: string;
-  city: string;
-  state: string;
-  zip: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  location_number?: string;
   parking_loading?: string;
-  countiesServed?: string[];
-  timeNeeded?: string[];
-  cateringBrokerage?: string[];
+  counties?: string;
+  time_needed?: string;
+  catering_brokerage?: string;
   frequency?: string;
-  provisions?: string[];
+  provide?: string;
   head_count?: string;
-  status?: "active" | "pending" | "deleted";
+  status: "active" | "pending" | "deleted";
+  side_notes?: string;
 }
 
 interface UserFormValues extends User {
   displayName: string;
-  head_count?: string;
 }
 
 export default function EditUser({ params }: { params: { id: string } }) {
@@ -65,7 +66,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const userId = session?.user?.id;
 
   const useUploadFileHook = (category: string) => {
-    console.log("Creating upload hook for category:", category);
     const { onUpload, progresses, isUploading } = useUploadFile(
       "fileUploader",
       {
@@ -85,10 +85,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
       },
     );
     return {
-      onUpload: (files: File[]) => {
-        console.log("Uploading files for category:", category);
-        return onUpload(files);
-      },
+      onUpload: (files: File[]) => onUpload(files),
       progresses,
       isUploading,
       category,
@@ -105,7 +102,6 @@ export default function EditUser({ params }: { params: { id: string } }) {
     general_files: useUploadFileHook("general_files"),
   };
 
-
   const {
     control,
     handleSubmit,
@@ -115,13 +111,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
     formState: { errors, isDirty },
   } = useForm<UserFormValues>({
     defaultValues: {
-      countiesServed: [],
-      timeNeeded: [],
-      cateringBrokerage: [],
-      frequency: "",
-      provisions: [],
+      type: "vendor",
+      status: "pending",
       displayName: "",
-      head_count: "",
     },
   });
 
@@ -142,43 +134,32 @@ export default function EditUser({ params }: { params: { id: string } }) {
           }
           throw new Error("Failed to fetch user");
         }
-        const data = await response.json();
+        const data: User = await response.json();
 
         // Set form values
-        setValue(
-          "displayName",
-          data.displayName || data.contact_name || data.name || "",
-        );
-        setValue("company_name", data.company_name || "");
-        setValue("contact_number", data.contact_number || "");
+        setValue("displayName", data.name || data.contact_name || "");
+        setValue("name", data.name || "");
         setValue("email", data.email || "");
+        setValue("company_name", data.company_name || "");
+        setValue("contact_name", data.contact_name || "");
+        setValue("contact_number", data.contact_number || "");
         setValue("website", data.website || "");
         setValue("street1", data.street1 || "");
         setValue("street2", data.street2 || "");
         setValue("city", data.city || "");
         setValue("state", data.state || "");
         setValue("zip", data.zip || "");
+        setValue("location_number", data.location_number || "");
         setValue("parking_loading", data.parking_loading || "");
-        setValue("type", data.type || "");
-        setValue("status", data.status || "pending");
-
-        // Only set timeNeeded and countiesServed if the user is a vendor or client
-        if (data.type === "vendor" || data.type === "client") {
-          setValue("timeNeeded", data.timeNeeded || []);
-          setValue("countiesServed", data.countiesServed || []);
-        }
-
-        // Vendor specific fields
-        if (data.type === "vendor") {
-          setValue("cateringBrokerage", data.cateringBrokerage || []);
-          setValue("frequency", data.frequency || "");
-          setValue("provisions", data.provide ? data.provide.split(", ") : []);
-        }
-
-        if (data.type === "client") {
-          setValue("head_count", data.head_count || "");
-          setValue("frequency", data.frequency || "");
-        }
+        setValue("type", data.type);
+        setValue("status", data.status);
+        setValue("counties", data.counties || "");
+        setValue("time_needed", data.time_needed || "");
+        setValue("catering_brokerage", data.catering_brokerage || "");
+        setValue("frequency", data.frequency || "");
+        setValue("provide", data.provide || "");
+        setValue("head_count", data.head_count || "");
+        setValue("side_notes", data.side_notes || "");
       } catch (error) {
         console.error("Error fetching user:", error);
       } finally {
@@ -192,21 +173,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
       const submitData: User = { ...data };
-
       delete (submitData as any).displayName;
-
-      if (data.type === "driver" || data.type === "helpdesk") {
-        submitData.name = data.displayName;
-        delete submitData.contact_name;
-        delete submitData.company_name;
-      } else if (data.type === "vendor" || data.type === "client") {
-        submitData.contact_name = data.displayName;
-        delete submitData.name;
-      }
-
-      if (data.type === "client") {
-        submitData.head_count = data.head_count;
-      }
 
       const response = await fetch(`/api/users/${params.id}`, {
         method: "PUT",
@@ -220,10 +187,8 @@ export default function EditUser({ params }: { params: { id: string } }) {
       }
 
       const updatedUser = await response.json();
-
       toast.success("User saved successfully!");
       reset(updatedUser);
-
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -231,19 +196,15 @@ export default function EditUser({ params }: { params: { id: string } }) {
     }
   };
 
-  const currentPageTitle = loading
-    ? "Loading..."
-    : `Editing ${watchedValues.displayName || "User"}`;
-
   const handleBack = () => {
-    reset(); // Reset the form
+    reset();
     setHasUnsavedChanges(false);
     toast("Changes discarded", { icon: "🔄" });
     router.push("/");
   };
 
   const handleDiscard = () => {
-    reset(); // Reset the form
+    reset();
     setHasUnsavedChanges(false);
     toast("Changes discarded", { icon: "🔄" });
     router.push("/");
@@ -331,10 +292,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
                       watchedValues={watchedValues}
                     />
                   )}
-                  <Card
-                    className="overflow-hidden"
-                    x-chunk="dashboard-07-chunk-4"
-                  >
+                  <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle>Uploaded Files</CardTitle>
                       <CardDescription>View your documents here</CardDescription>
@@ -354,31 +312,19 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   </Card>
                 </div>
                 <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-                  <Card
-                    className="overflow-hidden"
-                    x-chunk="dashboard-07-chunk-4"
-                  >
+                  <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle>Upload Files</CardTitle>
                       <CardDescription>Add your documents here</CardDescription>
                     </CardHeader>
                     <CardContent>
-                    <UserProfileUploads
+                      <UserProfileUploads
                         uploadHooks={uploadHooks}
-                        userType={
-                          watchedValues.type as
-                            | "vendor"
-                            | "client"
-                            | "driver"
-                            | "admin"
-                            | "helpdesk"
-                            | "super_admin"
-                        }
-                        onUploadSuccess={handleUploadSuccess}  
+                        userType={watchedValues.type}
+                        onUploadSuccess={handleUploadSuccess}
                       />
                     </CardContent>
                   </Card>
-                  
                   <PasswordChange />
                 </div>
               </div>

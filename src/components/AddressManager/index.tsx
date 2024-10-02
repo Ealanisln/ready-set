@@ -8,15 +8,16 @@ import Link from "next/link";
 
 export interface Address {
   id: string;
-  vendor: string;
   street1: string;
   street2: string | null;
   city: string;
   state: string;
   zip: string;
-  location_number: string | null;
-  parking_loading: string | null;
+  locationNumber: string | null;
+  parkingLoading: string | null;
   county: string;
+  isRestaurant: boolean;
+  isShared: boolean;
 }
 
 interface AddressManagerProps {
@@ -105,7 +106,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         const response = await fetch("/api/addresses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...newAddress, userId: session.user.id }),
+          body: JSON.stringify(newAddress),
         });
 
         if (response.ok) {
@@ -123,9 +124,6 @@ const AddressManager: React.FC<AddressManagerProps> = ({
 
   return (
     <div>
-      {/* <h2 className="mb-6 text-xl font-bold text-gray-800">
-        Pick Up Location
-      </h2> */}
       {error && <p className="mb-4 text-red-500">{error}</p>}
       {isLoading ? (
         <p className="text-gray-600">Loading addresses...</p>
@@ -140,16 +138,17 @@ const AddressManager: React.FC<AddressManagerProps> = ({
                 className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
                 onChange={(e) => {
                   field.onChange(e);
-                  onAddressSelected(e.target.value); // Call this when an address is selected
+                  onAddressSelected(e.target.value);
                 }}
               >
                 <option value="">Please Select</option>
                 {addresses.map((address) => (
                   <option key={address.id} value={address.id}>
-                    {`${address.county} - ${address.vendor}`}
+                    {`${address.county} - ${address.isRestaurant ? 'Restaurant' : 'Address'}`}
                     {`\n${address.street1}${
                       address.street2 ? `, ${address.street2}` : ""
                     }, ${address.city}, ${address.state}, ${address.zip}`}
+                    {address.isShared ? ' (Shared)' : ''}
                   </option>
                 ))}
               </select>

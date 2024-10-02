@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -16,20 +16,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { COUNTIES } from "@/components/Auth/SignUp/ui/FormData";
 
 interface Address {
   id: string;
   county: string;
-  company?: string;
-  vendor?: string;
+  name: string;
   street1: string;
   street2: string | null;
   city: string;
   state: string;
   zip: string;
-  location_number: string | null;
-  parking_loading: string | null;
+  locationNumber: string | null;
+  parkingLoading: string | null;
+  isRestaurant: boolean;
+  isShared: boolean;
 }
 
 interface AddressModalProps {
@@ -48,7 +50,8 @@ const AddressModal: React.FC<AddressModalProps> = ({
   const [selectedCounty, setSelectedCounty] = useState<string>(
     addressToEdit?.county || "",
   );
-  const { register, handleSubmit, setValue, reset } = useForm<Address>();
+  const { control, register, handleSubmit, setValue, reset } =
+    useForm<Address>();
 
   useEffect(() => {
     if (addressToEdit) {
@@ -56,10 +59,11 @@ const AddressModal: React.FC<AddressModalProps> = ({
         setValue(key as keyof Address, value);
       });
       setSelectedCounty(addressToEdit.county);
-      setValue("vendor", addressToEdit.vendor || "");  // Set vendor field
-
     } else {
-      reset();
+      reset({
+        isRestaurant: false,
+        isShared: false,
+      });
       setSelectedCounty("");
     }
   }, [addressToEdit, setValue, reset]);
@@ -70,7 +74,6 @@ const AddressModal: React.FC<AddressModalProps> = ({
   };
 
   const onSubmit = async (data: Address) => {
-
     try {
       const url = addressToEdit
         ? `/api/addresses?id=${addressToEdit.id}`
@@ -85,6 +88,8 @@ const AddressModal: React.FC<AddressModalProps> = ({
         body: JSON.stringify({
           ...data,
           county: selectedCounty,
+          isRestaurant: Boolean(data.isRestaurant),
+          isShared: Boolean(data.isShared),
         }),
       });
 
@@ -140,14 +145,10 @@ const AddressModal: React.FC<AddressModalProps> = ({
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="vendor" className="text-right">
-                Vendor
+              <Label htmlFor="name" className="text-right">
+                Name
               </Label>
-              <Input
-                id="vendor"
-                className="col-span-3"
-                {...register("vendor")}
-              />
+              <Input id="name" className="col-span-3" {...register("name")} />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="street1" className="text-right">
@@ -188,24 +189,54 @@ const AddressModal: React.FC<AddressModalProps> = ({
               <Input id="zip" className="col-span-3" {...register("zip")} />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="location_number" className="text-right">
+              <Label htmlFor="locationNumber" className="text-right">
                 Location Phone Number
               </Label>
               <Input
-                id="location_number"
+                id="locationNumber"
                 className="col-span-3"
-                {...register("location_number")}
+                {...register("locationNumber")}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="parking_loading" className="text-right">
+              <Label htmlFor="parkingLoading" className="text-right">
                 Parking / Loading
               </Label>
               <Input
-                id="parking_loading"
+                id="parkingLoading"
                 className="col-span-3"
-                {...register("parking_loading")}
+                {...register("parkingLoading")}
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Controller
+                name="isRestaurant"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isRestaurant"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Label htmlFor="isRestaurant">Is this a restaurant?</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Controller
+                name="isShared"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isShared"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Label htmlFor="isShared">Is this a shared address?</Label>
             </div>
           </div>
           <div className="flex justify-end">

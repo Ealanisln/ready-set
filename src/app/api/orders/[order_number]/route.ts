@@ -22,6 +22,7 @@ type CateringRequest = Prisma.catering_requestGetPayload<{
         };
       };
     };
+    fileUploads: true;
   };
 }>;
 
@@ -41,16 +42,15 @@ type OnDemandOrder = Prisma.on_demandGetPayload<{
         };
       };
     };
+    fileUploads: true;
   };
-}> & {
-  delivery_address?: Prisma.addressGetPayload<{}> | null;
-};
+}>;
 
-type Order =
+type Order = 
   | (CateringRequest & { order_type: "catering" })
   | (OnDemandOrder & { order_type: "on_demand" });
 
-function serializeBigInt(data: any): any {
+function serializeOrder(data: any): any {
   return JSON.parse(JSON.stringify(data, (_, value) =>
     typeof value === "bigint" ? value.toString() : value
   ));
@@ -90,6 +90,7 @@ export async function GET(
             },
           },
         },
+        fileUploads: true,
       },
     });
 
@@ -114,24 +115,17 @@ export async function GET(
               },
             },
           },
+          fileUploads: true,
         },
       });
 
       if (onDemandOrder) {
-        // Fetch the delivery address if delivery_address_id exists
-        let delivery_address = null;
-        if (onDemandOrder.delivery_address_id) {
-          delivery_address = await prisma.address.findUnique({
-            where: { id: onDemandOrder.delivery_address_id },
-          });
-        }
-
-        order = { ...onDemandOrder, delivery_address, order_type: "on_demand" };
+        order = { ...onDemandOrder, order_type: "on_demand" };
       }
     }
 
     if (order) {
-      const serializedOrder = serializeBigInt(order);
+      const serializedOrder = serializeOrder(order);
       return NextResponse.json(serializedOrder);
     }
 
@@ -167,7 +161,6 @@ export async function PATCH(
       );
     }
 
-
     let updatedOrder: Order | null = null;
 
     // Try updating catering request
@@ -198,6 +191,7 @@ export async function PATCH(
               },
             },
           },
+          fileUploads: true,
         },
       });
       updatedOrder = { ...updated, order_type: "catering" };
@@ -224,13 +218,14 @@ export async function PATCH(
               },
             },
           },
+          fileUploads: true,
         },
       });
       updatedOrder = { ...updated, order_type: "on_demand" };
     }
 
     if (updatedOrder) {
-      const serializedOrder = serializeBigInt(updatedOrder);
+      const serializedOrder = serializeOrder(updatedOrder);
       return NextResponse.json(serializedOrder);
     }
 

@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       width,
       height,
       weight,
-      fileUploads, // New field for file uploads
+      fileUploads,
     } = data;
 
     // Validate required fields
@@ -171,21 +171,25 @@ export async function POST(req: NextRequest) {
       }
 
       // Handle address creation or update
-      let addressId: bigint;
+      let addressId: string;
       if (address.id) {
         // If an id is provided, update the existing address
         await txPrisma.address.update({
-          where: { id: BigInt(address.id) },
+          where: { id: address.id },
           data: {
             street1: address.street1,
             street2: address.street2 || null,
             city: address.city,
             state: address.state,
             zip: address.zip,
-            user_id: session.user.id,
+            locationNumber: address.locationNumber || null,
+            parkingLoading: address.parkingLoading || null,
+            isRestaurant: address.isRestaurant || false,
+            isShared: address.isShared || false,
+            createdBy: session.user.id,
           },
         });
-        addressId = BigInt(address.id);
+        addressId = address.id;
       } else {
         // If no id is provided, create a new address
         const newAddress = await txPrisma.address.create({
@@ -195,29 +199,36 @@ export async function POST(req: NextRequest) {
             city: address.city,
             state: address.state,
             zip: address.zip,
-            user_id: session.user.id,
-            status: "active",
+            locationNumber: address.locationNumber || null,
+            parkingLoading: address.parkingLoading || null,
+            isRestaurant: address.isRestaurant || false,
+            isShared: address.isShared || false,
+            createdBy: session.user.id,
           },
         });
         addressId = newAddress.id;
       }
 
       // Handle delivery address creation or update
-      let deliveryAddressId: bigint;
+      let deliveryAddressId: string;
       if (delivery_address.id) {
         // If an id is provided, update the existing address
         await txPrisma.address.update({
-          where: { id: BigInt(delivery_address.id) },
+          where: { id: delivery_address.id },
           data: {
             street1: delivery_address.street1,
             street2: delivery_address.street2 || null,
             city: delivery_address.city,
             state: delivery_address.state,
             zip: delivery_address.zip,
-            user_id: session.user.id,
+            locationNumber: delivery_address.locationNumber || null,
+            parkingLoading: delivery_address.parkingLoading || null,
+            isRestaurant: delivery_address.isRestaurant || false,
+            isShared: delivery_address.isShared || false,
+            createdBy: session.user.id,
           },
         });
-        deliveryAddressId = BigInt(delivery_address.id);
+        deliveryAddressId = delivery_address.id;
       } else {
         // If no id is provided, create a new address
         const newDeliveryAddress = await txPrisma.address.create({
@@ -227,8 +238,11 @@ export async function POST(req: NextRequest) {
             city: delivery_address.city,
             state: delivery_address.state,
             zip: delivery_address.zip,
-            user_id: session.user.id,
-            status: "active",
+            locationNumber: delivery_address.locationNumber || null,
+            parkingLoading: delivery_address.parkingLoading || null,
+            isRestaurant: delivery_address.isRestaurant || false,
+            isShared: delivery_address.isShared || false,
+            createdBy: session.user.id,
           },
         });
         deliveryAddressId = newDeliveryAddress.id;
@@ -259,17 +273,15 @@ export async function POST(req: NextRequest) {
             tip: parsedTip,
             status: "active",
             fileUploads: {
-              connectOrCreate: fileUploads.map((file: { name: string; url: string; size: number }) => ({
-                where: { fileUrl: file.url },
-                create: {
-                  userId: session.user.id,
-                  fileName: file.name,
-                  fileUrl: file.url,
-                  fileSize: file.size,
-                  fileType: file.name.split('.').pop() || 'unknown',
-                  uploadedAt: new Date(),
-                },
-              })),
+              create: fileUploads?.map((file: { name: string; url: string; size: number }) => ({
+                userId: session.user.id,
+                fileName: file.name,
+                fileUrl: file.url,
+                fileSize: file.size,
+                fileType: file.name.split('.').pop() || 'unknown',
+                uploadedAt: new Date(),
+                entityType: 'catering_request',
+              })) || [],
             },
           },
           include: {
@@ -301,6 +313,20 @@ export async function POST(req: NextRequest) {
             height,
             weight,
             status: "active",
+            fileUploads: {
+              create: fileUploads?.map((file: { name: string; url: string; size: number }) => ({
+                userId: session.user.id,
+                fileName: file.name,
+                fileUrl: file.url,
+                fileSize: file.size,
+                fileType: file.name.split('.').pop() || 'unknown',
+                uploadedAt: new Date(),
+                entityType: 'on_demand',
+              })) || [],
+            },
+          },
+          include: {
+            fileUploads: true,
           },
         });
       } else {

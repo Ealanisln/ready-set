@@ -1,22 +1,57 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import {
-  PrismaClient,
-  Prisma,
-  users_status,
-  users_type,
-  addresses_status,
-} from "@prisma/client";
-import {
-  VendorFormData,
-  ClientFormData,
-  DriverFormData,
-  HelpDeskFormData,
-} from "@/components/Auth/SignUp/ui/FormData";
+import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-type RequestBody = VendorFormData | ClientFormData | DriverFormData | HelpDeskFormData;
+interface BaseFormData {
+  email: string;
+  phoneNumber: string;
+  password: string;
+  userType: users_type;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
+interface VendorFormData extends BaseFormData {
+  company: string;
+  contact_name: string;
+  timeNeeded: string[];
+  frequency: string;
+  parking?: string;
+  countiesServed?: string[];
+  website?: string;
+  cateringBrokerage?: string[];
+  provisions?: string[];
+}
+
+interface ClientFormData extends BaseFormData {
+  company: string;
+  contact_name: string;
+  timeNeeded: string[];
+  frequency: string;
+  countiesServed: string[];
+  head_count: string;
+  parking?: string;
+  website?: string;
+}
+
+interface DriverFormData extends BaseFormData {
+  name: string;
+}
+
+interface HelpDeskFormData extends BaseFormData {
+  name: string;
+}
+
+type RequestBody =
+  | VendorFormData
+  | ClientFormData
+  | DriverFormData
+  | HelpDeskFormData;
 
 export async function POST(request: Request) {
   try {
@@ -39,134 +74,36 @@ export async function POST(request: Request) {
       );
     }
 
-    if (userType === "vendor") {
-      const {
-        company,
-        contact_name,
-        street1,
-        city,
-        state,
-        zip,
-        timeNeeded,
-        frequency,
-      } = body as VendorFormData;
-      if (
-        !company ||
-        !contact_name ||
-        !street1 ||
-        !city ||
-        !state ||
-        !zip ||
-        !timeNeeded ||
-        !frequency
-      ) {
-        return NextResponse.json(
-          {
-            error: "Missing required fields for vendor",
-            missingFields: [
-              "company",
-              "contact_name",
-              "street1",
-              "city",
-              "state",
-              "zip",
-              "timeNeeded",
-              "frequency",
-            ].filter(
-              (field) =>
-                !(body as VendorFormData)[field as keyof VendorFormData],
-            ),
-          },
-          { status: 400 },
-        );
+    const commonFields = ["street1", "city", "state", "zip"];
+    let requiredFields: string[] = [...commonFields];
+
+    if (userType === "vendor" || userType === "client") {
+      requiredFields = [
+        ...requiredFields,
+        "company",
+        "contact_name",
+        "timeNeeded",
+        "frequency",
+      ];
+      if (userType === "client") {
+        requiredFields.push("countiesServed", "head_count");
       }
-    } else if (userType === "client") {
-      const {
-        company,
-        contact_name,
-        street1,
-        city,
-        state,
-        zip,
-        timeNeeded,
-        frequency,
-        countiesServed,
-        head_count,
-      } = body as ClientFormData;
-      if (
-        !company ||
-        !contact_name ||
-        !street1 ||
-        !city ||
-        !state ||
-        !zip ||
-        !timeNeeded ||
-        !frequency ||
-        !countiesServed ||
-        !head_count
-      ) {
-        return NextResponse.json(
-          {
-            error: "Missing required fields for client",
-            missingFields: [
-              "company",
-              "contact_name",
-              "street1",
-              "city",
-              "state",
-              "zip",
-              "timeNeeded",
-              "frequency",
-              "countiesServed",
-              "head_count",
-            ].filter(
-              (field) =>
-                !(body as ClientFormData)[field as keyof ClientFormData],
-            ),
-          },
-          { status: 400 },
-        );
-      }
-    } else if (userType === "driver") {
-      const { name, street1, city, state, zip } = body as DriverFormData;
-      if (!name || !street1 || !city || !state || !zip) {
-        return NextResponse.json(
-          {
-            error: "Missing required fields for driver",
-            missingFields: [
-              "contact_name",
-              "street1",
-              "city",
-              "state",
-              "zip",
-            ].filter(
-              (field) =>
-                !(body as DriverFormData)[field as keyof DriverFormData],
-            ),
-          },
-          { status: 400 },
-        );
-      }
-    } else if (userType === "helpdesk") {
-      const { name, street1, city, state, zip } = body as HelpDeskFormData;
-      if (!name || !street1 || !city || !state || !zip) {
-        return NextResponse.json(
-          {
-            error: "Missing required fields for helpdesk",
-            missingFields: [
-              "name",
-              "street1",
-              "city",
-              "state",
-              "zip",
-            ].filter(
-              (field) =>
-                !(body as HelpDeskFormData)[field as keyof HelpDeskFormData],
-            ),
-          },
-          { status: 400 },
-        );
-      }
+    } else if (userType === "driver" || userType === "helpdesk") {
+      requiredFields.push("name");
+    }
+
+    const missingFields = requiredFields.filter(
+      (field) => !(body as any)[field],
+    );
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Missing required fields for ${userType}`,
+          missingFields,
+        },
+        { status: 400 },
+      );
     }
 
     const exist = await prisma.user.findUnique({
@@ -189,15 +126,17 @@ export async function POST(request: Request) {
       contact_number: phoneNumber,
       password: hashedPassword,
       type: userType as users_type,
-      name: 
+      name:
         userType === "driver" || userType === "helpdesk"
           ? (body as DriverFormData | HelpDeskFormData).name
           : (body as VendorFormData | ClientFormData).contact_name,
       company_name:
-        userType !== "driver" && "company" in body ? body.company : undefined,
+        userType !== "driver" && userType !== "helpdesk"
+          ? (body as VendorFormData | ClientFormData).company
+          : undefined,
       status: users_status.pending,
       street1: body.street1,
-      street2: "street2" in body ? body.street2 : undefined,
+      street2: body.street2,
       city: body.city,
       state: body.state,
       zip: body.zip,
@@ -205,26 +144,32 @@ export async function POST(request: Request) {
       updated_at: new Date(),
 
       // Conditional fields
-      ...(userType !== "driver" && {
-        parking_loading: "parking" in body ? body.parking : undefined,
-        counties:
-          "countiesServed" in body
-            ? (body as VendorFormData | ClientFormData).countiesServed.join(
-                ", ",
-              )
-            : undefined,
-        time_needed:
-          "timeNeeded" in body
-            ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ")
-            : undefined,
-        frequency:
-          "frequency" in body
-            ? (body as VendorFormData | ClientFormData).frequency
-            : undefined,
-        head_count:
-          "head_count" in body ? body.head_count?.toString() : undefined,
-        website: "website" in body ? body.website : undefined,
-      }),
+      ...(userType !== "driver" &&
+        userType !== "helpdesk" && {
+          parking_loading: "parking" in body ? body.parking : undefined,
+          counties:
+            "countiesServed" in body
+              ? ((
+                  body as VendorFormData | ClientFormData
+                )?.countiesServed?.join(", ") ?? "")
+              : undefined,
+          time_needed:
+            "timeNeeded" in body
+              ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ")
+              : undefined,
+          frequency:
+            "frequency" in body
+              ? (body as VendorFormData | ClientFormData).frequency
+              : undefined,
+          head_count:
+            "head_count" in body
+              ? (body as ClientFormData).head_count
+              : undefined,
+          website:
+            "website" in body
+              ? (body as VendorFormData | ClientFormData).website
+              : undefined,
+        }),
 
       // Vendor-specific fields
       ...(userType === "vendor" && {
@@ -243,26 +188,42 @@ export async function POST(request: Request) {
       data: userData,
     });
 
-    const addressData: Prisma.addressCreateInput = {
-      user: {
-        connect: { id: newUser.id },
-      },
-      county: "Main Address",
-      vendor: userType === "vendor" ? newUser.company_name : null,
-      street1: body.street1,
-      street2: "street2" in body ? body.street2 : null,
-      city: body.city,
-      state: body.state,
-      zip: body.zip,
-      location_number: "location_number" in body ? body.location_number : null,
-      parking_loading: "parking" in body ? body.parking : null,
-      status: addresses_status.active,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-
+    // Creating a default address for the user
     await prisma.address.create({
-      data: addressData,
+      data: {
+        name: "Main Address",
+        street1: body.street1,
+        street2: body.street2,
+        city: body.city,
+        state: body.state,
+        zip: body.zip,
+        county:
+          userType === "vendor" || userType === "client"
+            ? (body as VendorFormData | ClientFormData).countiesServed?.[0]
+            : undefined,
+        locationNumber:
+          "location_number" in body ? (body as any).location_number : undefined,
+        parkingLoading:
+          "parking" in body
+            ? (body as VendorFormData | ClientFormData).parking
+            : undefined,
+        isRestaurant: userType === "vendor",
+        isShared: false,
+        createdBy: newUser.id,
+      },
+    });
+
+    // Creating a userAddress relation
+    await prisma.userAddress.create({
+      data: {
+        userId: newUser.id,
+        addressId: (await prisma.address.findFirst({
+          where: { createdBy: newUser.id },
+          select: { id: true },
+        }))!.id,
+        alias: "Main Address",
+        isDefault: true,
+      },
     });
 
     return NextResponse.json(

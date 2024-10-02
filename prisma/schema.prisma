@@ -47,7 +47,8 @@ model user {
     updated_at            DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
 
     accounts              account[]
-    addresses             address[]
+    savedAddresses        userAddress[]
+    createdAddresses      address[] // New relation for addresses created by users
     catering_requests     catering_request[]
     driver_dispatches     dispatch[]         @relation("DriverRelation")
     dispatcher_dispatches dispatch[]         @relation("DispatcherRelation")
@@ -56,28 +57,44 @@ model user {
     file_uploads          file_upload[]
 }
 
-model file_upload {
-    id         String   @id @default(cuid())
-    fileName   String
-    fileType   String
-    fileSize   Int
-    fileUrl    String
-    entityType String // e.g., "user", "catering_request", "on_demand"
-    entityId   String
-    category   String? // e.g., "driver_photo", "vehicle_photo", "license_photo", "insurance_photo", "order_invoice"
-    uploadedAt DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+model address {
+    id             String   @id @default(cuid())
+    name           String?
+    street1        String
+    street2        String?
+    city           String
+    state          String
+    zip            String
+    county         String?
+    locationNumber String?
+    parkingLoading String?
+    isRestaurant   Boolean  @default(false) // New field to mark restaurant addresses
+    isShared       Boolean  @default(false) // New field to indicate if the address is shared
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+    createdBy      String? // New field to track who created the address
 
-    userId String?
-    user   user?   @relation(fields: [userId], references: [id])
+    // Relations
+    creator          user?              @relation(fields: [createdBy], references: [id])
+    userAddresses    userAddress[]
+    pickupRequests   catering_request[] @relation("PickupAddress")
+    deliveryRequests catering_request[] @relation("DeliveryAddress")
+    onDemands        on_demand[]
+}
 
-    cateringRequestId BigInt?
-    onDemandId        BigInt?
+model userAddress {
+    id        String   @id @default(cuid())
+    userId    String
+    addressId String
+    alias     String? 
+    isDefault Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    cateringRequest catering_request? @relation(fields: [cateringRequestId], references: [id])
-    onDemand        on_demand?        @relation(fields: [onDemandId], references: [id])
+    user    user    @relation(fields: [userId], references: [id])
+    address address @relation(fields: [addressId], references: [id])
 
-    @@index([entityType, entityId])
+    @@unique([userId, addressId])
 }
 
 model account {
@@ -115,32 +132,11 @@ model verification_token {
     @@unique([identifier, token])
 }
 
-model address {
-    id                BigInt             @id @default(autoincrement())
-    user_id           String
-    county            String?            @db.VarChar(191)
-    vendor            String?
-    street1           String?            @db.VarChar(191)
-    street2           String?            @db.VarChar(191)
-    city              String?            @db.VarChar(191)
-    state             String?            @db.VarChar(191)
-    zip               String?            @db.VarChar(191)
-    location_number   String?            @db.VarChar(191)
-    parking_loading   String?            @db.VarChar(191)
-    status            addresses_status   @default(inactive)
-    created_at        DateTime?          @db.Timestamptz(6)
-    updated_at        DateTime?          @db.Timestamptz(6)
-    user              user               @relation(fields: [user_id], references: [id])
-    pickup_requests   catering_request[] @relation("PickupAddress")
-    delivery_requests catering_request[] @relation("DeliveryAddress")
-    on_demands        on_demand[]
-}
-
 model catering_request {
     id                  BigInt                      @id @default(autoincrement())
     guid                String?
     user_id             String
-    address_id          BigInt
+    address_id          String
     brokerage           String?                     @db.VarChar(191)
     order_number        String                      @unique
     date                DateTime?                   @db.Date
@@ -160,7 +156,7 @@ model catering_request {
     tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
     created_at          DateTime                    @default(now()) @db.Timestamptz(6)
     updated_at          DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
-    delivery_address_id BigInt
+    delivery_address_id String
     driver_status       driver_status?
     address             address                     @relation("PickupAddress", fields: [address_id], references: [id])
     delivery_address    address                     @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
@@ -183,26 +179,11 @@ model dispatch {
     dispatcher        user?             @relation("DispatcherRelation", fields: [userId], references: [id])
 }
 
-model failed_job {
-    id         BigInt   @id @default(autoincrement())
-    connection String
-    queue      String
-    payload    String
-    exception  String
-    failed_at  DateTime @default(now()) @db.Timestamptz(6)
-}
-
-model migrations {
-    id        BigInt @id @default(autoincrement())
-    migration String @db.VarChar(191)
-    batch     BigInt
-}
-
 model on_demand {
     id                  BigInt                 @id @default(autoincrement())
     guid                String?
     user_id             String
-    address_id          BigInt
+    address_id          String
     order_number        String                 @unique @db.VarChar(191)
     date                DateTime               @db.Date
     pickup_time         DateTime               @db.Time(6)
@@ -224,12 +205,36 @@ model on_demand {
     weight              String?                @db.VarChar(191)
     created_at          DateTime               @default(now()) @db.Timestamptz(6)
     updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
-    delivery_address_id BigInt
+    delivery_address_id String
     driver_status       driver_status?
     dispatch            dispatch[]
     address             address                @relation(fields: [address_id], references: [id])
     user                user                   @relation(fields: [user_id], references: [id])
     fileUploads         file_upload[]
+}
+
+model file_upload {
+    id         String   @id @default(cuid())
+    fileName   String
+    fileType   String
+    fileSize   Int
+    fileUrl    String
+    entityType String
+    entityId   String
+    category   String?
+    uploadedAt DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    userId String?
+    user   user?   @relation(fields: [userId], references: [id])
+
+    cateringRequestId BigInt?
+    onDemandId        BigInt?
+
+    cateringRequest catering_request? @relation(fields: [cateringRequestId], references: [id])
+    onDemand        on_demand?        @relation(fields: [onDemandId], references: [id])
+
+    @@index([entityType, entityId])
 }
 
 enum driver_status {
@@ -238,11 +243,6 @@ enum driver_status {
     en_route_to_client
     arrived_to_client
     completed
-}
-
-enum addresses_status {
-    active
-    inactive
 }
 
 enum catering_requests_need_host {
@@ -255,16 +255,6 @@ enum catering_requests_status {
     assigned
     cancelled
     completed
-}
-
-enum dispatches_service_type {
-    catering
-    ondemand
-}
-
-enum dispatches_user_type {
-    vendor
-    client
 }
 
 enum on_demand_status {

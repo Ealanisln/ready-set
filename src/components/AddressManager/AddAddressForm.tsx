@@ -3,14 +3,15 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 
 interface AddressFormData {
   county: string;
-  vendor: string;
   street1: string;
   street2: string;
   city: string;
   state: string;
   zip: string;
-  location_number: string;
-  parking_loading: string;
+  locationNumber: string;
+  parkingLoading: string;
+  isRestaurant: boolean;
+  isShared: boolean;
 }
 
 interface AddAddressFormProps {
@@ -38,8 +39,8 @@ const AddAddressForm: React.FC<AddAddressFormProps> = ({ onSubmit, onClose, allo
             </svg>
           </button>
         </div>
-        <form onSubmit={handleSubmit(submitHandler)}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+          <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="county">
               County
             </label>
@@ -57,6 +58,101 @@ const AddAddressForm: React.FC<AddAddressFormProps> = ({ onSubmit, onClose, allo
             {errors.county && <p className="text-red-500 text-xs italic">{errors.county.message}</p>}
           </div>
           
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street1">
+              Street Address 1
+            </label>
+            <input
+              {...register('street1', { required: 'Street Address 1 is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            {errors.street1 && <p className="text-red-500 text-xs italic">{errors.street1.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street2">
+              Street Address 2
+            </label>
+            <input
+              {...register('street2')}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="city">
+              City
+            </label>
+            <input
+              {...register('city', { required: 'City is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            {errors.city && <p className="text-red-500 text-xs italic">{errors.city.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="state">
+              State
+            </label>
+            <input
+              {...register('state', { required: 'State is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            {errors.state && <p className="text-red-500 text-xs italic">{errors.state.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="zip">
+              ZIP Code
+            </label>
+            <input
+              {...register('zip', { required: 'ZIP Code is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            {errors.zip && <p className="text-red-500 text-xs italic">{errors.zip.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="locationNumber">
+              Location Phone Number
+            </label>
+            <input
+              {...register('locationNumber')}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="parkingLoading">
+              Parking / Loading
+            </label>
+            <input
+              {...register('parkingLoading')}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              {...register('isRestaurant')}
+              className="mr-2"
+            />
+            <label className="text-gray-700 text-sm font-bold" htmlFor="isRestaurant">
+              Is this a restaurant?
+            </label>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              {...register('isShared')}
+              className="mr-2"
+            />
+            <label className="text-gray-700 text-sm font-bold" htmlFor="isShared">
+              Is this a shared address?
+            </label>
+          </div>
           
           <div className="flex items-center justify-between">
             <button

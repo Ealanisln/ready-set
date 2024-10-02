@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "bun prisma/seed.ts",
-    "delete-fake-data": "bun src/utils/delete.ts"
+    "delete-fake-data": "bun src/utils/delete.ts",
+    "backup": "ts-node -P tsconfig.utils.json src/utils/dbBackup.ts"
   },
   "prisma": {
     "seed": "bun prisma/seed.ts"
@@ -52,6 +53,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "2.30.0",
+    "dotenv": "^16.4.5",
     "embla-carousel-autoplay": "^8.3.0",
     "embla-carousel-react": "^8.3.0",
     "gray-matter": "^4.0.3",

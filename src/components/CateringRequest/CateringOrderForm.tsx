@@ -36,6 +36,10 @@ interface FormData {
     city: string;
     state: string;
     zip: string;
+    locationNumber?: string | null;
+    parkingLoading?: string | null;
+    isRestaurant: boolean;
+    isShared: boolean;
   };
   delivery_address: {
     id: string;
@@ -44,6 +48,10 @@ interface FormData {
     city: string;
     state: string;
     zip: string;
+    locationNumber?: string | null;
+    parkingLoading?: string | null;
+    isRestaurant: boolean;
+    isShared: boolean;
   };
 }
 
@@ -87,6 +95,10 @@ const CombinedOrderForm: React.FC = () => {
         city: "",
         state: "",
         zip: "",
+        locationNumber: null,
+        parkingLoading: null,
+        isRestaurant: false,
+        isShared: false,
       },
       delivery_address: {
         id: "",
@@ -95,6 +107,10 @@ const CombinedOrderForm: React.FC = () => {
         city: "",
         state: "",
         zip: "",
+        locationNumber: null,
+        parkingLoading: null,
+        isRestaurant: false,
+        isShared: false,
       },
     },
   });
@@ -139,6 +155,10 @@ const CombinedOrderForm: React.FC = () => {
             city: data.address.city,
             state: data.address.state,
             zip: data.address.zip,
+            locationNumber: data.address.locationNumber,
+            parkingLoading: data.address.parkingLoading,
+            isRestaurant: data.address.isRestaurant,
+            isShared: data.address.isShared,
           },
           delivery_address: {
             id: data.delivery_address.id,
@@ -147,6 +167,10 @@ const CombinedOrderForm: React.FC = () => {
             city: data.delivery_address.city,
             state: data.delivery_address.state,
             zip: data.delivery_address.zip,
+            locationNumber: data.delivery_address.locationNumber,
+            parkingLoading: data.delivery_address.parkingLoading,
+            isRestaurant: data.delivery_address.isRestaurant,
+            isShared: data.delivery_address.isShared,
           },
           tip: data.tip ? parseFloat(data.tip) : undefined,
         }),
@@ -223,6 +247,10 @@ const CombinedOrderForm: React.FC = () => {
               city: selectedAddress.city,
               state: selectedAddress.state,
               zip: selectedAddress.zip,
+              locationNumber: selectedAddress.locationNumber || null,
+              parkingLoading: selectedAddress.parkingLoading || null,
+              isRestaurant: selectedAddress.isRestaurant,
+              isShared: selectedAddress.isShared,
             });
           }
         }}
@@ -265,7 +293,6 @@ const CombinedOrderForm: React.FC = () => {
 
       {orderType === "catering" && (
         <>
-          {/* Catering-specific fields */}
           <div>
             <label
               htmlFor="headcount"
@@ -396,7 +423,6 @@ const CombinedOrderForm: React.FC = () => {
 
       {orderType === "on_demand" && (
         <>
-          {/* On-demand specific fields */}
           <div>
             <label
               htmlFor="item_delivered"
@@ -538,7 +564,6 @@ const CombinedOrderForm: React.FC = () => {
         </>
       )}
 
-      {/* Common fields for both order types */}
       <div>
         <label
           htmlFor="order_number"
@@ -739,6 +764,10 @@ const CombinedOrderForm: React.FC = () => {
                     city: selectedAddress.city,
                     state: selectedAddress.state,
                     zip: selectedAddress.zip,
+                    locationNumber: selectedAddress.locationNumber || null,
+                    parkingLoading: selectedAddress.parkingLoading || null,
+                    isRestaurant: selectedAddress.isRestaurant,
+                    isShared: selectedAddress.isShared,
                   });
                 }
               }}
@@ -748,6 +777,8 @@ const CombinedOrderForm: React.FC = () => {
               {addresses.map((address) => (
                 <option key={address.id} value={address.id}>
                   {`${address.street1}, ${address.city}, ${address.state} ${address.zip}`}
+                  {address.isRestaurant ? " (Restaurant)" : ""}
+                  {address.isShared ? " (Shared)" : ""}
                 </option>
               ))}
             </select>

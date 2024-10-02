@@ -15,15 +15,16 @@ import AddressModal from "./AddressModal";
 interface Address {
   id: string;
   county: string;
-  company?: string;
-  vendor?: string;
+  name: string;  // Added name field
   street1: string;
   street2: string | null;
   city: string;
   state: string;
   zip: string;
-  location_number: string | null;
-  parking_loading: string | null;
+  locationNumber: string | null;
+  parkingLoading: string | null;
+  isRestaurant: boolean;
+  isShared: boolean;
 }
 
 const UserAddresses: React.FC = () => {
@@ -110,25 +111,29 @@ const UserAddresses: React.FC = () => {
         + Add Address
       </Button>
       <Table>
-        <TableCaption>A list of your pickup addresses.</TableCaption>
+        <TableCaption>A list of your addresses.</TableCaption>
         <TableHeader>
           <TableRow>
+            <TableHead>Name</TableHead> {/* Added Name column */}
             <TableHead>County</TableHead>
-            <TableHead>Vendor</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Street</TableHead>
             <TableHead>City, State, Zip</TableHead>
             <TableHead>Phone number</TableHead>
+            <TableHead>Shared</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {addresses.map((address) => (
             <TableRow key={address.id}>
+              <TableCell>{address.name}</TableCell> {/* Added Name cell */}
               <TableCell>{address.county}</TableCell>
-              <TableCell>{address.vendor}</TableCell>
+              <TableCell>{address.isRestaurant ? 'Restaurant' : 'Address'}</TableCell>
               <TableCell>{`${address.street1}${address.street2 ? `, ${address.street2}` : ""}`}</TableCell>
               <TableCell>{`${address.city}, ${address.state}, ${address.zip}`}</TableCell>
-              <TableCell>{`${address.location_number || ""} ${address.parking_loading || ""}`}</TableCell>
+              <TableCell>{`${address.locationNumber || ""} ${address.parkingLoading || ""}`}</TableCell>
+              <TableCell>{address.isShared ? 'Yes' : 'No'}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"

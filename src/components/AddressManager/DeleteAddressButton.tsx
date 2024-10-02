@@ -10,7 +10,7 @@ const DeleteAddressButton: React.FC<DeleteAddressButtonProps> = ({ addressId, on
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this address?')) {
       try {
-        const response = await fetch(`/api/addresses/${addressId}`, {
+        const response = await fetch(`/api/addresses?id=${addressId}`, {
           method: 'DELETE',
         });
 
