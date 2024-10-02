@@ -169,7 +169,7 @@ const Team = () => {
         <div className="mb-[60px]">
           <SectionTitle
             subtitle="Our Team"
-            title="Meet Our Data Ready Set Team"
+            title="Meet Our Ready Set Team"
             paragraph="We are a diverse group of professionals committed to delivering top-notch service and driving growth through analysis and collaboration."
             width="640px"
             center
