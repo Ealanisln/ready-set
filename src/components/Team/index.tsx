@@ -106,7 +106,7 @@ const teamData: TeamType[] = [
     id: 10,
     name: "Rochelle Lean Tan",
     designation: "Marketing Assistant Coordinator",
-    image: "/images/team/Tan_Rochelle_Lean.png",
+    image: "/images/team/Tan_Rochelle.png",
     skills: ["Customer Service", "Marketing Campaigns", "Sales Support"],
     description: "Experienced in handling inbound and outbound calls, emails, and correspondences with strong communication skills.",
     facebookLink: "/#",
