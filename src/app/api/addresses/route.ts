@@ -9,12 +9,24 @@ export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401   
+ });
   }
 
   try {
+    const isShared = request.nextUrl.searchParams.get('isShared'); // Get isShared param
+
+    // Build the where clause dynamically
+    const whereClause = {
+      OR: [
+        { createdBy: session.user.id },
+        ...(isShared === 'true' ? [{ isShared: true }] : []),
+      ],
+    };
+    
+
     const addresses = await prisma.address.findMany({
-      where: { createdBy: session.user.id },
+      where: whereClause, 
       select: {
         id: true,
         name: true,
