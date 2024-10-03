@@ -72,6 +72,18 @@ const menuData: Menu[] = [
     path: "/blog",
     newTab: false,
   },
+  {
+    id: 6,
+    title: "Sign In",
+    path: "/signin",
+    newTab: false,
+  },
+  {
+    id: 7,
+    title: "Sign Up",
+    path: "/signup",
+    newTab: false,
+  },
 ];
 
 export default menuData;

@@ -51,7 +51,7 @@ const Header = () => {
 
   // Create a new menu array with conditional items based on user type
   const updatedMenuData = [
-    ...menuData,
+    ...menuData.filter(item => item.title !== "Sign In" && item.title !== "Sign Up"),
     ...(userType === "client" ? [cateringRequestMenuItem] : []),
     ...(userType === "admin" || userType === "super_admin"
       ? [adminMenuItem]
@@ -270,7 +270,44 @@ const Header = () => {
                             ))}
                           </div>
                         </li>
-                      ),
+                      )
+                    )}
+                    {!session?.user && (
+                      <>
+                        <li className="group relative">
+                          <Link
+                            onClick={navbarToggleHandler}
+                            scroll={false}
+                            href="/signin"
+                            className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                          >
+                            Sign In
+                          </Link>
+                        </li>
+                        <li className="group relative">
+                          <Link
+                            onClick={navbarToggleHandler}
+                            scroll={false}
+                            href="/signup"
+                            className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                          >
+                            Sign Up
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                    {session?.user && (
+                      <li className="group relative md:hidden">
+                        <button
+                          onClick={() => {
+                            signOut({ callbackUrl: '/', redirect: true });
+                            navbarToggleHandler();
+                          }}
+                          className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                        >
+                          Sign Out
+                        </button>
+                      </li>
                     )}
                   </ul>
                 </nav>
@@ -280,6 +317,8 @@ const Header = () => {
                 <button
                   aria-label="theme toggler"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  
+                  
                   className="flex h-8 w-8 items-center justify-center duration-300"
                 >
                   <span>

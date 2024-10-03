@@ -43,11 +43,11 @@ const UserAddresses: React.FC = () => {
 
     try {
       const response = await fetch("/api/addresses?isShared=true"); 
-      console.log(response);
       if (!response.ok) {
         throw new Error("Failed to fetch addresses");
       }
       const data = await response.json();
+      console.log(data);
       setAddresses(data);
     } catch (error) {
       console.error("Error fetching addresses:", error);
