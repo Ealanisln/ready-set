@@ -8,8 +8,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ToasterContext from "@/app/api/contex/ToasetContex";
+import BannerComponent from "@/components/Footer/Banner";
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [loading, setLoading] = useState<boolean>(true);
   const pathname = usePathname();
 
@@ -26,7 +31,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <ToasterContext />
         {!isBackendAdminRoute && !isStudioRoute && <Header />}
         <main className="flex-grow">{children}</main>
-        {!isBackendAdminRoute && !isStudioRoute && <Footer />}
+        {!isBackendAdminRoute && !isStudioRoute && (
+          <>
+            <BannerComponent />
+            <Footer />
+          </>
+        )}
         <ScrollToTop />
       </ThemeProvider>
     </SessionProvider>
