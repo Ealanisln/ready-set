@@ -11,6 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useRouter } from "next/navigation";
 
 const OrderPage = () => {
   const [orderNumber, setOrderNumber] = useState("");
@@ -21,6 +22,12 @@ const OrderPage = () => {
     const lastSegment = pathSegments[pathSegments.length - 1];
     setOrderNumber(lastSegment);
   }, []);
+
+  const router = useRouter();
+
+  const handleDeleteSuccess = () => {
+    router.push("/admin/");
+  };
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -46,7 +53,7 @@ const OrderPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <SingleOrder />
+        <SingleOrder onDeleteSuccess={handleDeleteSuccess} />{" "}
       </div>
     </div>
   );
