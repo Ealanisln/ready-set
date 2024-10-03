@@ -1,4 +1,4 @@
-// Original reference code 
+// Original reference code
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -13,7 +13,11 @@ import AdditionalInfo from "./ui/AdditionalInfo";
 import { Order, Driver } from "@/types/order";
 import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 
-const SingleOrder: React.FC = () => {
+interface SingleOrderProps {
+  onDeleteSuccess: () => void;
+}
+
+const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -21,6 +25,7 @@ const SingleOrder: React.FC = () => {
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
+
 
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
@@ -162,11 +167,14 @@ const SingleOrder: React.FC = () => {
   return (
     <main className="container mx-auto p-4">
       <Card className="mx-auto w-full max-w-5xl py-4">
-        <OrderHeader
+      <OrderHeader
           orderNumber={order.order_number}
           date={order.date}
           driverInfo={driverInfo}
           onAssignDriver={handleOpenDriverDialog}
+          orderType={order.order_type}
+          orderId={order.id}
+          onDeleteSuccess={onDeleteSuccess}
         />
         <CardContent className="pt-6">
           <OrderDetails order={order} />
