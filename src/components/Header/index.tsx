@@ -51,7 +51,9 @@ const Header = () => {
 
   // Create a new menu array with conditional items based on user type
   const updatedMenuData = [
-    ...menuData.filter(item => item.title !== "Sign In" && item.title !== "Sign Up"),
+    ...menuData.filter(
+      (item) => item.title !== "Sign In" && item.title !== "Sign Up",
+    ),
     ...(userType === "client" ? [cateringRequestMenuItem] : []),
     ...(userType === "admin" || userType === "super_admin"
       ? [adminMenuItem]
@@ -270,11 +272,11 @@ const Header = () => {
                             ))}
                           </div>
                         </li>
-                      )
+                      ),
                     )}
                     {!session?.user && (
                       <>
-                        <li className="group relative">
+                        <li className="group relative lg:hidden">
                           <Link
                             onClick={navbarToggleHandler}
                             scroll={false}
@@ -284,7 +286,7 @@ const Header = () => {
                             Sign In
                           </Link>
                         </li>
-                        <li className="group relative">
+                        <li className="group relative lg:hidden">
                           <Link
                             onClick={navbarToggleHandler}
                             scroll={false}
@@ -297,10 +299,10 @@ const Header = () => {
                       </>
                     )}
                     {session?.user && (
-                      <li className="group relative md:hidden">
+                      <li className="group relative lg:hidden">
                         <button
                           onClick={() => {
-                            signOut({ callbackUrl: '/', redirect: true });
+                            signOut({ callbackUrl: "/", redirect: true });
                             navbarToggleHandler();
                           }}
                           className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
@@ -317,8 +319,6 @@ const Header = () => {
                 <button
                   aria-label="theme toggler"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  
-                  
                   className="flex h-8 w-8 items-center justify-center duration-300"
                 >
                   <span>
@@ -359,14 +359,18 @@ const Header = () => {
                     </Link>
                     {pathUrl !== "/" || sticky ? (
                       <button
-                        onClick={() => signOut({ callbackUrl: '/', redirect:true })}
+                        onClick={() =>
+                          signOut({ callbackUrl: "/", redirect: true })
+                        }
                         className="signUpBtn rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
                       >
                         Sign Out
                       </button>
                     ) : (
                       <button
-                        onClick={() => signOut({ callbackUrl: '/', redirect:true })}
+                        onClick={() =>
+                          signOut({ callbackUrl: "/", redirect: true })
+                        }
                         className="signUpBtn rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white"
                       >
                         Sign Out
