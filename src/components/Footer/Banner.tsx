@@ -1,8 +1,6 @@
-'use client'
-
 import { useState, useEffect } from 'react'
-import { X, Clock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
+import Image from 'next/image';
 
 export default function Component() {
   const [timeLeft, setTimeLeft] = useState(24 * 60 * 60) // 24 hours in seconds
@@ -28,30 +26,46 @@ export default function Component() {
   if (!isVisible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-3 md:p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50"> 
-    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
-      <div className="flex items-center mb-2 sm:mb-0">
-        <Clock className="w-5 h-5 mr-2 text-amber-400" /> 
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      {/* Mobile Banner */}
+      <div className="sm:hidden">
+        <Image
+          src="/images/footer/mobile-banner.png"
+          alt="Mobile Promotion Banner"
+          className="w-full h-auto"
+          width={613}
+          height={88}
+          layout="responsive"
+        />
+      </div>
+      
+      {/* Desktop Banner */}
+      <div className="hidden sm:block">
+        <Image
+          src="/images/footer/desktop-banner.png"
+          alt="Desktop Promotion Banner"
+          className="w-full h-auto"
+          width={1274}
+          height={158}
+          layout="responsive"
+        />
+      </div>
+      
+      {/* Timer Overlay */}
+      {/* <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
         <span className="text-sm font-semibold">
-          Offer Ends: {formatTime(timeLeft)}
+          {formatTime(timeLeft)}
         </span>
-      </div>
-      <div className="flex items-center space-x-4">
-        <span className="text-base font-bold text-amber-400"> 
-          Limited Time: 20% Off!
-        </span>
-        <Button className="bg-amber-400 text-gray-800 hover:bg-amber-300 text-sm px-4 py-1"> 
-          Claim Now
-        </Button>
-      </div>
+      </div> */}
+      
+      {/* Close Button */}
       <button
         onClick={() => setIsVisible(false)}
-        className="absolute top-1 right-1 text-white hover:text-amber-400" 
+        className="absolute top-1 right-1 text-white hover:text-amber-400 bg-black bg-opacity-50 rounded-full p-1"
         aria-label="Close promotion banner"
       >
         <X className="w-4 h-4" />
       </button>
     </div>
-  </div>
   )
 }

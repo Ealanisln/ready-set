@@ -18,13 +18,24 @@ const Hero = () => {
                 className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
                 data-wow-delay=".2s"
               >
-                  <Image
-                    src="/images/logo/full-logo.png"
-                    alt="Company Logo"
-                    width={400}
-                    height={150}
-                    className="mx-auto"
-                  />
+{/* Full-width white background with negative margin trick */}
+<div className="relative w-screen" style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
+  <div className="absolute inset-0 bg-white"></div>
+  <div className="relative max-w-7xl mx-auto px-4 py-6">
+    {/* Logo */}
+    <div className="max-w-md mx-auto">
+      <Image
+        src="/images/logo/full-logo.png"
+        alt="Ready Set Logo"
+        width={400}
+        height={150}
+        className="w-full h-auto"
+      />
+    </div>
+  </div>
+</div>
+
+
                 <p className="mx-auto mb-4 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
                   Always ready for you.
                 </p>
