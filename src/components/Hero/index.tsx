@@ -13,12 +13,11 @@ const Hero = () => {
       >
         <div className="container">
           <div className="-mx-4 flex flex-wrap items-center">
-            <div className="w-full px-4">
+            <div className="w-full px-2">
               <div
                 className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
                 data-wow-delay=".2s"
               >
-                <div>
                   <Image
                     src="/images/logo/full-logo.png"
                     alt="Company Logo"
@@ -26,8 +25,7 @@ const Hero = () => {
                     height={150}
                     className="mx-auto"
                   />
-                </div>
-                <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
+                <p className="mx-auto mb-4 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
                   Always ready for you.
                 </p>
                 <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
@@ -65,7 +63,7 @@ const Hero = () => {
                 </ul>
 
                 <div>
-                  <p className="mb-4 text-center text-base font-medium text-white/60">
+                  <p className="text-center text-base font-medium text-white/60">
                     Want to be part of our network? <br />
                     <Link
                       href="/signup"
@@ -77,13 +75,12 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-
             <div className="w-full px-4">
               <div
                 className="wow fadeInUp relative z-10 mx-auto max-w-[845px]"
                 data-wow-delay=".25s"
               >
-                <div className="mt-16">
+                <div className="mt-8">
                   <div className="flex justify-center pb-4">
                     <CarouselPlugin />
                   </div>
