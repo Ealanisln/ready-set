@@ -18,15 +18,15 @@ const Hero = () => {
                 className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
                 data-wow-delay=".2s"
               >
-          <div>
-            <Image
-              src="/images/logo/full-logo.png"
-              alt="Company Logo"
-              width={300}
-              height={100}
-              className="mx-auto"
-            />
-          </div>
+                <div>
+                  <Image
+                    src="/images/logo/full-logo.png"
+                    alt="Company Logo"
+                    width={400}
+                    height={150}
+                    className="mx-auto"
+                  />
+                </div>
                 <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
                   Always ready for you.
                 </p>
