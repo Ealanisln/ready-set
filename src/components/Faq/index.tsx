@@ -21,7 +21,7 @@ const Faq = () => {
             />
             <SingleFaq
               question="How to download icons from LineIcons?"
-              answer="It takes 2-3 weeks to get your first blog post ready. That includes the in-depth research & creation of your monthly content marketing strategy that we do before writing your first blog post, Ipsum available ."
+              answer="It takes 2-3 weeks to get your first ready. That includes the in-depth research & creation of your monthly content marketing strategy that we do before writing your first blog post, Ipsum available ."
             />
             <SingleFaq
               question="Is GrayGrids part of UIdeck?"
