@@ -12,7 +12,7 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]">
-                  At Ready-Set, Delivering Excellence Across the San Francisco
+                  At Ready Set, Delivering Excellence Across the San Francisco
                   Bay Area and Austin
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
@@ -27,9 +27,8 @@ const About = () => {
                   delivery, emergency deliveries, catering delivery & setup, or
                   any package delivery you need. Our experienced couriers are
                   ready to pick up and deliver your items with care and speed,
-                  ensuring your <strong>delivery in Austin</strong>, the{" "}
-                  <strong>Bay Area</strong>, or <strong>San Francisco</strong>{" "}
-                  is seamless and efficient.
+                  ensuring your <strong>delivery in the San Francisco Bay Area</strong> and {" "}
+                  <strong>Austin</strong>{" "} is seamless and efficient.
                 </p>
                 <p className="mb-10 text-lg leading-relaxed text-body-color dark:text-dark-6">
                   <strong>Your Business is Our Priority</strong>
@@ -83,11 +82,11 @@ const About = () => {
 
                   <div className="relative z-10 mb-4 flex items-center justify-center overflow-hidden bg-primary px-6 py-12 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8">
                     <div>
-                      <span className="block text-5xl font-extrabold text-white">
-                        04
-                      </span>
                       <span className="block text-base font-semibold text-white">
-                        We have
+                        We have over
+                      </span>
+                      <span className="block text-5xl font-extrabold text-white">
+                        5
                       </span>
                       <span className="block text-base font-medium text-white text-opacity-70">
                         Years of experience
