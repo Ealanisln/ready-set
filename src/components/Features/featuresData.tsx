@@ -4,16 +4,6 @@ const featuresData: Feature[] = [
   {
     id: 1,
     icon: (
-      <svg fill="#FFFFFF" width="32" height="32" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Artboard 17</title><path d="M58.17,11H26.92a4.83,4.83,0,0,0-4.83,4.83v.44H8.59a2.65,2.65,0,0,0-2.36,1.47L1.28,27.84A2.65,2.65,0,0,0,1,29V44.65a2,2,0,0,0,2,2H5.71a7.64,7.64,0,0,0,15.06,0h21a7.64,7.64,0,0,0,15.06,0h3.47A2.7,2.7,0,0,0,63,44V15.85A4.83,4.83,0,0,0,58.17,11ZM9.45,20.29H22.09v6.55H6.23ZM13.24,49a3.66,3.66,0,1,1,3.65-3.65A3.66,3.66,0,0,1,13.24,49Zm0-11.31a7.65,7.65,0,0,0-7.16,5H5V30.84H22.09V42.65H20.4A7.65,7.65,0,0,0,13.24,37.67ZM49.29,49a3.66,3.66,0,1,1,3.65-3.65A3.66,3.66,0,0,1,49.29,49ZM59,42.65H56.45a7.64,7.64,0,0,0-14.33,0h-16V15.85a.84.84,0,0,1,.83-.83H58.17a.84.84,0,0,1,.83.83Z"/></svg>
-    ),
-    title: "On-the-Go Courier Assistance",
-    paragraph: "Need a package delivered quickly and efficiently? Our experienced couriers are ready to pick up and deliver your items with care and speed.",
-    btn: "Learn More",
-    btnLink: "/#",
-  },
-  {
-    id: 2,
-    icon: (
       <svg fill="#FFFFFF" width="32" height="32" version="1.1" id="lni_lni-restaurant" xmlns="http://www.w3.org/2000/svg" x="0px"
 	 y="0px" viewBox="0 0 64 64">
 <g>
@@ -38,7 +28,7 @@ const featuresData: Feature[] = [
     btnLink: "/#",
   },
   {
-    id: 3,
+    id: 2,
     icon: (
       <svg fill="#FFFFFF" width="32" height="32" version="1.1" id="lni_lni-invention" xmlns="http://www.w3.org/2000/svg"  x="0px"
 	 y="0px" viewBox="0 0 64 64">
@@ -61,6 +51,16 @@ const featuresData: Feature[] = [
     ),
     title: "Beyond Food: We Deliver Solutions",
     paragraph: "Our delivery services extend beyond just food. We can handle a wide range of items, from documents to medical supplies, ensuring they reach their destination safely and on time.",
+    btn: "Learn More",
+    btnLink: "/#",
+  },
+  {
+    id: 3,
+    icon: (
+      <svg fill="#FFFFFF" width="32" height="32" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Artboard 17</title><path d="M58.17,11H26.92a4.83,4.83,0,0,0-4.83,4.83v.44H8.59a2.65,2.65,0,0,0-2.36,1.47L1.28,27.84A2.65,2.65,0,0,0,1,29V44.65a2,2,0,0,0,2,2H5.71a7.64,7.64,0,0,0,15.06,0h21a7.64,7.64,0,0,0,15.06,0h3.47A2.7,2.7,0,0,0,63,44V15.85A4.83,4.83,0,0,0,58.17,11ZM9.45,20.29H22.09v6.55H6.23ZM13.24,49a3.66,3.66,0,1,1,3.65-3.65A3.66,3.66,0,0,1,13.24,49Zm0-11.31a7.65,7.65,0,0,0-7.16,5H5V30.84H22.09V42.65H20.4A7.65,7.65,0,0,0,13.24,37.67ZM49.29,49a3.66,3.66,0,1,1,3.65-3.65A3.66,3.66,0,0,1,49.29,49ZM59,42.65H56.45a7.64,7.64,0,0,0-14.33,0h-16V15.85a.84.84,0,0,1,.83-.83H58.17a.84.84,0,0,1,.83.83Z"/></svg>
+    ),
+    title: "On-the-Go Courier Assistance",
+    paragraph: "Need a package delivered quickly and efficiently? Our experienced couriers are ready to pick up and deliver your items with care and speed.",
     btn: "Learn More",
     btnLink: "/#",
   },
