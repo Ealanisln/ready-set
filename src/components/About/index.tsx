@@ -35,7 +35,7 @@ const About = () => {
                 </p>
 
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
-                  At Ready-Set, we treat your business as an extension of our
+                  At Ready Set, we treat your business as an extension of our
                   own. Each driver undergoes comprehensive training programs to
                   maximize the client experience. Our drivers are also required
                   to abide by the Health Insurance Portability and
