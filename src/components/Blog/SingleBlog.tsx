@@ -6,49 +6,47 @@ import { SimpleBlogCard } from "@/types/simple-blog-card";
 
 interface PostsProps {
   data: SimpleBlogCard[];
+  basePath: string;
 }
 
-const Posts = ({ data }: PostsProps) => {
+const SingleBlog = ({ data, basePath }: PostsProps) => {
   return (
-    <div className="wow fadeInUp grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3" data-wow-delay=".1s">
-      {data.map((post, idx) => (
-        <div key={post._id} className="mb-8 overflow-hidden rounded flex flex-col justify-between h-full">
-          <div>
-            <Link
-              href={`/blog/${post.slug?.current}`}
-              className="block"
-            >
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl mx-auto">
+      {data.map((post) => (
+        <div key={post._id} className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden h-full">
+          <div className="p-4 flex-shrink-0">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white hover:text-primary dark:hover:text-primary line-clamp-2">
+              <Link href={`/${basePath}/${post.slug?.current}`}>
+                {post.title}
+              </Link>
+            </h3>
+          </div>
+          <div className="relative w-full aspect-video"> {/* 16:9 aspect ratio */}
+            <Link href={`/${basePath}/${post.slug?.current}`} className="block">
               {post.mainImage ? (
                 <Image
                   src={urlFor(post.mainImage).url()}
                   alt="Blog post image"
-                  width={408}
-                  height={272}
-                  className="w-full rounded-sm object-cover transition"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  style={{ objectFit: "cover" }}
                 />
               ) : (
-                <div className="flex h-[200px] items-center justify-center rounded-sm bg-gray-200">
-                  <span>No Image</span>
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                  <span className="text-gray-500 dark:text-gray-400">No Image</span>
                 </div>
               )}
             </Link>
           </div>
-
-          <div className="pt-4">
-            <div className="mb-5 inline-block rounded bg-primary px-4 py-1 text-center text-xs font-semibold leading-loose text-white">
-              {post._updatedAt.substring(0, 10)}
-            </div>
-            <h3>
-              <Link
-                href={`/blog/${post.slug?.current}`}
-                className="mb-4 inline-block text-xl font-semibold text-dark hover:text-primary dark:text-white dark:hover:text-primary sm:text-2xl lg:text-xl xl:text-2xl"
-              >
-                {post.title}
-              </Link>
-            </h3>
-            <p className="text-base text-body-color dark:text-dark-6">
+          <div className="p-4 flex-grow">
+            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
               {post.smallDescription}
             </p>
+          </div>
+          <div className="px-4 pb-4 mt-auto">
+            <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
+              {post._updatedAt.substring(0, 10)}
+            </div>
           </div>
         </div>
       ))}
@@ -56,4 +54,4 @@ const Posts = ({ data }: PostsProps) => {
   );
 };
 
-export default Posts;
+export default SingleBlog;
