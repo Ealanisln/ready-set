@@ -40,7 +40,7 @@ const components: PortableTextComponents = {
   },
   block: {
     normal: ({ children }) => (
-      <p style={{ whiteSpace: 'pre-line', marginBottom: '2em' }}>{children}</p>
+      <p style={{ whiteSpace: "pre-line", marginBottom: "2em" }}>{children}</p>
     ),
     h1: ({ children }) => <h1 className="text-4xl font-bold">{children}</h1>,
     h2: ({ children }) => <h2 className="text-3xl font-bold">{children}</h2>,
@@ -96,11 +96,11 @@ export default async function Page({ params }: { params: any }) {
               className="mt-8 rounded-xl"
             />
 
-            <div className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16" style={{ whiteSpace: 'pre-line' }}>
-              <PortableText
-                value={data.body}
-                components={components}
-              />
+            <div
+              className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16"
+              style={{ whiteSpace: "pre-line" }}
+            >
+              <PortableText value={data.body} components={components} />
             </div>
           </div>
         </div>

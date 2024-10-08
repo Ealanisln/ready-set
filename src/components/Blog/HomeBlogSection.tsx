@@ -47,7 +47,7 @@ const HomeBlogSection = async () => {
         <div className="pb-10 pt-20 lg:pb-20 lg:pt-[120px]">
           <div className="container mx-auto">
             <div className="-mx-4 flex flex-wrap justify-center">
-              <SingleBlog data={data} />
+            <SingleBlog data={data} basePath="blog" />
             </div>
             </div>
         </div>
