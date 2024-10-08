@@ -1,5 +1,6 @@
+// menuData.ts
 import { Menu } from "@/types/menu";
-
+  
 export const cateringRequestMenuItem: Menu = {
   id: 10,
   title: "Orders",
@@ -18,7 +19,7 @@ export const cateringRequestMenuItem: Menu = {
       newTab: false,
     },
     {
-      id: 10,  // Changed from 9 to avoid duplicate IDs
+      id: 10,
       title: "Order status",
       path: "/order-status",
       newTab: false,
@@ -87,3 +88,4 @@ const menuData: Menu[] = [
 ];
 
 export default menuData;
+

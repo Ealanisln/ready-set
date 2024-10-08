@@ -1,12 +1,28 @@
-import { useTheme } from "next-themes";
+import React from 'react';
 
-const ThemeToggler = () => {
-  const { theme, setTheme } = useTheme();
+interface ThemeTogglerProps {
+  theme: string | undefined;
+  setTheme: (theme: string) => void;
+  sticky: boolean;
+  pathUrl: string;
+}
+
+const ThemeToggler: React.FC<ThemeTogglerProps> = ({ theme, setTheme, sticky, pathUrl }) => {
+  const handleToggle = () => {
+    if (theme === "dark") {
+      setTheme("light");
+    } else {
+      setTheme("dark");
+    }
+  };
+
   return (
     <button
       aria-label="theme toggler"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="text-black flex h-8 w-8 items-center justify-center duration-300 dark:text-white"
+      onClick={handleToggle}
+      className={`text-black flex h-8 w-8 items-center justify-center duration-300 dark:text-white ${
+        sticky && pathUrl !== '/' ? 'text-primary' : ''
+      }`}
     >
       <span>
         <svg
