@@ -23,6 +23,7 @@ const nextConfig = {
         source: '/admin/orders/:order_number',
         destination: '/admin/orders/[order_number]',
       },
+      
     ];
   },
 };

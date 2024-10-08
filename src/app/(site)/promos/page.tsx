@@ -9,7 +9,7 @@ export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Ready Set | Always ready for you",
-  description: "Information about our services",
+  description: "Information about our promos",
 };
 
 export async function generateStaticParams() {
@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
 async function getData() {
   const query = `
-  *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] {
+  *[_type == 'post' && 'Promos' in categories[]->title] {
     _id,
     _updatedAt,
     title,
@@ -38,11 +38,12 @@ export default async function Blog() {
 
   return (
     <>
-      <Breadcrumb pageName="Welcome to our blog" />
+      <Breadcrumb pageName="Welcome to our Promos blog" />
+
       <section className="pb-10 pt-20 lg:pb-20 lg:pt-[120px]">
         <div className="container mx-auto">
           <div className="-mx-4 flex flex-wrap justify-center sm:px-4">
-            <SingleBlog data={data} basePath="blog" />
+          <SingleBlog data={data} basePath="promos" />
           </div>
         </div>
       </section>
