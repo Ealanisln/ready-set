@@ -29,7 +29,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
       className={`flex flex-wrap items-center ${imagePosition === "right" ? "flex-row-reverse" : ""}`}
     >
       {/* Title and Icon */}
-      <div className="mb-6 w-full lg:mb-0 lg:w-1/2">
+      <div className="mb-6 w-full lg:mb-0 lg:w-3/5">
         <div className={`${imagePosition === "right" ? "lg:pr-8" : "lg:pl-8"}`}>
           <div className="mb-4 flex items-center">
             {icon}
@@ -39,8 +39,8 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
         </div>
       </div>
       {/* Image */}
-      <div className="w-full p-4 lg:w-1/2">
-        <div className="relative h-[300px] lg:h-[400px]">
+      <div className="w-full p-4 lg:w-2/5">
+        <div className="relative h-[250px] lg:h-[300px]">
           <Image
             src={imageSrc}
             alt={title}
