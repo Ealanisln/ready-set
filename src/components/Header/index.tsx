@@ -38,7 +38,11 @@ const Header: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   const navbarToggleHandler = () => {
-    setNavbarOpen(!navbarOpen);
+    setNavbarOpen((prev) => !prev);
+  };
+
+  const closeNavbarOnNavigate = () => {
+    setNavbarOpen(false);
   };
 
   const handleStickyNavbar = () => {
@@ -94,7 +98,6 @@ const Header: React.FC = () => {
               className={`navbar-logo block w-full ${
                 sticky ? "py-2" : "py-5"
               } `}
-              onClick={navbarToggleHandler}
             >
               {pathUrl !== "/" ? (
                 <>
@@ -174,7 +177,7 @@ const Header: React.FC = () => {
                     <li key={menuItem.id} className="group relative">
                       {menuItem.path ? (
                         <Link
-                          onClick={navbarToggleHandler}
+                          onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href={menuItem.path}
                           className={`ud-menu-scroll flex py-2 text-base ${
@@ -190,7 +193,10 @@ const Header: React.FC = () => {
                       ) : (
                         <>
                           <button
-                            onClick={() => handleSubmenu(index)}
+                            onClick={() => {
+                              handleSubmenu(index);
+                              closeNavbarOnNavigate();
+                            }}
                             className={`ud-menu-scroll flex items-center justify-between py-2 text-base ${
                               pathUrl !== "/"
                                 ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
@@ -240,7 +246,7 @@ const Header: React.FC = () => {
                     <>
                       <li className="group relative lg:hidden">
                         <Link
-                          onClick={navbarToggleHandler}
+                          onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href="/signin"
                           className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
@@ -250,7 +256,7 @@ const Header: React.FC = () => {
                       </li>
                       <li className="group relative lg:hidden">
                         <Link
-                          onClick={navbarToggleHandler}
+                          onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href="/signup"
                           className="ud-menu-scroll flex py-2 text-black group-hover:text-primary dark:text-dark dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
