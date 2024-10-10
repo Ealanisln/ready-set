@@ -27,12 +27,12 @@ export default function Home() {
       <CallToAction />
       <HomeBlogSection />
       {/*
-      <Pricing />
+      <Pricing />*/}
       <Testimonials />
       <Faq />
       <Team />
       <Contact />
-      <Clients /> */}
+      {/* <Clients />  */}
     </main>
   );
 }
