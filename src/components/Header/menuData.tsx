@@ -1,6 +1,5 @@
-// menuData.ts
 import { Menu } from "@/types/menu";
-  
+
 export const cateringRequestMenuItem: Menu = {
   id: 10,
   title: "Orders",
@@ -24,7 +23,7 @@ export const cateringRequestMenuItem: Menu = {
       path: "/order-status",
       newTab: false,
     },
-  ]
+  ],
 };
 
 export const adminMenuItem: Menu = {
@@ -48,6 +47,39 @@ export const driverMenuItem: Menu = {
   newTab: false,
 };
 
+export const virtualAssistantMenuItem: Menu = {
+  id: 11,
+  title: "Virtual Assistant",
+  path: "/virtual-assistant",
+  newTab: false,
+  submenu: [
+    {
+      id: 12,
+      title: "Services",
+      path: "/virtual-assistant/services",
+      newTab: false,
+    },
+    {
+      id: 13,
+      title: "Features",
+      path: "/virtual-assistant/features",
+      newTab: false,
+    },
+    {
+      id: 14,
+      title: "Pricing",
+      path: "/virtual-assistant/pricing",
+      newTab: false,
+    },
+    {
+      id: 15,
+      title: "FAQ",
+      path: "/virtual-assistant/faq",
+      newTab: false,
+    },
+  ],
+};
+
 const menuData: Menu[] = [
   {
     id: 1,
@@ -61,6 +93,7 @@ const menuData: Menu[] = [
     path: "/about",
     newTab: false,
   },
+  virtualAssistantMenuItem, // Add the new Virtual Assistant menu item
   {
     id: 4,
     title: "Contact",
@@ -88,4 +121,3 @@ const menuData: Menu[] = [
 ];
 
 export default menuData;
-
