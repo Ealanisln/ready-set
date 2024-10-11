@@ -8,8 +8,28 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative overflow-hidden bg-white pt-[120px] dark:bg-gray-900 md:pt-[130px] lg:pt-[160px]"
+      className="relative overflow-hidden bg-custom-yellow pt-[120px] dark:bg-gray-900 md:pt-[130px] lg:pt-[160px]"
     >
+      {/* Full-width banner */}
+      <div className="relative mb-24 w-full bg-black py-12 shadow-md dark:bg-gray-700">
+        <div className="container mx-auto px-4">
+          {/* <Image
+            src="/images/logo/light-logo.png"
+            alt="Ready Set Logo"
+            width={400}
+            height={150}
+            className="mx-auto h-auto w-auto object-contain dark:hidden"
+          /> */}
+          <Image
+            src="/images/logo/dark-logo.png"
+            alt="Ready Set Logo"
+            width={400}
+            height={150}
+            className="mx-auto  h-auto w-auto object-contain"
+          />
+        </div>
+      </div>
+
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap items-center">
           <div className="w-full">
@@ -17,31 +37,12 @@ const Hero = () => {
               className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
               data-wow-delay=".2s"
             >
-              {/* Logo */}
-              <div className="mx-auto mb-24 max-w-md">
-                <Image
-                  src="/images/logo/light-logo.png"
-                  alt="Ready Set Logo"
-                  width={400}
-                  height={150}
-                  className="h-auto w-full object-contain dark:hidden"
-                />
-                <Image
-                  src="/images/logo/dark-logo.png"
-                  alt="Ready Set Logo"
-                  width={400}
-                  height={150}
-                  className="hidden h-auto w-full object-contain dark:block"
-                />
-              </div>
-
+              {/* Call-to-action buttons */}
               <ul className="mb-8 flex flex-wrap items-center justify-center gap-5">
-                {" "}
-                {/* Reduced top margin */}
                 <li>
                   <Link
                     href="/catering-request"
-                    className="inline-flex items-center justify-center rounded-md bg-custom-yellow px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-yellow-400 dark:bg-yellow-600 dark:text-white dark:hover:bg-yellow-500"
+                    className="inline-flex items-center justify-center rounded-md bg-gray-800 px-7 py-[14px] text-center text-base font-medium text-white shadow-1 transition duration-300 ease-in-out hover:bg-gray-700 dark:bg-blue-700 dark:hover:bg-blue-600"
                   >
                     Let&apos;s Start
                   </Link>
@@ -50,7 +51,7 @@ const Hero = () => {
                   <Link
                     href="/contact"
                     target="_blank"
-                    className="flex items-center gap-4 rounded-md bg-gray-100 px-6 py-[14px] text-base font-medium text-dark transition duration-300 ease-in-out hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                    className="flex items-center gap-4 rounded-md bg-blue-500 px-6 py-[14px] text-base font-medium text-white transition duration-300 ease-in-out hover:bg-white hover:text-gray-800 dark:bg-amber-500 dark:hover:bg-gray-800 dark:hover:text-white"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -72,11 +73,11 @@ const Hero = () => {
               </ul>
 
               <div>
-                <p className="text-center text-base font-medium text-gray-600 dark:text-gray-400">
+                <p className="mb-4 text-center text-base font-medium text-slate-800">
                   Want to be part of our network? <br />
                   <Link
                     href="/signup"
-                    className="font-semibold text-custom-yellow hover:underline dark:text-yellow-400"
+                    className="font-semibold text-slate-600 hover:underline"
                   >
                     Join Us
                   </Link>
