@@ -146,6 +146,7 @@ const UserAddresses: React.FC = () => {
                 <Button
                   variant="destructive"
                   onClick={() => handleDeleteAddress(address.id)}
+                  disabled={address.isShared} // Disable if address is shared
                 >
                   Delete
                 </Button>
