@@ -190,8 +190,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   }
 
   return (
-    <main className="container mx-auto p-4">
-      <Card className="mx-auto w-full max-w-5xl py-6">
+    <main className="container mx-auto p-6">
+      <Card className="mx-auto w-full max-w-5xl pt-2">
         <OrderHeader
           orderNumber={order.order_number}
           date={order.date}
