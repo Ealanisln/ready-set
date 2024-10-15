@@ -24,7 +24,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
     </CardHeader>
     <CardContent>
       {children}
-      <Button asChild size="sm" className="mt-4 w-full">
+      <Button asChild size="sm" className="mt-4 w-full" variant="outline">
         <Link href={linkHref}>{linkText}</Link>
       </Button>
     </CardContent>
