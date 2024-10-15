@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
+import sgMail from "@sendgrid/mail";
 
 const prisma = new PrismaClient();
 
 // Define types for our order objects
 type CateringOrder = Prisma.catering_requestGetPayload<{
-  include: { user: { select: { name: true, email: true } } }
+  include: { user: { select: { name: true; email: true } } };
 }>;
 
 type OnDemandOrder = Prisma.on_demandGetPayload<{
-  include: { user: { select: { name: true, email: true } } }
+  include: { user: { select: { name: true; email: true } } };
 }>;
 
 type Order = CateringOrder | OnDemandOrder;
@@ -24,29 +25,29 @@ export async function GET(req: NextRequest) {
   }
 
   const url = new URL(req.url);
-  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-  const type = url.searchParams.get('type');
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
+  const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+  const type = url.searchParams.get("type");
+  const page = parseInt(url.searchParams.get("page") || "1", 10);
   const skip = (page - 1) * limit;
 
   try {
     let cateringOrders: CateringOrder[] = [];
     let onDemandOrders: OnDemandOrder[] = [];
 
-    if (type === 'all' || type === 'catering' || !type) {
+    if (type === "all" || type === "catering" || !type) {
       cateringOrders = await prisma.catering_request.findMany({
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { created_at: "desc" },
         include: { user: { select: { name: true, email: true } } },
       });
     }
 
-    if (type === 'all' || type === 'on_demand' || !type) {
+    if (type === "all" || type === "on_demand" || !type) {
       onDemandOrders = await prisma.on_demand.findMany({
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { created_at: "desc" },
         include: { user: { select: { name: true, email: true } } },
       });
     }
@@ -55,19 +56,72 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
       .slice(0, limit);
 
-    const serializedOrders = allOrders.map(order => ({
-      ...JSON.parse(JSON.stringify(order, (key, value) =>
-        typeof value === 'bigint'
-          ? value.toString()
-          : value
-      )),
-      order_type: 'brokerage' in order ? 'catering' : 'on_demand',
+    const serializedOrders = allOrders.map((order) => ({
+      ...JSON.parse(
+        JSON.stringify(order, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        ),
+      ),
+      order_type: "brokerage" in order ? "catering" : "on_demand",
     }));
 
     return NextResponse.json(serializedOrders, { status: 200 });
   } catch (error) {
     console.error("Error fetching orders:", error);
-    return NextResponse.json({ message: "Error fetching orders" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error fetching orders" },
+      { status: 500 },
+    );
+  }
+}
+
+async function sendOrderEmail(order: any) {
+  let body = `
+    <h2>New Order Details:</h2>
+    <p>Order Type: ${order.order_type}</p>
+    <p>Order Number: ${order.order_number}</p>
+    <p>Brokerage: ${order.brokerage}</p>
+    <p>Date: ${order.date}</p>
+    <p>Pickup Time: ${order.pickup_time}</p>
+    <p>Arrival Time: ${order.arrival_time}</p>
+    <p>Order Total: $${order.order_total}</p>
+    <p>Client Attention: ${order.client_attention}</p>
+    <p>Pickup Notes: ${order.pickup_notes || "N/A"}</p>
+    <p>Special Notes: ${order.special_notes || "N/A"}</p>
+  `;
+
+  if (order.order_type === "catering") {
+    body += `
+      <p>Headcount: ${order.headcount}</p>
+      <p>Need Host: ${order.need_host}</p>
+      <p>Hours Needed: ${order.hours_needed || "N/A"}</p>
+      <p>Number of Hosts: ${order.number_of_host || "N/A"}</p>
+    `;
+  } else if (order.order_type === "on_demand") {
+    body += `
+      <p>Item Delivered: ${order.item_delivered}</p>
+      <p>Vehicle Type: ${order.vehicle_type}</p>
+      <p>Length: ${order.length}</p>
+      <p>Width: ${order.width}</p>
+      <p>Height: ${order.height}</p>
+      <p>Weight: ${order.weight}</p>
+    `;
+  }
+
+  const msg = {
+    to: "info@ready-set.co", // Replace with the desired recipient email
+    from: "emmanuel@alanis.dev", // Replace with your verified sender email
+    subject: `New ${order.order_type.charAt(0).toUpperCase() + order.order_type.slice(1)} Order - ${order.order_number}`,
+    html: body,
+  };
+
+  sgMail.setApiKey(process.env.SEND_API_KEY || "");
+
+  try {
+    await sgMail.send(msg);
+    console.log("Order notification email sent successfully");
+  } catch (error) {
+    console.error("Error sending order notification email:", error);
   }
 }
 
@@ -130,9 +184,10 @@ export async function POST(req: NextRequest) {
     // Use a transaction to ensure atomicity
     const result = await prisma.$transaction(async (txPrisma) => {
       // Check for existing order number within both catering_request and on_demand tables
-      const existingCateringRequest = await txPrisma.catering_request.findUnique({
-        where: { order_number: order_number },
-      });
+      const existingCateringRequest =
+        await txPrisma.catering_request.findUnique({
+          where: { order_number: order_number },
+        });
 
       const existingOnDemandRequest = await txPrisma.on_demand.findUnique({
         where: { order_number: order_number },
@@ -273,15 +328,18 @@ export async function POST(req: NextRequest) {
             tip: parsedTip,
             status: "active",
             fileUploads: {
-              create: fileUploads?.map((file: { name: string; url: string; size: number }) => ({
-                userId: session.user.id,
-                fileName: file.name,
-                fileUrl: file.url,
-                fileSize: file.size,
-                fileType: file.name.split('.').pop() || 'unknown',
-                uploadedAt: new Date(),
-                entityType: 'catering_request',
-              })) || [],
+              create:
+                fileUploads?.map(
+                  (file: { name: string; url: string; size: number }) => ({
+                    userId: session.user.id,
+                    fileName: file.name,
+                    fileUrl: file.url,
+                    fileSize: file.size,
+                    fileType: file.name.split(".").pop() || "unknown",
+                    uploadedAt: new Date(),
+                    entityType: "catering_request",
+                  }),
+                ) || [],
             },
           },
           include: {
@@ -314,15 +372,18 @@ export async function POST(req: NextRequest) {
             weight,
             status: "active",
             fileUploads: {
-              create: fileUploads?.map((file: { name: string; url: string; size: number }) => ({
-                userId: session.user.id,
-                fileName: file.name,
-                fileUrl: file.url,
-                fileSize: file.size,
-                fileType: file.name.split('.').pop() || 'unknown',
-                uploadedAt: new Date(),
-                entityType: 'on_demand',
-              })) || [],
+              create:
+                fileUploads?.map(
+                  (file: { name: string; url: string; size: number }) => ({
+                    userId: session.user.id,
+                    fileName: file.name,
+                    fileUrl: file.url,
+                    fileSize: file.size,
+                    fileType: file.name.split(".").pop() || "unknown",
+                    uploadedAt: new Date(),
+                    entityType: "on_demand",
+                  }),
+                ) || [],
             },
           },
           include: {
@@ -332,6 +393,9 @@ export async function POST(req: NextRequest) {
       } else {
         throw new Error("Invalid order type");
       }
+
+      // Send email notification
+      await sendOrderEmail({ ...newOrder, order_type });
 
       return newOrder;
     });

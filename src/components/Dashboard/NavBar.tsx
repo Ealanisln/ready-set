@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +55,7 @@ const NavBar = () => {
           <SheetContent side="left">
             <nav className="grid gap-6 text-lg font-medium">
               <Link
-                href="#"
+                href="/"
                 className="flex items-center gap-2 text-lg font-semibold"
               >
                 <Gauge className="h-6 w-6" />
@@ -119,7 +118,7 @@ const NavBar = () => {
           <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
             <TooltipProvider>
               <Link
-                href="#"
+                href="/"
                 className="text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold md:h-8 md:w-8 md:text-base"
               >
                 <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
