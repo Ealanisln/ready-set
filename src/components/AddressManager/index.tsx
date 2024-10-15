@@ -1,3 +1,4 @@
+// src/components/AddressManager/index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -50,7 +51,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/addresses`);
+      const response = await fetch(`/api/addresses?isShared=all`);
       if (response.ok) {
         const data = await response.json();
         setAddresses(data);
