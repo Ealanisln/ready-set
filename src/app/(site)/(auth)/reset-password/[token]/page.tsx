@@ -1,3 +1,4 @@
+// src/app/(site)/(auth)/reset-password/[token]/page.tsx
 import React from "react";
 import ResetPassword from "@/components/Auth/ResetPassword";
 import Breadcrumb from "@/components/Common/Breadcrumb";
