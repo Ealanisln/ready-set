@@ -113,6 +113,9 @@ export function DashboardHome() {
               <Link href="/catering-request" className="block w-full">
                 <Button className="w-full">Create new order</Button>
               </Link>
+              <Link href="/admin/users/new-user" className="block w-full">
+                <Button className="w-full" variant="outline">Create new user</Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

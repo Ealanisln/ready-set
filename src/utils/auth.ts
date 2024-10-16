@@ -4,13 +4,35 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import { prisma } from "./prismaDB";
 import type { Adapter } from "next-auth/adapters";
+
+// Define the structure of your User type based on your Prisma schema
+interface CustomUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  type: string;
+  isTemporaryPassword: boolean;
+  // Add other fields from your Prisma User model as needed
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: CustomUser;
+  }
+
+  interface User extends CustomUser {}
+}
+
+declare module "next-auth/jwt" {
+  interface JWT extends CustomUser {}
+}
 
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/signin",
+    error: '/auth/error',
   },
   adapter: PrismaAdapter(prisma) as Adapter,
   secret: process.env.NEXTAUTH_SECRET,
@@ -21,41 +43,36 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "text", placeholder: "Jhondoe" },
+        email: { label: "Email", type: "text", placeholder: "johndoe@example.com" },
         password: { label: "Password", type: "password" },
-        username: { label: "Username", type: "text", placeholder: "Jhon Doe" },
       },
 
       async authorize(credentials) {
-        // check to see if email and password is there
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Please enter an email or password");
+          return null;
         }
-
-        // check to see if user already exist
+      
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
-
-        // if user was not found
+      
         if (!user || !user?.password) {
-          throw new Error("In valid email or password");
+          return null;
         }
-
-        // check to see if passwords match
+      
         const passwordMatch = await bcrypt.compare(
           credentials.password,
-          user.password,
+          user.password
         );
-
+      
         if (!passwordMatch) {
-          throw new Error("Incorrect password");
+          return null;
         }
-
-        return user;
-      },
+      
+        return user as CustomUser;
+      }
     }),
 
     GoogleProvider({
@@ -76,35 +93,56 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt: async (payload: any) => {
-      const { token } = payload;
-      const user = payload.user;
-  
+    async jwt({ token, user, account }) {
       if (user) {
-        return {
-          ...token,
-          id: user.id,
-          type: user.type, 
-        };
+        token.id = user.id;
+        token.type = user.type;
+        token.isTemporaryPassword = user.isTemporaryPassword;
+      }
+      if (account && account.type === "oauth") {
+        await prisma.user.update({
+          where: { id: token.id },
+          data: { isTemporaryPassword: false }
+        });
+        token.isTemporaryPassword = false;
       }
       return token;
     },
-  
-    session: async ({ session, token }: { session: any; token: any }) => {
-      if (session?.user) {
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            id: token.id,
-            type: token.type, 
-          },
-        };
-      }
+
+    async session({ session, token }) {
+      session.user = {
+        ...session.user,
+        id: token.id,
+        type: token.type,
+        isTemporaryPassword: token.isTemporaryPassword,
+      };
       return session;
+    },
+
+    async signIn({ user, account }) {
+      if (account?.type === "credentials") {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+        });
+        if (dbUser?.isTemporaryPassword) {
+          // Instead of setting a new property, we'll use the existing one
+          return true; // Allow sign in, we'll handle redirection on the client side
+        }
+      }
+      return true;
+    }
+  },
+
+  events: {
+    async signIn({ user, account }) {
+      if (account?.type === "oauth") {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isTemporaryPassword: false }
+        });
+      }
     },
   },
 
-  
-  // debug: process.env.NODE_ENV === "developement",
+  // debug: process.env.NODE_ENV === "development",
 };
