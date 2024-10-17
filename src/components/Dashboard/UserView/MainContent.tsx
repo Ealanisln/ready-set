@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserTable } from "./UserTable";
 import { UserFilter } from "./UserFilter";
+import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
 
 interface User {
@@ -31,27 +32,32 @@ interface User {
 interface MainContentProps {
   users: User[];
   filter: string | null;
-  setFilter: (filter: string | null) => void;
+  setFilter: Dispatch<SetStateAction<string | null>>;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
-  users,
+  users: initialUsers,
   filter,
   setFilter,
 }) => {
-  const [currentUserRole, setCurrentUserRole] = useState<"admin" | "super_admin">("admin");
+  const [users, setUsers] = useState<User[]>(initialUsers);
   const [paginationInfo, setPaginationInfo] = useState({
     start: 0,
     end: 0,
     total: 0,
   });
   const [activeTab, setActiveTab] = useState("active");
+  const { toast } = useToast();
+  const { data: session } = useSession();
 
-  const filteredUsers = users.filter((user) => {
+  const currentUserRole = session?.user?.type === "super_admin" ? "super_admin" : "admin";
+
+  const filteredUsers = users?.filter((user) => {
+    if (!user) return false;
     if (filter && user.type !== filter) return false;
     if (activeTab === "all") return true;
     return user.status === activeTab;
-  });
+  }) ?? [];
 
   const handlePaginationChange = (
     start: number,
@@ -61,10 +67,36 @@ export const MainContent: React.FC<MainContentProps> = ({
     setPaginationInfo({ start, end, total });
   };
 
-  const { data: session } = useSession();
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        throw new Error('Failed to fetch users');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
-  console.log("Current activeTab:", activeTab);
-  console.log("Filtered users:", filteredUsers);
+  const handleUserDeleted = useCallback(() => {
+    fetchUsers();
+    toast({
+      title: "User deleted",
+      description: "The user has been successfully removed.",
+    });
+  }, [fetchUsers, toast]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const renderTabContent = (tabValue: string, title: string) => (
     <TabsContent value={tabValue}>
@@ -80,6 +112,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             users={filteredUsers}
             onPaginationChange={handlePaginationChange}
             currentUserRole={currentUserRole}
+            onUserDeleted={handleUserDeleted}
           />
         </CardContent>
         <CardFooter>
@@ -110,7 +143,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             <Button size="sm" className="h-8 gap-1">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                <Link href="/signup">Add User</Link>
+                <Link href="/admin/users/new-user">Add User</Link>
               </span>
             </Button>
           </div>

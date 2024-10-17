@@ -2,28 +2,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
+import { deleteUserFiles } from "@/app/actions/delete-user-files";
 
 // Helper function to check admin authorization
 async function checkAuthorization(requestedUserId: string) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   // Allow access if the user is requesting their own profile
   if (session.user.id === requestedUserId) {
     return null;
   }
-  
+
   // Allow access if the user is an admin or super_admin
-  if (session.user.type === 'admin' || session.user.type === 'super_admin') {
+  if (session.user.type === "admin" || session.user.type === "super_admin") {
     return null;
   }
-  
+
   // Deny access for all other cases
-  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
 // GET: Fetch a user by ID (only id and name)
@@ -93,7 +94,6 @@ export async function GET(
   }
 }
 
-
 // PUT: Update a user by ID
 export async function PUT(
   request: NextRequest,
@@ -119,7 +119,8 @@ export async function PUT(
       delete processedData.timeNeeded;
     }
     if (processedData.cateringBrokerage) {
-      processedData.catering_brokerage = processedData.cateringBrokerage.join(", ");
+      processedData.catering_brokerage =
+        processedData.cateringBrokerage.join(", ");
       delete processedData.cateringBrokerage;
     }
     if (processedData.provisions) {
@@ -127,13 +128,13 @@ export async function PUT(
       delete processedData.provisions;
     }
     if (processedData.displayName) {
-      if (processedData.type === 'vendor') {
+      if (processedData.type === "vendor") {
         processedData.name = processedData.displayName;
         delete processedData.contact_name;
-      } else if (processedData.type === 'client') {
+      } else if (processedData.type === "client") {
         processedData.contact_name = processedData.displayName;
         delete processedData.name;
-      } else if (processedData.type === 'driver') {
+      } else if (processedData.type === "driver") {
         processedData.name = processedData.displayName;
         delete processedData.contact_name;
       }
@@ -142,17 +143,33 @@ export async function PUT(
 
     // Remove any fields that are not in the Prisma schema
     const allowedFields = [
-      'name', 'email', 'type', 'company_name', 'contact_name', 'contact_number',
-      'website', 'street1', 'street2', 'city', 'state', 'zip', 'location_number',
-      'parking_loading', 'counties', 'time_needed', 'catering_brokerage',
-      'frequency', 'provide', 'head_count', 'status'
+      "name",
+      "email",
+      "type",
+      "company_name",
+      "contact_name",
+      "contact_number",
+      "website",
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "zip",
+      "location_number",
+      "parking_loading",
+      "counties",
+      "time_needed",
+      "catering_brokerage",
+      "frequency",
+      "provide",
+      "head_count",
+      "status",
     ];
     Object.keys(processedData).forEach((key) => {
       if (!allowedFields.includes(key)) {
         delete processedData[key];
       }
     });
-
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -161,7 +178,6 @@ export async function PUT(
         updated_at: new Date(),
       },
     });
-
 
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {
@@ -187,16 +203,28 @@ export async function DELETE(
   { params }: { params: { userId: string } },
 ) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.type !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (
+    !session ||
+    (session.user.type !== "admin" && session.user.type !== "super_admin")
+  ) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { userId } = params;
   try {
+    // First, delete all files associated with the user
+    const filesDeletionResult = await deleteUserFiles(userId);
+    console.log("Files deletion result:", filesDeletionResult);
+
+    // Then, delete the user
     await prisma.user.delete({
       where: { id: userId },
     });
-    return NextResponse.json({ message: "User deleted" });
+
+    return NextResponse.json({
+      message: "User and associated files deleted",
+      filesDeletionResult,
+    });
   } catch (error: unknown) {
     console.error("Error deleting user:", error);
     let errorMessage = "Failed to delete user";

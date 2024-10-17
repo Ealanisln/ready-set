@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +28,19 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { PaginationWrapper } from './PaginationWrapper'; 
+import { PaginationWrapper } from "./PaginationWrapper";
+import { toast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -39,41 +56,74 @@ interface UserTableProps {
   users: User[];
   onPaginationChange: (start: number, end: number, total: number) => void;
   currentUserRole: "admin" | "super_admin";
+  onUserDeleted: () => void;
 }
 
-export const UserTable: React.FC<UserTableProps> = ({ 
-  users, 
-  onPaginationChange, 
+export const UserTable: React.FC<UserTableProps> = ({
+  users,
+  onPaginationChange,
   currentUserRole,
-   
+  onUserDeleted,
 }) => {
-  const [sortColumn, setSortColumn] = useState<keyof User>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortColumn, setSortColumn] = useState<keyof User>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const toggleSort = (column: keyof User) => {
     if (column === sortColumn) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
   const sortedUsers = useMemo(() => {
     const sortUsers = (a: User, b: User) => {
-      const getName = (user: User) => (user.name || user.contact_name || '').toLowerCase();
-      const valueA = sortColumn === 'name' ? getName(a) : ((a[sortColumn] as string) || '').toLowerCase();
-      const valueB = sortColumn === 'name' ? getName(b) : ((b[sortColumn] as string) || '').toLowerCase();
-      
-      return sortDirection === 'asc' 
-        ? valueA.localeCompare(valueB) 
+      const getName = (user: User) =>
+        (user.name || user.contact_name || "").toLowerCase();
+      const valueA =
+        sortColumn === "name"
+          ? getName(a)
+          : ((a[sortColumn] as string) || "").toLowerCase();
+      const valueB =
+        sortColumn === "name"
+          ? getName(b)
+          : ((b[sortColumn] as string) || "").toLowerCase();
+
+      return sortDirection === "asc"
+        ? valueA.localeCompare(valueB)
         : valueB.localeCompare(valueA);
     };
-  
+
     return [...users].sort(sortUsers);
   }, [users, sortColumn, sortDirection]);
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast({
+          title: "User deleted successfully",
+          description: "The user has been removed from the system.",
+        });
+        onUserDeleted();
+      } else {
+        throw new Error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Pagination logic
   const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
@@ -84,7 +134,10 @@ export const UserTable: React.FC<UserTableProps> = ({
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     const newStartIndex = (page - 1) * itemsPerPage;
-    const newEndIndex = Math.min(newStartIndex + itemsPerPage, sortedUsers.length);
+    const newEndIndex = Math.min(
+      newStartIndex + itemsPerPage,
+      sortedUsers.length,
+    );
     onPaginationChange(newStartIndex + 1, newEndIndex, sortedUsers.length);
   };
 
@@ -93,20 +146,36 @@ export const UserTable: React.FC<UserTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead onClick={() => toggleSort('name')}>
-              Name {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+            <TableHead onClick={() => toggleSort("name")}>
+              Name{" "}
+              {sortColumn === "name" && (sortDirection === "asc" ? "↑" : "↓")}
             </TableHead>
-            <TableHead onClick={() => toggleSort('type')}>
-              Type {sortColumn === 'type' && (sortDirection === 'asc' ? '↑' : '↓')}
+            <TableHead onClick={() => toggleSort("type")}>
+              Type{" "}
+              {sortColumn === "type" && (sortDirection === "asc" ? "↑" : "↓")}
             </TableHead>
-            <TableHead className="hidden md:table-cell" onClick={() => toggleSort('contact_number')}>
-              Phone {sortColumn === 'contact_number' && (sortDirection === 'asc' ? '↑' : '↓')}
+            <TableHead
+              className="hidden md:table-cell"
+              onClick={() => toggleSort("contact_number")}
+            >
+              Phone{" "}
+              {sortColumn === "contact_number" &&
+                (sortDirection === "asc" ? "↑" : "↓")}
             </TableHead>
-            <TableHead className="hidden md:table-cell" onClick={() => toggleSort('email')}>
-              E-mail {sortColumn === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
+            <TableHead
+              className="hidden md:table-cell"
+              onClick={() => toggleSort("email")}
+            >
+              E-mail{" "}
+              {sortColumn === "email" && (sortDirection === "asc" ? "↑" : "↓")}
             </TableHead>
-            <TableHead className="hidden md:table-cell" onClick={() => toggleSort('created_at')}>
-              Created at {sortColumn === 'created_at' && (sortDirection === 'asc' ? '↑' : '↓')}
+            <TableHead
+              className="hidden md:table-cell"
+              onClick={() => toggleSort("created_at")}
+            >
+              Created at{" "}
+              {sortColumn === "created_at" &&
+                (sortDirection === "asc" ? "↑" : "↓")}
             </TableHead>
             <TableHead>
               <span className="sr-only">Actions</span>
@@ -138,11 +207,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      aria-haspopup="true"
-                      size="icon"
-                      variant="ghost"
-                    >
+                    <Button aria-haspopup="true" size="icon" variant="ghost">
                       <MoreHorizontal className="h-4 w-4" />
                       <span className="sr-only">Toggle menu</span>
                     </Button>
@@ -152,6 +217,38 @@ export const UserTable: React.FC<UserTableProps> = ({
                     <Link href={`/admin/users/${user.id}`}>
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                     </Link>
+                    {currentUserRole === "super_admin" && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete the user account and remove
+                              their data from our servers.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteUser(user.id)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
