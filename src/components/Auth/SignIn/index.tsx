@@ -1,6 +1,8 @@
+// src/components/Auth/SignIn/index.tsx
+
 "use client";
 
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,31 +19,43 @@ const Signin = () => {
     checkboxToggle: false,
   });
 
-  const [isPassword, setIsPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const loginUser = (e: any) => {
+  const loginUser = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     setLoading(true);
-    signIn("credentials", { ...loginData, redirect: false })
-      .then((callback) => {
-        if (callback?.error) {
-          toast.error(callback?.error);
-          setLoading(false);
-          return;
-        }
-
-        if (callback?.ok && !callback?.error) {
-          toast.success("Login successful");
-          setLoading(false);
+    try {
+      const result = await signIn("credentials", {
+        ...loginData,
+        redirect: false,
+      });
+  
+      if (result?.error) {
+        console.error("SignIn error:", result.error);
+        toast.error(result.error);
+        setLoading(false);
+        return;
+      }
+  
+      if (result?.ok) {
+        toast.success("Login successful");
+        
+        // Get the session to check if the password is temporary
+        const session = await getSession();
+        
+        if (session?.user.isTemporaryPassword) {
+          router.push("/change-password");
+        } else {
           router.push("/");
         }
-      })
-      .catch((err) => {
-        setLoading(false);
-        toast.error(err.message);
-      });
+      }
+    } catch (err) {
+      console.error("Detailed error:", err);
+      toast.error("An error occurred during sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,7 +86,7 @@ const Signin = () => {
                 </Link>
               </div>
 
-              {/* <SocialSignIn /> */}
+                        {/* <SocialSignIn /> */}
 
               {/* <span className="z-1 relative my-8 block text-center">
                 <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
@@ -86,38 +100,36 @@ const Signin = () => {
                 setIsPassword={setIsPassword}
               /> */}
 
-                <form onSubmit={(e) => e.preventDefault()}>
-                  <div className="mb-[22px]">
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, email: e.target.value })
-                      }
-                      className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div className="mb-[22px]">
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, password: e.target.value })
-                      }
-                      className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div className="mb-9">
-                    <button
-                      onClick={loginUser}
-                      type="submit"
-                      className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90"
-                    >
-                      Sign In {loading && <Loader />}
-                    </button>
-                  </div>
-                </form>
-
+              <form onSubmit={loginUser}>
+                <div className="mb-[22px]">
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, email: e.target.value })
+                    }
+                    className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="mb-[22px]">
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
+                    className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="mb-9">
+                  <button
+                    type="submit"
+                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90"
+                  >
+                    Sign In {loading && <Loader />}
+                  </button>
+                </div>
+              </form>
 
               <Link
                 href="/forgot-password"

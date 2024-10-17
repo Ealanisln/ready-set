@@ -1,43 +1,54 @@
+// src/app/api/forgot-password/update/route.ts
+
 import bcrypt from "bcryptjs";
 import { prisma } from "@/utils/prismaDB";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-	const body = await request.json();
-	const { email, password } = body;
+    const body = await request.json();
+    const { email, password, token } = body;
 
-	if (!email || !password) {
-		return new NextResponse("Missing Fields", { status: 400 });
-	}
+    if (!email || !password || !token) {
+        return NextResponse.json({ error: "Missing Fields" }, { status: 400 });
+    }
 
-	const formatedEmail = email.toLowerCase();
+    const formattedEmail = email.toLowerCase();
 
-	const user = await prisma.user.findUnique({
-		where: {
-			email: formatedEmail,
-		},
-	});
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: formattedEmail,
+            },
+        });
 
-	if (!user) {
-		throw new Error("Email does not exists");
-	}
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
 
-	const hashedPassword = await bcrypt.hash(password, 10);
+        // Check if the token is valid and not expired
+        if (user.passwordResetToken !== token || 
+            !user.passwordResetTokenExp || 
+            user.passwordResetTokenExp < new Date()) {
+            return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+        }
 
-	try {
-		await prisma.user.update({
-			where: {
-				email: formatedEmail,
-			},
-			data: {
-				password: hashedPassword,
-				passwordResetToken: null,
-				passwordResetTokenExp: null,
-			},
-		});
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-		return NextResponse.json("Password Updated", { status: 200 });
-	} catch (error) {
-		return new NextResponse("Internal Error", { status: 500 });
-	}
+        await prisma.user.update({
+            where: {
+                email: formattedEmail,
+            },
+            data: {
+                password: hashedPassword,
+                passwordResetToken: null,
+                passwordResetTokenExp: null,
+                isTemporaryPassword: false,
+            },
+        });
+
+        return NextResponse.json({ message: "Password updated successfully" }, { status: 200 });
+    } catch (error) {
+        console.error("Password update error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 }

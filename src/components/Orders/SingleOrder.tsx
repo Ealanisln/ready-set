@@ -1,4 +1,4 @@
-// Original reference code
+// src/components/Orders/SingleOrder.tsx
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import CustomerInfo from "./ui/CustomerInfo";
 import AdditionalInfo from "./ui/AdditionalInfo";
 import { Order, Driver } from "@/types/order";
 import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
+import OrderStatus from "./OrderStatus";
 
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
@@ -25,7 +26,6 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
-
 
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
@@ -152,6 +152,31 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     }
   };
 
+  const handleOrderStatusChange = async (newStatus: string) => {
+    if (!order) return;
+
+    try {
+      const response = await fetch(`/api/orders/${order.order_number}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const updatedOrder = await response.json();
+        setOrder(updatedOrder);
+        toast.success("Order status updated successfully!");
+      } else {
+        throw new Error("Failed to update order status");
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      toast.error("Failed to update order status. Please try again.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -165,9 +190,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   }
 
   return (
-    <main className="container mx-auto p-4">
-      <Card className="mx-auto w-full max-w-5xl py-4">
-      <OrderHeader
+    <main className="container mx-auto p-6">
+      <Card className="mx-auto w-full max-w-5xl pt-2">
+        <OrderHeader
           orderNumber={order.order_number}
           date={order.date}
           driverInfo={driverInfo}
@@ -176,6 +201,18 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           orderId={order.id}
           onDeleteSuccess={onDeleteSuccess}
         />
+        <Separator />
+
+        <CardContent className="pt-6">
+          <OrderStatus
+            orderType={order.order_type}
+            initialStatus={order.status}
+            orderId={order.id}
+            onStatusChange={handleOrderStatusChange}
+          />
+        </CardContent>
+        <Separator />
+
         <CardContent className="pt-6">
           <OrderDetails order={order} />
           <Separator />
@@ -199,11 +236,6 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
             specialNotes={order.special_notes}
           />
         </CardContent>
-        <CardFooter className="bg-muted/50 flex flex-row items-center border-t px-6 py-6">
-          <div className="text-md text-muted-foreground">
-            Order status: <span className="font-semibold">{order.status}</span>
-          </div>
-        </CardFooter>
       </Card>
       <div className="py-8">
         <DriverStatusCard

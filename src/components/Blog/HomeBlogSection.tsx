@@ -15,13 +15,14 @@ export async function generateStaticParams() {
 
 async function getData() {
   const query = `
-  *[_type == 'post'] {
+  *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] {
     _id,
     _updatedAt,
     title,
     slug,
     mainImage,
     smallDescription,
+    categories[]->{ title }
   }  
   `;
   const data = await client.fetch(query);
