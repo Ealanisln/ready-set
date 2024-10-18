@@ -76,18 +76,42 @@ export async function GET(req: NextRequest) {
 }
 
 async function sendOrderEmail(order: any) {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatTime = (time: Date) => {
+    return time.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZoneName: "short",
+    });
+  };
+
+  const formatAddress = (address: any) => {
+    return `${address.street1}${address.street2 ? ", " + address.street2 : ""}, ${address.city}, ${address.state} ${address.zip}`;
+  };
+
   let body = `
     <h2>New Order Details:</h2>
     <p>Order Type: ${order.order_type}</p>
     <p>Order Number: ${order.order_number}</p>
     <p>Brokerage: ${order.brokerage}</p>
-    <p>Date: ${order.date}</p>
-    <p>Pickup Time: ${order.pickup_time}</p>
-    <p>Arrival Time: ${order.arrival_time}</p>
+    <p>Date: ${formatDate(new Date(order.date))}</p>
+    <p>Pickup Time: ${formatTime(new Date(order.pickup_time))}</p>
+    <p>Arrival Time: ${formatTime(new Date(order.arrival_time))}</p>
     <p>Order Total: $${order.order_total}</p>
     <p>Client Attention: ${order.client_attention}</p>
     <p>Pickup Notes: ${order.pickup_notes || "N/A"}</p>
     <p>Special Notes: ${order.special_notes || "N/A"}</p>
+    <p>Pickup Address: ${formatAddress(order.address)}</p>
+    <p>Drop-off Address: ${formatAddress(order.delivery_address)}</p>
   `;
 
   if (order.order_type === "catering") {
@@ -159,7 +183,6 @@ export async function POST(req: NextRequest) {
       width,
       height,
       weight,
-      fileUploads,
     } = data;
 
     // Validate required fields
@@ -305,7 +328,6 @@ export async function POST(req: NextRequest) {
 
       let newOrder;
       if (order_type === "catering") {
-        // Create catering request
         newOrder = await txPrisma.catering_request.create({
           data: {
             user_id: session.user.id,
@@ -327,27 +349,19 @@ export async function POST(req: NextRequest) {
             order_total: parsedOrderTotal,
             tip: parsedTip,
             status: "active",
-            fileUploads: {
-              create:
-                fileUploads?.map(
-                  (file: { name: string; url: string; size: number }) => ({
-                    userId: session.user.id,
-                    fileName: file.name,
-                    fileUrl: file.url,
-                    fileSize: file.size,
-                    fileType: file.name.split(".").pop() || "unknown",
-                    uploadedAt: new Date(),
-                    entityType: "catering_request",
-                  }),
-                ) || [],
-            },
           },
           include: {
-            fileUploads: true,
+            address: true,
+            delivery_address: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         });
       } else if (order_type === "on_demand") {
-        // Create on-demand request
         newOrder = await txPrisma.on_demand.create({
           data: {
             user_id: session.user.id,
@@ -371,23 +385,16 @@ export async function POST(req: NextRequest) {
             height,
             weight,
             status: "active",
-            fileUploads: {
-              create:
-                fileUploads?.map(
-                  (file: { name: string; url: string; size: number }) => ({
-                    userId: session.user.id,
-                    fileName: file.name,
-                    fileUrl: file.url,
-                    fileSize: file.size,
-                    fileType: file.name.split(".").pop() || "unknown",
-                    uploadedAt: new Date(),
-                    entityType: "on_demand",
-                  }),
-                ) || [],
-            },
           },
           include: {
-            fileUploads: true,
+            address: true,
+            delivery_address: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         });
       } else {
