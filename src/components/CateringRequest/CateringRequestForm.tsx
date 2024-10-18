@@ -1,8 +1,12 @@
-import React, { useCallback, useState } from "react";
+// src/components/CateringRequest/CateringRequestForm.tsx
+
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
+import { useUploadFile } from "@/hooks/use-upload-file";
+import { Loader2 } from "lucide-react";
 
 interface CateringFormData {
   brokerage: string;
@@ -50,6 +54,12 @@ interface CateringFormData {
 
 const CateringRequestForm: React.FC = () => {
   const { data: session } = useSession();
+  const [tempFiles, setTempFiles] = useState<File[]>([]);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -101,14 +111,49 @@ const CateringRequestForm: React.FC = () => {
     },
   });
 
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { onUpload, uploadedFiles, isUploading } = useUploadFile(
+    "orderAttachment",
+    {
+      userId: session?.user?.id,
+      maxFileCount: 5,
+      maxFileSize: 4 * 1024 * 1024, // 4MB
+      allowedFileTypes: ["image/jpeg", "image/png", "application/pdf"],
+      category: "order_attachment",
+      entityType: "catering_request",
+      entityId: orderId || "temp",
+    },
+  );
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setTempFiles(Array.from(event.target.files));
+    }
+  };
 
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
   }, []);
 
   const needHost = watch("need_host");
+
+  useEffect(() => {
+    const uploadFiles = async () => {
+      if (orderId && tempFiles.length > 0) {
+        try {
+          await onUpload(tempFiles);
+          console.log("All files uploaded successfully");
+          setTempFiles([]);
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          toast.error(
+            "Order created, but there was an issue uploading files. Please try uploading files again.",
+          );
+        }
+      }
+    };
+
+    uploadFiles();
+  }, [orderId, tempFiles, onUpload]);
 
   const onSubmit = async (data: CateringFormData) => {
     if (!session?.user?.id) {
@@ -126,48 +171,27 @@ const CateringRequestForm: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
     try {
-      const endpoint = "/api/orders";
-      const response = await fetch(endpoint, {
+      const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           order_type: "catering",
-          address: {
-            id: data.address.id,
-            street1: data.address.street1,
-            street2: data.address.street2,
-            city: data.address.city,
-            state: data.address.state,
-            zip: data.address.zip,
-            locationNumber: data.address.locationNumber,
-            parkingLoading: data.address.parkingLoading,
-            isRestaurant: data.address.isRestaurant,
-            isShared: data.address.isShared,
-          },
-          delivery_address: {
-            id: data.delivery_address.id,
-            street1: data.delivery_address.street1,
-            street2: data.delivery_address.street2,
-            city: data.delivery_address.city,
-            state: data.delivery_address.state,
-            zip: data.delivery_address.zip,
-            locationNumber: data.delivery_address.locationNumber,
-            parkingLoading: data.delivery_address.parkingLoading,
-            isRestaurant: data.delivery_address.isRestaurant,
-            isShared: data.delivery_address.isShared,
-          },
-          tip: data.tip ? parseFloat(data.tip) : undefined,
+          fileUploads: uploadedFiles,
         }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        reset();
+      if (orderResponse.ok) {
+        const orderResult = await orderResponse.json();
+        setOrderId(orderResult.id);
         toast.success("Catering request submitted successfully!");
+        reset();
       } else {
-        const errorData = await response.json();
+        const errorData = await orderResponse.json();
         console.error("Failed to create catering request", errorData);
 
         if (errorData.message === "Order number already exists") {
@@ -181,7 +205,28 @@ const CateringRequestForm: React.FC = () => {
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const uploadFile = async (file: File, orderId: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("entityType", "catering_request");
+    formData.append("entityId", orderId);
+    formData.append("category", "order_attachment");
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload file ${file.name}`);
+    }
+
+    return response.json();
   };
 
   return (
@@ -681,12 +726,60 @@ const CateringRequestForm: React.FC = () => {
         />
       </div>
 
+      <div>
+        <label
+          htmlFor="file-upload"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          Attach Files (optional)
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          multiple
+          onChange={handleFileSelect}
+          className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
+        />
+        {uploadedFiles.length > 0 && (
+          <div className="mt-2">
+            <p className="text-sm text-gray-500">Uploaded files:</p>
+            <ul className="list-inside list-disc">
+              {uploadedFiles.map((file, index) => (
+                <li key={index} className="text-sm text-gray-700">
+                  {file.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
       <button
         type="submit"
-        className="w-full rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"
+        disabled={isSubmitting || isUploading}
+        className={`w-full rounded-md ${
+          isSubmitting || isUploading
+            ? "bg-blue-300"
+            : "bg-blue-500 hover:bg-blue-600"
+        } flex items-center justify-center px-6 py-3 text-white transition`}
       >
-        Submit Catering Request
+        {isSubmitting || isUploading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {isSubmitting ? "Submitting..." : "Uploading Files..."}
+          </>
+        ) : (
+          "Submit Catering Request"
+        )}
       </button>
+
+      {(isSubmitting || isUploading) && (
+        <div className="mt-4 text-center text-sm text-gray-500">
+          {isSubmitting ? "Creating your order..." : "Uploading files..."}
+          <br />
+          Please do not refresh the page.
+        </div>
+      )}
     </form>
   );
 };

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
 import sgMail from "@sendgrid/mail";
+import { UploadedFile } from "@/types/upload";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,73 @@ type OnDemandOrder = Prisma.on_demandGetPayload<{
 }>;
 
 type Order = CateringOrder | OnDemandOrder;
+
+async function handleFileUpload(
+  file: {
+    name: string;
+    url: string;
+    size: number;
+  },
+  userId: string,
+  entityType: "catering_request" | "on_demand",
+  entityId: string,
+) {
+  try {
+    // Check if a file with the same name and size already exists for this entity
+    const existingFile = await prisma.file_upload.findFirst({
+      where: {
+        fileName: file.name,
+        fileSize: file.size,
+        entityType: entityType,
+        entityId: entityId,
+      },
+    });
+
+    if (existingFile) {
+      console.log(
+        `File ${file.name} already exists for ${entityType} ${entityId}. Skipping upload.`,
+      );
+      return existingFile;
+    }
+
+    // If the file doesn't exist, create a new entry
+    const newFile = await prisma.file_upload.create({
+      data: {
+        userId: userId,
+        fileName: file.name,
+        fileUrl: file.url,
+        fileSize: file.size,
+        fileType: file.name.split(".").pop() || "unknown",
+        entityType: entityType,
+        entityId: entityId,
+        category: "order_attachment",
+        uploadedAt: new Date(),
+        updatedAt: new Date(),
+        [entityType === "catering_request"
+          ? "cateringRequestId"
+          : "onDemandId"]: parseInt(entityId),
+      },
+    });
+
+    console.log(`File registered in database:`, newFile);
+    return newFile;
+  } catch (error) {
+    console.error("Error registering file in database:", error);
+    throw error;
+  }
+}
+
+export async function handleFileUploads(
+  files: Array<{ name: string; url: string; size: number }>,
+  userId: string,
+  entityType: "catering_request" | "on_demand",
+  entityId: string,
+) {
+  const uploadPromises = files.map((file) =>
+    handleFileUpload(file, userId, entityType, entityId),
+  );
+  return Promise.all(uploadPromises);
+}
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -39,7 +107,11 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { created_at: "desc" },
-        include: { user: { select: { name: true, email: true } } },
+        include: { 
+          user: { select: { name: true, email: true } },
+          address: true,
+          delivery_address: true
+        },
       });
     }
 
@@ -48,7 +120,11 @@ export async function GET(req: NextRequest) {
         skip,
         take: limit,
         orderBy: { created_at: "desc" },
-        include: { user: { select: { name: true, email: true } } },
+        include: { 
+          user: { select: { name: true, email: true } },
+          address: true,
+          delivery_address: true
+        },
       });
     }
 
@@ -59,8 +135,8 @@ export async function GET(req: NextRequest) {
     const serializedOrders = allOrders.map((order) => ({
       ...JSON.parse(
         JSON.stringify(order, (key, value) =>
-          typeof value === "bigint" ? value.toString() : value,
-        ),
+          typeof value === "bigint" ? value.toString() : value
+        )
       ),
       order_type: "brokerage" in order ? "catering" : "on_demand",
     }));
@@ -70,24 +146,48 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching orders:", error);
     return NextResponse.json(
       { message: "Error fetching orders" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 async function sendOrderEmail(order: any) {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatTime = (time: Date) => {
+    return time.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZoneName: "short",
+    });
+  };
+
+  const formatAddress = (address: any) => {
+    return `${address.street1}${address.street2 ? ", " + address.street2 : ""}, ${address.city}, ${address.state} ${address.zip}`;
+  };
+
   let body = `
     <h2>New Order Details:</h2>
     <p>Order Type: ${order.order_type}</p>
     <p>Order Number: ${order.order_number}</p>
     <p>Brokerage: ${order.brokerage}</p>
-    <p>Date: ${order.date}</p>
-    <p>Pickup Time: ${order.pickup_time}</p>
-    <p>Arrival Time: ${order.arrival_time}</p>
+    <p>Date: ${formatDate(new Date(order.date))}</p>
+    <p>Pickup Time: ${formatTime(new Date(order.pickup_time))}</p>
+    <p>Arrival Time: ${formatTime(new Date(order.arrival_time))}</p>
     <p>Order Total: $${order.order_total}</p>
     <p>Client Attention: ${order.client_attention}</p>
     <p>Pickup Notes: ${order.pickup_notes || "N/A"}</p>
     <p>Special Notes: ${order.special_notes || "N/A"}</p>
+    <p>Pickup Address: ${formatAddress(order.address)}</p>
+    <p>Drop-off Address: ${formatAddress(order.delivery_address)}</p>
   `;
 
   if (order.order_type === "catering") {
@@ -183,11 +283,10 @@ export async function POST(req: NextRequest) {
 
     // Use a transaction to ensure atomicity
     const result = await prisma.$transaction(async (txPrisma) => {
-      // Check for existing order number within both catering_request and on_demand tables
-      const existingCateringRequest =
-        await txPrisma.catering_request.findUnique({
-          where: { order_number: order_number },
-        });
+      // Check for existing order number
+      const existingCateringRequest = await txPrisma.catering_request.findUnique({
+        where: { order_number: order_number },
+      });
 
       const existingOnDemandRequest = await txPrisma.on_demand.findUnique({
         where: { order_number: order_number },
@@ -305,7 +404,6 @@ export async function POST(req: NextRequest) {
 
       let newOrder;
       if (order_type === "catering") {
-        // Create catering request
         newOrder = await txPrisma.catering_request.create({
           data: {
             user_id: session.user.id,
@@ -328,26 +426,30 @@ export async function POST(req: NextRequest) {
             tip: parsedTip,
             status: "active",
             fileUploads: {
-              create:
-                fileUploads?.map(
-                  (file: { name: string; url: string; size: number }) => ({
-                    userId: session.user.id,
-                    fileName: file.name,
-                    fileUrl: file.url,
-                    fileSize: file.size,
-                    fileType: file.name.split(".").pop() || "unknown",
-                    uploadedAt: new Date(),
-                    entityType: "catering_request",
-                  }),
-                ) || [],
+              create: fileUploads.map((file: UploadedFile) => ({
+                userId: session.user.id,
+                fileName: file.name,
+                fileUrl: file.url,
+                fileSize: file.size,
+                fileType: file.name.split(".").pop() || "unknown",
+                uploadedAt: new Date(),
+                entityType: "catering_request",
+              })),
             },
           },
           include: {
             fileUploads: true,
+            address: true,
+            delivery_address: true,
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
           },
         });
       } else if (order_type === "on_demand") {
-        // Create on-demand request
         newOrder = await txPrisma.on_demand.create({
           data: {
             user_id: session.user.id,
@@ -372,22 +474,27 @@ export async function POST(req: NextRequest) {
             weight,
             status: "active",
             fileUploads: {
-              create:
-                fileUploads?.map(
-                  (file: { name: string; url: string; size: number }) => ({
-                    userId: session.user.id,
-                    fileName: file.name,
-                    fileUrl: file.url,
-                    fileSize: file.size,
-                    fileType: file.name.split(".").pop() || "unknown",
-                    uploadedAt: new Date(),
-                    entityType: "on_demand",
-                  }),
-                ) || [],
+              create: fileUploads.map((file: UploadedFile) => ({
+                userId: session.user.id,
+                fileName: file.name,
+                fileUrl: file.url,
+                fileSize: file.size,
+                fileType: file.name.split(".").pop() || "unknown",
+                uploadedAt: new Date(),
+                entityType: "on_demand",
+              })),
             },
           },
           include: {
             fileUploads: true,
+            address: true,
+            delivery_address: true,
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
           },
         });
       } else {

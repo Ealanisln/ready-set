@@ -101,5 +101,10 @@
     "tailwindcss": "^3.4.13",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
-  }
+  },
+  "contributors": [
+    "Emmanuel Alanis <ealanisln@me.com>",
+    "Fernando Cardenas <fsanchezcln@gmail.com>",
+    "fersanz-87 <cromo181@gmail.com>"
+  ]
 }

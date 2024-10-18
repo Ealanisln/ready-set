@@ -4,9 +4,12 @@ import { UploadThingError } from "uploadthing/server";
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  fileUploader: f({ image: { maxFileSize: "4MB" }, pdf: { maxFileSize: "4MB" } })
+  orderAttachment: f({
+    image: { maxFileSize: "4MB" },
+    pdf: { maxFileSize: "4MB" },
+  })
     .middleware(async ({ req }) => {
-      const { getServerAuth } = await import('@/server/auth');
+      const { getServerAuth } = await import("@/server/auth");
       const user = await getServerAuth(req);
       if (!user) throw new UploadThingError("Unauthorized");
 
@@ -15,18 +18,23 @@ export const ourFileRouter = {
       const entityType = req.headers.get("x-entity-type");
       const entityId = req.headers.get("x-entity-id");
 
-      return { 
+      if (!category || !entityType || !entityId) {
+        throw new UploadThingError("Missing required metadata");
+      }
+
+      return {
         userId: user.id,
-        category: category || 'uncategorized',
-        entityType: entityType || 'user',
-        entityId: entityId || user.id
+        category,
+        entityType,
+        entityId,
       };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      const { handleUploadComplete } = await import('@/server/upload');
+      const { handleUploadComplete } = await import("@/server/upload");
       const result = await handleUploadComplete({ metadata, file });
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
+      console.log("Associated with:", metadata.entityType, metadata.entityId);
       return { ...result, uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
