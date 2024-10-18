@@ -38,13 +38,13 @@ const CateringPage = () => {
       <div className="container">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="8-Point Checklist"
-            title="Catering request"
+            title={<h1>Catering Request</h1>}
+            subtitle={<h2>8-point Checklist</h2>}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."
             center
           />
         </div>
-        <div className="flex flex-col items-center space-y-8">
+        <div className="flex-col flex items-center space-y-8">
           {/* You can choose to use either CateringOrderForm or CateringRequestForm here */}
           {/* <CateringOrderForm /> */}
           <CateringRequestForm />
