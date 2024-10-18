@@ -24,7 +24,7 @@ const sendEmail = async( data: FormInputs) => {
     }
   
     const msg = {
-      to: "info@ready-set.co",
+      to: "ealanisln@gmail.com",
       from: "emmanuel@alanis.dev",
       subject: "Website message - Ready Set",
       html: body,
