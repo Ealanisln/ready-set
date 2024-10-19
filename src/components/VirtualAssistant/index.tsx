@@ -53,6 +53,11 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   </div>
 );
 
+<li>
+Join the team
+</li>
+
+
 const ReadySetVirtualAssistantPage: React.FC = () => {
   const services: ServiceSectionProps[] = [
     {
@@ -181,7 +186,7 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
             specific projects, we&apos;ve got you covered.
           </p>
           <p className="text-lg font-semibold">
-            Empowering Businesses Across the San Francisco Bay Area and Austin
+            Empowering Businesses Across the San Francisco Bay Area and Austin, TX.
           </p>
         </div>
         <div className="w-full lg:w-1/2 lg:pl-8">
