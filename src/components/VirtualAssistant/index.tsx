@@ -53,11 +53,6 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   </div>
 );
 
-<li>
-Join the team
-</li>
-
-
 const ReadySetVirtualAssistantPage: React.FC = () => {
   const services: ServiceSectionProps[] = [
     {
@@ -165,12 +160,14 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
       imagePosition: "right",
     },
   ];
-
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="mb-8 text-center text-4xl font-bold">
-        ReadySet Virtual Assistant Services
-      </h1>
+        ReadySet Virtual Assistant Services  
+      </h1> 
+      <a href="/join" className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+  Join the team
+</a>
       <div className="mb-16 flex flex-wrap items-center">
         <div className="mb-8 w-full lg:mb-0 lg:w-1/2">
           <p className="mb-6 text-lg">

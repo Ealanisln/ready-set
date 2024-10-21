@@ -50,7 +50,7 @@ export const driverMenuItem: Menu = {
 export const virtualAssistantMenuItem: Menu = {
   id: 11,
   title: "Virtual Assistant",
-  path: "/virtual-assistant",
+  path: "/va",
   newTab: false,
   submenu: [
     {
