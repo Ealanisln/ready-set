@@ -167,34 +167,26 @@ const Footer = () => {
               <ul>
                 <li>
                   <a
-                    href="/#"
+                    href="/logistics"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
-                    LineIcons
+                    Logistics
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/#"
+                    href="/va"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
-                    Next.js Templates
+                    Virtual Assistant
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/#"
+                    href="/join-the-team"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
-                    TailAdmin
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/#"
-                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
-                  >
-                    PlainAdmin
+                    Join the team
                   </a>
                 </li>
               </ul>
@@ -274,14 +266,14 @@ const Footer = () => {
             <div className="w-full px-4 md:w-1/3 lg:w-1/2">
               <div className="my-1 flex justify-center md:justify-end">
                 <p className="text-base text-gray-7">
-                  Designed and Developed by{" "}
+                  Developed by{" "}
                   <a
                     href="https://alanis.dev"
                     rel="nofollow noopner noreferrer"
                     target="_blank"
                     className="text-gray-1 hover:underline"
                   >
-                    Alanis Web Dev
+                    Alanis Dev
                   </a>
                 </p>
               </div>

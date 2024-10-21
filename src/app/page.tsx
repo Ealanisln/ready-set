@@ -6,7 +6,7 @@ import ScrollUp from "@/components/Common/ScrollUp";
 import Contact from "@/components/Contact";
 import Faq from "@/components/Faq";
 import Features from "@/components/Features";
-import Hero from "@/components/Hero";
+import Hero from "@/components/Hero/index";
 import Team from "@/components/Team";
 import Testimonials from "@/components/Testimonials";
 import { Metadata } from "next";
@@ -21,12 +21,13 @@ export default function Home() {
   return (
     <main>
       <ScrollUp />
+     
       <Hero />
+       {/*
 			<Features />
       <About />
       <CallToAction />
       <HomeBlogSection />
-      {/*
       <Pricing />
       <Testimonials />
       <Faq />
