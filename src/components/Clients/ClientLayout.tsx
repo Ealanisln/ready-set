@@ -15,6 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   const isBackendAdminRoute = pathname?.startsWith("/admin");
   const isStudioRoute = pathname?.startsWith("/studio");
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -24,7 +25,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <SessionProvider>
       <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
         <ToasterContext />
-        {!isBackendAdminRoute && !isStudioRoute && <Header />}
+        {!isBackendAdminRoute && !isStudioRoute && !isHomePage && <Header />}
         <main className="flex-grow">{children}</main>
         {!isBackendAdminRoute && !isStudioRoute && <Footer />}
         <ScrollToTop />
