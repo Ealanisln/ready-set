@@ -387,14 +387,14 @@ export async function POST(req: NextRequest) {
             status: "active",
           },
           include: {
-            address: true,
-            delivery_address: true,
             user: {
               select: {
                 name: true,
                 email: true,
               },
             },
+            address: true,
+            delivery_address: true, // Changed to match schema
           },
         });
       } else {
