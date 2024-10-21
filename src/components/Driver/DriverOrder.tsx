@@ -27,6 +27,7 @@ import {
   CheckIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 // Shared types
 interface Driver {
@@ -115,11 +116,13 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
   updateDriverStatus,
 }) => {
   const getProgressValue = (status: string | null) => {
-    return driverStatusProgress[status || 'assigned'] || 0;
+    return driverStatusProgress[status || "assigned"] || 0;
   };
 
   const getDisplayStatus = (status: string | null) => {
-    return status ? driverStatusMap[status] || status : driverStatusMap['assigned'];
+    return status
+      ? driverStatusMap[status] || status
+      : driverStatusMap["assigned"];
   };
 
   return (
@@ -160,22 +163,24 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
               <div className="flex flex-col items-center justify-center">
                 <span className="mb-2 text-xl font-medium">Drive Status</span>
                 <div className="flex justify-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">Update Status</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {Object.entries(driverStatusMap).map(([status, label]) => (
-                    <DropdownMenuItem
-                      key={status}
-                      onClick={() => updateDriverStatus(status)}
-                    >
-                      {label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">Update Status</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {Object.entries(driverStatusMap).map(
+                        ([status, label]) => (
+                          <DropdownMenuItem
+                            key={status}
+                            onClick={() => updateDriverStatus(status)}
+                          >
+                            {label}
+                          </DropdownMenuItem>
+                        ),
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
               <Progress
                 value={getProgressValue(order.driver_status)}
@@ -188,26 +193,24 @@ const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
               </div>
             </div>
             <div className="flex justify-center">
-
-            <Badge
-                  variant="outline"
-                  className={cn("px-4 py-2 text-lg font-medium", {
-                    "border-yellow-300 bg-yellow-100 text-yellow-800":
-                      order.driver_status === "assigned" || !order.driver_status,
-                    "border-blue-300 bg-blue-100 text-blue-800":
-                      order.driver_status === "arrived_at_vendor",
-                    "border-green-300 bg-green-100 text-green-800":
-                      order.driver_status === "en_route_to_client",
-                    "border-purple-300 bg-purple-100 text-purple-800":
-                      order.driver_status === "arrived_to_client",
-                    "border-gray-300 bg-gray-100 text-gray-800":
-                      order.driver_status === "completed",
-                  })}
-                >
-                  {getDisplayStatus(order.driver_status)}
-                </Badge>
-                </div>
-           
+              <Badge
+                variant="outline"
+                className={cn("px-4 py-2 text-lg font-medium", {
+                  "border-yellow-300 bg-yellow-100 text-yellow-800":
+                    order.driver_status === "assigned" || !order.driver_status,
+                  "border-blue-300 bg-blue-100 text-blue-800":
+                    order.driver_status === "arrived_at_vendor",
+                  "border-green-300 bg-green-100 text-green-800":
+                    order.driver_status === "en_route_to_client",
+                  "border-purple-300 bg-purple-100 text-purple-800":
+                    order.driver_status === "arrived_to_client",
+                  "border-gray-300 bg-gray-100 text-gray-800":
+                    order.driver_status === "completed",
+                })}
+              >
+                {getDisplayStatus(order.driver_status)}
+              </Badge>
+            </div>
           </div>
         ) : (
           <div>No driver assigned to this order.</div>
@@ -223,10 +226,11 @@ const DriverDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const orderNumber = window.location.pathname.split("/").pop();
+      const orderNumber = pathname.split("/").pop();
 
       try {
         const response = await fetch(`/api/orders/${orderNumber}`);
@@ -235,9 +239,13 @@ const DriverDashboard: React.FC = () => {
         }
         const data: Order = await response.json();
         setOrder(data);
-        
+
         // Extract driver info from the dispatch array
-        if (data.dispatch && data.dispatch.length > 0 && data.dispatch[0].driver) {
+        if (
+          data.dispatch &&
+          data.dispatch.length > 0 &&
+          data.dispatch[0].driver
+        ) {
           setDriverInfo(data.dispatch[0].driver);
         } else {
           setDriverInfo(null);
@@ -250,7 +258,7 @@ const DriverDashboard: React.FC = () => {
     };
 
     fetchOrder();
-  }, []);
+  }, [pathname]);
 
   const updateDriverStatus = async (newStatus: string) => {
     if (!order) return;
@@ -270,7 +278,11 @@ const DriverDashboard: React.FC = () => {
 
       const updatedOrder: Order = await response.json();
       setOrder(updatedOrder);
-      if (updatedOrder.dispatch && updatedOrder.dispatch.length > 0 && updatedOrder.dispatch[0].driver) {
+      if (
+        updatedOrder.dispatch &&
+        updatedOrder.dispatch.length > 0 &&
+        updatedOrder.dispatch[0].driver
+      ) {
         setDriverInfo(updatedOrder.dispatch[0].driver);
       }
     } catch (err) {
@@ -283,11 +295,12 @@ const DriverDashboard: React.FC = () => {
         <p className="ml-4 text-lg font-semibold">Loading...</p>
       </div>
     );
-  if (error) return (
-    <div className="flex h-screen items-center justify-center">
-      <p className="ml-4 text-lg font-semibold">Error: {error}</p>
-    </div>
-  );
+  if (error)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Error: {error}</p>
+      </div>
+    );
 
   if (!order)
     return (
@@ -306,7 +319,9 @@ const DriverDashboard: React.FC = () => {
               Order #{order.order_number}
             </CardTitle>
             <Badge
-              variant={order.order_type === "catering" ? "secondary" : "default"}
+              variant={
+                order.order_type === "catering" ? "secondary" : "default"
+              }
               className="text-sm"
             >
               {order.order_type === "catering" ? "Catering" : "On Demand"}

@@ -13,6 +13,7 @@ import AdditionalInfo from "./ui/AdditionalInfo";
 import { Order, Driver } from "@/types/order";
 import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 import OrderStatus from "./OrderStatus";
+import { usePathname } from "next/navigation";
 
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
@@ -27,9 +28,11 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
 
+  const pathname = usePathname();
+
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
-    const orderNumber = window.location.pathname.split("/").pop();
+    const orderNumber = pathname.split("/").pop();
     try {
       const response = await fetch(
         `/api/orders/${orderNumber}?include=dispatch.driver`,
@@ -59,7 +62,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     fetchOrderDetails();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // Add usePathname
 import Link from "next/link";
 import SingleOrder from "@/components/Orders/SingleOrder";
 import {
@@ -16,14 +16,15 @@ import {
 const OrderPage = () => {
   const [orderNumber, setOrderNumber] = useState("");
 
+  const pathname = usePathname();
+  const router = useRouter();
+
   useEffect(() => {
-    // Get the order number from the URL
-    const pathSegments = window.location.pathname.split("/");
+    // Get the order number from the URL using pathname
+    const pathSegments = pathname.split("/");
     const lastSegment = pathSegments[pathSegments.length - 1];
     setOrderNumber(lastSegment);
-  }, []);
-
-  const router = useRouter();
+  }, [pathname]);
 
   const handleDeleteSuccess = () => {
     router.push("/admin/");
