@@ -6,7 +6,6 @@ import {
   Calendar,
   FileText,
   BarChart2,
-  Globe,
 } from "lucide-react";
 
 interface ServiceSectionProps {
@@ -28,7 +27,6 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
     <div
       className={`flex flex-wrap items-center ${imagePosition === "right" ? "flex-row-reverse" : ""}`}
     >
-      {/* Title and Icon */}
       <div className="mb-6 w-full lg:mb-0 lg:w-3/5">
         <div className={`${imagePosition === "right" ? "lg:pr-8" : "lg:pl-8"}`}>
           <div className="mb-4 flex items-center">
@@ -38,7 +36,6 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
           {description}
         </div>
       </div>
-      {/* Image */}
       <div className="w-full p-4 lg:w-2/5">
         <div className="relative h-[250px] lg:h-[300px]">
           <Image
@@ -160,14 +157,20 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
       imagePosition: "right",
     },
   ];
+
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="mb-8 text-center text-4xl font-bold">
-        ReadySet Virtual Assistant Services  
-      </h1> 
-      <a href="/join" className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-  Join the team
-</a>
+        ReadySet Virtual Assistant Services
+      </h1>
+      <div className="mb-8 flex justify-center">
+        <a
+          href="/join-the-team"
+          className="inline-block rounded bg-green-500 px-12 py-4 text-white transition-colors hover:bg-green-600"
+        >
+          Join the team
+        </a>
+      </div>
       <div className="mb-16 flex flex-wrap items-center">
         <div className="mb-8 w-full lg:mb-0 lg:w-1/2">
           <p className="mb-6 text-lg">
@@ -183,7 +186,8 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
             specific projects, we&apos;ve got you covered.
           </p>
           <p className="text-lg font-semibold">
-            Empowering Businesses Across the San Francisco Bay Area and Austin, TX.
+            Empowering Businesses Across the San Francisco Bay Area and Austin,
+            TX.
           </p>
         </div>
         <div className="w-full lg:w-1/2 lg:pl-8">
