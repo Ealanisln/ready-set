@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Faq from "@/components/Faq";
 import SectionTitle from "@/components/Common/SectionTitle";
-import CateringOrderForm from "@/components/CateringRequest/CateringOrderForm";
-import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm"; // Import the new form
+import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm"; 
 
 const CateringPage = () => {
   const { data: session, status } = useSession();
