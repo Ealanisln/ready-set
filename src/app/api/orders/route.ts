@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
-import sgMail from "@sendgrid/mail";
 import { sendOrderEmail } from "@/utils/emailSender";
 
 const prisma = new PrismaClient();
@@ -330,10 +329,9 @@ export async function POST(req: NextRequest) {
 
       // Send email notification
       // In your API route:
-      // In your API route:
       await sendOrderEmail({
         ...newOrder,
-        order_type, // This should now work with the Prisma result
+        order_type, 
       });
       return newOrder;
     });
