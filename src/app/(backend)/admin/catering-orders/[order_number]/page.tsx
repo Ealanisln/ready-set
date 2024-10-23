@@ -54,7 +54,7 @@ const OrderPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <SingleOrder onDeleteSuccess={handleDeleteSuccess} />{" "}
+        <SingleOrder onDeleteSuccess={handleDeleteSuccess} />
       </div>
     </div>
   );

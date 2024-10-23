@@ -448,16 +448,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
                     <CardContent>
                       <UserProfileUploads
                         uploadHooks={uploadHooks}
-                        userType={
-                          watchedValues.type as
-                            | "vendor"
-                            | "client"
-                            | "driver"
-                            | "admin"
-                            | "helpdesk"
-                            | "super_admin"
+                        userType={watchedValues.type}
+                        onUploadSuccess={() =>
+                          setRefreshTrigger((prev) => prev + 1)
                         }
-                        onUploadSuccess={handleUploadSuccess}
                       />
                       {/* <div className="py-2">
                         {userId ? (

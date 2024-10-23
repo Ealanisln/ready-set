@@ -9,63 +9,106 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { EmptyCard } from "@/components/Uploader/empty-card";
 
-interface UploadedFile {
-  key: string;
-  name: string;
-  url: string;
+interface FileUpload {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+  entityType: string;
+  entityId: string;
+  category?: string;
+  uploadedAt: Date;
+  updatedAt: Date;
+  userId?: string;
+  cateringRequestId?: number;
+  onDemandId?: number;
 }
 
-interface UploadedFilesCardProps {
-  uploadedFiles: UploadedFile[]
+interface UploadedFilesViewerProps {
+  files: FileUpload[];
+  title?: string;
+  description?: string;
 }
 
-export function UploadedFilesCard({ uploadedFiles }: UploadedFilesCardProps) {
+export function UploadedFilesViewer({ 
+  files, 
+  title = "Uploaded Files",
+  description = "View uploaded files"
+}: UploadedFilesViewerProps) {
+  const isImage = (fileType: string) => {
+    return fileType.startsWith('image');
+  };
+
+  const isPDF = (fileType: string) => {
+    return fileType === 'application/pdf';
+  };
+
+  const handleDownload = (fileUrl: string, fileName: string) => {
+    window.open(fileUrl, '_blank');
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Uploaded files</CardTitle>
-        <CardDescription>View the uploaded files here</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {uploadedFiles.length > 0 ? (
-          <ScrollArea className="pb-4">
-            <div className="flex w-max space-x-2.5">
-              {uploadedFiles.map((file, index) => (
-                <div key={`${file.key}-${index}`} className="relative aspect-video w-64">
-                  {file.url && file.url.toLowerCase().endsWith('.pdf') ? (
-                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-full bg-gray-100 rounded-md">
-                      <FileText size={48} />
-                      <span className="ml-2 text-sm">{file.name}</span>
-                    </a>
-                  ) : file.url ? (
-                    <Image
-                      src={file.url}
-                      alt={file.name}
-                      fill
-                      sizes="(min-width: 640px) 640px, 100vw"
-                      loading="lazy"
-                      className="rounded-md object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-100 rounded-md">
-                      <span className="text-sm text-gray-500">No URL available</span>
+        {files && files.length > 0 ? (
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-4">
+              {files.map((file) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    {isImage(file.fileType) ? (
+                      <div className="relative h-16 w-16 overflow-hidden rounded-md">
+                        <Image
+                          src={file.fileUrl}
+                          alt={file.fileName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <FileText 
+                        className="h-10 w-10 text-muted-foreground" 
+                        aria-hidden="true" 
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <p className="font-medium line-clamp-1">{file.fileName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(file.uploadedAt).toLocaleDateString()}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDownload(file.fileUrl, file.fileName)}
+                  >
+                    Download
+                  </Button>
                 </div>
               ))}
             </div>
-            <ScrollBar orientation="horizontal" />
+            <ScrollBar orientation="vertical" />
           </ScrollArea>
         ) : (
           <EmptyCard
-            title="No files uploaded"
-            description="Upload some files to see them here"
+            title="No files available"
+            description="No files have been uploaded yet"
             className="w-full"
           />
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

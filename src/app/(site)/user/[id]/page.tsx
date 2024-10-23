@@ -1,3 +1,5 @@
+// src/app/(site)/user/[id]/page.tsx This code its working
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
