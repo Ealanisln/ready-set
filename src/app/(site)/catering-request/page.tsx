@@ -36,9 +36,9 @@ const CateringPage = () => {
     >
       <div className="container">
         <div className="mb-[60px]">
-          <SectionTitle
-            title={<h1>Catering Request</h1>}
-            subtitle={<h2>8-point Checklist</h2>}
+        <SectionTitle
+            title={"Catering Request"}
+            subtitle={"8-point Checklist"}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."
             center
           />
