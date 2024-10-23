@@ -150,7 +150,7 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
             <li>Preparing research reports and presentations</li>
             <li>Trend analysis and forecasting</li> 
           </ul>
-          <Testimonials />
+          
           
         </>
         
@@ -203,9 +203,11 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
         </div>
       </div>
       {services.map((service, index) => (
-        <ServiceSection key={index} {...service} />
+        <ServiceSection key={index} {...service} /> 
       ))}
+      <Testimonials />
     </div>
+    
   );
 };
 export default ReadySetVirtualAssistantPage;
