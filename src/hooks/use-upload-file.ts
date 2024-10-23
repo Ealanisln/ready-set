@@ -1,112 +1,92 @@
 // src/hooks/use-upload-file.ts
-import * as React from "react"
-import type { UploadedFile } from "@/types/uploaded-file"
-import { toast } from "@/components/ui/use-toast"
-import type { UploadFilesOptions } from "uploadthing/types"
+import * as React from "react";
+import type { FileWithPath } from "react-dropzone";
+import { toast } from "@/components/ui/use-toast";
+import { generateReactHelpers } from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
-import { getErrorMessage } from "@/lib/handle-error"
-import { uploadFiles } from "@/lib/uploadthing"
-import { type OurFileRouter } from "@/app/api/uploadthing/core"
-
-interface UseUploadFileProps {
-  defaultUploadedFiles?: UploadedFile[]
-  userId?: string
-  maxFileCount?: number
-  maxFileSize?: number
-  allowedFileTypes?: string[]
-  onUploadBegin?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["onUploadBegin"]
-  onUploadProgress?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["onUploadProgress"]
-  headers?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["headers"]
-  skipPolling?: UploadFilesOptions<OurFileRouter, keyof OurFileRouter>["skipPolling"]
-  category: string
-  entityType: string
-  entityId: string
+export type UploadThingFile = {
+  key: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  serverData: unknown;
+  customId?: string | null;
 }
+
+// Update types to match v7
+interface UseUploadFileProps {
+  defaultUploadedFiles?: UploadThingFile[];
+  userId?: string;
+  maxFileCount?: number;
+  maxFileSize?: number;
+  allowedFileTypes?: string[];
+  onUploadBegin?: () => void;
+  onUploadProgress?: (progress: number) => void;
+  category: string;
+  entityType: string;
+  entityId: string;
+}
+
+const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 export function useUploadFile(
   endpoint: keyof OurFileRouter,
-  {
-    defaultUploadedFiles = [],
-    userId,
-    maxFileCount,
-    maxFileSize,
-    allowedFileTypes,
-    onUploadBegin,
-    onUploadProgress,
-    headers,
-    skipPolling,
-    category,
-    entityType,
-    entityId,
-  }: UseUploadFileProps
+  props: UseUploadFileProps
 ) {
-  const [uploadedFiles, setUploadedFiles] =
-    React.useState<UploadedFile[]>(defaultUploadedFiles)
-  const [progresses, setProgresses] = React.useState<Record<string, number>>({})
-  const [isUploading, setIsUploading] = React.useState(false)
+  const [uploadedFiles, setUploadedFiles] = React.useState<UploadThingFile[]>(props.defaultUploadedFiles ?? []);
+  const [progresses, setProgresses] = React.useState<Record<string, number>>({});
+  const [isUploading, setIsUploading] = React.useState(false);
 
-  async function onUpload(files: File[]) {
-    // Client-side validation
-    if (maxFileCount && files.length > maxFileCount) {
-      toast({ title: "Error", description: `You can only upload up to ${maxFileCount} files.`, variant: "destructive" })
-      return
-    }
+  const { startUpload } = useUploadThing(endpoint, {
+    onClientUploadComplete: (res) => {
+      if (res) {
+        setUploadedFiles((prev) => [...prev, ...res as UploadThingFile[]]);
+      }
+      setIsUploading(false);
+    },
+    onUploadError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsUploading(false);
+    },
+    onUploadBegin: () => {
+      setIsUploading(true);
+      props.onUploadBegin?.();
+    },
+    onUploadProgress: (progress: number) => {
+      setProgresses((prev) => ({
+        ...prev,
+        progress: progress,
+      }));
+      props.onUploadProgress?.(progress);
+    },
+  });
 
-    const invalidFiles = files.filter(file => {
-      if (maxFileSize && file.size > maxFileSize) return true
-      if (allowedFileTypes && !allowedFileTypes.includes(file.type)) return true
-      return false
-    })
-
-    if (invalidFiles.length > 0) {
-      toast({ title: "Error", description: "Some files are invalid. Please check file types and sizes.", variant: "destructive" })
-      return
-    }
-
-    setIsUploading(true)
+  const onUpload = async (files: FileWithPath[]): Promise<UploadThingFile[]> => {
+    setIsUploading(true);
     try {
-      // Add userId, category, entityType, and entityId to headers if they are defined
-      const customHeaders: Record<string, string> = {
-        "X-Category": category,
-        "X-Entity-Type": entityType,
-        "X-Entity-Id": entityId,
+      const result = await startUpload(files);
+      if (!result) {
+        throw new Error("Upload failed");
       }
-      if (userId) {
-        customHeaders["X-User-Id"] = userId
-      }
-
-      const updatedHeaders = {
-        ...headers,
-        ...customHeaders,
-      }
-
-      const res = await uploadFiles(endpoint, {
-        files,
-        headers: updatedHeaders,
-        onUploadBegin,
-        skipPolling,
-        onUploadProgress: (opts:any) => {
-          setProgresses((prev) => ({
-            ...prev,
-            [opts.file.name]: opts.progress,
-          }))
-          onUploadProgress?.(opts)
-        },
-      })
-
-      setUploadedFiles((prev) => (prev ? [...prev, ...res] : res))
+      return result as UploadThingFile[];
     } catch (err) {
-      toast({ title: "Error", description: getErrorMessage(err), variant: "destructive" })
+      console.error("Upload error:", err);
+      throw err;
     } finally {
-      setProgresses({})
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return {
     onUpload,
     uploadedFiles,
     progresses,
     isUploading,
-  }
+  } as const;
 }
