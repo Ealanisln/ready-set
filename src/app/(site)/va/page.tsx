@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const AboutPage = () => {
   return (
     <main>
-      <Breadcrumb pageName="Virtual Assistant Services" />
+      
       <VirtualAssistantServices />
     </main>
   );

@@ -7,7 +7,7 @@ import {
   FileText,
   BarChart2,
 } from "lucide-react";
-
+import Testimonials from "../Testimonials";
 interface ServiceSectionProps {
   title: string;
   description: React.ReactNode;
@@ -15,7 +15,6 @@ interface ServiceSectionProps {
   imageSrc: string;
   imagePosition: "left" | "right";
 }
-
 const ServiceSection: React.FC<ServiceSectionProps> = ({
   title,
   description,
@@ -45,11 +44,11 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
             className="rounded-lg object-cover object-center"
           />
         </div>
-      </div>
+        </div>
     </div>
   </div>
+  
 );
-
 const ReadySetVirtualAssistantPage: React.FC = () => {
   const services: ServiceSectionProps[] = [
     {
@@ -149,19 +148,21 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
             <li>Competitor analysis</li>
             <li>Data collection and compilation</li>
             <li>Preparing research reports and presentations</li>
-            <li>Trend analysis and forecasting</li>
+            <li>Trend analysis and forecasting</li> 
           </ul>
+          <Testimonials />
+          
         </>
-      ),
-      imageSrc: "/images/virtual/research-analysis.jpg",
-      imagePosition: "right",
+        
+      ), 
+      imageSrc: "/images/virtual/research-analysis.jpg" , 
+      imagePosition: "right", 
     },
   ];
-
   return (
-    <div className="container mx-auto px-4 py-16">
-      <h1 className="mb-8 text-center text-4xl font-bold">
-        ReadySet Virtual Assistant Services
+    <div className="container mx-auto px-4 py-28">
+      <h1 className="pt-8 mb-8 text-center text-4xl font-bold">
+        Ready Set Virtual Assistant Services
       </h1>
       <div className="mb-8 flex justify-center">
         <a
@@ -207,5 +208,4 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
     </div>
   );
 };
-
 export default ReadySetVirtualAssistantPage;
