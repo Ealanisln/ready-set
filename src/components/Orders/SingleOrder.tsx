@@ -1,19 +1,18 @@
-// src/components/Orders/SingleOrder.tsx
-
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
-import DriverStatusCard from "./DriverStatus";
+import { DriverStatusCard } from "./DriverStatus";
 import OrderHeader from "./ui/OrderHeader";
 import OrderDetails from "./ui/OrderDetails";
 import AddressInfo from "./ui/AddressInfo";
 import CustomerInfo from "./ui/CustomerInfo";
 import AdditionalInfo from "./ui/AdditionalInfo";
-import { Order, Driver } from "@/types/order";
 import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
-import OrderStatus from "./OrderStatus";
+import OrderStatusCard from "./OrderStatus";
 import { usePathname } from "next/navigation";
+import { OrderFilesManager } from "./ui/OrderFiles";
+import { Driver, Order, OrderStatus, OrderType } from "@/types/order";
 
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
@@ -27,12 +26,28 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [isDriverAssigned, setIsDriverAssigned] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
+  const [files, setFiles] = useState([]);
 
   const pathname = usePathname();
+  const orderNumber = pathname.split("/").pop() || "";
+
+  // In the getOrderTypeAndId function, update the type conversion:
+  const getOrderTypeAndId = useCallback((order: Order | null) => {
+    if (!order) return { orderType: null as OrderType | null, orderId: "" };
+
+    // No need to transform the type since we're using the correct one from the database
+    const orderType: OrderType = order.order_type;
+    const orderId = order.id?.toString() || "";
+
+    return { orderType, orderId };
+  }, []);
+
+  const getEntityType = (orderType: OrderType) => {
+    return orderType;
+  };
 
   const fetchOrderDetails = useCallback(async () => {
     setIsLoading(true);
-    const orderNumber = pathname.split("/").pop();
     try {
       const response = await fetch(
         `/api/orders/${orderNumber}?include=dispatch.driver`,
@@ -52,6 +67,21 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           setDriverInfo(null);
           setIsDriverAssigned(false);
         }
+
+        // Fetch files after we have the order details
+        const { orderType, orderId } = getOrderTypeAndId(data);
+        if (orderType && orderId) {
+          const entityType = getEntityType(orderType);
+          const filesResponse = await fetch(
+            `/api/files/${entityType}/${orderId}`,
+          );
+          if (filesResponse.ok) {
+            const filesData = await filesResponse.json();
+            setFiles(filesData);
+          } else {
+            console.error("Failed to fetch files");
+          }
+        }
       } else {
         console.error("Failed to fetch order");
         toast.error("Failed to load order details");
@@ -62,7 +92,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [pathname]);
+  }, [orderNumber, getOrderTypeAndId]);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -155,7 +185,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     }
   };
 
-  const handleOrderStatusChange = async (newStatus: string) => {
+  // Update handleOrderStatusChange in SingleOrder.tsx
+  const handleOrderStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;
 
     try {
@@ -192,6 +223,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     return <div>Order not found</div>;
   }
 
+  const { orderType, orderId } = getOrderTypeAndId(order);
+
   return (
     <main className="container mx-auto p-6">
       <Card className="mx-auto w-full max-w-5xl pt-2">
@@ -200,18 +233,18 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           date={order.date}
           driverInfo={driverInfo}
           onAssignDriver={handleOpenDriverDialog}
-          orderType={order.order_type}
+          orderType={order.order_type as OrderType}
           orderId={order.id}
           onDeleteSuccess={onDeleteSuccess}
         />
         <Separator />
 
         <CardContent className="pt-6">
-          <OrderStatus
-            orderType={order.order_type}
-            initialStatus={order.status}
+          <OrderStatusCard
+            orderType={order.order_type as OrderType}
+            initialStatus={order.status as OrderStatus}
             orderId={order.id}
-            onStatusChange={handleOrderStatusChange}
+            onStatusChange={(newStatus) => handleOrderStatusChange(newStatus)}
           />
         </CardContent>
         <Separator />
@@ -238,11 +271,29 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
             pickupNotes={order.pickup_notes}
             specialNotes={order.special_notes}
           />
+          <Separator />
+          {orderType && orderId && (
+            <OrderFilesManager
+              orderNumber={order.order_number}
+              orderType={orderType}
+              orderId={orderId}
+              initialFiles={files}
+            />
+          )}
         </CardContent>
       </Card>
       <div className="py-8">
         <DriverStatusCard
-          order={order}
+          order={{
+            id: order.id,
+            status: order.status,
+            driver_status: order.driver_status,
+            user_id: order.user_id,
+            pickup_time: order.pickup_time,
+            arrival_time: order.arrival_time,
+            complete_time: order.complete_time,
+            updated_at: order.updated_at,
+          }}
           driverInfo={driverInfo}
           updateDriverStatus={updateDriverStatus}
         />
