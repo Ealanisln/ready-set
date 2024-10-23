@@ -1,9 +1,11 @@
+// src/server/upload.ts
+
 import { PrismaClient } from '@prisma/client';
-import { UploadMetadata, UploadedFile } from '@/types/upload';
+import type { UploadMetadata, UploadedFile } from '@/types/upload';
 
 const prisma = new PrismaClient();
 
-interface UploadCompleteParams {
+export interface UploadCompleteParams {
   metadata: UploadMetadata;
   file: UploadedFile;
 }
@@ -47,7 +49,6 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
 
     // Prepare the base data
     const baseData = {
-      id: undefined, // Let Prisma handle CUID generation
       userId: metadata.userId,
       fileName: file.name,
       fileType: fileType,
@@ -56,7 +57,7 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
       entityType: metadata.entityType || 'user',
       entityId: metadata.entityId || metadata.userId,
       category: metadata.category,
-      uploadedAt: new Date(), // Schema uses uploadedAt instead of createdAt
+      uploadedAt: new Date(),
       updatedAt: new Date()
     };
 

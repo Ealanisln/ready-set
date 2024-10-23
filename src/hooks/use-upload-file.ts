@@ -15,7 +15,6 @@ export type UploadThingFile = {
   customId?: string | null;
 }
 
-// Update types to match v7
 interface UseUploadFileProps {
   defaultUploadedFiles?: UploadThingFile[];
   userId?: string;
@@ -31,22 +30,43 @@ interface UseUploadFileProps {
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
+const sanitizeFileName = (fileName: string): string => {
+  const sanitized = fileName
+    .replace(/%20/g, ' ')
+    .replace(/[^\w\s.-]/g, '')
+    .trim();
+  return sanitized;
+};
+
 export function useUploadFile(
   endpoint: keyof OurFileRouter,
   props: UseUploadFileProps
 ) {
-  const [uploadedFiles, setUploadedFiles] = React.useState<UploadThingFile[]>(props.defaultUploadedFiles ?? []);
+  const [uploadedFiles, setUploadedFiles] = React.useState<UploadThingFile[]>(
+    props.defaultUploadedFiles ?? []
+  );
   const [progresses, setProgresses] = React.useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = React.useState(false);
 
   const { startUpload } = useUploadThing(endpoint, {
+    headers: {
+      'x-category': props.category,
+      'x-entity-type': props.entityType,
+      'x-entity-id': props.entityId,
+    },
     onClientUploadComplete: (res) => {
       if (res) {
-        setUploadedFiles((prev) => [...prev, ...res as UploadThingFile[]]);
+        const sanitizedRes = res.map(file => ({
+          ...file,
+          name: sanitizeFileName(file.name)
+        })) as UploadThingFile[];
+        
+        setUploadedFiles((prev) => [...prev, ...sanitizedRes]);
       }
       setIsUploading(false);
     },
     onUploadError: (error: Error) => {
+      console.error('Upload error details:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -67,13 +87,29 @@ export function useUploadFile(
     },
   });
 
-  const onUpload = async (files: FileWithPath[]): Promise<UploadThingFile[]> => {
+  const onUpload = async (
+    files: FileWithPath[],
+    metadata?: {
+      category: string;
+      entityType: string;
+      entityId: string;
+    }
+  ): Promise<UploadThingFile[]> => {
     setIsUploading(true);
+    
     try {
-      const result = await startUpload(files);
+      const preparedFiles = files.map(file => {
+        const sanitizedName = sanitizeFileName(file.name);
+        return new File([file], sanitizedName, { type: file.type });
+      });
+
+      // In v7, we don't pass metadata as second parameter
+      const result = await startUpload(preparedFiles);
+      
       if (!result) {
         throw new Error("Upload failed");
       }
+      
       return result as UploadThingFile[];
     } catch (err) {
       console.error("Upload error:", err);
