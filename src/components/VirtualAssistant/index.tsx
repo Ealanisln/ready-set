@@ -1,13 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import {
-  Briefcase,
-  Phone,
-  Calendar,
-  FileText,
-  BarChart2,
-} from "lucide-react";
-import Testimonials from "../Testimonials";
+import { Briefcase, Phone, Calendar, FileText, BarChart2 } from "lucide-react";
 interface ServiceSectionProps {
   title: string;
   description: React.ReactNode;
@@ -44,10 +37,9 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
             className="rounded-lg object-cover object-center"
           />
         </div>
-        </div>
+      </div>
     </div>
   </div>
-  
 );
 const ReadySetVirtualAssistantPage: React.FC = () => {
   const services: ServiceSectionProps[] = [
@@ -148,20 +140,17 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
             <li>Competitor analysis</li>
             <li>Data collection and compilation</li>
             <li>Preparing research reports and presentations</li>
-            <li>Trend analysis and forecasting</li> 
+            <li>Trend analysis and forecasting</li>
           </ul>
-          
-          
         </>
-        
-      ), 
-      imageSrc: "/images/virtual/research-analysis.jpg" , 
-      imagePosition: "right", 
+      ),
+      imageSrc: "/images/virtual/research-analysis.jpg",
+      imagePosition: "right",
     },
   ];
   return (
     <div className="container mx-auto px-4 py-28">
-      <h1 className="pt-8 mb-8 text-center text-4xl font-bold">
+      <h1 className="mb-8 pt-8 text-center text-4xl font-bold">
         Ready Set Virtual Assistant Services
       </h1>
       <div className="mb-8 flex justify-center">
@@ -203,11 +192,9 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
         </div>
       </div>
       {services.map((service, index) => (
-        <ServiceSection key={index} {...service} /> 
+        <ServiceSection key={index} {...service} />
       ))}
-      <Testimonials />
     </div>
-    
   );
 };
 export default ReadySetVirtualAssistantPage;
