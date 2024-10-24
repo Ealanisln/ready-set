@@ -4,9 +4,7 @@ import { authOptions } from "@/utils/auth";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 
-
 const prisma = new PrismaClient();
-
 
 export async function GET(request: Request) {
   try {
@@ -78,7 +76,7 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -99,7 +97,7 @@ export async function DELETE(request: Request) {
     // Use prisma transaction to ensure data consistency
     const deletedFile = await prisma.$transaction(async (tx) => {
       // First check if file exists and user has permission
-      const file = await tx.file.findUnique({
+      const file = await tx.file_upload.findUnique({
         where: { id: fileId }
       });
 
@@ -112,7 +110,7 @@ export async function DELETE(request: Request) {
       }
 
       // Then delete the file
-      return tx.file.delete({
+      return tx.file_upload.delete({
         where: { id: fileId }
       });
     });
@@ -163,7 +161,7 @@ export async function DELETE(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -184,7 +182,7 @@ export async function PATCH(request: Request) {
     // Use prisma transaction for updating file metadata
     const updatedFile = await prisma.$transaction(async (tx) => {
       // First check if file exists and user has permission
-      const existingFile = await tx.file.findUnique({
+      const existingFile = await tx.file_upload.findUnique({
         where: { id: fileId }
       });
 
@@ -197,7 +195,7 @@ export async function PATCH(request: Request) {
       }
 
       // Then update the file
-      return tx.file.update({
+      return tx.file_upload.update({
         where: { id: fileId },
         data: updateData
       });

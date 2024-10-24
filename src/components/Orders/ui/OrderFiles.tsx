@@ -1,8 +1,10 @@
+// src/components/Orders/ui/OrderFiles.tsx
+
 import React, { useEffect, useState } from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
 import { UploadedFilesViewer } from "@/components/Uploader/uploaded-files-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUploadFile, type UploadThingFile } from "@/hooks/use-upload-file";
+import { useUploadFile } from "@/hooks/use-upload-file";
 import { OrderType } from "@/types/order";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -26,7 +28,7 @@ interface OrderFilesManagerProps {
   orderNumber: string;
   orderType: OrderType;
   orderId: string;
-  initialFiles: FileUpload[];
+  initialFiles?: FileUpload[];
 }
 
 export function OrderFilesManager({
@@ -70,33 +72,28 @@ export function OrderFilesManager({
     },
   );
 
-  // Fetch files on component mount
+  // Fetch files on component mount and when orderNumber changes
   useEffect(() => {
     const fetchFiles = async () => {
+      if (!orderNumber) return;
+
       try {
         setIsLoading(true);
-        let endpoint = '';
+        console.log('Fetching files for order:', orderNumber);
         
-        // Construct the endpoint based on order type
-        if (orderType === 'catering') {
-          endpoint = `/api/catering/${orderId}/files`;
-        } else if (orderType === 'on_demand') {
-          endpoint = `/api/on-demand/${orderId}/files`;
-        } else {
-          endpoint = `/api/orders/${orderId}/files`;
-        }
-
-        const response = await fetch(endpoint);
+        const response = await fetch(`/api/orders/${orderNumber}/files`);
         if (!response.ok) {
-          throw new Error('Failed to fetch files');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('Files fetched:', data);
+
         // Ensure dates are properly parsed
         const filesWithDates = data.map((file: FileUpload) => ({
           ...file,
           uploadedAt: new Date(file.uploadedAt),
-          updatedAt: new Date(file.updatedAt)
+          updatedAt: new Date(file.updatedAt || file.uploadedAt), // Fallback to uploadedAt if updatedAt is missing
         }));
 
         setAllFiles(filesWithDates);
@@ -113,12 +110,13 @@ export function OrderFilesManager({
     };
 
     fetchFiles();
-  }, [orderId, orderType, toast]); // Re-fetch if orderId or orderType changes
+  }, [orderNumber, toast]);
 
   // Handle newly uploaded files
   useEffect(() => {
-    console.log('uploadedFiles changed:', uploadedFiles);
     if (uploadedFiles.length > 0) {
+      console.log('New files uploaded:', uploadedFiles);
+      
       setAllFiles(prev => {
         const newFiles = [...prev];
         
@@ -133,15 +131,14 @@ export function OrderFilesManager({
             entityId: orderId,
             category: orderType,
             uploadedAt: new Date(),
-            updatedAt: new Date(),
-            userId: undefined,
-            cateringRequestId: orderType === 'catering' ? Number(orderId) : undefined,
-            onDemandId: orderType === 'on_demand' ? Number(orderId) : undefined,
+            updatedAt: new Date()
           };
 
-          const exists = newFiles.some(existing => existing.fileUrl === convertedFile.fileUrl);
-          if (!exists) {
-            newFiles.push(convertedFile);
+          const existingIndex = newFiles.findIndex(existing => existing.id === convertedFile.id);
+          if (existingIndex !== -1) {
+            newFiles[existingIndex] = convertedFile; // Update existing file
+          } else {
+            newFiles.push(convertedFile); // Add new file
           }
         });
         
@@ -150,28 +147,32 @@ export function OrderFilesManager({
     }
   }, [uploadedFiles, orderType, orderId]);
 
-  const getDisplayText = (type: OrderType) => {
+  const getDisplayText = (type: OrderType): string => {
     switch (type) {
       case "catering":
         return "Catering Request";
       case "on_demand":
         return "On Demand";
       default:
-        return "Unknown";
+        return "Order";
     }
   };
 
-  const handleUpload = async (files: File[], metadata?: { 
-    category: string; 
-    entityType: string; 
-    entityId: string; 
-  }): Promise<void> => {
-    console.log('Starting upload for files:', files);
+  const handleUpload = async (files: File[]): Promise<void> => {
     try {
+      console.log('Starting upload for files:', files);
       await onUpload(files);
-      console.log('Upload completed');
+      toast({
+        title: "Success",
+        description: "Files uploaded successfully",
+      });
     } catch (error) {
       console.error("Upload error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload files. Please try again.",
+        variant: "destructive",
+      });
       throw error;
     }
   };

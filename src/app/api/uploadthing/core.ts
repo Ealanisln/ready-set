@@ -28,6 +28,7 @@ type UploadMetadata = {
   category: string;
   entityType: string;
   entityId: string;
+  orderNumber?: string;
 };
 
 export const ourFileRouter = {
@@ -46,6 +47,7 @@ export const ourFileRouter = {
           category: getHeaderSafe(req.headers, 'x-category'),
           entityType: getHeaderSafe(req.headers, 'x-entity-type'),
           entityId: getHeaderSafe(req.headers, 'x-entity-id'),
+          orderNumber: getHeaderSafe(req.headers, 'x-order-number'),
           files: files.map(f => ({
             name: f.name,
             size: f.size,
@@ -64,14 +66,21 @@ export const ourFileRouter = {
         const category = getHeaderSafe(req.headers, "x-category");
         const entityType = getHeaderSafe(req.headers, "x-entity-type");
         const entityId = getHeaderSafe(req.headers, "x-entity-id");
+        const orderNumber = getHeaderSafe(req.headers, "x-order-number");
 
-        console.log('Extracted header values:', { category, entityType, entityId });
+        console.log('Extracted header values:', { 
+          category, 
+          entityType, 
+          entityId,
+          orderNumber 
+        });
 
         const metadata: UploadMetadata = {
           userId: user.id,
           category: category || 'uncategorized',
           entityType: entityType || 'user',
-          entityId: entityId || user.id
+          entityId: entityId || user.id,
+          orderNumber: orderNumber || undefined
         };
 
         logUploadDetails('Middleware Metadata', metadata);
@@ -94,6 +103,7 @@ export const ourFileRouter = {
           metadata
         });
 
+        // Handle the upload completion
         const result = await handleUploadComplete({ 
           metadata: metadata as UploadMetadata, 
           file 

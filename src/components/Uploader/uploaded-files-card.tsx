@@ -1,6 +1,12 @@
-import React from 'react';
 import Image from "next/image";
-import { FileText, Loader2 } from "lucide-react";
+import {
+  FileText,
+  FileImage,
+  FileSpreadsheet,
+  FileType,
+  Loader2,
+  FileTextIcon,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -36,25 +42,39 @@ interface UploadedFilesViewerProps {
   isLoading?: boolean;
 }
 
-export function UploadedFilesViewer({ 
-  files, 
+export function UploadedFilesViewer({
+  files,
   title = "Uploaded Files",
   description = "View uploaded files",
-  isLoading = false
+  isLoading = false,
 }: UploadedFilesViewerProps) {
   const isImage = (fileType: string | null | undefined): boolean => {
     if (!fileType) return false;
-    return fileType.toLowerCase().startsWith('image') || 
-           ['jpg', 'jpeg', 'png', 'gif', 'webp'].some(ext => 
-             fileType.toLowerCase().includes(ext)
-           );
+    return (
+      fileType.toLowerCase().startsWith("image") ||
+      fileType.toLowerCase() === "image" ||
+      ["jpg", "jpeg", "png", "gif", "webp"].some((ext) =>
+        fileType.toLowerCase().includes(ext),
+      )
+    );
   };
 
   const isPDF = (fileType: string | null | undefined): boolean => {
     if (!fileType) return false;
-    return fileType.toLowerCase() === 'pdf' || 
-           fileType.toLowerCase().includes('pdf') ||
-           fileType.toLowerCase() === 'application/pdf';
+    return (
+      fileType.toLowerCase() === "pdf" ||
+      fileType.toLowerCase().includes("pdf") ||
+      fileType.toLowerCase() === "application/pdf"
+    );
+  };
+
+  const isSpreadsheet = (fileType: string | null | undefined): boolean => {
+    if (!fileType) return false;
+    return (
+      ["xls", "xlsx", "csv", "numbers"].some((ext) =>
+        fileType.toLowerCase().includes(ext),
+      ) || fileType.toLowerCase().includes("spreadsheet")
+    );
   };
 
   const getFileIcon = (file: FileUpload) => {
@@ -70,32 +90,59 @@ export function UploadedFilesViewer({
         </div>
       );
     }
-    
+
+    if (isPDF(file.fileType)) {
+      return (
+        <FileTextIcon
+          className="h-10 w-10 text-red-500"
+          aria-label="PDF file"
+        />
+      );
+    }
+
+    if (isSpreadsheet(file.fileType)) {
+      return (
+        <FileSpreadsheet
+          className="h-10 w-10 text-green-500"
+          aria-label="Spreadsheet file"
+        />
+      );
+    }
+
+    if (file.fileType?.toLowerCase().includes("document")) {
+      return (
+        <FileText
+          className="h-10 w-10 text-blue-500"
+          aria-label="Document file"
+        />
+      );
+    }
+
     return (
-      <FileText 
-        className="h-10 w-10 text-muted-foreground" 
-        aria-hidden="true" 
+      <FileType
+        className="text-muted-foreground h-10 w-10"
+        aria-label="Generic file"
       />
     );
   };
 
   const handleDownload = (fileUrl: string, fileName: string) => {
-    window.open(fileUrl, '_blank');
+    window.open(fileUrl, "_blank");
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const renderLoadingState = () => (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <div 
-          key={i} 
+        <div
+          key={i}
           className="flex items-center justify-between rounded-lg border p-4"
         >
           <div className="flex items-center gap-4">
@@ -125,13 +172,13 @@ export function UploadedFilesViewer({
         {files.map((file) => (
           <div
             key={file.id}
-            className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+            className="hover:bg-muted/50 flex items-center justify-between rounded-lg border p-4 transition-colors"
           >
             <div className="flex items-center gap-4">
               {getFileIcon(file)}
               <div className="flex flex-col">
-                <p className="font-medium line-clamp-1">{file.fileName}</p>
-                <div className="flex gap-2 text-sm text-muted-foreground">
+                <p className="line-clamp-1 font-medium">{file.fileName}</p>
+                <div className="text-muted-foreground flex gap-2 text-sm">
                   <span>{new Date(file.uploadedAt).toLocaleDateString()}</span>
                   <span>•</span>
                   <span>{formatFileSize(file.fileSize)}</span>
@@ -162,13 +209,16 @@ export function UploadedFilesViewer({
             <CardDescription>{description}</CardDescription>
           </div>
           {isLoading && (
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
           )}
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? renderLoadingState() : 
-          files && files.length > 0 ? renderFileList() : renderEmptyState()}
+        {isLoading
+          ? renderLoadingState()
+          : files && files.length > 0
+            ? renderFileList()
+            : renderEmptyState()}
       </CardContent>
     </Card>
   );
