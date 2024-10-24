@@ -1,6 +1,6 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Testimonials from "@/components/Testimonials";
-import VirtualAssistantServices from "@/components/VirtualAssistant";
+import HeroHeader from "@/components/VirtualAssistant";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 const AboutPage = () => {
   return (
     <main>
-      <VirtualAssistantServices />
-      {/* <Testimonials /> */}
+      <HeroHeader />
+      <Testimonials />
     </main>
   );
 };
