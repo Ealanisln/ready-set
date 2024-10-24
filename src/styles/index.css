@@ -6,12 +6,19 @@
 
 @font-face {
   font-family: 'Kabel';
-  src: url('/fonts/KabelC-Demi.otf') format('truetype');
-  font-weight: normal;
+  src: url('/fonts/KabelC-Demi.otf') format('opentype');
+  font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Kabel';
+  src: url('/fonts/KabelMedium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 body {
   font-family: var(--font-montserrat);
 }
