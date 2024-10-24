@@ -1,5 +1,3 @@
-// src/server/upload.ts
-
 import { PrismaClient } from '@prisma/client';
 import type { UploadMetadata, UploadedFile } from '@/types/upload';
 
@@ -10,21 +8,39 @@ export interface UploadCompleteParams {
   file: UploadedFile;
 }
 
+const FILE_TYPE_MAPPING: Record<string, string> = {
+  pdf: 'pdf',
+  jpg: 'image',
+  jpeg: 'image',
+  png: 'image',
+  gif: 'image',
+  webp: 'image',
+  txt: 'text',
+  doc: 'text',
+  docx: 'text'
+};
+
+function getFileType(fileName: string): string {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  return FILE_TYPE_MAPPING[extension] || 'other';
+}
+
+function safelyConvertToBigInt(value: string | number | undefined): bigint | undefined {
+  if (!value) return undefined;
+  
+  try {
+    // Remove any non-numeric characters and leading/trailing whitespace
+    const sanitizedValue = String(value).trim().replace(/[^0-9]/g, '');
+    return sanitizedValue ? BigInt(sanitizedValue) : undefined;
+  } catch (error) {
+    console.warn(`Failed to convert value to BigInt: ${value}`, error);
+    return undefined;
+  }
+}
+
 export async function handleUploadComplete({ metadata, file }: UploadCompleteParams) {
   console.log("Upload complete for userId:", metadata.userId);
   console.log("file url", file.url);
-
-  // Determine file type based on file extension
-  const fileExtension = file.name.split('.').pop()?.toLowerCase();
-  let fileType = 'other';
-  
-  if (fileExtension === 'pdf') {
-    fileType = 'pdf';
-  } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '')) {
-    fileType = 'image';
-  } else if (['txt', 'doc', 'docx'].includes(fileExtension || '')) {
-    fileType = 'text';
-  }
 
   try {
     // Check if a file with the same name and user ID already exists
@@ -51,7 +67,7 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
     const baseData = {
       userId: metadata.userId,
       fileName: file.name,
-      fileType: fileType,
+      fileType: getFileType(file.name),
       fileSize: file.size,
       fileUrl: file.url,
       entityType: metadata.entityType || 'user',
@@ -61,15 +77,19 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
       updatedAt: new Date()
     };
 
-    // Add relationship data based on entity type
+    // Safely convert entityId to BigInt and prepare relationship data
+    const entityId = safelyConvertToBigInt(metadata.entityId);
     const relationshipData = (() => {
-      if (metadata.entityType === 'catering_request' && metadata.entityId) {
-        return { cateringRequestId: BigInt(metadata.entityId) };
+      if (!entityId) return {};
+      
+      switch (metadata.entityType) {
+        case 'catering_request':
+          return { cateringRequestId: entityId };
+        case 'on_demand':
+          return { onDemandId: entityId };
+        default:
+          return {};
       }
-      if (metadata.entityType === 'on_demand' && metadata.entityId) {
-        return { onDemandId: BigInt(metadata.entityId) };
-      }
-      return {};
     })();
 
     const newFileUpload = await prisma.file_upload.create({
@@ -90,7 +110,7 @@ export async function handleUploadComplete({ metadata, file }: UploadCompletePar
     };
   } catch (error) {
     console.error("Error saving file to database:", error);
-    throw new Error("Failed to save file information");
+    throw new Error(`Failed to save file information: ${error instanceof Error ? error.message : 'Unknown error'}`);
   } finally {
     await prisma.$disconnect();
   }
