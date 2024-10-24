@@ -12,7 +12,7 @@ const AboutPage = () => {
   return (
     <main>
       <VirtualAssistantServices />
-      {/* <Testimonials /> */}
+      <Testimonials />
     </main>
   );
 };
