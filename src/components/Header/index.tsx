@@ -122,15 +122,15 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header
-      className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
-        sticky
-          ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
-          : isVirtualAssistantPage
-          ? "absolute bg-[#000000]"
-          : "absolute bg-transparent"
-      }`}
-    >
+<header
+  className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
+    sticky
+      ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
+      : isVirtualAssistantPage
+      ? "absolute bg-transparent"  // Changed from bg-[#000000] to bg-transparent
+      : "absolute bg-transparent"
+  }`}
+>
       <div className="container">
         <div className="relative -mx-4 flex items-center justify-between">
           <div className="w-60 max-w-full px-4">
