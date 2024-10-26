@@ -50,7 +50,7 @@ const HeroHeader = () => {
 
   return (
     <div className="bg-transparent">
-      <nav className="relative z-50 bg-transparent">
+      <nav className="relative z-50">
         <Navbar />
       </nav>
 
@@ -58,7 +58,7 @@ const HeroHeader = () => {
         <div className="relative min-h-screen">
           <div className="absolute inset-0">
             <Image
-              src="/images/virtual/header-bg.jpg"
+              src="/images/virtual/original.png"
               alt="Background"
               fill
               className="object-cover brightness-50"
