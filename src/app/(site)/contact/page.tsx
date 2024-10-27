@@ -1,5 +1,6 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Contact from "@/components/Contact";
+import BayAreaMap from "@/components/Contact/map";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ const ContactPage = () => {
     <>
       <Breadcrumb pageName="Contact Page" />
       <Contact />
+      <BayAreaMap />
     </>
   );
 };

@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Contact } from 'lucide-react';
 
 const BayAreaMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -23,7 +26,7 @@ const BayAreaMap = () => {
       <Card className="bg-white shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold mb-2">Bay Area California</CardTitle>
-          <p className="text-gray-600">Regiones Metropolitanas</p>
+          <p className="text-gray-600">Counties</p>
         </CardHeader>
         
         <CardContent>
