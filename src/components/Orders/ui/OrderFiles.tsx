@@ -1,28 +1,19 @@
-// src/components/Orders/ui/OrderFiles.tsx
-
+// components/OrderFilesManager/index.tsx
 import React, { useEffect, useState } from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
-import { UploadedFilesViewer } from "@/components/Uploader/uploaded-files-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import UploadedFilesViewer from "@/components/Uploader/uploaded-files-viewer";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import { OrderType } from "@/types/order";
+import { FileUpload } from "@/types/file";
 import { useToast } from "@/components/ui/use-toast";
-
-interface FileUpload {
-  id: string;
-  fileName: string;
-  fileType: string | null;
-  fileSize: number;
-  fileUrl: string;
-  entityType: string;
-  entityId: string;
-  category?: string;
-  uploadedAt: Date;
-  updatedAt: Date;
-  userId?: string;
-  cateringRequestId?: number;
-  onDemandId?: number;
-}
+import FileViewer from "@/components/FileViewer/file-viewer";
 
 interface OrderFilesManagerProps {
   orderNumber: string;
@@ -39,22 +30,24 @@ export function OrderFilesManager({
 }: OrderFilesManagerProps) {
   const [allFiles, setAllFiles] = useState<FileUpload[]>(initialFiles);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<FileUpload | null>(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const { toast } = useToast();
-  
+
   const { onUpload, uploadedFiles, progresses, isUploading } = useUploadFile(
     "fileUploader",
     {
-      defaultUploadedFiles: initialFiles.map(file => ({
+      defaultUploadedFiles: initialFiles.map((file) => ({
         key: file.id,
         name: file.fileName,
         url: file.fileUrl,
         size: file.fileSize,
-        type: file.fileType || '',
+        type: file.fileType || "",
         serverData: {
           entityType: file.entityType,
           entityId: file.entityId,
-          category: file.category
-        }
+          category: file.category,
+        },
       })),
       category: orderType,
       entityType: orderType,
@@ -72,33 +65,55 @@ export function OrderFilesManager({
     },
   );
 
-  // Fetch files on component mount and when orderNumber changes
   useEffect(() => {
     const fetchFiles = async () => {
       if (!orderNumber) return;
 
       try {
         setIsLoading(true);
-        console.log('Fetching files for order:', orderNumber);
-        
+        console.log("Fetching files for order:", orderNumber);
+
         const response = await fetch(`/api/orders/${orderNumber}/files`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        console.log('Files fetched:', data);
+        const responseData = await response.json();
+        console.log("Files fetched:", responseData);
 
-        // Ensure dates are properly parsed
-        const filesWithDates = data.map((file: FileUpload) => ({
-          ...file,
-          uploadedAt: new Date(file.uploadedAt),
-          updatedAt: new Date(file.updatedAt || file.uploadedAt), // Fallback to uploadedAt if updatedAt is missing
-        }));
+        let filesArray: any[] = [];
+        if (Array.isArray(responseData)) {
+          filesArray = responseData;
+        } else if (responseData && typeof responseData === "object") {
+          filesArray = Object.values(responseData);
+        } else {
+          console.error("Unexpected response format:", responseData);
+          throw new Error("Invalid response format");
+        }
 
-        setAllFiles(filesWithDates);
+        const processedFiles = filesArray.map(
+          (file: any): FileUpload => ({
+            id: file.id || "",
+            fileName: file.fileName || "",
+            fileType: file.fileType,
+            fileSize: file.fileSize || 0,
+            fileUrl: file.fileUrl || "",
+            entityType: file.entityType || "",
+            entityId: file.entityId || "",
+            category: file.category,
+            uploadedAt: new Date(file.uploadedAt || Date.now()),
+            updatedAt: new Date(
+              file.updatedAt || file.uploadedAt || Date.now(),
+            ),
+            userId: file.userId,
+            cateringRequestId: file.cateringRequestId,
+            onDemandId: file.onDemandId,
+          }),
+        );
+
+        setAllFiles(processedFiles);
       } catch (error) {
-        console.error('Error fetching files:', error);
+        console.error("Error fetching files:", error);
         toast({
           title: "Error",
           description: "Failed to load files. Please try again later.",
@@ -112,15 +127,14 @@ export function OrderFilesManager({
     fetchFiles();
   }, [orderNumber, toast]);
 
-  // Handle newly uploaded files
   useEffect(() => {
     if (uploadedFiles.length > 0) {
-      console.log('New files uploaded:', uploadedFiles);
-      
-      setAllFiles(prev => {
+      console.log("New files uploaded:", uploadedFiles);
+
+      setAllFiles((prev) => {
         const newFiles = [...prev];
-        
-        uploadedFiles.forEach(newFile => {
+
+        uploadedFiles.forEach((newFile) => {
           const convertedFile: FileUpload = {
             id: newFile.key,
             fileName: newFile.name,
@@ -131,17 +145,19 @@ export function OrderFilesManager({
             entityId: orderId,
             category: orderType,
             uploadedAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
           };
 
-          const existingIndex = newFiles.findIndex(existing => existing.id === convertedFile.id);
+          const existingIndex = newFiles.findIndex(
+            (existing) => existing.id === convertedFile.id,
+          );
           if (existingIndex !== -1) {
-            newFiles[existingIndex] = convertedFile; // Update existing file
+            newFiles[existingIndex] = convertedFile;
           } else {
-            newFiles.push(convertedFile); // Add new file
+            newFiles.push(convertedFile);
           }
         });
-        
+
         return newFiles;
       });
     }
@@ -160,7 +176,7 @@ export function OrderFilesManager({
 
   const handleUpload = async (files: File[]): Promise<void> => {
     try {
-      console.log('Starting upload for files:', files);
+      console.log("Starting upload for files:", files);
       await onUpload(files);
       toast({
         title: "Success",
@@ -177,44 +193,68 @@ export function OrderFilesManager({
     }
   };
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Order Files</CardTitle>
-        <CardDescription>
-          {getDisplayText(orderType)} Files - Order #{orderNumber}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <FileUploader
-          onUpload={handleUpload}
-          progresses={progresses}
-          isUploading={isUploading}
-          category={orderType}
-          entityType={orderType}
-          entityId={orderId}
-          accept={{
-            "image/*": [],
-            "application/pdf": [".pdf"],
-            "application/msword": [".doc"],
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-              [".docx"],
-            "application/vnd.ms-excel": [".xls"],
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-              [".xlsx"],
-          }}
-          maxSize={5 * 1024 * 1024}
-          maxFileCount={10}
-          multiple={true}
-        />
+  const handleFileClick = (file: FileUpload) => {
+    if (
+      file.fileType?.startsWith("image/") ||
+      file.fileType === "application/pdf"
+    ) {
+      setSelectedFile(file);
+      setIsViewerOpen(true);
+    } else {
+      window.open(file.fileUrl, "_blank");
+    }
+  };
 
-        <UploadedFilesViewer 
-          files={allFiles}
-          title={`${getDisplayText(orderType)} Order Files`}
-          description={`Files for Order #${orderNumber}`}
-          isLoading={isLoading}
-        />
-      </CardContent>
-    </Card>
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Files</CardTitle>
+          <CardDescription>
+            {getDisplayText(orderType)} Files - Order #{orderNumber}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FileUploader
+            onUpload={handleUpload}
+            progresses={progresses}
+            isUploading={isUploading}
+            category={orderType}
+            entityType={orderType}
+            entityId={orderId}
+            accept={{
+              "image/*": [],
+              "application/pdf": [".pdf"],
+              "application/msword": [".doc"],
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                [".docx"],
+              "application/vnd.ms-excel": [".xls"],
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                [".xlsx"],
+            }}
+            maxSize={5 * 1024 * 1024}
+            maxFileCount={10}
+            multiple={true}
+          />
+
+          <UploadedFilesViewer
+            files={allFiles}
+            title={`${getDisplayText(orderType)} Order Files`}
+            description={`Files for Order #${orderNumber}`}
+            isLoading={isLoading}
+            onFileClick={handleFileClick}
+          />
+        </CardContent>
+      </Card>
+
+      <FileViewer
+        file={selectedFile}
+        isOpen={isViewerOpen}
+        onClose={() => {
+          setIsViewerOpen(false);
+          setSelectedFile(null);
+        }}
+      />
+    </>
   );
 }

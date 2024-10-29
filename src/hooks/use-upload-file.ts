@@ -1,4 +1,3 @@
-// src/hooks/use-upload-file.ts
 import * as React from "react";
 import type { FileWithPath } from "react-dropzone";
 import { toast } from "@/components/ui/use-toast";
@@ -25,7 +24,8 @@ interface UseUploadFileProps {
   onUploadProgress?: (progress: number) => void;
   category: string;
   entityType: string;
-  entityId: string;
+  entityId: string;  // Added this line
+  orderNumber?: string;
 }
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
@@ -47,12 +47,14 @@ export function useUploadFile(
   );
   const [progresses, setProgresses] = React.useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = React.useState(false);
+  const [tempEntityId] = React.useState(`temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
 
   const { startUpload } = useUploadThing(endpoint, {
     headers: {
       'x-category': props.category,
       'x-entity-type': props.entityType,
-      'x-entity-id': props.entityId,
+      'x-entity-id': props.entityId || tempEntityId,  // Updated to use props.entityId
+      ...(props.orderNumber && { 'x-order-number': props.orderNumber }),
     },
     onClientUploadComplete: (res) => {
       if (res) {
@@ -89,11 +91,6 @@ export function useUploadFile(
 
   const onUpload = async (
     files: FileWithPath[],
-    metadata?: {
-      category: string;
-      entityType: string;
-      entityId: string;
-    }
   ): Promise<UploadThingFile[]> => {
     setIsUploading(true);
     
@@ -103,7 +100,6 @@ export function useUploadFile(
         return new File([file], sanitizedName, { type: file.type });
       });
 
-      // In v7, we don't pass metadata as second parameter
       const result = await startUpload(preparedFiles);
       
       if (!result) {
@@ -119,10 +115,36 @@ export function useUploadFile(
     }
   };
 
+  // Add a method to update entityId for all uploaded files
+  const updateEntityId = async (newEntityId: string) => {
+    try {
+      const response = await fetch('/api/uploadthing/update-entity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldEntityId: tempEntityId,
+          newEntityId,
+          entityType: props.entityType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update entity ID');
+      }
+    } catch (error) {
+      console.error('Error updating entity ID:', error);
+      throw error;
+    }
+  };
+
   return {
     onUpload,
     uploadedFiles,
     progresses,
     isUploading,
+    tempEntityId,
+    updateEntityId,
   } as const;
 }
