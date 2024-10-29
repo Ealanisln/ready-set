@@ -58,7 +58,7 @@ const HeroHeader = () => {
         <div className="relative min-h-screen">
           <div className="absolute inset-0">
             <Image
-              src="/images/virtual/original.png"
+              src="/images/virtual/header-bg.png"
               alt="Background"
               fill
               className="object-cover brightness-50"
@@ -113,7 +113,7 @@ const HeroHeader = () => {
                 className="mt-32 flex flex-wrap justify-center gap-8 pb-20 md:gap-12 lg:flex-nowrap lg:gap-24"
                 variants={staggerChildren}
               >
-                {benefits.map(({ text, iconPath, description, alt }) => (
+                {benefits.map(({ text, iconPath, alt }) => (
                   <motion.div
                     key={text}
                     className="group flex items-center gap-4 transition-all duration-300"
@@ -133,7 +133,7 @@ const HeroHeader = () => {
                         className="h-8 w-8"
                       />
                     </motion.div>
-                    <span className="text-lg font-bold text-white">{text}</span>
+                    <span className="text-xl font-bold text-white">{text}</span>
                   </motion.div>
                 ))}
               </motion.div>

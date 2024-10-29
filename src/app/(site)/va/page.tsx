@@ -1,6 +1,6 @@
-import Breadcrumb from "@/components/Common/Breadcrumb";
-import Testimonials from "@/components/Testimonials";
 import HeroHeader from "@/components/VirtualAssistant";
+import DiscoveryCallSection from "@/components/VirtualAssistant/DiscoveryCall";
+import DiscoveryBanner from "@/components/VirtualAssistant/DiscoveryCallBanner";
 import OverwhelmSection from "@/components/VirtualAssistant/FeatureCard";
 import Features from "@/components/VirtualAssistant/Features";
 import BusinessScaleSection from "@/components/VirtualAssistant/VaOptimizationCta";
@@ -17,8 +17,9 @@ const AboutPage = () => {
       <HeroHeader />
       <Features />
       <OverwhelmSection />
+      <DiscoveryCallSection  />
       <BusinessScaleSection />
-      <Testimonials />
+      <DiscoveryBanner />
     </main>
   );
 };
