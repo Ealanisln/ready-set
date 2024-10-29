@@ -4,28 +4,24 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Contact } from 'lucide-react';
 
-const BayAreaMap = () => {
+const AustinMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   
   const regions = [
-    { name: 'MARIN' },
-    { name: 'EAST BAY - RICHMOND' },
-    { name: 'EAST BAY - CONCORD' },
-    { name: 'EAST BAY - OAKLAND' },
-    { name: 'SAN FRANCISCO - SOUTH' },
-    { name: 'PENINSULA - NORTH' },
-    { name: 'EAST BAY - HAYWARD' },
-    { name: 'PENINSULA COAST' },
-    { name: 'PENINSULA - SOUTH' },
-    { name: 'SAN JOSE - EAST' },
-    { name: 'SAN JOSE - WEST' }
+    { name: '6801 North Capital of Texas Hwy ' },
+    { name: '8322 Cross Park Dr' },
+    { name: '1122 Colorado St' },
+    { name: '600 Congress Av' },
+    { name: '301 Congress Av' },
+    { name: 'East Saint Elmo Rd' },
+    { name: '4401 Freidrich Ln' }
   ];
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       <Card className="bg-white shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold mb-2">Bay Area</CardTitle>
+          <CardTitle className="text-3xl font-bold mb-2">Austin Texas</CardTitle>
         </CardHeader>
         
         <CardContent>
@@ -33,8 +29,8 @@ const BayAreaMap = () => {
             {/* Contenedor de la imagen*/}
             <div className="relative">
               <img
-                src="/images/maps/San Francisco Map.jpg"
-                alt="Bay Area Map"
+                src="/images/maps/Austin Texas.jpg"
+                alt="Austin Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               />
             </div>
@@ -54,6 +50,8 @@ const BayAreaMap = () => {
                   >
                     <span className="font-medium">{region.name} - {region.name}</span>
                   </button>
+
+                  
                 ))}
               </div>
             </div>
@@ -64,4 +62,4 @@ const BayAreaMap = () => {
   );
 };
 
-export default BayAreaMap;
+export default AustinMap;
