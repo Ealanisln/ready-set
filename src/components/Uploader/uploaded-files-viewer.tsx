@@ -13,6 +13,7 @@ interface UploadedFilesViewerProps {
   title?: string;
   description?: string;
   isLoading?: boolean;
+  onFileClick?: (file: FileUpload) => void;  // Add this line
 }
 
 const UploadedFilesViewer = ({

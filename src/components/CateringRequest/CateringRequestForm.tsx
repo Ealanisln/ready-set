@@ -126,6 +126,7 @@ const CateringRequestForm: React.FC = () => {
     category: "catering",
     entityType: "catering_request",
     userId: session?.user?.id,
+    entityId: "your-entity-id-here"  // Add this line
   });
 
   // Cleanup function for uploaded files
