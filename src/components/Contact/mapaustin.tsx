@@ -48,7 +48,7 @@ const AustinMap = () => {
                         : 'bg-white hover:bg-yellow-100'}`}
                     
                   >
-                    <span className="font-medium">{region.name} - {region.name}</span>
+                    <span className="font-medium">{region.name} </span>
                   </button>
 
                   
