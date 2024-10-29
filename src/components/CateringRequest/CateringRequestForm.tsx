@@ -10,11 +10,8 @@ import { HostSection } from "./HostSection";
 import { AddressSection } from "./AddressSection";
 import { CateringFormData, Address } from "@/types/catering";
 import { useUploadFile } from "@/hooks/use-upload-file";
-import { UploadedFile } from "@/types/uploaded-file";
 import { X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
-import { generateReactHelpers } from "@uploadthing/react";
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadThingFile[];
@@ -48,8 +45,6 @@ const BROKERAGE_OPTIONS = [
   { value: "Direct Delivery", label: "Direct Delivery" },
   { value: "Other", label: "Other" },
 ];
-
-const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 const CateringRequestForm: React.FC = () => {
   const { data: session } = useSession();
@@ -110,25 +105,28 @@ const CateringRequestForm: React.FC = () => {
 
   const needHost = watch("need_host");
 
-  const { onUpload, uploadedFiles, progresses, isUploading } = useUploadFile(
-    "fileUploader",
-    {
-      maxFileCount: 5,
-      maxFileSize: 10 * 1024 * 1024,
-      allowedFileTypes: [
-        "application/pdf",
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ],
-      category: "catering",
-      entityType: "catering_request",
-      entityId: "temp",
-      userId: session?.user?.id,
-    },
-  );
+  const {
+    onUpload,
+    uploadedFiles,
+    progresses,
+    isUploading,
+    tempEntityId,
+    updateEntityId,
+  } = useUploadFile("fileUploader", {
+    maxFileCount: 5,
+    maxFileSize: 10 * 1024 * 1024,
+    allowedFileTypes: [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    category: "catering",
+    entityType: "catering_request",
+    userId: session?.user?.id,
+  });
 
   // Cleanup function for uploaded files
   const cleanupUploadedFiles = async (fileKeys: string[]) => {
@@ -170,19 +168,21 @@ const CateringRequestForm: React.FC = () => {
     };
   }, [uploadedFileKeys, isSubmitting]);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (!event.target.files?.length) return;
-    
+
     const files = Array.from(event.target.files) as FileWithPath[];
     try {
       const result = await onUpload(files);
       // No need to check if result exists since onUpload will either return array or throw
-      const newFileKeys = result.map(file => file.key);
-      setUploadedFileKeys(prev => [...prev, ...newFileKeys]);
-      setValue('attachments', result);
+      const newFileKeys = result.map((file) => file.key);
+      setUploadedFileKeys((prev) => [...prev, ...newFileKeys]);
+      setValue("attachments", result);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload files. Please try again.');
+      console.error("Upload error:", error);
+      toast.error("Failed to upload files. Please try again.");
     }
   };
 
@@ -208,7 +208,6 @@ const CateringRequestForm: React.FC = () => {
       return;
     }
 
-    // Set loading state
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -228,18 +227,28 @@ const CateringRequestForm: React.FC = () => {
         }),
       });
 
-      if (response.ok) {
-        // Clear the tracked file keys since they're now associated with a submitted order
-        setUploadedFileKeys([]);
-        reset();
-        toast.success("Catering request submitted successfully!");
-      } else {
-        // If submission fails, keep the files tracked for potential cleanup
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
           errorData.message || "Failed to submit catering request",
         );
       }
+
+      const order = await response.json();
+
+      // Update file associations
+      if (uploadedFiles.length > 0) {
+        try {
+          await updateEntityId(order.id.toString());
+        } catch (updateError) {
+          console.error("Error updating file associations:", updateError);
+          // Continue with form submission even if file update fails
+        }
+      }
+
+      setUploadedFileKeys([]);
+      reset();
+      toast.success("Catering request submitted successfully!");
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("An error occurred. Please try again.");

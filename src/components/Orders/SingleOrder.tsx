@@ -50,28 +50,28 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
 
   const fetchOrderDetails = useCallback(async () => {
     if (!orderNumber) {
-      console.error('No order number available');
+      console.error("No order number available");
       setIsLoading(false);
       return;
     }
-  
+
     setIsLoading(true);
-    console.log('Fetching order details for:', orderNumber);
-  
+    console.log("Fetching order details for:", orderNumber);
+
     try {
       // Fetch order details
       const orderResponse = await fetch(
-        `/api/orders/${orderNumber}?include=dispatch.driver`
+        `/api/orders/${orderNumber}?include=dispatch.driver`,
       );
-  
+
       if (!orderResponse.ok) {
-        throw new Error('Failed to fetch order details');
+        throw new Error("Failed to fetch order details");
       }
-  
+
       const orderData = await orderResponse.json();
-      console.log('Order data received:', orderData);
+      console.log("Order data received:", orderData);
       setOrder(orderData);
-  
+
       // Set driver info if available
       if (orderData.dispatch?.length > 0 && orderData.dispatch[0].driver) {
         setDriverInfo(orderData.dispatch[0].driver);
@@ -80,31 +80,63 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
         setDriverInfo(null);
         setIsDriverAssigned(false);
       }
-  
-      // Fetch files
+
+      // Fetch files with improved error handling
       try {
         console.log(`Fetching files for order: ${orderNumber}`);
         const filesResponse = await fetch(`/api/orders/${orderNumber}/files`);
-        
-        if (filesResponse.ok) {
-          const filesData = await filesResponse.json();
-          console.log('Files data received:', filesData);
-          
-          const transformedFiles = filesData.map((file: any) => ({
-            ...file,
-            uploadedAt: new Date(file.uploadedAt),
-            updatedAt: new Date(file.updatedAt || file.uploadedAt)
-          }));
-          
-          setFiles(transformedFiles);
-        } else {
-          console.error('Failed to fetch files:', await filesResponse.text());
+
+        const contentType = filesResponse.headers.get("content-type");
+
+        if (!filesResponse.ok) {
+          if (contentType?.includes("application/json")) {
+            const errorData = await filesResponse.json();
+            throw new Error(errorData.message || "Failed to fetch files");
+          } else {
+            const errorText = await filesResponse.text();
+            throw new Error(errorText || "Failed to fetch files");
+          }
         }
+
+        const filesData = await filesResponse.json();
+        console.log("Files data received:", filesData);
+
+        // Convert object to array if necessary
+        const filesArray = Object.values(filesData);
+
+        if (!Array.isArray(filesArray)) {
+          throw new Error("Invalid files data format");
+        }
+
+        const transformedFiles = filesArray.map((file: any) => ({
+          ...file,
+          // Handle empty date objects by using current date as fallback
+          uploadedAt:
+            file.uploadedAt && Object.keys(file.uploadedAt).length > 0
+              ? new Date(file.uploadedAt)
+              : new Date(),
+          updatedAt:
+            file.updatedAt && Object.keys(file.updatedAt).length > 0
+              ? new Date(file.updatedAt)
+              : new Date(),
+          // Ensure cateringRequestId is handled correctly
+          cateringRequestId: file.cateringRequestId
+            ? Number(file.cateringRequestId)
+            : null,
+          // Ensure other numeric fields are handled correctly
+          fileSize: Number(file.fileSize),
+          onDemandId: file.onDemandId ? Number(file.onDemandId) : null,
+        }));
+
+        setFiles(transformedFiles);
       } catch (fileError) {
-        console.error('Error fetching files:', fileError);
-        toast.error('Failed to load order files');
+        console.error("Error fetching files:", fileError);
+        toast.error(
+          fileError instanceof Error
+            ? fileError.message
+            : "Failed to load order files",
+        );
       }
-  
     } catch (error) {
       console.error("Error fetching order:", error);
       toast.error("Failed to load order details");
@@ -169,7 +201,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
       toast.success(
         isDriverAssigned
           ? "Driver updated successfully!"
-          : "Driver assigned successfully!"
+          : "Driver assigned successfully!",
       );
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
@@ -244,7 +276,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   if (!order) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="ml-4 text-lg font-semibold">Order not found: {orderNumber}</p>
+        <p className="ml-4 text-lg font-semibold">
+          Order not found: {orderNumber}
+        </p>
       </div>
     );
   }
@@ -304,7 +338,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           />
         </CardContent>
       </Card>
-      
+
       <div className="py-8">
         <DriverStatusCard
           order={{
@@ -321,7 +355,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           updateDriverStatus={updateDriverStatus}
         />
       </div>
-      
+
       <DriverAssignmentDialog
         isOpen={isDriverDialogOpen}
         onOpenChange={setIsDriverDialogOpen}
