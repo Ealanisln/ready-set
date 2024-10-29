@@ -18,12 +18,7 @@ import {
 } from "@/components/ui/select";
 import { CheckCircle, Clock, XCircle, Truck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-
-type CateringRequestStatus = "active" | "assigned" | "cancelled" | "completed";
-type OnDemandStatus = "active" | "assigned" | "cancelled" | "completed";
-type OrderStatus = CateringRequestStatus | OnDemandStatus;
-
-type OrderType = "catering" | "on_demand";
+import { OrderStatus, OrderType } from '@/types/order';
 
 interface StatusBadgeProps {
   status: OrderStatus;
@@ -32,13 +27,13 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
-      case "active":
+      case OrderStatus.active:
         return "bg-blue-500 hover:bg-blue-600";
-      case "assigned":
+      case OrderStatus.assigned:
         return "bg-yellow-500 hover:bg-yellow-600";
-      case "cancelled":
+      case OrderStatus.cancelled:
         return "bg-red-500 hover:bg-red-600";
-      case "completed":
+      case OrderStatus.completed:
         return "bg-green-500 hover:bg-green-600";
       default:
         return "bg-gray-500 hover:bg-gray-600";
@@ -47,13 +42,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
-      case "active":
+      case OrderStatus.active:
         return <Clock className="mr-1 h-4 w-4" />;
-      case "assigned":
+      case OrderStatus.assigned:
         return <Truck className="mr-1 h-4 w-4" />;
-      case "cancelled":
+      case OrderStatus.cancelled:
         return <XCircle className="mr-1 h-4 w-4" />;
-      case "completed":
+      case OrderStatus.completed:
         return <CheckCircle className="mr-1 h-4 w-4" />;
       default:
         return null;
@@ -73,16 +68,16 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 interface OrderStatusProps {
   orderType: OrderType;
   initialStatus: OrderStatus;
-  orderId: string;
+  orderId: string | number;
   onStatusChange?: (newStatus: OrderStatus) => void;
 }
 
-export default function OrderStatus({
+export const OrderStatusCard: React.FC<OrderStatusProps> = ({
   orderType,
   initialStatus,
   orderId,
   onStatusChange,
-}: OrderStatusProps) {
+}) => {
   const [status, setStatus] = useState<OrderStatus>(initialStatus);
 
   const handleStatusChange = (newStatus: OrderStatus) => {
@@ -96,11 +91,15 @@ export default function OrderStatus({
     });
   };
 
+  const getOrderTypeDisplay = (type: OrderType): string => {
+    return type === "catering" ? "Catering Request" : "On-Demand Order";
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">
-          {orderType === "catering" ? "Catering Request" : "On-Demand Order"}
+          {getOrderTypeDisplay(orderType)}
         </CardTitle>
         <CardDescription>Order ID: {orderId}</CardDescription>
       </CardHeader>
@@ -111,19 +110,25 @@ export default function OrderStatus({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Change Status:</span>
-          <Select onValueChange={handleStatusChange} value={status}>
+          <Select
+            onValueChange={(value) => handleStatusChange(value as OrderStatus)}
+            value={status}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="assigned">Assigned</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              {Object.values(OrderStatus).map((statusValue) => (
+                <SelectItem key={statusValue} value={statusValue}>
+                  {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default OrderStatusCard;

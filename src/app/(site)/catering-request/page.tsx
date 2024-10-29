@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Faq from "@/components/Faq";
 import SectionTitle from "@/components/Common/SectionTitle";
-import CateringOrderForm from "@/components/CateringRequest/CateringOrderForm";
-import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm"; // Import the new form
+import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm";
 
 const CateringPage = () => {
   const { data: session, status } = useSession();
@@ -37,14 +36,14 @@ const CateringPage = () => {
     >
       <div className="container">
         <div className="mb-[60px]">
-        <SectionTitle
+          <SectionTitle
             title={"Catering Request"}
             subtitle={"8-point Checklist"}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."
             center
           />
         </div>
-        <div className="flex-col flex items-center space-y-8">
+        <div className="flex flex-col items-center space-y-8">
           {/* You can choose to use either CateringOrderForm or CateringRequestForm here */}
           {/* <CateringOrderForm /> */}
           <CateringRequestForm />

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
-import sgMail from "@sendgrid/mail";
+import { sendOrderEmail } from "@/utils/emailSender";
 
 const prisma = new PrismaClient();
 
@@ -72,80 +72,6 @@ export async function GET(req: NextRequest) {
       { message: "Error fetching orders" },
       { status: 500 },
     );
-  }
-}
-
-async function sendOrderEmail(order: any) {
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatTime = (time: Date) => {
-    return time.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    });
-  };
-
-  const formatAddress = (address: any) => {
-    return `${address.street1}${address.street2 ? ", " + address.street2 : ""}, ${address.city}, ${address.state} ${address.zip}`;
-  };
-
-  let body = `
-    <h2>New Order Details:</h2>
-    <p>Order Type: ${order.order_type}</p>
-    <p>Order Number: ${order.order_number}</p>
-    <p>Brokerage: ${order.brokerage}</p>
-    <p>Date: ${formatDate(new Date(order.date))}</p>
-    <p>Pickup Time: ${formatTime(new Date(order.pickup_time))}</p>
-    <p>Arrival Time: ${formatTime(new Date(order.arrival_time))}</p>
-    <p>Order Total: $${order.order_total}</p>
-    <p>Client Attention: ${order.client_attention}</p>
-    <p>Pickup Notes: ${order.pickup_notes || "N/A"}</p>
-    <p>Special Notes: ${order.special_notes || "N/A"}</p>
-    <p>Pickup Address: ${formatAddress(order.address)}</p>
-    <p>Drop-off Address: ${formatAddress(order.delivery_address)}</p>
-  `;
-
-  if (order.order_type === "catering") {
-    body += `
-      <p>Headcount: ${order.headcount}</p>
-      <p>Need Host: ${order.need_host}</p>
-      <p>Hours Needed: ${order.hours_needed || "N/A"}</p>
-      <p>Number of Hosts: ${order.number_of_host || "N/A"}</p>
-    `;
-  } else if (order.order_type === "on_demand") {
-    body += `
-      <p>Item Delivered: ${order.item_delivered}</p>
-      <p>Vehicle Type: ${order.vehicle_type}</p>
-      <p>Length: ${order.length}</p>
-      <p>Width: ${order.width}</p>
-      <p>Height: ${order.height}</p>
-      <p>Weight: ${order.weight}</p>
-    `;
-  }
-
-  const msg = {
-    to: "info@ready-set.co", // Replace with the desired recipient email
-    from: "emmanuel@alanis.dev", // Replace with your verified sender email
-    subject: `New ${order.order_type.charAt(0).toUpperCase() + order.order_type.slice(1)} Order - ${order.order_number}`,
-    html: body,
-  };
-
-  sgMail.setApiKey(process.env.SEND_API_KEY || "");
-
-  try {
-    await sgMail.send(msg);
-    console.log("Order notification email sent successfully");
-  } catch (error) {
-    console.error("Error sending order notification email:", error);
   }
 }
 
@@ -402,8 +328,11 @@ export async function POST(req: NextRequest) {
       }
 
       // Send email notification
-      await sendOrderEmail({ ...newOrder, order_type });
-
+      // In your API route:
+      await sendOrderEmail({
+        ...newOrder,
+        order_type, 
+      });
       return newOrder;
     });
 

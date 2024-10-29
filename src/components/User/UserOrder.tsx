@@ -16,6 +16,7 @@ import {
   ClockIcon,
 } from "lucide-react";
 import OrderStatusCard from "./OrderStatus";
+import { usePathname } from "next/navigation";
 
 type OrderStatus = "active" | "assigned" | "cancelled" | "completed";
 type DriverStatus =
@@ -89,9 +90,11 @@ const UserOrderDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const pathname = usePathname();
+
   useEffect(() => {
     const fetchOrder = async () => {
-      const orderNumber = window.location.pathname.split("/").pop();
+      const orderNumber = pathname.split("/").pop();
 
       try {
         const response = await fetch(
@@ -110,7 +113,7 @@ const UserOrderDetail: React.FC = () => {
     };
 
     fetchOrder();
-  }, []);
+  }, [pathname]);
 
   const formatAddress = (address: Address | null) => {
     if (!address) return "N/A";

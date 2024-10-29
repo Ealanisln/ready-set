@@ -1,11 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { MoreVertical, Truck, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,46 +19,60 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Driver } from '@/types/order';
-import toast from 'react-hot-toast';
+import { Driver, OrderType } from "@/types/order";
+import toast from "react-hot-toast";
 
 interface OrderHeaderProps {
   orderNumber: string;
-  date: string;
+  date: string | Date;
   driverInfo: Driver | null;
   onAssignDriver: () => void;
-  orderType: 'catering' | 'on_demand';
-  orderId: string;
-  onDeleteSuccess: () => void;  // New prop for handling successful deletion
+  orderType: OrderType;
+  orderId: string | number;
+  onDeleteSuccess: () => void;
 }
 
-const OrderHeader: React.FC<OrderHeaderProps> = ({ 
-  orderNumber, 
-  date, 
-  driverInfo, 
-  onAssignDriver, 
+const OrderHeader: React.FC<OrderHeaderProps> = ({
+  orderNumber,
+  date,
+  driverInfo,
+  onAssignDriver,
   orderType,
   orderId,
-  onDeleteSuccess
+  onDeleteSuccess,
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  const formatDate = (date: string | Date): string => {
+    if (typeof date === "string") {
+      return new Date(date).toLocaleDateString();
+    }
+    return date.toLocaleDateString();
+  };
+
+  const getApiOrderType = (type: OrderType): string => {
+    return type === "on_demand" ? "onDemand" : type;
+  };
+
   const handleDeleteOrder = async () => {
     try {
-      const apiOrderType = orderType === 'on_demand' ? 'onDemand' : orderType;
-      const response = await fetch(`/api/orders/delete?orderId=${orderId}&orderType=${apiOrderType}`, {
-        method: 'DELETE',
-      });
+      const apiOrderType = getApiOrderType(orderType);
+      const response = await fetch(
+        `/api/orders/delete?orderId=${orderId}&orderType=${apiOrderType}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (response.ok) {
-        toast.success('Order deleted successfully');
-        onDeleteSuccess();  // Call the callback function instead of using router
+        toast.success("Order deleted successfully");
+        onDeleteSuccess();
       } else {
-        throw new Error('Failed to delete order');
+        throw new Error("Failed to delete order");
       }
     } catch (error) {
-      console.error('Error deleting order:', error);
-      toast.error('Failed to delete order. Please try again.');
+      console.error("Error deleting order:", error);
+      toast.error("Failed to delete order. Please try again.");
     } finally {
       setIsDeleteDialogOpen(false);
     }
@@ -75,9 +85,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
           <CardTitle className="text-2xl font-bold">
             Order {orderNumber}
           </CardTitle>
-          <CardDescription>
-            Date: {new Date(date).toLocaleDateString()}
-          </CardDescription>
+          <CardDescription>Date: {formatDate(date)}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -117,18 +125,23 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
         </div>
       </CardHeader>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the order
-              and all associated data.
+              This action cannot be undone. This will permanently delete the
+              order and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteOrder}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteOrder}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
