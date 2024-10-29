@@ -8,17 +8,17 @@ const BayAreaMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   
   const regions = [
-    { id: '08', name: 'MARIN' },
-    { id: '05', name: 'EAST BAY - RICHMOND' },
-    { id: '04', name: 'EAST BAY - CONCORD' },
-    { id: '10', name: 'EAST BAY - OAKLAND' },
-    { id: '11', name: 'SAN FRANCISCO - SOUTH' },
-    { id: '09', name: 'PENINSULA - NORTH' },
-    { id: '06', name: 'EAST BAY - HAYWARD' },
-    { id: '02', name: 'PENINSULA COAST' },
-    { id: '03', name: 'PENINSULA - SOUTH' },
-    { id: '01', name: 'SAN JOSE - EAST' },
-    { id: '02', name: 'SAN JOSE - WEST' }
+    { name: 'MARIN' },
+    { name: 'EAST BAY - RICHMOND' },
+    { name: 'EAST BAY - CONCORD' },
+    { name: 'EAST BAY - OAKLAND' },
+    { name: 'SAN FRANCISCO - SOUTH' },
+    { name: 'PENINSULA - NORTH' },
+    { name: 'EAST BAY - HAYWARD' },
+    { name: 'PENINSULA COAST' },
+    { name: 'PENINSULA - SOUTH' },
+    { name: 'SAN JOSE - EAST' },
+    { name: 'SAN JOSE - WEST' }
   ];
 
   return (
@@ -41,7 +41,7 @@ const BayAreaMap = () => {
 
             {/* Lista de regiones */}
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-xl font-semibold mb-4">Counties</h3>
+              <h3 className="text-xl font-semibold mb-4">Areas</h3>
               <div className="grid grid-cols-1 gap-2">
                 {regions.map((region) => (
                   <button
@@ -50,7 +50,7 @@ const BayAreaMap = () => {
                       ${selectedRegion === region.id 
                         ? 'bg-yellow-400 text-black' 
                         : 'bg-white hover:bg-yellow-100'}`}
-                    onClick={() => setSelectedRegion(region.id)}
+                    
                   >
                     <span className="font-medium">{region.id} - {region.name}</span>
                   </button>
