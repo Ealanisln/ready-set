@@ -12,6 +12,7 @@ export type UploadThingFile = {
   type: string;
   serverData: unknown;
   customId?: string | null;
+  entityId?: string;  
 }
 
 interface UseUploadFileProps {
