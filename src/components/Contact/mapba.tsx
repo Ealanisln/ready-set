@@ -8,13 +8,13 @@ const BayAreaMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   
   const regions = [
+    { name: 'SAN FRANCISCO' },
     { name: 'MARIN' },
     { name: 'EAST BAY - RICHMOND' },
     { name: 'EAST BAY - CONCORD' },
     { name: 'EAST BAY - OAKLAND' },
-    { name: 'SAN FRANCISCO - SOUTH' },
-    { name: 'PENINSULA - NORTH' },
     { name: 'EAST BAY - HAYWARD' },
+    { name: 'PENINSULA - NORTH' },
     { name: 'PENINSULA COAST' },
     { name: 'PENINSULA - SOUTH' },
     { name: 'SAN JOSE - EAST' },

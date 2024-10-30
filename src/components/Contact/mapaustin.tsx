@@ -27,10 +27,10 @@ const AustinMap = () => {
         <CardContent>
         <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
             {/* Contenedor de la imagen*/}
-            <div className="relative w-full lg:w-2/3">
+            <div className="relative w-full lg:w-1/2 xl:w-2/5">
               <img
                 src="/images/maps/Austin Texas.jpg"
-                alt="Bay Area Map"
+                alt="Austin Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               />
             </div>
