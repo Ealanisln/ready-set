@@ -8,12 +8,12 @@ const AustinMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   
   const regions = [
-    { name: '6801 North Capital of Texas Hwy ' },
+    { name: '6801 N Capital of Texas Hwy' },
     { name: '8322 Cross Park Dr' },
     { name: '1122 Colorado St' },
     { name: '600 Congress Av' },
     { name: '301 Congress Av' },
-    { name: 'East Saint Elmo Rd' },
+    { name: 'East Saint Elmor Rd' },
     { name: '4401 Freidrich Ln' }
   ];
 
@@ -25,12 +25,12 @@ const AustinMap = () => {
         </CardHeader>
         
         <CardContent>
-          <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
             {/* Contenedor de la imagen*/}
-            <div className="relative w-full lg:w-2/3 mr-12">
+            <div className="relative w-full lg:w-2/3">
               <img
                 src="/images/maps/Austin Texas.jpg"
-                alt="Austin Map"
+                alt="Bay Area Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               />
             </div>
