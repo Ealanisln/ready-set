@@ -29,9 +29,9 @@ const BayAreaMap = () => {
         </CardHeader>
         
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="flex justify-center items-center">
             {/* Contenedor de la imagen*/}
-            <div className="relative">
+            <div className="relative max-w-2xl">
               <img
                 src="/images/maps/San Francisco Map.jpg"
                 alt="Bay Area Map"
