@@ -34,8 +34,8 @@ const testimonialData: Testimonial[] = [
 
 const Testimonials = () => {
   return (
-    <section className="bg-gray-1 py-20 dark:bg-dark-2 md:py-[120px]">
-      <div className="container px-4">
+    <section className="bg-gray-4 py-20 dark:bg-dark-2 md:py-[120px]">
+      <div className="container px-20">
         <SectionTitle
           subtitle="Testimonials"
           title="What our Client Say"
@@ -49,7 +49,9 @@ const Testimonials = () => {
             <SingleTestimonial key={i} testimonial={testimonial} />
           ))}
         </div>
+
       </div>
+      
     </section>
   );
 };

@@ -26,6 +26,7 @@ import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert"
 import UserFilesDisplay from "@/components/User/user-files-display";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
+import { FileWithPath } from "react-dropzone";
 
 interface User {
   id: string;
@@ -275,24 +276,31 @@ export default function EditUser({ params }: { params: { id: string } }) {
   };
 
   const useUploadFileHook = (category: string) => {
-    const { onUpload, progresses, isUploading } = useUploadFile(
-      "fileUploader",
-      {
-        defaultUploadedFiles: [],
-        userId: userId ?? "",
-        maxFileCount: 1,
-        maxFileSize: 3 * 1024 * 1024,
-        allowedFileTypes: [
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "application/pdf",
-        ],
-        category: category,
-        entityType: "user",
-        entityId: params.id,
-      },
-    );
+    const {
+      onUpload: originalOnUpload,
+      progresses,
+      isUploading,
+    } = useUploadFile("fileUploader", {
+      defaultUploadedFiles: [],
+      userId: params?.id ?? "",
+      maxFileCount: 1,
+      maxFileSize: 3 * 1024 * 1024,
+      allowedFileTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "application/pdf",
+      ],
+      category: category,
+      entityType: "user",
+      entityId: params.id,
+    });
+
+    // Wrap the onUpload function to match the expected type
+    const onUpload = async (files: FileWithPath[]): Promise<void> => {
+      await originalOnUpload(files);
+    };
+
     return {
       onUpload,
       progresses,
@@ -309,7 +317,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
-  };
+  } as const;
 
   if (loading) {
     return (
@@ -400,7 +408,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   >
                     <CardHeader>
                       <CardTitle>Uploaded Files</CardTitle>
-                      <CardDescription>View your documents here</CardDescription>
+                      <CardDescription>
+                        View your documents here
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="py-2">
@@ -438,16 +448,10 @@ export default function EditUser({ params }: { params: { id: string } }) {
                     <CardContent>
                       <UserProfileUploads
                         uploadHooks={uploadHooks}
-                        userType={
-                          watchedValues.type as
-                            | "vendor"
-                            | "client"
-                            | "driver"
-                            | "admin"
-                            | "helpdesk"
-                            | "super_admin"
+                        userType={watchedValues.type}
+                        onUploadSuccess={() =>
+                          setRefreshTrigger((prev) => prev + 1)
                         }
-                        onUploadSuccess={handleUploadSuccess}  
                       />
                       {/* <div className="py-2">
                         {userId ? (

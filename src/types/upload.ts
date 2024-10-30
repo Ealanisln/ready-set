@@ -1,15 +1,16 @@
-import type { FileRouter } from "uploadthing/next";
-
+// types/upload.ts
 export interface UploadMetadata {
   userId: string;
   category: string;
   entityType: string;
   entityId: string;
-}
-export interface UploadedFile {
-  name: string;
-  url: string;
-  size: number;
+  orderNumber?: string;
 }
 
-export type OurFileRouter = FileRouter;
+export interface UploadedFile {
+  name: string;
+  size: number;
+  type?: string;
+  key: string;
+  url: string;
+}

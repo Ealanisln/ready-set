@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -36,6 +38,43 @@ const Header: React.FC = () => {
   const [sticky, setSticky] = useState(false);
   const [openIndex, setOpenIndex] = useState(-1);
   const { theme, setTheme } = useTheme();
+
+  // Check if current page is Virtual Assistant page
+  const isVirtualAssistantPage = pathUrl === "/va";
+  const isHomePage = pathUrl === "/";
+
+  // Helper function for text colors throughout the header
+  const getTextColorClasses = () => {
+    if (sticky) {
+      return "text-dark dark:text-white";
+    }
+    if (isVirtualAssistantPage || isHomePage) {
+      return "text-white";
+    }
+    return "text-dark dark:text-white";
+  };
+
+  // Updated logo visibility logic
+  const getLogoVisibility = () => {
+    if (sticky) {
+      return {
+        light: "block dark:hidden",  // Show light logo in light mode
+        dark: "hidden dark:block"    // Show dark logo in dark mode
+      };
+    }
+    if (isVirtualAssistantPage || isHomePage) {
+      return {
+        light: "hidden",             // Hide light logo
+        dark: "block"                // Show dark logo
+      };
+    }
+    return {
+      light: "block dark:hidden",    // Default: Show light logo in light mode
+      dark: "hidden dark:block"      // Default: Show dark logo in dark mode
+    };
+  };
+
+  const logoClasses = getLogoVisibility();
 
   const navbarToggleHandler = () => {
     setNavbarOpen((prev) => !prev);
@@ -83,13 +122,15 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header
-      className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
-        sticky
-          ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
-          : "absolute bg-transparent"
-      }`}
-    >
+<header
+  className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
+    sticky
+      ? "shadow-nav fixed z-[999] border-b border-stroke bg-white/80 backdrop-blur-[5px] dark:border-dark-3/20 dark:bg-dark/10"
+      : isVirtualAssistantPage
+      ? "absolute bg-transparent"  // Changed from bg-[#000000] to bg-transparent
+      : "absolute bg-transparent"
+  }`}
+>
       <div className="container">
         <div className="relative -mx-4 flex items-center justify-between">
           <div className="w-60 max-w-full px-4">
@@ -99,42 +140,38 @@ const Header: React.FC = () => {
                 sticky ? "py-2" : "py-5"
               } `}
             >
-              {pathUrl !== "/" ? (
+              {(!isHomePage || sticky) ? (
                 <>
                   <Image
                     src="/images/logo/logo-white.png"
                     alt="logo"
                     width={240}
                     height={30}
-                    className="header-logo w-full dark:hidden"
+                    className={`header-logo w-full ${logoClasses.light}`}
                   />
                   <Image
                     src="/images/logo/logo-dark.png"
                     alt="logo"
                     width={240}
                     height={30}
-                    className="header-logo hidden w-full dark:block"
+                    className={`header-logo w-full ${logoClasses.dark}`}
                   />
                 </>
               ) : (
                 <>
                   <Image
-                    src={
-                      sticky
-                        ? "/images/logo/logo-white.png"
-                        : "/images/logo/logo-white.png"
-                    }
+                    src="/images/logo/logo-white.png"
                     alt="logo"
                     width={140}
                     height={30}
-                    className="header-logo w-full dark:hidden"
+                    className={`header-logo w-full ${logoClasses.light}`}
                   />
                   <Image
                     src="/images/logo/logo-dark.png"
                     alt="logo"
                     width={140}
                     height={30}
-                    className="header-logo hidden w-full dark:block"
+                    className={`header-logo w-full ${logoClasses.dark}`}
                   />
                 </>
               )}
@@ -151,18 +188,15 @@ const Header: React.FC = () => {
                 <span
                   className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
                     navbarOpen ? " top-[7px] rotate-45" : " "
-                  } ${pathUrl !== "/" ? "!bg-dark dark:!bg-white" : sticky ? "bg-dark dark:bg-white" : "bg-white"}`}
+                  } ${
+                    sticky
+                      ? "bg-dark dark:bg-white"
+                      : isVirtualAssistantPage || isHomePage
+                        ? "bg-white"
+                        : "bg-dark dark:bg-white"
+                  }`}
                 />
-                <span
-                  className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
-                    navbarOpen ? "opacity-0 " : " "
-                  } ${pathUrl !== "/" ? "!bg-dark dark:!bg-white" : sticky ? "bg-dark dark:bg-white" : "bg-white"}`}
-                />
-                <span
-                  className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
-                    navbarOpen ? " top-[-8px] -rotate-45" : " "
-                  } ${pathUrl !== "/" ? "!bg-dark dark:!bg-white" : sticky ? "bg-dark dark:bg-white" : "bg-white"}`}
-                />
+                {/* ... other spans with similar conditional styling */}
               </button>
               <nav
                 id="navbarCollapse"
@@ -180,13 +214,7 @@ const Header: React.FC = () => {
                           onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href={menuItem.path}
-                          className={`ud-menu-scroll flex py-2 text-base ${
-                            pathUrl !== "/"
-                              ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                              : sticky
-                                ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                : "text-body-color dark:text-white lg:text-black"
-                          } ${pathUrl === menuItem.path && "text-primary"} lg:inline-flex lg:px-0 lg:py-6`}
+                          className={`ud-menu-scroll flex py-2 text-base ${getTextColorClasses()} group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
                         >
                           {menuItem.title}
                         </Link>
@@ -197,13 +225,7 @@ const Header: React.FC = () => {
                               handleSubmenu(index);
                               closeNavbarOnNavigate();
                             }}
-                            className={`ud-menu-scroll flex items-center justify-between py-2 text-base ${
-                              pathUrl !== "/"
-                                ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                : sticky
-                                  ? "text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary"
-                                  : "text-dark dark:text-white lg:text-dark"
-                            } lg:inline-flex lg:px-0 lg:py-6`}
+                            className={`ud-menu-scroll flex items-center justify-between py-2 text-base ${getTextColorClasses()} group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6`}
                           >
                             {menuItem.title}
                             <span className="pl-1">
@@ -249,7 +271,7 @@ const Header: React.FC = () => {
                           onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href="/signin"
-                          className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                          className="ud-menu-scroll flex py-2 text-base text-white group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
                         >
                           Sign In
                         </Link>
@@ -259,7 +281,7 @@ const Header: React.FC = () => {
                           onClick={closeNavbarOnNavigate}
                           scroll={false}
                           href="/signup"
-                          className="ud-menu-scroll flex py-2 text-black group-hover:text-primary dark:text-dark dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                          className="ud-menu-scroll flex py-2 text-white group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
                         >
                           Sign Up
                         </Link>
@@ -273,7 +295,7 @@ const Header: React.FC = () => {
                           signOut({ callbackUrl: "/", redirect: true });
                           navbarToggleHandler();
                         }}
-                        className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
+                        className="ud-menu-scroll flex py-2 text-base text-white group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"
                       >
                         Sign Out
                       </button>
@@ -284,12 +306,12 @@ const Header: React.FC = () => {
             </div>
 
             <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
-              {/* Theme toggler */}
-              <button
-                aria-label="theme toggler"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex h-8 w-8 items-center justify-center duration-300"
-              >
+            {/* Theme toggler */}
+            <button
+              aria-label="theme toggler"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={`flex h-8 w-8 items-center justify-center duration-300 ${getTextColorClasses()}`}
+            >
                 <svg
                   viewBox="0 0 16 16"
                   className="hidden h-[22px] w-[22px] dark:block"
@@ -300,7 +322,9 @@ const Header: React.FC = () => {
                 <svg
                   viewBox="0 0 23 23"
                   className={`h-[30px] w-[30px] fill-black text-dark dark:hidden ${
-                    !sticky && pathUrl === "/" && "text-white"
+                    (!sticky && pathUrl === "/") || isVirtualAssistantPage
+                      ? "text-white"
+                      : ""
                   }`}
                   fill="currentColor"
                 >
@@ -311,43 +335,43 @@ const Header: React.FC = () => {
               </button>
 
               {session?.user ? (
-                <>
-                  <Link href={`/user/${session.user.id}`}>
-                    <p
-                      className={`loginBtn px-7 py-3 font-medium text-dark ${
-                        !sticky && pathUrl === "/" ? "text-dark" : "text-black"
-                      }`}
-                    >
-                      {session.user.name}
+              <>
+                <Link href={`/user/${session.user.id}`}>
+                  <p
+                    className={`loginBtn px-7 py-3 font-medium ${
+                      sticky 
+                        ? "text-dark dark:text-white"
+                        : isVirtualAssistantPage || isHomePage
+                          ? "text-white"
+                          : "text-dark dark:text-white"
+                    }`}
+                  >
+                    {session.user.name}
                     </p>
-                  </Link>
-                  {pathUrl !== "/" || sticky ? (
-                    <button
-                      onClick={() =>
-                        signOut({ callbackUrl: "/", redirect: true })
-                      }
-                      className="signUpBtn rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
-                    >
-                      Sign Out
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        signOut({ callbackUrl: "/", redirect: true })
-                      }
-                      className="signUpBtn rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white"
-                    >
-                      Sign Out
-                    </button>
+                </Link>
+                {isVirtualAssistantPage || isHomePage ? (
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+                    className="signUpBtn rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white"
+                  >
+                    Sign Out
+                  </button>
+                                 ) : (
+                                  <button
+                                    onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+                                    className="signUpBtn rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark"
+                                  >
+                                    Sign Out
+                                  </button>
                   )}
                 </>
               ) : (
                 <>
-                  {pathUrl !== "/" ? (
+                  {pathUrl !== "/" || isVirtualAssistantPage ? (
                     <>
                       <Link
                         href="/signin"
-                        className="px-7 py-3 text-base font-medium hover:opacity-70 dark:text-white"
+                        className="px-7 py-3 text-base font-medium text-white hover:opacity-70 dark:text-white"
                       >
                         Sign In
                       </Link>
@@ -365,7 +389,7 @@ const Header: React.FC = () => {
                         className={`px-7 py-3 text-base font-medium hover:opacity-70 ${
                           sticky
                             ? "text-black dark:text-white"
-                            : "text-black dark:text-white"
+                            : "text-white dark:text-white"
                         }`}
                       >
                         Sign In

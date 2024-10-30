@@ -11,17 +11,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const OrderPage = () => {
   const [orderNumber, setOrderNumber] = useState("");
+  const pathname = usePathname();
 
   useEffect(() => {
     // Get the order number from the URL
-    const pathSegments = window.location.pathname.split("/");
+    const pathSegments = pathname.split("/");
     const lastSegment = pathSegments[pathSegments.length - 1];
     setOrderNumber(lastSegment);
-  }, []);
+  }, [pathname]);
 
   const router = useRouter();
 
