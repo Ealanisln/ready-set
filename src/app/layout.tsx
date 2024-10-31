@@ -4,7 +4,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { VercelToolbar } from "@vercel/toolbar/next";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -16,6 +17,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const shouldInjectToolbar = process.env.NODE_ENV === "development";
+
   return (
     <html
       suppressHydrationWarning={true}
@@ -24,6 +27,8 @@ export default function RootLayout({
     >
       <body>
         <ClientLayout>{children}</ClientLayout>
+        {shouldInjectToolbar && <VercelToolbar />}
+
         <Analytics />
         <SpeedInsights />
       </body>

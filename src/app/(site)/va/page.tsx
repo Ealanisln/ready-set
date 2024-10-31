@@ -3,6 +3,7 @@ import DiscoveryCallSection from "@/components/VirtualAssistant/DiscoveryCall";
 import DiscoveryBanner from "@/components/VirtualAssistant/DiscoveryCallBanner";
 import OverwhelmSection from "@/components/VirtualAssistant/FeatureCard";
 import Features from "@/components/VirtualAssistant/Features";
+import ReadySetVirtualAssistantPage from "@/components/VirtualAssistant/Old";
 import Pricing from "@/components/VirtualAssistant/Pricing";
 import BusinessScaleSection from "@/components/VirtualAssistant/VaOptimizationCta";
 import { Metadata } from "next";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 const AboutPage = () => {
   return (
     <main>
+      {/* <ReadySetVirtualAssistantPage /> */}
       <HeroHeader />
       <Features />
       <OverwhelmSection />
