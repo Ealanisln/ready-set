@@ -4,19 +4,19 @@ import Link from 'next/link';
 const BusinessScaleSection = () => {
   const benefits = [
     {
-      image: "/images/virtual/administrative-support.jpg",
+      image: "/images/virtual/administrative-support.png",
       alt: "Business collaboration",
       title: "Build a business that runs without you",
       description: "Streamline your processes and automate tasks, instead of doing everything manually."
     },
     {
-      image: "/images/virtual/content-creation.jpg",
+      image: "/images/virtual/content-creation.png",
       alt: "Work life balance",
       title: "Enjoy more free time",
       description: "Imagine saving 20 hours a week and doing more of what you love just by having the right virtual assistant, tech and processes."
     },
     {
-      image: "/images/virtual/customer-service.jpg",
+      image: "/images/virtual/customer-service.png",
       alt: "Remote work setup",
       title: "Make more money with less stress",
       description: "With the right scaling techniques, you'll be able to take on more clients, create better offers, and expand your market."
