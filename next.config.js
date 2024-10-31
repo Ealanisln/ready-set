@@ -8,24 +8,25 @@ const nextConfig = {
         port: "",
       },
       {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
       },
       {
-        protocol: 'https',
-        hostname: 'utfs.io',
+        protocol: "https",
+        hostname: "utfs.io",
       },
     ],
   },
   async rewrites() {
     return [
       {
-        source: '/admin/orders/:order_number',
-        destination: '/admin/orders/[order_number]',
+        source: "/admin/orders/:order_number",
+        destination: "/admin/orders/[order_number]",
       },
-      
     ];
   },
 };
 
-module.exports = nextConfig;
+const withVercelToolbar = require("@vercel/toolbar/plugins/next")();
+
+module.exports = withVercelToolbar(nextConfig);

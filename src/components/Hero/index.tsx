@@ -1,108 +1,58 @@
-import Image from "next/image";
+import React from 'react';
 import Link from "next/link";
-import { CarouselPlugin } from "../Carousel";
-import CirclePattern from "../Auth/SignUp/ui/CirclePattern";
-import CirclePatternSecond from "../Auth/SignUp/ui/CirclePatternSecond";
+import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
 
-const Hero = () => {
+interface ButtonLinkProps {
+  href: string;
+  icon: React.ReactElement<LucideIcon>;
+  title: string;
+  description: string;
+}
+
+const ButtonLink: React.FC<ButtonLinkProps> = ({ href, icon, title, description }) => {
   return (
-    <>
-      <section
-        id="home"
-        className="relative overflow-hidden bg-custom-yellow pt-[120px] md:pt-[130px] lg:pt-[160px]"
-      >
-        <div className="container">
-          <div className="-mx-4 flex flex-wrap items-center">
-            <div className="w-full px-4">
-              <div
-                className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
-                data-wow-delay=".2s"
-              >
-                <h1 className="mb-6 text-3xl font-bold leading-snug text-black sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                  Ready Set
-                </h1>
-                <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
-                  Always ready for you.
-                </p>
-                <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
-                  <li>
-                    <Link
-                      href="/catering-request"
-                      className="inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-gray-2"
-                    >
-                      Let&apos;s Start
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/contact"
-                      target="_blank"
-                      className="flex items-center gap-4 rounded-md bg-white/[0.12] px-6 py-[14px] text-base font-medium text-white transition duration-300 ease-in-out hover:bg-white hover:text-dark"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M18,16 C20.20915,16 22,14.20915 22,12 C22,9.79085 20.20915,8 18,8" />
-                        <path d="M6,8 C3.79086,8 2,9.79085 2,12 C2,14.20915 3.79086,16 6,16" />
-                        <path d="M6,16 L6,15.75 L6,14.5 L6,12 L6,8 C6,4.68629 8.6863,2 12,2 C15.3137,2 18,4.68629 18,8 L18,16 C18,19.3137 15.3137,22 12,22" />
-                      </svg>
-                      Contact us
-                    </Link>
-                  </li>
-                </ul>
-
-                <div>
-                  <p className="mb-4 text-center text-base font-medium text-white/60">
-                    Want to be part of our network? <br />
-                    <Link
-                      href="/signup"
-                      className="font-semibold text-white hover:underline"
-                    >
-                      Join Us
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full px-4">
-              <div
-                className="wow fadeInUp relative z-10 mx-auto max-w-[845px]"
-                data-wow-delay=".25s"
-              >
-                <div className="mt-16">
-                  <div className="flex justify-center pb-4">
-                    <CarouselPlugin />
-                  </div>
-                </div>
-                <div className="absolute -left-9 bottom-0 z-[-1]">
-                  <CirclePattern className="fill-white" />
-                </div>
-                <div className="absolute -right-6 -top-6 z-[-1]">
-                  <CirclePatternSecond
-                    numCircles={12}
-                    offsetX={2.288}
-                    offsetY={38.0087}
-                    cols={3}
-                    width={29}
-                    height={40}
-                    viewBox="0 0 29 40"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+    <Link href={href} className="group">
+      <div className="bg-white rounded-lg p-6 flex flex-col items-center justify-center shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:scale-105 h-full">
+        <div className="text-primary transition-colors duration-300 group-hover:text-primary-dark mb-4">
+          {icon}
         </div>
-      </section>
-    </>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">{title}</h2>
+        <p className="text-center text-gray-600">{description}</p>
+      </div>
+    </Link>
   );
 };
 
-export default Hero;
+const LandingPage: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-yellow-300 flex flex-col items-center justify-center p-4">
+      <header className="text-center mb-16">
+        <h1 className="text-5xl font-bold text-gray-800 mb-4">Ready Set Group LLC</h1>
+        <p className="text-2xl text-gray-700">Choose your destination</p>
+      </header>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl w-full">
+        <ButtonLink 
+          href="/logistics" 
+          icon={<Truck className="w-12 h-12" />}
+          title="Logistics"
+          description="Join our logistics team and be part of a dynamic supply chain network"
+        />
+        <ButtonLink 
+          href="/va" 
+          icon={<Headphones className="w-12 h-12" />}
+          title="Virtual Assistant"
+          description="Become a virtual assistant and work flexibly from anywhere"
+        />
+        <ButtonLink 
+          href="/join-the-team" 
+          icon={<Users className="w-12 h-12" />}
+          title="Join the Team"
+          description="Explore various exciting positions available in our growing company"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default LandingPage;
