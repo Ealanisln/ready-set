@@ -56,7 +56,7 @@
     "date-fns": "2.30.0",
     "dotenv": "^16.4.5",
     "embla-carousel-autoplay": "^8.3.0",
-    "embla-carousel-react": "^8.3.0",
+    "embla-carousel-react": "^8.3.1",
     "gray-matter": "^4.0.3",
     "json-edit-react": "^1.17.1",
     "lucide-react": "^0.396.0",
