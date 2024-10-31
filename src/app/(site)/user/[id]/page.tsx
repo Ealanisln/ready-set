@@ -1,3 +1,5 @@
+// src/app/(site)/user/[id]/page.tsx This code its working
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -23,6 +25,7 @@ import { useSession } from "next-auth/react";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
+import { FileWithPath } from "react-dropzone";
 
 interface User {
   id: string;
@@ -65,27 +68,35 @@ export default function EditUser({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
+  // Update the useUploadFileHook to handle the proper return type
   const useUploadFileHook = (category: string) => {
-    const { onUpload, progresses, isUploading } = useUploadFile(
-      "fileUploader",
-      {
-        defaultUploadedFiles: [],
-        userId: userId ?? "",
-        maxFileCount: 1,
-        maxFileSize: 3 * 1024 * 1024,
-        allowedFileTypes: [
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "application/pdf",
-        ],
-        category: category,
-        entityType: "user",
-        entityId: params.id,
-      },
-    );
+    const {
+      onUpload: originalOnUpload,
+      progresses,
+      isUploading,
+    } = useUploadFile("fileUploader", {
+      defaultUploadedFiles: [],
+      userId: userId ?? "",
+      maxFileCount: 1,
+      maxFileSize: 3 * 1024 * 1024,
+      allowedFileTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "application/pdf",
+      ],
+      category: category,
+      entityType: "user",
+      entityId: params.id,
+    });
+
+    // Wrap the onUpload function to return void instead of UploadThingFile[]
+    const onUpload = async (files: FileWithPath[]): Promise<void> => {
+      await originalOnUpload(files);
+    };
+
     return {
-      onUpload: (files: File[]) => onUpload(files),
+      onUpload,
       progresses,
       isUploading,
       category,
@@ -100,7 +111,7 @@ export default function EditUser({ params }: { params: { id: string } }) {
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
-  };
+  } as const;
 
   const {
     control,
@@ -295,7 +306,9 @@ export default function EditUser({ params }: { params: { id: string } }) {
                   <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle>Uploaded Files</CardTitle>
-                      <CardDescription>View your documents here</CardDescription>
+                      <CardDescription>
+                        View your documents here
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="py-2">
