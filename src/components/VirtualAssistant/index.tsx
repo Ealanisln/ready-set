@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -38,16 +38,16 @@ const HeroHeader = () => {
   const features = [
     {
       icon: <GraduationCap className="h-6 w-6 md:h-8 md:w-8" />,
-      title: "Industry Professional UK Writers"
+      title: "Industry Professional UK Writers",
     },
     {
       icon: <MousePointerClick className="h-6 w-6 md:h-8 md:w-8" />,
-      title: "Try Before You Buy"
+      title: "Try Before You Buy",
     },
     {
       icon: <UserCog className="h-6 w-6 md:h-8 md:w-8" />,
-      title: "Dedicated Account Managers"
-    }
+      title: "Dedicated Account Managers",
+    },
   ];
 
   const fadeIn = {
@@ -87,23 +87,23 @@ const HeroHeader = () => {
           </div>
           <div className="relative z-10 mx-auto max-w-6xl px-4 pt-16 md:pt-20">
             <motion.div
-              className="text-center mt-8 md:mt-12"
+              className="mt-8 text-center md:mt-12"
               initial="hidden"
               animate="visible"
               variants={staggerChildren}
             >
               <motion.h1
-                className="mb-4 md:mb-6 text-white"
+                className="mb-4 text-white md:mb-6"
                 style={{ fontFamily: "Kabel" }}
                 variants={fadeIn}
               >
                 <motion.div className="mt-12 md:mt-20" variants={fadeIn}>
-                  <span className="text-3xl md:text-4xl lg:text-6xl font-bold leading-tight">
+                  <span className="text-3xl font-bold leading-tight md:text-4xl lg:text-6xl">
                     Ready, Set, Delegate!
                   </span>
                 </motion.div>
                 <motion.div className="mt-3 md:mt-4 lg:mt-6" variants={fadeIn}>
-                  <span className="text-lg md:text-xl lg:text-4xl font-normal leading-relaxed">
+                  <span className="text-lg font-normal leading-relaxed md:text-xl lg:text-4xl">
                     Expert Virtual Assistants, Ready When You Are.
                   </span>
                 </motion.div>
@@ -120,13 +120,13 @@ const HeroHeader = () => {
               </motion.div>
 
               <motion.div
-                className="mt-12 md:mt-16 lg:mt-32 flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-24 pb-12 md:pb-20 md:flex-row"
+                className="mt-12 flex flex-col items-center justify-center gap-4 pb-12 md:mt-16 md:flex-row md:gap-6 md:pb-20 lg:mt-32 lg:gap-24"
                 variants={staggerChildren}
               >
                 {benefits.map(({ text, iconPath, alt }) => (
                   <motion.div
                     key={text}
-                    className="group flex items-center justify-center gap-3 md:gap-4 transition-all duration-300 w-full md:w-auto"
+                    className="group flex w-full items-center justify-center gap-3 transition-all duration-300 md:w-auto md:gap-4"
                     variants={fadeIn}
                     whileHover={{ scale: 1.05 }}
                   >
@@ -142,65 +142,12 @@ const HeroHeader = () => {
                         className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8"
                       />
                     </motion.div>
-                    <span className="text-base md:text-lg lg:text-xl font-bold text-white">
+                    <span className="text-base font-bold text-white md:text-lg lg:text-xl">
                       {text}
                     </span>
                   </motion.div>
                 ))}
               </motion.div>
-            </motion.div>
-
-            {/* Feature Carousel Section - Updated bottom padding */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mx-auto max-w-6xl pb-24 md:pb-12" // Increased bottom padding on mobile
-            >
-              <div className="w-full bg-black rounded-2xl md:rounded-3xl p-4 md:p-8 lg:p-16 shadow-lg">
-                <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
-                  <div className="w-full md:w-1/3">
-                    <h2 className="text-white text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
-                      BEST PLATFORM
-                      <br />TO LEARN
-                      <br />EVERYTHING
-                    </h2>
-                  </div>
-                  
-                  <div className="w-full md:w-2/3">
-                    <Carousel
-                      opts={{
-                        align: "center",
-                        loop: true,
-                      }}
-                      className="w-full relative"
-                    >
-                      <CarouselContent className="-ml-2 md:-ml-4">
-                        {features.map((feature, index) => (
-                          <CarouselItem key={index} className="pl-2 md:pl-4 basis-full md:basis-1/3">
-                            <Card className="bg-yellow-400 border-none">
-                              <CardContent className="flex flex-col items-center justify-center p-4 md:p-6 text-center space-y-3 md:space-y-4">
-                                <div className="text-black">
-                                  {feature.icon}
-                                </div>
-                                <h3 className="font-medium text-xs md:text-sm text-black">
-                                  {feature.title}
-                                </h3>
-                              </CardContent>
-                            </Card>
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      <CarouselPrevious 
-                        className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-12 bg-yellow-400 hover:bg-yellow-500 text-black border-none"
-                      />
-                      <CarouselNext 
-                        className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-10 bg-yellow-400 hover:bg-yellow-500 text-black border-none"
-                      />
-                    </Carousel>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>

@@ -18,6 +18,8 @@ const AboutPage = () => {
     <main>
       {/* <ReadySetVirtualAssistantPage /> */}
       <HeroHeader />
+      <FeatureCarousel />
+
       {/* <FeatureCarousel /> */}
       <Features />
       <OverwhelmSection />

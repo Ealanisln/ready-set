@@ -28,7 +28,7 @@ const features = [
 
 export default function FeatureCarousel() {
   return (
-    <div className="mx-auto max-w-6xl pb-12">
+    <div className="mx-auto max-w-6xl p-6">
       <div className="w-full bg-black rounded-3xl p-8 lg:p-16 shadow-lg mb-8">
         <div className="flex flex-col md:flex-row md:items-center gap-8">
           <div className="w-full md:w-1/3">
