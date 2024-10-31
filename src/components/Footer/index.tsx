@@ -168,7 +168,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="/logistics"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Logistics
                   </a>
@@ -176,7 +176,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="/va"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Virtual Assistant
                   </a>
@@ -184,7 +184,7 @@ const Footer = () => {
                 <li>
                   <a
                     href="/join-the-team"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Join the team
                   </a>
@@ -265,7 +265,7 @@ const Footer = () => {
             </div>
             <div className="w-full px-4 md:w-1/3 lg:w-1/2">
               <div className="my-1 flex justify-center md:justify-end">
-                <p className="text-base text-gray-400">
+                <p className="text-base text-gray-7">
                   Developed by{" "}
                   <a
                     href="https://alanis.dev"
