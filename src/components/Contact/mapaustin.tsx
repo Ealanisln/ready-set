@@ -27,7 +27,7 @@ const AustinMap = () => {
         <CardContent>
         <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
             {/* Contenedor de la imagen*/}
-            <div className="relative w-full lg:w-1/2 xl:w-2/5">
+            <div className="relative w-full lg:w-2/3">
               <img
                 src="/images/maps/Austin Texas.jpg"
                 alt="Austin Map"
