@@ -77,13 +77,16 @@ const HeroHeader = () => {
       <section className="relative isolate">
         <div className="relative min-h-[100svh]">
           <div className="absolute inset-0">
+            <picture>
+              <source srcSet="/images/virtual/header-bg.webp" type="image/webp" />
             <Image
-              src="/images/virtual/header-bg.png"
+              src="/images/virtual/header-bg.jpg"
               alt="Background"
               fill
               className="object-cover brightness-50"
               priority
             />
+            </picture>
           </div>
           <div className="relative z-10 mx-auto max-w-6xl px-4 pt-16 md:pt-20">
             <motion.div
