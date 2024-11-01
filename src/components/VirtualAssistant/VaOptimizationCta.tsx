@@ -4,19 +4,22 @@ import Link from 'next/link';
 const BusinessScaleSection = () => {
   const benefits = [
     {
-      image: "/images/virtual/administrative-support.png",
+      imageWebp: "/images/virtual/administrative-support.webp",
+      imageFallback: "/images/virtual/administrative-support.jpg",
       alt: "Business collaboration",
       title: "Build a business that runs without you",
       description: "Streamline your processes and automate tasks, instead of doing everything manually."
     },
     {
-      image: "/images/virtual/content-creation.png",
+      imageWebp: "/images/virtual/content-creation.webp",
+      imageFallback: "/images/virtual/content-creation.jpg",
       alt: "Work life balance",
       title: "Enjoy more free time",
       description: "Imagine saving 20 hours a week and doing more of what you love just by having the right virtual assistant, tech and processes."
     },
     {
-      image: "/images/virtual/customer-service.png",
+      imageWebp: "/images/virtual/customer-service.webp",
+      imageFallback: "/images/virtual/customer-service.jpg",
       alt: "Remote work setup",
       title: "Make more money with less stress",
       description: "With the right scaling techniques, you'll be able to take on more clients, create better offers, and expand your market."
@@ -77,14 +80,17 @@ const BusinessScaleSection = () => {
           {benefits.map((benefit, index) => (
             <div key={index} className="space-y-6">
               <div className="relative rounded-3xl overflow-hidden aspect-[4/3]">
+              <picture>
+                <source srcSet={benefit.imageWebp} type='image/webp' />
                 <Image
-                  src={benefit.image}
+                  src={benefit.imageFallback}
                   alt={benefit.alt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 33vw"
                   quality={85}
                 />
+                </picture>
               </div>
               <div className="text-center space-y-4">
                 <h3 className="text-2xl font-bold">
