@@ -35,7 +35,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   pathUrl,
   getTextColorClasses
 }) => {
-  // Desktop Menu
+  // Restored Desktop Menu with full content
   const DesktopMenu = () => (
     <nav className="hidden lg:block">
       <ul className="flex items-center gap-x-8">
@@ -67,7 +67,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       key={submenuItem.id}
                       className={`block rounded-lg px-4 py-2 text-sm transition-colors ${
                         pathUrl === submenuItem.path
-                          ? "bg-primary/10 text-primary"
+                          ? "bg-amber-400/10 text-amber-500"
                           : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
                       }`}
                     >
@@ -83,9 +83,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     </nav>
   );
 
-  // Mobile Menu
+  // Mobile Menu Overlay (same as before)
   const MobileMenuOverlay = () => (
-    <div className={`fixed inset-0 z-50 lg:hidden ${navbarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+    <div 
+      className={`fixed inset-0 z-50 lg:hidden ${
+        navbarOpen ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0 }}
+    >
       {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
@@ -96,19 +101,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       
       {/* Menu panel */}
       <nav
-        className={`absolute right-0 h-full w-72 transform overflow-y-auto bg-white/90 backdrop-blur-md transition-transform duration-300 ease-in-out dark:bg-dark-2/90 ${
+        className={`fixed right-0 top-0 bottom-0 w-72 transform overflow-y-auto bg-white/90 backdrop-blur-md transition-transform duration-300 ease-in-out dark:bg-dark-2/90 ${
           navbarOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{ height: '100vh' }}
       >
         {/* Close button */}
         <button
           onClick={navbarToggleHandler}
-          className="absolute right-4 top-4 rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-2"
+          className="absolute right-4 top-4 z-50 rounded-full p-2 text-amber-500 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-400/10"
         >
           <X className="h-6 w-6" />
         </button>
 
-        <div className="px-6 py-16">
+        <div className="flex h-full flex-col px-6 py-16">
           <ul className="space-y-2">
             {menuData.map((menuItem, index) => (
               <li key={menuItem.id} className="group">
@@ -117,7 +123,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     onClick={closeNavbarOnNavigate}
                     scroll={false}
                     href={menuItem.path}
-                    className="flex w-full rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+                    className="flex w-full rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
                   >
                     {menuItem.title}
                   </Link>
@@ -125,7 +131,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   <div className="space-y-2">
                     <button
                       onClick={() => handleSubmenu(index)}
-                      className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+                      className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
                     >
                       {menuItem.title}
                       <ChevronDown
@@ -151,8 +157,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                             }}
                             className={`block rounded-lg px-4 py-2 text-sm transition-colors ${
                               pathUrl === submenuItem.path
-                                ? "bg-primary/10 text-primary"
-                                : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                                ? "bg-amber-400/10 text-amber-500"
+                                : "text-gray-600 hover:bg-amber-100 dark:text-gray-300 dark:hover:bg-amber-400/10"
                             }`}
                           >
                             {submenuItem.title}
@@ -166,20 +172,20 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             ))}
           </ul>
 
-          <div className="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <div className="mt-auto border-t border-gray-200 py-6 dark:border-gray-700">
             {!session?.user ? (
               <div className="space-y-3">
                 <Link
                   onClick={closeNavbarOnNavigate}
                   href="/signin"
-                  className="block w-full rounded-lg bg-gray-100 px-4 py-3 text-center font-medium text-gray-900 transition-colors hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                  className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
                 >
                   Sign In
                 </Link>
                 <Link
                   onClick={closeNavbarOnNavigate}
                   href="/signup"
-                  className="block w-full rounded-lg bg-primary px-4 py-3 text-center font-medium text-white transition-colors hover:bg-primary/90"
+                  className="block w-full rounded-lg bg-amber-400 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600"
                 >
                   Sign Up
                 </Link>
@@ -190,7 +196,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   signOut({ callbackUrl: "/", redirect: true });
                   navbarToggleHandler();
                 }}
-                className="block w-full rounded-lg bg-gray-100 px-4 py-3 text-center font-medium text-gray-900 transition-colors hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
               >
                 Sign Out
               </button>
