@@ -18,7 +18,14 @@ import { toast } from "@/components/ui/use-toast";
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: File[];
   onValueChange?: (files: File[]) => void;
-  onUpload: (files: File[]) => Promise<void>;
+  onUpload: (
+    files: File[],
+    metadata?: {
+      category: string;
+      entityType: string;
+      entityId: string;
+    },
+  ) => Promise<void>;
   onUploadSuccess?: (files: File[]) => void;
   progresses: Record<string, number>;
   accept?: DropzoneProps["accept"];
@@ -81,7 +88,7 @@ export function FileUploader(props: FileUploaderProps) {
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        })
+        }),
       );
 
       const updatedFiles = files ? [...files, ...newFiles] : newFiles;
@@ -91,7 +98,7 @@ export function FileUploader(props: FileUploaderProps) {
       if (rejectedFiles.length > 0) {
         rejectedFiles.forEach(({ file, errors }) => {
           toast({
-            description: `File ${file.name} was rejected: ${errors.map(e => e.message).join(", ")}`,
+            description: `File ${file.name} was rejected: ${errors.map((e) => e.message).join(", ")}`,
             variant: "destructive",
           });
         });
@@ -99,7 +106,12 @@ export function FileUploader(props: FileUploaderProps) {
 
       if (updatedFiles.length > 0 && updatedFiles.length <= maxFileCount) {
         try {
-          await onUpload(updatedFiles);
+          // Pass metadata along with files
+          await onUpload(updatedFiles, {
+            category,
+            entityType,
+            entityId,
+          });
           setFiles([]);
           onUploadSuccess?.(updatedFiles);
           toast({
@@ -114,15 +126,24 @@ export function FileUploader(props: FileUploaderProps) {
         }
       }
     },
-    [files, maxFileCount, multiple, onUpload, setFiles, onUploadSuccess]
+    [
+      files,
+      maxFileCount,
+      multiple,
+      onUpload,
+      setFiles,
+      onUploadSuccess,
+      category,
+      entityType,
+      entityId,
+    ],
   );
-
 
   React.useEffect(() => {
     return () => {
       if (!files) return;
       files.forEach((file) => {
-        if ('preview' in file && typeof file.preview === 'string') {
+        if ("preview" in file && typeof file.preview === "string") {
           URL.revokeObjectURL(file.preview);
         }
       });
@@ -147,7 +168,7 @@ export function FileUploader(props: FileUploaderProps) {
               "ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
               isDragActive && "border-muted-foreground/50",
               (disabled || isUploading) && "pointer-events-none opacity-60",
-              className
+              className,
             )}
             {...dropzoneProps}
           >
@@ -220,7 +241,9 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
   return (
     <div className="relative flex items-center gap-2.5">
       <div className="flex flex-1 gap-2.5">
-        {'preview' in file ? <FilePreview file={file as File & { preview: string }} /> : null}
+        {"preview" in file ? (
+          <FilePreview file={file as File & { preview: string }} />
+        ) : null}
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-col gap-px">
             <p className="text-foreground/80 line-clamp-1 text-sm font-medium">

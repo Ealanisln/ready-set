@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Faq from "@/components/Faq";
 import SectionTitle from "@/components/Common/SectionTitle";
-import CateringOrderForm from "@/components/CateringRequest/CateringOrderForm";
-import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm"; // Import the new form
+import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm";
 
 const CateringPage = () => {
   const { data: session, status } = useSession();
@@ -38,8 +37,8 @@ const CateringPage = () => {
       <div className="container">
         <div className="mb-[60px]">
           <SectionTitle
-            subtitle="8-Point Checklist"
-            title="Catering request"
+            title={"Catering Request"}
+            subtitle={"8-point Checklist"}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."
             center
           />

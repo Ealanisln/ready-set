@@ -36,9 +36,9 @@ const OnDemandPage = () => {
     >
       <div className="container">
         <div className="mb-[60px]">
-          <SectionTitle
-            subtitle="8-Point Checklist"
-            title="On-Demand request"
+        <SectionTitle
+            title={"Catering Request"}
+            subtitle={"8-point Checklist"}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."
             center
           />

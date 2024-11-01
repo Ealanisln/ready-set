@@ -1,108 +1,91 @@
-import Image from "next/image";
+"use client";
+
+import React from 'react';
 import Link from "next/link";
-import { CarouselPlugin } from "../Carousel";
-import CirclePattern from "../Auth/SignUp/ui/CirclePattern";
-import CirclePatternSecond from "../Auth/SignUp/ui/CirclePatternSecond";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
 
-const Hero = () => {
+interface ButtonLinkProps {
+  href: string;
+  icon: React.ReactElement<LucideIcon>;
+  title: string;
+  description: string;
+}
+
+const ButtonLink: React.FC<ButtonLinkProps> = ({ href, icon, title, description }) => {
   return (
-    <>
-      <section
-        id="home"
-        className="relative overflow-hidden bg-custom-yellow pt-[120px] md:pt-[130px] lg:pt-[160px]"
-      >
-        <div className="container">
-          <div className="-mx-4 flex flex-wrap items-center">
-            <div className="w-full px-4">
-              <div
-                className="hero-content wow fadeInUp mx-auto max-w-[780px] text-center"
-                data-wow-delay=".2s"
-              >
-                <h1 className="mb-6 text-3xl font-bold leading-snug text-black sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.2]">
-                  Ready Set
-                </h1>
-                <p className="mx-auto mb-9 max-w-[600px] text-base font-medium text-black sm:text-lg sm:leading-[1.44]">
-                  Always ready for you.
-                </p>
-                <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
-                  <li>
-                    <Link
-                      href="/catering-request"
-                      className="inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium text-dark shadow-1 transition duration-300 ease-in-out hover:bg-gray-2"
-                    >
-                      Let&apos;s Start
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/contact"
-                      target="_blank"
-                      className="flex items-center gap-4 rounded-md bg-white/[0.12] px-6 py-[14px] text-base font-medium text-white transition duration-300 ease-in-out hover:bg-white hover:text-dark"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M18,16 C20.20915,16 22,14.20915 22,12 C22,9.79085 20.20915,8 18,8" />
-                        <path d="M6,8 C3.79086,8 2,9.79085 2,12 C2,14.20915 3.79086,16 6,16" />
-                        <path d="M6,16 L6,15.75 L6,14.5 L6,12 L6,8 C6,4.68629 8.6863,2 12,2 C15.3137,2 18,4.68629 18,8 L18,16 C18,19.3137 15.3137,22 12,22" />
-                      </svg>
-                      Contact us
-                    </Link>
-                  </li>
-                </ul>
-
-                <div>
-                  <p className="mb-4 text-center text-base font-medium text-white/60">
-                    Want to be part of our network? <br />
-                    <Link
-                      href="/signup"
-                      className="font-semibold text-white hover:underline"
-                    >
-                      Join Us
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full px-4">
-              <div
-                className="wow fadeInUp relative z-10 mx-auto max-w-[845px]"
-                data-wow-delay=".25s"
-              >
-                <div className="mt-16">
-                  <div className="flex justify-center pb-4">
-                    <CarouselPlugin />
-                  </div>
-                </div>
-                <div className="absolute -left-9 bottom-0 z-[-1]">
-                  <CirclePattern className="fill-white" />
-                </div>
-                <div className="absolute -right-6 -top-6 z-[-1]">
-                  <CirclePatternSecond
-                    numCircles={12}
-                    offsetX={2.288}
-                    offsetY={38.0087}
-                    cols={3}
-                    width={29}
-                    height={40}
-                    viewBox="0 0 29 40"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+    <Link href={href} className="group">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 h-full">
+        <div className="text-primary mb-2 sm:mb-4">
+          {icon}
         </div>
-      </section>
-    </>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-1 sm:mb-2 text-balance">
+          {title}
+        </h2>
+        <p className="text-sm sm:text-base text-center text-gray-600 dark:text-gray-300 text-balance">
+          {description}
+        </p>
+      </div>
+    </Link>
   );
 };
 
-export default Hero;
+const LandingPage: React.FC = () => {
+  const { resolvedTheme } = useTheme();
+  const logoSrc = resolvedTheme === 'dark' 
+    ? '/images/logo/full-logo-dark.png'
+    : '/images/logo/full-logo-light.png';
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-yellow-300 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 pt-8 sm:pt-12">
+      <header className="text-center mb-12 sm:mb-16 flex flex-col items-center w-full px-4 sm:px-6">
+        {/* Add width to prevent layout shift */}
+        <div className="w-full max-w-[600px] mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-6 sm:mb-8 mt-6 sm:mt-8 text-balance">
+            Ready Set Group LLC
+          </h1>
+        </div>
+        
+        {/* Add explicit width/height to prevent layout shift */}
+        <div className="relative w-[300px] h-[200px] sm:w-[400px] sm:h-[300px] md:w-[500px] md:h-[400px] mb-6 sm:mb-10">
+          <Image
+            src={logoSrc}
+            alt="Ready Set Group LLC Logo"
+            fill
+            sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, 500px"
+            className="object-contain"
+            priority
+          />
+        </div>
+        
+        <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-200 mt-4 sm:mt-6 text-balance">
+          Choose your destination
+        </p>
+      </header>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <ButtonLink 
+          href="/logistics" 
+          icon={<Truck strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+          title="Logistics"
+          description="Join our logistics team and be part of a dynamic supply chain network"
+        />
+        <ButtonLink 
+          href="/va" 
+          icon={<Headphones strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+          title="Virtual Assistant"
+          description="Become a virtual assistant and work flexibly from anywhere"
+        />
+        <ButtonLink 
+          href="/join-the-team" 
+          icon={<Users strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+          title="Join the Team"
+          description="Explore various exciting positions available in our growing company"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default LandingPage;

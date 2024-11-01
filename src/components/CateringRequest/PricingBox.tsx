@@ -4,21 +4,10 @@ import OfferList from "./OfferList";
 import { Price } from "@/types/price";
 
 const PricingBox = ({ product }: { product: Price }) => {
+
   // POST request
   const handleSubscription = async (e: any) => {
-    e.preventDefault();
-    const { data } = await axios.post(
-      "/api/payment",
-      {
-        priceId: product.id,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    window.location.assign(data);
+   console.log("testing")
   };
 
   return (

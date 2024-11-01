@@ -1,6 +1,17 @@
-import React from "react";
+"use client";
+
 import Image from "next/image";
-import Navbar from "@/components/Header";
+import { motion } from "framer-motion";
+import * as React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { GraduationCap, MousePointerClick, UserCog } from "lucide-react";
 
 const HeroHeader = () => {
   const benefits = [
@@ -24,75 +35,120 @@ const HeroHeader = () => {
     },
   ];
 
-  return (
-    <div className="bg-black">
-      <nav className="relative z-50">
-        <Navbar />
-      </nav>
+  const features = [
+    {
+      icon: <GraduationCap className="h-6 w-6 md:h-8 md:w-8" />,
+      title: "Industry Professional UK Writers",
+    },
+    {
+      icon: <MousePointerClick className="h-6 w-6 md:h-8 md:w-8" />,
+      title: "Try Before You Buy",
+    },
+    {
+      icon: <UserCog className="h-6 w-6 md:h-8 md:w-8" />,
+      title: "Dedicated Account Managers",
+    },
+  ];
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const staggerChildren = {
+    visible: {
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const scaleIn = {
+    hidden: { scale: 0.8, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+
+  return (
+    <div className="bg-transparent">
       <section className="relative isolate">
-        <div className="relative min-h-screen">
+        <div className="relative min-h-[100svh]">
           <div className="absolute inset-0">
             <Image
-              src="/images/virtual/header-bg.jpg"
+              src="/images/virtual/header-bg.png"
               alt="Background"
               fill
               className="object-cover brightness-50"
               priority
             />
           </div>
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 pt-40">
-            <div className="text-center">
-              <h1 className="mb-6 text-white" style={{ fontFamily: "Kabel" }}>
-                <div className="mt-2">
-                  <span className="text-6xl font-bold leading-tight">
+          <div className="relative z-10 mx-auto max-w-6xl px-4 pt-16 md:pt-20">
+            <motion.div
+              className="mt-8 text-center md:mt-12"
+              initial="hidden"
+              animate="visible"
+              variants={staggerChildren}
+            >
+              <motion.h1
+                className="mb-4 text-white md:mb-6"
+                style={{ fontFamily: "Kabel" }}
+                variants={fadeIn}
+              >
+                <motion.div className="mt-12 md:mt-20" variants={fadeIn}>
+                  <span className="text-3xl font-bold leading-tight md:text-4xl lg:text-6xl">
                     Ready, Set, Delegate!
                   </span>
-                </div>
-                <div className="mt-6">
-                  <span className="text-2xl font-normal leading-relaxed md:text-4xl">
+                </motion.div>
+                <motion.div className="mt-3 md:mt-4 lg:mt-6" variants={fadeIn}>
+                  <span className="text-lg font-normal leading-relaxed md:text-xl lg:text-4xl">
                     Expert Virtual Assistants, Ready When You Are.
                   </span>
-                </div>
-              </h1>
+                </motion.div>
+              </motion.h1>
 
-              <div className="mt-12">
-                <button className="rounded-full bg-amber-400 px-8 py-4 font-semibold text-black transition-all hover:bg-amber-500">
+              <motion.div className="mt-6 md:mt-8 lg:mt-12" variants={scaleIn}>
+                <motion.button
+                  className="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-amber-500 md:px-8 md:py-4 md:text-base"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   BOOK A DISCOVERY CALL
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
 
-              <div className="mt-32 flex flex-wrap justify-center gap-8 pb-20 md:gap-12 lg:flex-nowrap lg:gap-24">
-                {benefits.map(({ text, iconPath, description, alt }) => (
-                  <div
+              <motion.div
+                className="mt-12 flex flex-col items-center justify-center gap-4 pb-12 md:mt-16 md:flex-row md:gap-6 md:pb-20 lg:mt-32 lg:gap-24"
+                variants={staggerChildren}
+              >
+                {benefits.map(({ text, iconPath, alt }) => (
+                  <motion.div
                     key={text}
-                    className="group flex items-center gap-4 transition-all duration-300 hover:scale-105"
+                    className="group flex w-full items-center justify-center gap-3 transition-all duration-300 md:w-auto md:gap-4"
+                    variants={fadeIn}
+                    whileHover={{ scale: 1.05 }}
                   >
-                    <div className="">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
                       <Image
                         src={iconPath}
                         alt={alt}
                         width={48}
                         height={48}
-                        className="h-8 w-8" // Increased from w-8 h-8
+                        className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8"
                       />
-                    </div>
-                    <span className="text-lg font-bold text-white">{text}</span>
-                  </div>
+                    </motion.div>
+                    <span className="text-base font-bold text-white md:text-lg lg:text-xl">
+                      {text}
+                    </span>
+                  </motion.div>
                 ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0">
-            <svg
-              viewBox="0 0 1440 320"
-              className="fill-white"
-              preserveAspectRatio="none"
-            >
-              <path d="M0,160 C360,240 720,80 1080,160 C1260,200 1440,160 1440,160 L1440,320 L0,320 Z" />
-            </svg>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
