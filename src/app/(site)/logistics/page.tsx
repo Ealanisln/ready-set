@@ -1,3 +1,5 @@
+// src/app/(site)/logistics/page.tsx
+
 "use client";
 
 import { useState } from "react";
@@ -17,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { QuoteRequestForm } from "@/components/Logistics/QuoteRequestForm";
 
 // Define types for the service details
 type ServiceDetail = {
@@ -236,64 +239,7 @@ export default function LogisticsServices() {
       </div>
 
       {/* Contact Form Section */}
-      <div className="bg-white py-24">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-xl">
-            <Card className="p-8">
-              <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
-                Request a Quote
-              </h2>
-              {formSubmitted ? (
-                <div className="p-8 text-center">
-                  <Check className="mx-auto mb-4 h-16 w-16 text-green-500" />
-                  <p className="text-xl text-gray-700">
-                    Thank you for your interest! We&apos;ll contact you shortly
-                    with a custom quote.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <Input
-                    type="text"
-                    placeholder="Company Name"
-                    required
-                    className="w-full"
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Contact Person"
-                    required
-                    className="w-full"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Business Email"
-                    required
-                    className="w-full"
-                  />
-                  <Input
-                    type="tel"
-                    placeholder="Phone Number"
-                    required
-                    className="w-full"
-                  />
-                  <Textarea
-                    placeholder="Tell us about your catering delivery needs"
-                    required
-                    className="min-h-[120px] w-full"
-                  />
-                  <Button
-                    type="submit"
-                    className="w-full bg-yellow-400 py-6 text-gray-800 hover:bg-yellow-500"
-                  >
-                    Get Quote
-                  </Button>
-                </form>
-              )}
-            </Card>
-          </div>
-        </div>
-      </div>
+     <QuoteRequestForm />
     </div>
   );
 }

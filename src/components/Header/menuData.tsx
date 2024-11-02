@@ -51,7 +51,7 @@ export const virtualAssistantMenuItem: Menu = {
   id: 11,
   title: "Virtual Assistant",
   path: "/va",
-  newTab: false,
+  newTab: true,
   submenu: [
     {
       id: 12,
