@@ -19,11 +19,11 @@ const AboutPage = () => {
       {/* <ReadySetVirtualAssistantPage /> */}
       <HeroHeader />
       {/* <FeatureCarousel /> */}
-      <Features />
+      {/* <Features /> */}
       <OverwhelmSection />
       <DiscoveryCallSection />
       <BusinessScaleSection />
-      <Pricing />
+      {/* <Pricing /> */}
       <DiscoveryBanner />
     </main>
   );
