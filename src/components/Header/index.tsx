@@ -140,7 +140,11 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
         <>
           <Link
             href="/signin"
-            className="hidden px-7 py-3 text-base font-medium text-white hover:opacity-70 dark:text-white lg:block"
+            className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 lg:block ${
+              isVirtualAssistantPage
+                ? "text-white"
+                : "text-dark dark:text-white" // Default to dark text for non-home/VA pages
+            }`}
           >
             Sign In
           </Link>
@@ -156,9 +160,9 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
           <Link
             href="/signin"
             className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 md:block ${
-              sticky
-                ? "text-black dark:text-white"
-                : "text-white dark:text-white"
+              sticky || !isHomePage
+                ? "text-dark dark:text-white" // Dark text when sticky or not homepage
+                : "text-white dark:text-white" // White text only on homepage when not sticky
             }`}
           >
             Sign In
