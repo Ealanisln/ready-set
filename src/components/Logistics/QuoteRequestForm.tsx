@@ -70,91 +70,93 @@ export const QuoteRequestForm = () => {
   }
 
   return (
-    <Card className="px-8 py-8 w-full max-w-2xl mx-auto">
-      <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
-        Request a Quote
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <Input
-            {...register("companyName", { required: true })}
-            type="text"
-            placeholder="Company Name"
-            className="w-full"
-          />
-          {errors.companyName && (
-            <span className="mt-1 text-sm text-red-500">Company name is required</span>
-          )}
-        </div>
-
-        <div>
-          <Input
-            {...register("contactPerson", { required: true })}
-            type="text"
-            placeholder="Contact Person"
-            className="w-full"
-          />
-          {errors.contactPerson && (
-            <span className="mt-1 text-sm text-red-500">Contact person is required</span>
-          )}
-        </div>
-
-        <div>
-          <Input
-            {...register("email", {
-              required: true,
-              pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            })}
-            type="email"
-            placeholder="Business Email"
-            className="w-full"
-          />
-          {errors.email && (
-            <span className="mt-1 text-sm text-red-500">
-              {errors.email.type === "pattern"
-                ? "Please enter a valid email"
-                : "Email is required"}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <Input
-            {...register("phone", { required: true })}
-            type="tel"
-            placeholder="Phone Number"
-            className="w-full"
-          />
-          {errors.phone && (
-            <span className="mt-1 text-sm text-red-500">Phone number is required</span>
-          )}
-        </div>
-
-        <div>
-          <Textarea
-            {...register("message", { required: true })}
-            placeholder="Tell us about your catering delivery needs"
-            className="min-h-[120px] w-full"
-          />
-          {errors.message && (
-            <span className="mt-1 text-sm text-red-500">Message is required</span>
-          )}
-        </div>
-
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-yellow-400 py-6 text-gray-800 hover:bg-yellow-500"
-        >
-          {isSubmitting ? "Sending..." : "Get Quote"}
-        </Button>
-
-        {message?.type === "error" && (
-          <div className="mt-4 rounded bg-red-100 p-3 text-red-800">
-            {message.text}
+    <div className="py-24">
+      <Card className="px-8 py-8 w-full max-w-2xl mx-auto">
+        <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
+          Request a Quote
+        </h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <Input
+              {...register("companyName", { required: true })}
+              type="text"
+              placeholder="Company Name"
+              className="w-full"
+            />
+            {errors.companyName && (
+              <span className="mt-1 text-sm text-red-500">Company name is required</span>
+            )}
           </div>
-        )}
-      </form>
-    </Card>
+
+          <div>
+            <Input
+              {...register("contactPerson", { required: true })}
+              type="text"
+              placeholder="Contact Person"
+              className="w-full"
+            />
+            {errors.contactPerson && (
+              <span className="mt-1 text-sm text-red-500">Contact person is required</span>
+            )}
+          </div>
+
+          <div>
+            <Input
+              {...register("email", {
+                required: true,
+                pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              })}
+              type="email"
+              placeholder="Business Email"
+              className="w-full"
+            />
+            {errors.email && (
+              <span className="mt-1 text-sm text-red-500">
+                {errors.email.type === "pattern"
+                  ? "Please enter a valid email"
+                  : "Email is required"}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <Input
+              {...register("phone", { required: true })}
+              type="tel"
+              placeholder="Phone Number"
+              className="w-full"
+            />
+            {errors.phone && (
+              <span className="mt-1 text-sm text-red-500">Phone number is required</span>
+            )}
+          </div>
+
+          <div>
+            <Textarea
+              {...register("message", { required: true })}
+              placeholder="Tell us about your catering delivery needs"
+              className="min-h-[120px] w-full"
+            />
+            {errors.message && (
+              <span className="mt-1 text-sm text-red-500">Message is required</span>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-yellow-400 py-6 text-gray-800 hover:bg-yellow-500"
+          >
+            {isSubmitting ? "Sending..." : "Get Quote"}
+          </Button>
+
+          {message?.type === "error" && (
+            <div className="mt-4 rounded bg-red-100 p-3 text-red-800">
+              {message.text}
+            </div>
+          )}
+        </form>
+      </Card>
+    </div>
   );
 };
