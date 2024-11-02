@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ChevronRight, Truck, Headphones, Users } from "lucide-react"
+import Link from 'next/link';
 
 export default function JoinOurTeam() {
   const [formSubmitted, setFormSubmitted] = useState(false)
@@ -36,8 +37,10 @@ export default function JoinOurTeam() {
             <Headphones className="w-12 h-12 text-yellow-400 mb-4" />
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Virtual Assistant</h2>
             <p className="text-gray-600 mb-4">Are you a talented virtual assistant? Put your skills to work and help our team stay organized and efficient.</p>
-            <Button className="bg-yellow-400 hover:bg-yellow-500 text-gray-800">
-              Learn More <ChevronRight className="ml-2 h-4 w-4" />
+            <Button asChild>
+            <Link href="/va" className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 flex items-center">
+            Learn More <ChevronRight className="ml-2 h-4 w-4" />
+            </Link>
             </Button>
           </div>
         </div>
