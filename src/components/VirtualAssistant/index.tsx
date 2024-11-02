@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { motion } from "framer-motion";
 import * as React from "react";
@@ -6,7 +7,6 @@ import FeatureCarousel from "./FeatureCarousel";
 import { MaskBackground } from "./MaskBackground";
 
 const HeroHeader = () => {
-  // Animations configuration
   const animations = {
     fadeIn: {
       hidden: { opacity: 0, y: 20 },
@@ -34,7 +34,7 @@ const HeroHeader = () => {
       <section className="relative isolate">
         <div className="relative isolate flex min-h-screen flex-col justify-between">
           {/* Background Image */}
-          <div className="absolute inset-0 h-[78vh] overflow-hidden">
+          <div className="absolute inset-0 h-screen overflow-hidden">
             <picture>
               <source srcSet="/images/virtual/header-bg.webp" type="image/webp" />
               <Image
@@ -49,23 +49,23 @@ const HeroHeader = () => {
           <MaskBackground />
 
           {/* Main Content */}
-          <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-16 md:pt-20 lg:pt-24">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
             <motion.div
-              className="flex flex-col items-center"
+              className="flex flex-col items-center justify-center flex-grow"
               initial="hidden"
               animate="visible"
               variants={animations.staggerChildren}
             >
               {/* Hero Title */}
               <motion.div
-                className="text-center"
+                className="text-center max-w-4xl mx-auto"
                 variants={animations.fadeIn}
               >
                 <h1 className="font-kabel text-white">
-                  <span className="block text-3xl font-bold leading-tight md:text-5xl lg:text-6xl pt-24">
+                  <span className="block text-4xl font-bold leading-tight md:text-6xl lg:text-7xl">
                     Ready, Set, Delegate!
                   </span>
-                  <span className="mt-3 block text-lg font-normal leading-relaxed md:mt-4 md:text-xl lg:mt-6 lg:text-4xl">
+                  <span className="mt-4 block text-xl font-normal leading-relaxed md:text-2xl lg:text-4xl">
                     Expert Virtual Assistants, Ready When You Are.
                   </span>
                 </h1>
@@ -73,11 +73,11 @@ const HeroHeader = () => {
 
               {/* CTA Button */}
               <motion.div
-                className="mt-8 md:mt-10 lg:mt-12 pt-16"
+                className="mt-12 md:mt-16"
                 variants={animations.scaleIn}
               >
                 <motion.button
-                  className="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-amber-500 md:px-8 md:py-4 md:text-base"
+                  className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -85,18 +85,18 @@ const HeroHeader = () => {
                 </motion.button>
               </motion.div>
             </motion.div>
-          </div>
 
-          {/* Feature Carousel */}
-          <motion.div
-            className="relative z-10 w-full mt-auto pb-10"
-            variants={animations.fadeIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.5 }}
-          >
-            <FeatureCarousel />
-          </motion.div>
+            {/* Feature Carousel */}
+            <motion.div
+              className="w-full mb-12"
+              variants={animations.fadeIn}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.5 }}
+            >
+              <FeatureCarousel />
+            </motion.div>
+          </div>
           
           <MaskBackground />
         </div>
