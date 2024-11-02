@@ -1,6 +1,6 @@
-import { Menu } from "@/types/menu";
+import { MenuItem } from "@/types/menu";
 
-export const cateringRequestMenuItem: Menu = {
+export const cateringRequestMenuItem: MenuItem = {
   id: 10,
   title: "Orders",
   newTab: false,
@@ -26,61 +26,55 @@ export const cateringRequestMenuItem: Menu = {
   ],
 };
 
-export const adminMenuItem: Menu = {
+export const adminMenuItem: MenuItem = {
   id: 6,
   title: "Admin",
   path: "/admin",
   newTab: false,
 };
 
-export const vendorMenuItem: Menu = {
+export const vendorMenuItem: MenuItem = {
   id: 7,
   title: "Vendor",
   path: "/vendor",
   newTab: false,
 };
 
-export const driverMenuItem: Menu = {
+export const driverMenuItem: MenuItem = {
   id: 8,
   title: "Driver",
   path: "/driver",
   newTab: false,
 };
 
-export const virtualAssistantMenuItem: Menu = {
+export const rsSubsidiariesMenuItem: MenuItem = {
   id: 11,
-  title: "Virtual Assistant",
-  path: "/va",
-  newTab: true,
+  title: "RS Subsidiaries",
+  newTab: false,
   submenu: [
     {
       id: 12,
-      title: "Services",
-      path: "/virtual-assistant/services",
+      title: "Logistics",
+      path: "/logistics",
       newTab: false,
     },
     {
       id: 13,
-      title: "Features",
-      path: "/virtual-assistant/features",
+      title: "Virtual Assistant",
+      path: "/va",
       newTab: false,
     },
     {
       id: 14,
-      title: "Pricing",
-      path: "/virtual-assistant/pricing",
-      newTab: false,
-    },
-    {
-      id: 15,
-      title: "FAQ",
-      path: "/virtual-assistant/faq",
+      title: "Join Us",
+      path: "/join-the-team",
       newTab: false,
     },
   ],
 };
 
-const menuData: Menu[] = [
+
+const menuData: MenuItem[] = [
   {
     id: 1,
     title: "Home",
@@ -93,7 +87,7 @@ const menuData: Menu[] = [
     path: "/about",
     newTab: false,
   },
-  virtualAssistantMenuItem, // Add the new Virtual Assistant menu item
+  rsSubsidiariesMenuItem, // Add the new Virtual Assistant menu item
   {
     id: 4,
     title: "Contact",

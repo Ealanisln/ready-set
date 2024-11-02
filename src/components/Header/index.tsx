@@ -227,6 +227,12 @@ const Header: React.FC = () => {
     return "bg-dark dark:bg-white";
   };
 
+    // Enhanced close handler that closes both navbar and submenus
+    const closeAllMenus = () => {
+      setNavbarOpen(false);
+      setOpenIndex(-1);
+    };
+
   // Event handlers
   const navbarToggleHandler = () => setNavbarOpen((prev) => !prev);
   const closeNavbarOnNavigate = () => setNavbarOpen(false);
@@ -236,6 +242,11 @@ const Header: React.FC = () => {
   const handleStickyNavbar = () => {
     setSticky(window.scrollY >= 80);
   };
+
+    // Add pathUrl to dependency array to trigger menu close on route change
+    useEffect(() => {
+      closeAllMenus();
+    }, [pathUrl]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyNavbar);
