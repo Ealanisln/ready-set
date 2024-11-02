@@ -47,38 +47,32 @@ export const driverMenuItem: MenuItem = {
   newTab: false,
 };
 
-export const virtualAssistantMenuItem: MenuItem = {
+export const rsSubsidiariesMenuItem: MenuItem = {
   id: 11,
-  title: "Virtual Assistant",
-  path: "/va",
-  newTab: true,
+  title: "RS Subsidiaries",
+  newTab: false,
   submenu: [
     {
       id: 12,
-      title: "Services",
-      path: "/virtual-assistant/services",
+      title: "Logistics",
+      path: "/logistics",
       newTab: false,
     },
     {
       id: 13,
-      title: "Features",
-      path: "/virtual-assistant/features",
+      title: "Virtual Assistant",
+      path: "/va",
       newTab: false,
     },
     {
       id: 14,
-      title: "Pricing",
-      path: "/virtual-assistant/pricing",
-      newTab: false,
-    },
-    {
-      id: 15,
-      title: "FAQ",
-      path: "/virtual-assistant/faq",
+      title: "Join Us",
+      path: "/join-the-team",
       newTab: false,
     },
   ],
 };
+
 
 const menuData: MenuItem[] = [
   {
@@ -93,7 +87,7 @@ const menuData: MenuItem[] = [
     path: "/about",
     newTab: false,
   },
-  virtualAssistantMenuItem, // Add the new Virtual Assistant menu item
+  rsSubsidiariesMenuItem, // Add the new Virtual Assistant menu item
   {
     id: 4,
     title: "Contact",
