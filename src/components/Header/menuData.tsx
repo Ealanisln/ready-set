@@ -1,6 +1,6 @@
-import { Menu } from "@/types/menu";
+import { MenuItem } from "@/types/menu";
 
-export const cateringRequestMenuItem: Menu = {
+export const cateringRequestMenuItem: MenuItem = {
   id: 10,
   title: "Orders",
   newTab: false,
@@ -26,28 +26,28 @@ export const cateringRequestMenuItem: Menu = {
   ],
 };
 
-export const adminMenuItem: Menu = {
+export const adminMenuItem: MenuItem = {
   id: 6,
   title: "Admin",
   path: "/admin",
   newTab: false,
 };
 
-export const vendorMenuItem: Menu = {
+export const vendorMenuItem: MenuItem = {
   id: 7,
   title: "Vendor",
   path: "/vendor",
   newTab: false,
 };
 
-export const driverMenuItem: Menu = {
+export const driverMenuItem: MenuItem = {
   id: 8,
   title: "Driver",
   path: "/driver",
   newTab: false,
 };
 
-export const virtualAssistantMenuItem: Menu = {
+export const virtualAssistantMenuItem: MenuItem = {
   id: 11,
   title: "Virtual Assistant",
   path: "/va",
@@ -80,7 +80,7 @@ export const virtualAssistantMenuItem: Menu = {
   ],
 };
 
-const menuData: Menu[] = [
+const menuData: MenuItem[] = [
   {
     id: 1,
     title: "Home",
