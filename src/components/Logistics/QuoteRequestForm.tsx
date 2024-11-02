@@ -70,7 +70,7 @@ export const QuoteRequestForm = () => {
   }
 
   return (
-    <Card className="p-8">
+    <Card className="px-8 py-8 w-full max-w-2xl mx-auto">
       <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
         Request a Quote
       </h2>
