@@ -1,103 +1,104 @@
-// src/components/VirtualAssistant/index.tsx
-
 "use client";
+
 import Image from "next/image";
 import { motion } from "framer-motion";
 import * as React from "react";
 import FeatureCarousel from "./FeatureCarousel";
+import { MaskBackground } from "./MaskBackground";
 
 const HeroHeader = () => {
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
-  const staggerChildren = {
-    visible: {
-      transition: {
-        staggerChildren: 0.2,
+  const animations = {
+    fadeIn: {
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    },
+    staggerChildren: {
+      visible: {
+        transition: {
+          staggerChildren: 0.2,
+        },
       },
     },
-  };
-
-  const scaleIn = {
-    hidden: { scale: 0.8, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
+    scaleIn: {
+      hidden: { scale: 0.8, opacity: 0 },
+      visible: {
+        scale: 1,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 100 },
+      },
     },
   };
 
   return (
     <div className="bg-transparent">
       <section className="relative isolate">
-        <div className="relative min-h-[100svh] flex items-center justify-center">
-          <div className="absolute inset-0">
+        <div className="relative isolate flex min-h-screen flex-col justify-between">
+          {/* Background Image */}
+          <div className="absolute inset-0 h-screen overflow-hidden">
             <picture>
               <source srcSet="/images/virtual/header-bg.webp" type="image/webp" />
-            <Image
-              src="/images/virtual/header-bg.jpg"
-              alt="Background"
-              fill
-              className="object-cover brightness-50"
-              priority
-            />
+              <Image
+                src="/images/virtual/header-bg.jpg"
+                alt="Background"
+                fill
+                className="object-cover brightness-50"
+                priority
+              />
             </picture>
           </div>
-          <div className="relative z-10 mx-auto max-w-6xl px-4 w-full">
+          <MaskBackground />
+
+          {/* Main Content */}
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
             <motion.div
-              className="flex flex-col items-center justify-center"
+              className="flex flex-col items-center justify-center flex-grow"
               initial="hidden"
               animate="visible"
-              variants={staggerChildren}
+              variants={animations.staggerChildren}
             >
-              <motion.h1
-                className="mb-4 text-white text-center md:mb-6"
-                style={{ fontFamily: "Kabel" }}
-                variants={fadeIn}
+              {/* Hero Title */}
+              <motion.div
+                className="text-center max-w-4xl mx-auto"
+                variants={animations.fadeIn}
               >
-                <motion.div
-                  className="flex justify-center mt-12 md:mt-20"
-                  variants={fadeIn}
-                >
-                  <span className="text-3xl font-bold leading-tight md:text-4xl lg:text-6xl">
+                <h1 className="font-kabel text-white">
+                  <span className="block text-4xl font-bold leading-tight md:text-6xl lg:text-7xl">
                     Ready, Set, Delegate!
                   </span>
-                </motion.div>
-                <motion.div
-                  className="flex justify-center mt-3 md:mt-4 lg:mt-6"
-                  variants={fadeIn}
-                >
-                  <span className="text-lg font-normal leading-relaxed md:text-xl lg:text-4xl">
+                  <span className="mt-4 block text-xl font-normal leading-relaxed md:text-2xl lg:text-4xl">
                     Expert Virtual Assistants, Ready When You Are.
                   </span>
-                </motion.div>
-              </motion.h1>
+                </h1>
+              </motion.div>
+
+              {/* CTA Button */}
               <motion.div
-                className="flex justify-center mt-6 md:mt-8 lg:mt-12"
-                variants={scaleIn}
+                className="mt-12 md:mt-16"
+                variants={animations.scaleIn}
               >
                 <motion.button
-                  className="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-amber-500 md:px-8 md:py-4 md:text-base"
+                  className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   BOOK A DISCOVERY CALL
                 </motion.button>
               </motion.div>
-              {/* Feature Carousel Section */}
-              <motion.div 
-                className="mt-8 w-full"
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.5 }}
-              >
-                <FeatureCarousel />
-              </motion.div>
+            </motion.div>
+
+            {/* Feature Carousel */}
+            <motion.div
+              className="w-full mb-12"
+              variants={animations.fadeIn}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.5 }}
+            >
+              <FeatureCarousel />
             </motion.div>
           </div>
+          
+          <MaskBackground />
         </div>
       </section>
     </div>
