@@ -1,89 +1,186 @@
 "use client";
 
-import React from 'react';
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ButtonLinkProps {
   href: string;
   icon: React.ReactElement<LucideIcon>;
   title: string;
   description: string;
+  delay: number;
 }
 
-const ButtonLink: React.FC<ButtonLinkProps> = ({ href, icon, title, description }) => {
+const ButtonLink: React.FC<ButtonLinkProps> = ({
+  href,
+  icon,
+  title,
+  description,
+  delay,
+}) => {
   return (
-    <Link href={href} className="group">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 h-full">
-        <div className="text-primary mb-2 sm:mb-4">
-          {icon}
-        </div>
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-1 sm:mb-2 text-balance">
-          {title}
-        </h2>
-        <p className="text-sm sm:text-base text-center text-gray-600 dark:text-gray-300 text-balance">
-          {description}
-        </p>
-      </div>
-    </Link>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.5,
+        delay,
+        ease: "easeOut",
+      }}
+    >
+      <Link href={href} className="group block">
+        <motion.div
+          className="flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:p-6"
+          whileHover={{
+            scale: 1.05,
+            transition: { duration: 0.2 },
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <motion.div
+            className="mb-2 text-primary sm:mb-4"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            {icon}
+          </motion.div>
+          <h2 className="mb-1 text-balance text-xl font-semibold text-gray-800 dark:text-gray-100 sm:mb-2 sm:text-2xl">
+            {title}
+          </h2>
+          <p className="text-balance text-center text-sm text-gray-600 dark:text-gray-300 sm:text-base">
+            {description}
+          </p>
+        </motion.div>
+      </Link>
+    </motion.div>
   );
 };
 
 const LandingPage: React.FC = () => {
   const { resolvedTheme } = useTheme();
-  const logoSrc = resolvedTheme === 'dark' 
-    ? '/images/logo/full-logo-dark.png'
-    : '/images/logo/full-logo-light.png';
+
+  const getLogoSources = () => {
+    if (resolvedTheme === "dark") {
+      return {
+        webp: "/images/logo/full-logo-dark.webp",
+        fallback: "/images/logo/full-logo-dark.png",
+      };
+    }
+    return {
+      webp: "/images/logo/full-logo-light.webp",
+      fallback: "/images/logo/full-logo-light.png",
+    };
+  };
+
+  const logoSources = getLogoSources();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-yellow-300 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 pt-8 sm:pt-12">
-      <header className="text-center mb-12 sm:mb-16 flex flex-col items-center w-full px-4 sm:px-6">
-        {/* Add width to prevent layout shift */}
-        <div className="w-full max-w-[600px] mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-6 sm:mb-8 mt-6 sm:mt-8 text-balance">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-yellow-50 to-yellow-300 p-4 pt-8 dark:from-gray-900 dark:to-gray-800 sm:pt-12">
+      <motion.header
+        className="mb-12 flex w-full flex-col items-center px-4 text-center sm:mb-16 sm:px-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="mx-auto w-full max-w-[600px]">
+          <motion.h1
+            className="mb-6 mt-6 text-balance text-3xl font-bold text-gray-800 dark:text-gray-100 sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             Ready Set Group LLC
-          </h1>
+          </motion.h1>
         </div>
-        
-        {/* Add explicit width/height to prevent layout shift */}
-        <div className="relative w-[300px] h-[200px] sm:w-[400px] sm:h-[300px] md:w-[500px] md:h-[400px] mb-6 sm:mb-10">
-          <Image
-            src={logoSrc}
-            alt="Ready Set Group LLC Logo"
-            fill
-            sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, 500px"
-            className="object-contain"
-            priority
-          />
-        </div>
-        
-        <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-200 mt-4 sm:mt-6 text-balance">
+
+        <motion.div
+          className="relative mb-6 h-[200px] w-[300px] sm:mb-10 sm:h-[300px] sm:w-[400px] md:h-[400px] md:w-[500px]"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <div className="relative h-full w-full">
+            <picture>
+              <source srcSet={logoSources.webp} type="image/webp" />
+              <Image
+                src={logoSources.fallback}
+                alt="Ready Set Group LLC Logo"
+                fill
+                sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, 500px"
+                className="object-contain"
+                priority
+              />
+            </picture>
+          </div>
+        </motion.div>
+
+        <motion.p
+          className="mt-4 text-balance text-xl text-gray-700 dark:text-gray-200 sm:mt-6 sm:text-2xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
           Choose your destination
-        </p>
-      </header>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <ButtonLink 
-          href="/logistics" 
-          icon={<Truck strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+        </motion.p>
+      </motion.header>
+
+      <motion.div
+        className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:gap-12 lg:px-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <ButtonLink
+          href="/logistics"
+          icon={
+            <Truck
+              strokeWidth={1.5}
+              className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+            />
+          }
           title="Logistics"
           description="Join our logistics team and be part of a dynamic supply chain network"
+          delay={0.9}
         />
-        <ButtonLink 
-          href="/va" 
-          icon={<Headphones strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+        <ButtonLink
+          href="/va"
+          icon={
+            <Headphones
+              strokeWidth={1.5}
+              className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+            />
+          }
           title="Virtual Assistant"
           description="Become a virtual assistant and work flexibly from anywhere"
+          delay={1.1}
         />
-        <ButtonLink 
-          href="/join-the-team" 
-          icon={<Users strokeWidth={1.5} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />}
+        <ButtonLink
+          href="/join-the-team"
+          icon={
+            <Users
+              strokeWidth={1.5}
+              className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+            />
+          }
           title="Join the Team"
           description="Explore various exciting positions available in our growing company"
+          delay={1.3}
         />
-      </div>
+      </motion.div>
     </div>
   );
 };
