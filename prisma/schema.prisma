@@ -1,6 +1,11 @@
 // This is your updated Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+<<<<<<< HEAD
+=======
+// This is your updated Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+>>>>>>> e645c70 (✨ New function to allow delete users)
 
 generator client {
     provider = "prisma-client-js"
@@ -111,12 +116,20 @@ model address {
     updatedAt      DateTime @updatedAt
     createdBy      String?
 
+<<<<<<< HEAD
     creator           user?              @relation(fields: [createdBy], references: [id], onDelete: SetNull)
     userAddresses     userAddress[]
     pickupRequests    catering_request[] @relation("PickupAddress")
     deliveryRequests  catering_request[] @relation("DeliveryAddress")
     onDemandsPickup   on_demand[]        @relation("PickupAddress")
     onDemandsDelivery on_demand[]        @relation("DeliveryAddress")
+=======
+    creator          user?              @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+    userAddresses    userAddress[]
+    pickupRequests   catering_request[] @relation("PickupAddress")
+    deliveryRequests catering_request[] @relation("DeliveryAddress")
+    onDemands        on_demand[]
+>>>>>>> e645c70 (✨ New function to allow delete users)
 }
 
 model userAddress {
@@ -214,6 +227,43 @@ model dispatch {
     driver            user?             @relation("DriverRelation", fields: [driverId], references: [id], onDelete: SetNull)
     on_demand         on_demand?        @relation(fields: [on_demandId], references: [id], onDelete: SetNull)
     dispatcher        user?             @relation("DispatcherRelation", fields: [userId], references: [id], onDelete: SetNull)
+<<<<<<< HEAD
+=======
+}
+
+model on_demand {
+    id                  BigInt                 @id @default(autoincrement())
+    guid                String?
+    user_id             String
+    address_id          String
+    order_number        String                 @unique @db.VarChar(191)
+    date                DateTime               @db.Date
+    pickup_time         DateTime               @db.Time(6)
+    arrival_time        DateTime               @db.Time(6)
+    complete_time       DateTime?              @db.Time(6)
+    hours_needed        String?                @db.VarChar(191)
+    item_delivered      String?                @db.VarChar(191)
+    vehicle_type        on_demand_vehicle_type @default(Car)
+    client_attention    String
+    pickup_notes        String?
+    special_notes       String?
+    image               String?
+    status              on_demand_status       @default(active)
+    order_total         Decimal?               @default(0.00) @db.Decimal(10, 2)
+    tip                 Decimal?               @default(0.00) @db.Decimal(10, 2)
+    length              String?                @db.VarChar(191)
+    width               String?                @db.VarChar(191)
+    height              String?                @db.VarChar(191)
+    weight              String?                @db.VarChar(191)
+    created_at          DateTime               @default(now()) @db.Timestamptz(6)
+    updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+    delivery_address_id String
+    driver_status       driver_status?
+    dispatch            dispatch[]
+    address             address                @relation(fields: [address_id], references: [id], onDelete: Restrict)
+    user                user                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    fileUploads         file_upload[]
+>>>>>>> e645c70 (✨ New function to allow delete users)
 }
 
 model file_upload {
