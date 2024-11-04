@@ -33,7 +33,7 @@ const BayAreaMap = () => {
             {/* Contenedor de la imagen*/}
             <div className="relative w-full lg:w-2/3">
               <img
-                src="/images/maps/San Francisco Map.jpg"
+                src="/images/maps/Bay Area Map.jpg"
                 alt="Bay Area Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               />

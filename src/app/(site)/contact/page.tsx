@@ -1,7 +1,7 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Contact from "@/components/Contact";
-import BayAreaMap from "@/components/Contact/mapba";
-import AustinMap from "@/components/Contact/mapaustin";
+import BayAreaMap from "@/components/Contact/mapbayarea";
+import AustinMap from "@/components/Contact/mapaustintx";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

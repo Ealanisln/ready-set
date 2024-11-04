@@ -29,7 +29,7 @@ const AustinMap = () => {
             {/* Contenedor de la imagen*/}
             <div className="relative w-full lg:w-2/3">
               <img
-                src="/images/maps/Austin Texas.jpg"
+                src="/images/maps/Austin Map.jpg"
                 alt="Austin Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               />
