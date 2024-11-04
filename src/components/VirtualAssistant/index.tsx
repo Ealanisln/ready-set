@@ -51,7 +51,7 @@ const HeroHeader = () => {
           {/* Main Content */}
           <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
             <motion.div
-              className="flex flex-col items-center justify-center flex-grow"
+              className="flex flex-col items-center justify-center pt-32 flex-grow" // Added pt-32 to push content down
               initial="hidden"
               animate="visible"
               variants={animations.staggerChildren}
@@ -88,7 +88,7 @@ const HeroHeader = () => {
 
             {/* Feature Carousel */}
             <motion.div
-              className="w-full mb-12"
+              className="w-full max-w-5xl mx-auto mb-4 px-4" // Increased mb-24 for more bottom margin
               variants={animations.fadeIn}
               initial="hidden"
               animate="visible"
