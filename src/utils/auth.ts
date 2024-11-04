@@ -126,8 +126,4 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> e645c70 (✨ New function to allow delete users)
