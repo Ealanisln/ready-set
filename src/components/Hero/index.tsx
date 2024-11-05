@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -61,22 +60,10 @@ const ButtonLink: React.FC<ButtonLinkProps> = ({
 };
 
 const LandingPage: React.FC = () => {
-  const { resolvedTheme } = useTheme();
-
-  const getLogoSources = () => {
-    if (resolvedTheme === "dark") {
-      return {
-        webp: "/images/logo/full-logo-dark.webp",
-        fallback: "/images/logo/full-logo-dark.png",
-      };
-    }
-    return {
-      webp: "/images/logo/full-logo-light.webp",
-      fallback: "/images/logo/full-logo-light.png",
-    };
+  const logoSources = {
+    webp: "/images/logo/full-logo-dark.webp",
+    fallback: "/images/logo/full-logo-dark.png",
   };
-
-  const logoSources = getLogoSources();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -89,7 +76,19 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-yellow-50 to-yellow-300 p-4 pt-8 dark:from-gray-900 dark:to-gray-800 sm:pt-12">
+    <div className="relative flex min-h-screen flex-col items-center justify-center p-4 pt-8 sm:pt-12">
+      {/* Fixed background div */}
+      <div className="fixed inset-0 -z-10">
+        <picture>
+          <source srcSet="/images/hero/hero-bg.webp" type="image/webp" />
+          <img
+            src="/images/hero/hero-bg.jpg"
+            alt="Hero background"
+            className="h-full w-full object-cover brightness-50"
+          />
+        </picture>
+      </div>
+      
       <motion.header
         className="mb-12 flex w-full flex-col items-center px-4 text-center sm:mb-16 sm:px-6"
         initial={{ opacity: 0, y: -20 }}
@@ -98,7 +97,7 @@ const LandingPage: React.FC = () => {
       >
         <div className="mx-auto w-full max-w-[600px]">
           <motion.h1
-            className="mb-6 mt-6 text-balance text-3xl font-bold text-gray-800 dark:text-gray-100 sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
+            className="mb-6 mt-6 text-balance text-3xl font-bold text-yellow-400 sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -129,12 +128,12 @@ const LandingPage: React.FC = () => {
         </motion.div>
 
         <motion.p
-          className="mt-4 text-balance text-xl text-gray-700 dark:text-gray-200 sm:mt-6 sm:text-2xl"
+          className="mt-4 text-balance text-xl text-yellow-400 dark:text-gray-200 sm:mt-6 sm:text-2xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.5 }}
         >
-          Choose your destination
+          How can we help?
         </motion.p>
       </motion.header>
 
