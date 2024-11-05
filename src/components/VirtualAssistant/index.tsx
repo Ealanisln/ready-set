@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import AppointmentDialog from "./Appointment";
 
 const HeroHeader = () => {
   const animations = {
@@ -44,7 +45,10 @@ const HeroHeader = () => {
           {/* Background Image */}
           <div className="absolute inset-0 h-screen overflow-hidden">
             <picture>
-              <source srcSet="/images/virtual/header-bg.webp" type="image/webp" />
+              <source
+                srcSet="/images/virtual/header-bg.webp"
+                type="image/webp"
+              />
               <Image
                 src="/images/virtual/header-bg.jpg"
                 alt="Background"
@@ -57,16 +61,16 @@ const HeroHeader = () => {
           <MaskBackground />
 
           {/* Main Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
+          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4">
             <motion.div
-              className="flex flex-col items-center justify-center pt-32 flex-grow"
+              className="flex flex-grow flex-col items-center justify-center pt-32"
               initial="hidden"
               animate="visible"
               variants={animations.staggerChildren}
             >
               {/* Hero Title */}
               <motion.div
-                className="text-center max-w-4xl mx-auto"
+                className="mx-auto max-w-4xl text-center"
                 variants={animations.fadeIn}
               >
                 <h1 className="font-kabel text-white">
@@ -84,39 +88,13 @@ const HeroHeader = () => {
                 className="mt-12 md:mt-16"
                 variants={animations.scaleIn}
               >
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <motion.button
-                      className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg flex items-center gap-2"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      BOOK A DISCOVERY CALL
-                    </motion.button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%]">
-                    <DialogHeader>
-                      <DialogTitle>Schedule an Appointment</DialogTitle>
-                      <DialogDescription>
-                        Choose a convenient time for your appointment.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="h-[70vh] min-h-[400px] w-full">
-                      <iframe
-                        src=""
-                        width="100%"
-                        height="100%"
-                        className="border-0"
-                      ></iframe>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <AppointmentDialog calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" />
               </motion.div>
             </motion.div>
 
             {/* Feature Carousel */}
             <motion.div
-              className="w-full max-w-5xl mx-auto mb-4 px-4"
+              className="mx-auto mb-4 w-full max-w-5xl px-4"
               variants={animations.fadeIn}
               initial="hidden"
               animate="visible"
@@ -125,7 +103,7 @@ const HeroHeader = () => {
               <FeatureCarousel />
             </motion.div>
           </div>
-          
+
           <MaskBackground />
         </div>
       </section>

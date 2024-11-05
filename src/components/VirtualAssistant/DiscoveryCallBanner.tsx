@@ -10,6 +10,7 @@ interface CTAProps {
 }
 
 import React from 'react';
+import AppointmentDialog from './Appointment';
 
 interface CTAProps {
   heading?: string;
@@ -54,20 +55,8 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
               {subheading}
             </p>
 
-            <div className="flex flex-col items-center space-y-8">
-              <button 
-                onClick={onButtonClick}
-                className="bg-[#1a1a1a] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#2a2a2a] transition-colors text-lg uppercase tracking-wide"
-              >
-                {buttonText}
-              </button>
-              <div className="w-32 h-32 mt-8 flex items-center justify-center p-4">
-                <img
-                src={logoSrc}
-                alt={logoAlt}
-                className="w-full h-full object-contain mix-blend-multiply"
-                />
-              </div>
+            <div className="pt-4 flex justify-center">
+              <AppointmentDialog buttonVariant="black" calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" />
             </div>
           </div>
         </div>
