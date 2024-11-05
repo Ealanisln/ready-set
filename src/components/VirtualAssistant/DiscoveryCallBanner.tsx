@@ -4,6 +4,8 @@ interface CTAProps {
   heading?: string;
   subheading?: string;
   buttonText?: string;
+  logoSrc?: string;
+  logoAlt?: string;
   onButtonClick?: () => void;
 }
 
@@ -20,6 +22,8 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
   heading = "Your business could be rapidly approaching its ceiling.",
   subheading = "Why limit yourself with how your business works today? Book a Discovery Call now to smash through your business ceiling and scale up the right way—before clients start walking out on you.",
   buttonText = "BOOK A DISCOVERY CALL",
+  logoSrc = "/images/logo/Ready Set VA Logo 2.jpg" ,
+  logoAlt = "Ready Set logo" ,
   onButtonClick = () => {},
 }) => {
   return (
