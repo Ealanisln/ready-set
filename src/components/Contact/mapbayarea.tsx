@@ -44,18 +44,12 @@ const BayAreaMap = () => {
               <h3 className="text-xl font-semibold mb-4">Areas</h3>
               <div className="grid grid-cols-1 gap-2">
                 {regions.map((region) => (
-                  <button
+                  <div
                   key={region.name}
-                    className={`p-3 text-left rounded-md transition-colors duration-200 
-                      ${selectedRegion === region.name 
-                        ? 'bg-yellow-400 text-black' 
-                        : 'bg-white hover:bg-yellow-100'}`}
-                    
-                  >
+                    className= "p-3 text-left rounded-md bg-white"
+                      >
                     <span className="font-medium">{region.name} </span>
-                  </button>
-
-                  
+                  </div>
                 ))}
               </div>
             </div>
