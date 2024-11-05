@@ -27,12 +27,15 @@ export default function RootLayout({
     >
       <body>
         <ClientLayout>{children}</ClientLayout>
-        {shouldInjectToolbar && <VercelToolbar />}
 
+        {/* Vercel Tools */}
+        {shouldInjectToolbar && <VercelToolbar />}
         <Analytics />
         <SpeedInsights />
+
+        {/* Google Analytics */}
+        <GoogleAnalytics gaId="G-PHGL28W4NP" />
       </body>
-      <GoogleAnalytics gaId="G-PHGL28W4NP" />
     </html>
   );
 }

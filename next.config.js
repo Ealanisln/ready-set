@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-
-
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -29,4 +27,6 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+const withVercelToolbar = require('@vercel/toolbar/plugins/next')();
+// Export the config wrapped with the Vercel toolbar
+module.exports = withVercelToolbar(nextConfig);

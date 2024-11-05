@@ -5,6 +5,14 @@ import { motion } from "framer-motion";
 import * as React from "react";
 import FeatureCarousel from "./FeatureCarousel";
 import { MaskBackground } from "./MaskBackground";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const HeroHeader = () => {
   const animations = {
@@ -51,7 +59,7 @@ const HeroHeader = () => {
           {/* Main Content */}
           <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
             <motion.div
-              className="flex flex-col items-center justify-center pt-32 flex-grow" // Added pt-32 to push content down
+              className="flex flex-col items-center justify-center pt-32 flex-grow"
               initial="hidden"
               animate="visible"
               variants={animations.staggerChildren}
@@ -71,24 +79,44 @@ const HeroHeader = () => {
                 </h1>
               </motion.div>
 
-              {/* CTA Button */}
+              {/* CTA Button with Dialog */}
               <motion.div
                 className="mt-12 md:mt-16"
                 variants={animations.scaleIn}
               >
-                <motion.button
-                  className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  BOOK A DISCOVERY CALL
-                </motion.button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <motion.button
+                      className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg flex items-center gap-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      BOOK A DISCOVERY CALL
+                    </motion.button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%]">
+                    <DialogHeader>
+                      <DialogTitle>Schedule an Appointment</DialogTitle>
+                      <DialogDescription>
+                        Choose a convenient time for your appointment.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="h-[70vh] min-h-[400px] w-full">
+                      <iframe
+                        src=""
+                        width="100%"
+                        height="100%"
+                        className="border-0"
+                      ></iframe>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </motion.div>
             </motion.div>
 
             {/* Feature Carousel */}
             <motion.div
-              className="w-full max-w-5xl mx-auto mb-4 px-4" // Increased mb-24 for more bottom margin
+              className="w-full max-w-5xl mx-auto mb-4 px-4"
               variants={animations.fadeIn}
               initial="hidden"
               animate="visible"
