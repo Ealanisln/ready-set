@@ -1,6 +1,7 @@
 // src/app/(site)/sales/page.tsx
 import { Metadata } from 'next'
 import VaHoursSeller from '@/components/VirtualAssistant/Sales/VAHoursSeller'
+import Pricing from '@/components/VirtualAssistant/Pricing'
 
 export const metadata: Metadata = {
   title: 'Virtual Assistant Packages | Expert VA Services',
@@ -16,6 +17,7 @@ export default function SalesPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-16 pt-40">
       <VaHoursSeller />
+      {/* <Pricing /> */}
     </main>
   )
 }
