@@ -19,8 +19,9 @@ interface FormData {
 }
 
 const BookingForm = () => {
+  // Initialize searchParams safely
   const searchParams = useSearchParams();
-  const selectedPlan = searchParams.get('plan');
+  const selectedPlan = searchParams?.get('plan') ?? '';
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -32,12 +33,29 @@ const BookingForm = () => {
   });
 
   const [showCalendar, setShowCalendar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', formData);
-    // Add your API call here
+    setIsSubmitting(true);
+    
+    try {
+      // Here you would typically send the data to your backend
+      console.log('Form submitted:', formData);
+      // Add your API call here
+      
+      // Example API call:
+      // await fetch('/api/bookings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ ...formData, plan: selectedPlan }),
+      // });
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (
@@ -70,6 +88,7 @@ const BookingForm = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -83,6 +102,7 @@ const BookingForm = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -94,6 +114,7 @@ const BookingForm = () => {
                 placeholder="Your Company Ltd."
                 value={formData.company}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -107,6 +128,7 @@ const BookingForm = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -119,6 +141,7 @@ const BookingForm = () => {
                 value={formData.requirements}
                 onChange={handleInputChange}
                 rows={4}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -130,6 +153,7 @@ const BookingForm = () => {
                   variant="outline"
                   onClick={() => setShowCalendar(!showCalendar)}
                   className="w-full justify-start text-left font-normal"
+                  disabled={isSubmitting}
                 >
                   {formData.preferredStartDate
                     ? formData.preferredStartDate.toLocaleDateString()
@@ -151,8 +175,12 @@ const BookingForm = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              Submit Booking
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Booking'}
             </Button>
           </form>
         </CardContent>
