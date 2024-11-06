@@ -1,5 +1,8 @@
 "use client";
 
+import React from 'react';
+import AppointmentDialog from './Appointment';
+
 interface CTAProps {
   heading?: string;
   subheading?: string;
@@ -9,22 +12,12 @@ interface CTAProps {
   onButtonClick?: () => void;
 }
 
-import React from 'react';
-import AppointmentDialog from './Appointment';
-
-interface CTAProps {
-  heading?: string;
-  subheading?: string;
-  buttonText?: string;
-  onButtonClick?: () => void;
-}
-
 const DiscoveryBanner: React.FC<CTAProps> = ({
   heading = "Your business could be rapidly approaching its ceiling.",
   subheading = "Why limit yourself with how your business works today? Book a Discovery Call now to smash through your business ceiling and scale up the right way—before clients start walking out on you.",
   buttonText = "BOOK A DISCOVERY CALL",
-  logoSrc = "/images/logo/new-logo-ready-set.png" ,
-  logoAlt = "Ready Set logo" ,
+  logoSrc = "/images/logo/new-logo-ready-set.png",
+  logoAlt = "Ready Set logo",
   onButtonClick = () => {},
 }) => {
   return (
@@ -56,12 +49,30 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
             </p>
 
             <div className="pt-4 flex justify-center">
-              <AppointmentDialog buttonVariant="black" calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" />
+              <AppointmentDialog 
+                buttonVariant="black" 
+                calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" 
+              />
             </div>
           </div>
         </div>
 
-       
+        {/* Logo section */}
+        <div className="container mx-auto px-4 pb-20">
+          <div className="flex justify-center items-center">
+            <picture>
+              <source
+                srcSet="/images/logo/full-logo-light.webp"
+                type="image/webp"
+              />
+              <img
+                src="/images/logo/full-logo-light.png"
+                alt="Company Logo"
+                className="h-40 md:h-40 w-auto object-contain" // Increased height here
+              />
+            </picture>
+          </div>
+        </div>
       </div>
     </div>
   );
