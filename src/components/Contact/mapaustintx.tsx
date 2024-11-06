@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Contact } from 'lucide-react';
+import Image from 'next/image';
 
 const AustinMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -28,7 +29,7 @@ const AustinMap = () => {
         <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
             {/* Contenedor de la imagen*/}
             <div className="relative w-full lg:w-2/3">
-              <img
+              <Image
                 src="/images/maps/Austin Map.jpg"
                 alt="Austin Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"

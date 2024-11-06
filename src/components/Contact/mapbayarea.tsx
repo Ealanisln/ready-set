@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Contact } from 'lucide-react';
+import Image from 'next/image';
 
 const BayAreaMap = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -32,7 +33,7 @@ const BayAreaMap = () => {
         <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
             {/* Contenedor de la imagen*/}
             <div className="relative w-full lg:w-2/3">
-              <img
+              <Image
                 src="/images/maps/Bay Area Map.jpg"
                 alt="Bay Area Map"
                 className="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
