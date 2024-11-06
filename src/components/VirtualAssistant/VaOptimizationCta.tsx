@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import AppointmentDialog from "./Appointment";
 
 const BusinessScaleSection = () => {
   const benefits = [
@@ -61,12 +62,10 @@ const BusinessScaleSection = () => {
             </p>
           </div>
 
-          <Link
-            href="/book-call"
-            className="inline-block rounded-full bg-amber-400 px-8 py-4 font-semibold text-black transition-colors hover:bg-amber-500"
-          >
-            BOOK A DISCOVERY CALL
-          </Link>
+          <AppointmentDialog
+  buttonVariant="amber"
+  calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+/>
         </div>
       </div>
 

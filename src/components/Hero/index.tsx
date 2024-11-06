@@ -152,7 +152,7 @@ const LandingPage: React.FC = () => {
             />
           }
           title="Logistics"
-          description="Join our logistics team and be part of a dynamic supply chain network"
+          description="Streamline your supply chain with our logistics solutions"
           delay={0.9}
         />
         <ButtonLink
@@ -164,7 +164,7 @@ const LandingPage: React.FC = () => {
             />
           }
           title="Virtual Assistant"
-          description="Become a virtual assistant and work flexibly from anywhere"
+          description="Reclaim your time and boost your productivity!"
           delay={1.1}
         />
         <ButtonLink
