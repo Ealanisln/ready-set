@@ -1,3 +1,5 @@
+// src/components/VirtualAssistant/Pricing.tsx
+
 "use client";
 
 import React, { useState } from 'react';
