@@ -26,19 +26,19 @@ const GettingStartedSection = () => {
       number: 1,
       title: "Discovery Call",
       description:
-        "Book a Discovery Call with us today so we can analyse your current business set-up, and see how we can help.",
+        "Book a discovery call today to discuss your business and see how our virtual assistant services can help.",
     },
     {
       number: 2,
-      title: "Systemise & Scale Up",
+      title: "Customized Service Plan",
       description:
-        "We'll create and implement a personalised Systemise & Scale Up plan to streamline your processes with the right digital tools and Virtual Assistants.",
+        "We'll create a tailored plan to connect you with the right assistance and tools to efficient task management, so you can focus on growth.",
     },
     {
       number: 3,
-      title: "Enjoy freedom",
+      title: "Enjoy Enhaced Productivity",
       description:
-        "Once implementation is complete, we'll even train your virtual assistants on all your new systems and processes so you can enjoy your freedom!",
+        "With your virtual assistant team, experience greater productivity and more time for what truly matters.",
     },
   ];
 
@@ -47,8 +47,8 @@ const GettingStartedSection = () => {
       <div className="flex flex-col gap-8 md:flex-row">
         {/* Left Section */}
         <div className="w-full rounded-3xl bg-amber-300 p-8 md:w-1/2">
-          <h2 className="mb-8 text-4xl font-bold">
-            Getting started is <span className="font-black">easy</span>
+          <h2 className="mb-8 text-2xl font-extrabold">
+            Getting started with Virtual Assistant Services
           </h2>
 
           <div className="space-y-8">
