@@ -5,6 +5,15 @@ import { motion } from "framer-motion";
 import * as React from "react";
 import FeatureCarousel from "./FeatureCarousel";
 import { MaskBackground } from "./MaskBackground";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import AppointmentDialog from "./Appointment";
 
 const HeroHeader = () => {
   const animations = {
@@ -36,7 +45,10 @@ const HeroHeader = () => {
           {/* Background Image */}
           <div className="absolute inset-0 h-screen overflow-hidden">
             <picture>
-              <source srcSet="/images/virtual/header-bg.webp" type="image/webp" />
+              <source
+                srcSet="/images/virtual/header-bg.webp"
+                type="image/webp"
+              />
               <Image
                 src="/images/virtual/header-bg.jpg"
                 alt="Background"
@@ -49,16 +61,16 @@ const HeroHeader = () => {
           <MaskBackground />
 
           {/* Main Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-4 flex flex-col min-h-screen">
+          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4">
             <motion.div
-              className="flex flex-col items-center justify-center flex-grow"
+              className="flex flex-grow flex-col items-center justify-center pt-32"
               initial="hidden"
               animate="visible"
               variants={animations.staggerChildren}
             >
               {/* Hero Title */}
               <motion.div
-                className="text-center max-w-4xl mx-auto"
+                className="mx-auto max-w-4xl text-center"
                 variants={animations.fadeIn}
               >
                 <h1 className="font-kabel text-white">
@@ -71,24 +83,18 @@ const HeroHeader = () => {
                 </h1>
               </motion.div>
 
-              {/* CTA Button */}
+              {/* CTA Button with Dialog */}
               <motion.div
                 className="mt-12 md:mt-16"
                 variants={animations.scaleIn}
               >
-                <motion.button
-                  className="rounded-full bg-amber-400 px-8 py-4 text-base font-semibold text-black transition-all hover:bg-amber-500 md:px-10 md:py-5 md:text-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  BOOK A DISCOVERY CALL
-                </motion.button>
+                <AppointmentDialog calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" />
               </motion.div>
             </motion.div>
 
             {/* Feature Carousel */}
             <motion.div
-              className="w-full mb-12"
+              className="mx-auto mb-4 w-full max-w-5xl px-4"
               variants={animations.fadeIn}
               initial="hidden"
               animate="visible"
@@ -97,7 +103,7 @@ const HeroHeader = () => {
               <FeatureCarousel />
             </motion.div>
           </div>
-          
+
           <MaskBackground />
         </div>
       </section>

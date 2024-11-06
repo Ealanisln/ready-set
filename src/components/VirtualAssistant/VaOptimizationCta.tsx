@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import AppointmentDialog from "./Appointment";
 
 const BusinessScaleSection = () => {
   const benefits = [
@@ -61,12 +62,10 @@ const BusinessScaleSection = () => {
             </p>
           </div>
 
-          <Link
-            href="/book-call"
-            className="inline-block rounded-full bg-amber-400 px-8 py-4 font-semibold text-black transition-colors hover:bg-amber-500"
-          >
-            BOOK A DISCOVERY CALL
-          </Link>
+          <AppointmentDialog
+            buttonVariant="amber"
+            calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+          />
         </div>
       </div>
 
@@ -86,8 +85,8 @@ const BusinessScaleSection = () => {
 
         <div className="grid gap-8 md:grid-cols-3">
           {benefits.map((benefit, index) => (
-            <div key={index} className="space-y-6">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
+            <div key={index} className="flex flex-col items-center">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
                 <picture>
                   <source srcSet={benefit.imageWebp} type="image/webp" />
                   <Image
@@ -100,9 +99,11 @@ const BusinessScaleSection = () => {
                   />
                 </picture>
               </div>
-              <div className="space-y-4 text-center">
-                <h3 className="text-2xl font-bold">{benefit.title}</h3>
-                <p className="text-lg text-gray-700">{benefit.description}</p>
+              <div className="mt-6 flex flex-col items-center space-y-4 px-4">
+                <h3 className="text-center text-2xl font-bold">{benefit.title}</h3>
+                <p className="text-center text-lg text-gray-700 md:px-2">
+                  {benefit.description}
+                </p>
               </div>
             </div>
           ))}

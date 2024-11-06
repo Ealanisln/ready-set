@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import AppointmentDialog from "./Appointment";
 
 interface StepProps {
   number: number;
@@ -56,21 +57,30 @@ const GettingStartedSection = () => {
             ))}
           </div>
 
-          <button className="mt-8 rounded-full bg-black px-8 py-3 text-lg font-bold text-white transition-colors hover:bg-gray-800">
-            BOOK A DISCOVERY CALL
-          </button>
+          <div className="mt-8 flex justify-center">
+            <AppointmentDialog
+              buttonVariant="black"
+              calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+            />
+          </div>
         </div>
 
         {/* Right Section */}
         <div className="w-full md:w-1/2">
           <div className="h-full w-full overflow-hidden rounded-3xl bg-gray-100">
-            <Image
-              src="/images/virtual/discovery-call.jpg"
-              alt="Business professional with laptop"
-              width={800}
-              height={600}
-              className="h-full w-full object-cover"
-            />
+            <picture>
+              <source
+                srcSet="/images/virtual/discovery-call.webp"
+                type="image/webp"
+              />
+              <Image
+                src="/images/virtual/discovery-call.jpg"
+                alt="Business professional with laptop"
+                width={800}
+                height={600}
+                className="h-full w-full object-cover"
+              />
+            </picture>
           </div>
         </div>
       </div>

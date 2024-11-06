@@ -27,6 +27,8 @@ h1, h2 {
   font-family: "Kabel", sans-serif;
 }
 
+
+
 .sticky-menu .navbar-logo {
   @apply py-2;
 }
