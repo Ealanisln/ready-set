@@ -16,17 +16,17 @@ import Image from "next/image";
 const features = [
   {
     iconPath: "/images/virtual/drive.svg",
-    title: "Ready to Put Your Business\non Autopilot",
+    title: "Put Your Business\non Autopilot",
     alt: "Drive Icon",
   },
   {
     iconPath: "/images/virtual/time.svg",
-    title: "Set your focus on\nwhat truly \nmatters",
+    title: "Focus your\ntime on  \n what matters",
     alt: "Time Icon",
   },
   {
     iconPath: "/images/virtual/dollar.svg",
-    title: "Delegated tasks to\nincrease your\nearnings",
+    title: "Delegated tasks to\n grow revenue",
     alt: "Dollar Icon",
   },
 ];

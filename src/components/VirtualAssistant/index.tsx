@@ -5,14 +5,6 @@ import { motion } from "framer-motion";
 import * as React from "react";
 import FeatureCarousel from "./FeatureCarousel";
 import { MaskBackground } from "./MaskBackground";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import AppointmentDialog from "./Appointment";
 
 const HeroHeader = () => {

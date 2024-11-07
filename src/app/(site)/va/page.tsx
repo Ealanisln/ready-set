@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Ready Set Group LLC",
-      url: "https://readysetgroup.com",
+      url: "https://readysetllc.com",
     },
   ],
   verification: {

@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import AppointmentDialog from './Appointment';
+import React from "react";
+import AppointmentDialog from "./Appointment";
 
 interface CTAProps {
   heading?: string;
@@ -22,15 +22,15 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
 }) => {
   return (
     <div className="relative w-full">
-      <div className="relative bg-[#ffd766] w-full pt-10">
+      <div className="relative w-full bg-[#ffd766] pt-10">
         {/* Top curve */}
         <div className="absolute inset-x-0 top-0">
-          <svg 
-            className="w-full h-16" 
-            viewBox="0 0 1440 50" 
+          <svg
+            className="h-16 w-full"
+            viewBox="0 0 1440 50"
             preserveAspectRatio="none"
           >
-            <path 
+            <path
               fill="white"
               d="M0,50 C360,20 720,20 1440,50 L1440,0 L0,0 Z"
             />
@@ -38,20 +38,23 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
         </div>
 
         {/* Content container */}
-        <div className="container mx-auto px-4 py-16 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] max-w-3xl mx-auto">
-              Your business could be <span className="font-extrabold">rapidly approaching its ceiling.</span>
+        <div className="container relative z-10 mx-auto px-4 py-16">
+          <div className="mx-auto max-w-4xl space-y-8 text-center">
+            <h2 className="mx-auto max-w-3xl text-4xl font-bold text-[#1a1a1a] md:text-5xl">
+              Your business could be{" "}
+              <span className="font-extrabold">
+                rapidly approaching its ceiling.
+              </span>
             </h2>
-            
-            <p className="text-lg text-gray-800 max-w-3xl mx-auto">
+
+            <p className="mx-auto max-w-3xl text-lg text-gray-800">
               {subheading}
             </p>
 
-            <div className="pt-4 flex justify-center">
-              <AppointmentDialog 
-                buttonVariant="black" 
-                calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" 
+            <div className="flex justify-center pt-4">
+              <AppointmentDialog
+                buttonVariant="black"
+                calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
               />
             </div>
           </div>
@@ -59,16 +62,16 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
 
         {/* Logo section */}
         <div className="container mx-auto px-4 pb-20">
-          <div className="flex justify-center items-center">
+          <div className="flex items-center justify-center">
             <picture>
               <source
-                srcSet="/images/logo/full-logo-light.webp"
+                srcSet="/images/virtual/logo-headset.webp"
                 type="image/webp"
               />
               <img
-                src="/images/logo/full-logo-light.png"
-                alt="Company Logo"
-                className="h-40 md:h-40 w-auto object-contain" // Increased height here
+                src="/images/virtual/logo-headset.png"
+                alt="Virtual Headset Logo"
+                className="h-40 w-auto object-contain md:h-40"
               />
             </picture>
           </div>

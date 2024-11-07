@@ -38,6 +38,7 @@ interface LogoProps {
     light: string;
     dark: string;
   };
+  isVirtualAssistantPage: boolean;
 }
 
 interface AuthButtonsProps {
@@ -49,48 +50,87 @@ interface AuthButtonsProps {
 }
 
 // Components
-const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses }) => (
-  <Link
-    href="/"
-    className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}
-  >
-    {!isHomePage || sticky ? (
-      <>
-        <Image
-          src="/images/logo/logo-white.png"
-          alt="logo"
-          width={280}
-          height={40}
-          className={`header-logo w-full ${logoClasses.light}`}
-        />
-        <Image
-          src="/images/logo/logo-dark.png"
-          alt="logo"
-          width={280}
-          height={40}
-          className={`header-logo w-full ${logoClasses.dark}`}
-        />
-      </>
-    ) : (
-      <>
-        <Image
-          src="/images/logo/logo-white.png"
-          alt="logo"
-          width={180}
-          height={40}
-          className={`header-logo w-full ${logoClasses.light}`}
-        />
-        <Image
-          src="/images/logo/logo-dark.png"
-          alt="logo"
-          width={180}
-          height={40}
-          className={`header-logo w-full ${logoClasses.dark}`}
-        />
-      </>
-    )}
-  </Link>
-);
+const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualAssistantPage }) => {
+  if (isVirtualAssistantPage) {
+    return (
+      <Link
+      href="/"
+      className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}
+    >
+      {sticky ? (
+        // Dark version for light background (when sticky)
+        <picture>
+          <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
+          <Image
+            src="/images/virtual/logo-headset.png"
+            alt="Virtual Assistant Logo"
+            width={180}
+            height={40}
+            className="header-logo w-full"
+            priority
+          />
+        </picture>
+      ) : (
+        // White version for dark background (when not sticky)
+        <picture>
+          <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
+          <Image
+            src="/images/virtual/logo-headset-dark.png"
+            alt="Virtual Assistant Logo"
+            width={180}
+            height={40}
+            className="header-logo w-full"
+            priority
+          />
+        </picture>
+      )}
+    </Link>
+    );
+  }
+
+  return (
+    <Link
+      href="/"
+      className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}
+    >
+      {!isHomePage || sticky ? (
+        <>
+          <Image
+            src="/images/logo/logo-white.png"
+            alt="logo"
+            width={280}
+            height={40}
+            className={`header-logo w-full ${logoClasses.light}`}
+          />
+          <Image
+            src="/images/logo/logo-dark.png"
+            alt="logo"
+            width={280}
+            height={40}
+            className={`header-logo w-full ${logoClasses.dark}`}
+          />
+        </>
+      ) : (
+        <>
+          <Image
+            src="/images/logo/logo-white.png"
+            alt="logo"
+            width={180}
+            height={40}
+            className={`header-logo w-full ${logoClasses.light}`}
+          />
+          <Image
+            src="/images/logo/logo-dark.png"
+            alt="logo"
+            width={180}
+            height={40}
+            className={`header-logo w-full ${logoClasses.dark}`}
+          />
+        </>
+      )}
+    </Link>
+  );
+};
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({
   session,
@@ -142,10 +182,10 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
             href="/signin"
             className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 lg:block ${
               sticky 
-                ? "text-dark dark:text-white"  // Dark text when sticky, regardless of page
+                ? "text-dark dark:text-white"
                 : isVirtualAssistantPage 
-                  ? "text-white"  // White text on VA page only when not sticky
-                  : "text-dark dark:text-white"  // Dark text for other pages
+                  ? "text-white"
+                  : "text-dark dark:text-white"
             }`}
           >
             Sign In
@@ -163,8 +203,8 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
             href="/signin"
             className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 md:block ${
               sticky 
-                ? "text-dark dark:text-white"  // Dark text when sticky
-                : "text-white dark:text-white" // White text when not sticky on homepage
+                ? "text-dark dark:text-white"
+                : "text-white dark:text-white"
             }`}
           >
             Sign In
@@ -227,11 +267,11 @@ const Header: React.FC = () => {
     return "bg-dark dark:bg-white";
   };
 
-    // Enhanced close handler that closes both navbar and submenus
-    const closeAllMenus = () => {
-      setNavbarOpen(false);
-      setOpenIndex(-1);
-    };
+  // Enhanced close handler that closes both navbar and submenus
+  const closeAllMenus = () => {
+    setNavbarOpen(false);
+    setOpenIndex(-1);
+  };
 
   // Event handlers
   const navbarToggleHandler = () => setNavbarOpen((prev) => !prev);
@@ -243,10 +283,10 @@ const Header: React.FC = () => {
     setSticky(window.scrollY >= 80);
   };
 
-    // Add pathUrl to dependency array to trigger menu close on route change
-    useEffect(() => {
-      closeAllMenus();
-    }, [pathUrl]);
+  // Add pathUrl to dependency array to trigger menu close on route change
+  useEffect(() => {
+    closeAllMenus();
+  }, [pathUrl]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyNavbar);
@@ -284,6 +324,7 @@ const Header: React.FC = () => {
               isHomePage={isHomePage}
               sticky={sticky}
               logoClasses={logoClasses}
+              isVirtualAssistantPage={isVirtualAssistantPage}
             />
           </div>
 
