@@ -12,18 +12,69 @@ import Testimonials from "@/components/Testimonials";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ready Set | Home",
-  description: "On-demand courier that specializes in delivery for all your needs. We are Food Safety, and HIPPA Certified. Our team can meet all your Bay Area delivery needs.",
+  title:
+    "Ready Set Group LLC | Premier Bay Area Catering Delivery & Virtual Assistant Services",
+  description:
+    "Since 2019, Ready Set has been the trusted delivery partner for Silicon Valley giants like Apple, Google, and Facebook. Offering specialized catering delivery and professional virtual assistant services across multiple industries. HIPAA and Food Safety certified.",
+  keywords: [
+    "catering delivery",
+    "virtual assistant services",
+    "Bay Area logistics",
+    "Silicon Valley delivery",
+    "corporate catering",
+    "food safety certified",
+    "business support",
+    "same-day delivery",
+    "San Francisco courier",
+    "real estate VA",
+    "restaurant management",
+    "retail support",
+    "education sector VA",
+    "contractor staffing",
+    "Ready Set VA",
+    "floral delivery",
+    "gift delivery",
+    "administrative support",
+    "order management",
+    "Silicon Valley services",
+  ],
+  openGraph: {
+    title:
+      "Ready Set Group LLC | Bay Area's Premier Business Solutions Provider",
+    description:
+      "Established in 2019, Ready Set delivers excellence through specialized catering delivery and virtual assistant services. Trusted by tech giants like Apple, Google, and Facebook. Serving the Bay Area with certified logistics solutions.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Ready Set Group LLC",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Ready Set Group LLC | Catering Delivery & Virtual Assistant Services",
+    description:
+      "Silicon Valley's trusted delivery partner since 2019. Specialized in catering delivery and professional virtual assistant services for tech giants and businesses of all sizes.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  category: "Business Services",
+  classification: "Logistics and Professional Services",
 };
 
 export default function Home() {
-
   return (
     <main>
       <ScrollUp />
 
       <Hero />
-       {/*
+      {/*
 			<Features />
       <About />
       <CallToAction />
@@ -37,4 +88,3 @@ export default function Home() {
     </main>
   );
 }
-

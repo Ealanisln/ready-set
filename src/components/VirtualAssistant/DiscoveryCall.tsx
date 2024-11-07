@@ -86,8 +86,8 @@ const GettingStartedSection = () => {
       </div>
 
       {/* Stats Banner */}
-      <div className="w-full rounded-3xl bg-emerald-500 p-12">
-        <h2 className="text-center text-lg font-medium text-white md:text-2xl">
+      <div className="w-full rounded-3xl bg-black p-12">
+        <h2 className="text-center text-lg font-medium text-yellow-400 md:text-2xl">
           We&apos;ve helped <span className="font-bold">500+ companies</span>{" "}
           regain at least <span className="font-bold">20 hours per week.</span>
         </h2>
