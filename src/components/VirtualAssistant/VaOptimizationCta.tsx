@@ -45,20 +45,20 @@ const BusinessScaleSection = () => {
 
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Hiring VAs</span> is only part of
-            the solution.
+            <span className="text-yellowd-500">Are you trapped</span> in a business that demands your constant attention?
           </h2>
 
           <div className="space-y-4">
             <p className="text-lg">
-              The good news is, you can still drive your business to success.{" "}
-              <strong>But hiring a VA will only get you halfway there.</strong>
+            We’ve been there: You can’t take a day off without your entire operation grinding to a halt. 
+            Every decision, every task, relies on you. You are exhausted!.{" "}
             </p>
 
             <p className="text-lg">
-              To succeed long-term, you also need to optimise your processes and
-              upgrade your technology. That&apos;s how you set up a work
-              environment for true success!
+            <strong> You’ve probably considered hiring a virtual assistant to lighten the load. </strong> 
+            <p> But let’s face it, simply delegating tasks won’t solve the root problems holding your business back. 
+              Without clear systems and processes in place, the bottleneck remains, you’ll still be burdened by decisions 
+              and unable to truly leverage the support of a VA. </p>
             </p>
           </div>
 
