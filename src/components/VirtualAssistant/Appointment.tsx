@@ -15,7 +15,7 @@ interface ButtonProps {
   onClick?: () => void;
   icon?: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'black' | 'amber' | 'gray';
+  variant?: 'default' | 'black' | 'black-small' | 'amber' | 'gray';
 }
 
 export const CustomButton: React.FC<ButtonProps> = ({
@@ -30,6 +30,8 @@ export const CustomButton: React.FC<ButtonProps> = ({
     switch (variant) {
       case 'black':
         return "bg-black text-white hover:bg-gray-800 py-5 px-8 text-lg";
+      case 'black-small':
+        return "bg-black text-white hover:bg-gray-800 py-3 px-6 text-base";
       case 'amber':
         return "bg-amber-400 text-black hover:bg-amber-500 py-4 px-8";
       case 'gray':
@@ -75,7 +77,7 @@ interface AppointmentDialogProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonClassName?: string;
-  buttonVariant?: 'default' | 'black' | 'amber' | 'gray';
+  buttonVariant?: 'default' | 'black' | 'black-small' | 'amber' | 'gray';
   dialogTitle?: string;
   dialogDescription?: string;
   calendarUrl: string;

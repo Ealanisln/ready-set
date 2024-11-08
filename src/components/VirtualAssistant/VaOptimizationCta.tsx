@@ -45,33 +45,22 @@ const BusinessScaleSection = () => {
 
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Are you trapped</span> in a business that demands your constant attention?
+            <span className="text-yellowd-500">Let Ready Set VAs </span>be the
+            part of your business solution.
           </h2>
-
-          <div className="space-y-4">
-            <p className="text-lg">
-            We’ve been there: You can’t take a day off without your entire operation grinding to a halt. 
-            Every decision, every task, relies on you. You are exhausted!.{" "}
-            </p>
-
-            <p className="text-lg">
-            <strong> You’ve probably considered hiring a virtual assistant to lighten the load. </strong> 
-            <p> But let’s face it, simply delegating tasks won’t solve the root problems holding your business back. 
-              Without clear systems and processes in place, the bottleneck remains, you’ll still be burdened by decisions 
-              and unable to truly leverage the support of a VA. </p>
-            </p>
-            
-            <p className="text-lg"> 
-              In fact, bringing someone into a disorganized environment could actually amplify your stress, leaving you feeling 
-              more overwhelmed than ever. It’s time to build a business that can thrive with or without your constant involvement.
-            </p>
+          <div className="space-y-4 text-lg">
+            <strong>
+              {" "}
+              Don’t let task lists get out of hand? We’ve got you covered.
+            </strong>
 
             <p className="text-lg">
-            <strong> The truth is, simply hiring a VA isn’t enough. </strong> 
-             You need a different approach – Empower your business to run smoothly, with or without you. That’s where we come in. 
-              Ready Set to the rescue! Ready when you are!
+              Ready Set is here to lighten your load, handling everything from
+              routine tasks to urgent priorities—efficiently and swiftly.
+              Reclaim your time with our on-demand support and watch your
+              productivity soar. Let us handle the nitty gritty tasks so you can
+              focus on the big picture.
             </p>
-
           </div>
 
           <AppointmentDialog
@@ -112,7 +101,9 @@ const BusinessScaleSection = () => {
                 </picture>
               </div>
               <div className="mt-6 flex flex-col items-center space-y-4 px-4">
-                <h3 className="text-center text-2xl font-bold">{benefit.title}</h3>
+                <h3 className="text-center text-2xl font-bold">
+                  {benefit.title}
+                </h3>
                 <p className="text-center text-lg text-gray-700 md:px-2">
                   {benefit.description}
                 </p>
