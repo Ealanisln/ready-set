@@ -60,6 +60,18 @@ const BusinessScaleSection = () => {
               Without clear systems and processes in place, the bottleneck remains, you’ll still be burdened by decisions 
               and unable to truly leverage the support of a VA. </p>
             </p>
+            
+            <p className="text-lg"> 
+              In fact, bringing someone into a disorganized environment could actually amplify your stress, leaving you feeling 
+              more overwhelmed than ever. It’s time to build a business that can thrive with or without your constant involvement.
+            </p>
+
+            <p className="text-lg">
+            <strong> The truth is, simply hiring a VA isn’t enough. </strong> 
+             You need a different approach – Empower your business to run smoothly, with or without you. That’s where we come in. 
+              Ready Set to the rescue! Ready when you are!
+            </p>
+
           </div>
 
           <AppointmentDialog
