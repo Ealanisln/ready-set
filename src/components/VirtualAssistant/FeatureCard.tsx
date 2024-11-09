@@ -5,7 +5,6 @@ import AppointmentDialog from "./Appointment";
 interface Challenge {
   icon: React.ReactNode;
   title: string;
-  description: string;
 }
 
 const BusinessOverwhelm = () => {
@@ -13,46 +12,43 @@ const BusinessOverwhelm = () => {
     {
       icon: (
         <Image
-          src="/images/virtual/icon1.webp"
+          src="/images/virtual/icon2.webp"
           alt="Feeling trapped icon"
           width={100}
           height={100}
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Feeling trapped",
-      description: "in the day-to-day",
+      title: "Drowning in the Daily Grind",
     },
     {
       icon: (
         <Image
-          src="/images/virtual/icon2.webp"
+          src="/images/virtual/icon3.webp"
           alt="Can't take on more clients icon"
           width={100}
           height={100}
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Can't take on",
-      description: "more clients",
+      title: "Work-Life Balance... What's that?",
     },
     {
       icon: (
         <Image
-          src="/images/virtual/icon3.webp"
+          src="/images/virtual/icon4.webp"
           alt="No work life balance icon"
           width={100}
           height={100}
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "No work life balance",
-      description: "or time for friends and family (or vacations)",
+      title: "Maxed out and missing new opportunities",
     },
     {
       icon: (
         <Image
-          src="/images/virtual/icon4.webp"
+          src="/images/virtual/icon1.webp"
           alt="Business scaling icon"
           width={100}
           height={100}
@@ -60,13 +56,12 @@ const BusinessOverwhelm = () => {
         />
       ),
       title: "Your business",
-      description: "can't scale the way it is now",
     },
   ];
 
   return (
     <section className="flex w-full items-center justify-center py-16">
-      <div className="container max-w-6xl px-4 md:px-8">
+      <div className="container max-w-7xl px-4 md:px-8">
         <div className="grid items-center gap-12 md:grid-cols-2">
           {/* Left Column */}
           <div className="max-w-xl space-y-6">
@@ -130,13 +125,12 @@ const BusinessOverwhelm = () => {
           {/* Right Column - Challenges Grid */}
           <div className="flex flex-col justify-start space-y-16 pt-8">
             {challenges.map((challenge, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="flex-shrink-0">{challenge.icon}</div>
-                <div>
-                  <h3 className="text-xl font-bold leading-snug">
+              <div key={index} className="flex items-center gap-6">
+                <div className="flex-shrink-0 w-24">{challenge.icon}</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold leading-snug whitespace-normal">
                     {challenge.title}
                   </h3>
-                  <div className="text-gray-600">{challenge.description}</div>
                 </div>
               </div>
             ))}

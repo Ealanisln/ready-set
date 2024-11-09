@@ -13,8 +13,8 @@ interface CTAProps {
 }
 
 const DiscoveryBanner: React.FC<CTAProps> = ({
-  heading = "Your business could be rapidly approaching its ceiling.",
-  subheading = "Why limit yourself with how your business works today? Book a Discovery Call now to smash through your business ceiling and scale up the right way—before clients start walking out on you.",
+  heading = "Is your current business model holding you back",
+  subheading = "Streamline your processes and maximize your resources. Schedule a Discovery Call now to scale efficiently and achieve sustainable growth. You can focus on building a better business, while we do the heavy lifting.",
   buttonText = "BOOK A DISCOVERY CALL",
   logoSrc = "/images/logo/new-logo-ready-set.png",
   logoAlt = "Ready Set logo",
@@ -41,10 +41,8 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
         <div className="container relative z-10 mx-auto px-4 py-16">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <h2 className="mx-auto max-w-3xl text-4xl font-bold text-[#1a1a1a] md:text-5xl">
-              Your business could be{" "}
-              <span className="font-extrabold">
-                rapidly approaching its ceiling.
-              </span>
+              Is your current business model{" "}
+              <span className="font-extrabold">holding you back?</span>
             </h2>
 
             <p className="mx-auto max-w-3xl text-lg text-gray-800">

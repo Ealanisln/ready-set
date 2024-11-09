@@ -5,28 +5,29 @@ import AppointmentDialog from "./Appointment";
 const BusinessScaleSection = () => {
   const benefits = [
     {
-      imageWebp: "/images/virtual/administrative-support.webp",
-      imageFallback: "/images/virtual/administrative-support.jpg",
+      imageWebp: "/images/virtual/customer-service.webp",
+      imageFallback: "/images/virtual/customer-service.jpg",
       alt: "Business collaboration",
-      title: "Build a business that runs without you",
+      title: "Develop a business that runs smoothly on Its own",
       description:
-        "Streamline your processes and automate tasks, instead of doing everything manually.",
+        "Imagine a business that grows even when you're not involved.",
     },
     {
       imageWebp: "/images/virtual/content-creation.webp",
       imageFallback: "/images/virtual/content-creation.jpg",
       alt: "Work life balance",
-      title: "Enjoy more free time",
+      title: "Unlock extra time for what you love",
       description:
-        "Imagine saving 20 hours a week and doing more of what you love just by having the right virtual assistant, tech and processes.",
+        "A skilled VA can lighten your workload, giving you space to focus on what you love!",
+      isFlipped: true, // Added this flag to identify which image to flip
     },
     {
-      imageWebp: "/images/virtual/customer-service.webp",
-      imageFallback: "/images/virtual/customer-service.jpg",
+      imageWebp: "/images/virtual/administrative-support.webp",
+      imageFallback: "/images/virtual/administrative-support.jpg",
       alt: "Remote work setup",
-      title: "Make more money with less stress",
+      title: "Grow your wealth without the added stress!",
       description:
-        "With the right scaling techniques, you'll be able to take on more clients, create better offers, and expand your market.",
+        "Picture your wealth growing while dedicated help manages the day-to-day, letting you relax and stay inspired.",
     },
   ];
 
@@ -49,11 +50,9 @@ const BusinessScaleSection = () => {
             part of your business solution.
           </h2>
           <div className="space-y-4 text-lg">
-            <strong>
-              {" "}
-              Don’t let task lists get out of hand? We’ve got you covered.
-            </strong>
-
+            {" "}
+            Don&apos;t let task lists get out of hand. We&apos;ve got you
+            covered.
             <p className="text-lg">
               Ready Set is here to lighten your load, handling everything from
               routine tasks to urgent priorities—efficiently and swiftly.
@@ -74,13 +73,12 @@ const BusinessScaleSection = () => {
       <div className="space-y-12">
         <div className="space-y-4 text-center">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Scale your business</span> the
-            right way.
+            <span className="text-yellowd-500">Build your business up </span>
+            the smart way!
           </h2>
           <p className="text-xl">
-            With the right{" "}
-            <strong>technology, processes and virtual assistants</strong>, you
-            can:
+            By having proper tools, efficient workflows, and expert assistance,
+            you can:
           </p>
         </div>
 
@@ -94,7 +92,7 @@ const BusinessScaleSection = () => {
                     src={benefit.imageFallback}
                     alt={benefit.alt}
                     fill
-                    className="object-cover"
+                    className={`object-cover ${benefit.isFlipped ? "scale-x-[-1]" : ""}`}
                     sizes="(max-width: 768px) 100vw, 33vw"
                     quality={85}
                   />
