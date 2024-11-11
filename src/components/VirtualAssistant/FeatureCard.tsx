@@ -11,7 +11,7 @@ const BusinessOverwhelm = () => {
     {
       icon: (
         <Image
-          src="/images/virtual/icon1.webp"
+          src="/images/virtual/1.webp"
           alt="Feeling trapped icon"
           width={100}
           height={100}
@@ -23,7 +23,7 @@ const BusinessOverwhelm = () => {
     {
       icon: (
         <Image
-          src="/images/virtual/icon2.webp"
+          src="/images/virtual/2.webp"
           alt="Can't take on more clients icon"
           width={100}
           height={100}
@@ -35,7 +35,7 @@ const BusinessOverwhelm = () => {
     {
       icon: (
         <Image
-          src="/images/virtual/icon3.webp"
+          src="/images/virtual/3.webp"
           alt="No work life balance icon"
           width={100}
           height={100}
@@ -47,7 +47,7 @@ const BusinessOverwhelm = () => {
     {
       icon: (
         <Image
-          src="/images/virtual/icon4.webp"
+          src="/images/virtual/4.webp"
           alt="Business scaling icon"
           width={100}
           height={100}
