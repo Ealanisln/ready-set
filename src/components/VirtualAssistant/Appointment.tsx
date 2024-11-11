@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { forwardRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,60 +19,62 @@ interface ButtonProps {
   variant?: 'default' | 'black' | 'black-small' | 'amber' | 'gray';
 }
 
-export const CustomButton: React.FC<ButtonProps> = ({
-  href,
-  children,
-  onClick,
-  icon,
-  className = "",
-  variant = 'default'
-}) => {
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'black':
-        return "bg-black text-white hover:bg-gray-800 py-5 px-8 text-lg";
-      case 'black-small':
-        return "bg-black text-white hover:bg-gray-800 py-3 px-6 text-base";
-      case 'amber':
-        return "bg-amber-400 text-black hover:bg-amber-500 py-4 px-8";
-      case 'gray':
-        return "bg-gray-900 text-white hover:bg-gray-800 py-4 px-10 tracking-wide uppercase text-lg";
-      default:
-        return "bg-amber-400 text-black hover:bg-amber-500 md:px-10 md:py-5 md:text-lg px-8 py-4 text-base";
-    }
-  };
+export const CustomButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
+  ({ href, children, onClick, icon, className = "", variant = 'default' }, ref) => {
+    const getVariantClasses = () => {
+      switch (variant) {
+        case 'black':
+          return "bg-black text-white hover:bg-gray-800 py-5 px-8 text-lg";
+        case 'black-small':
+          return "bg-black text-white hover:bg-gray-800 py-3 px-6 text-base";
+        case 'amber':
+          return "bg-amber-400 text-black hover:bg-amber-500 py-4 px-8";
+        case 'gray':
+          return "bg-gray-900 text-white hover:bg-gray-800 py-4 px-10 tracking-wide uppercase text-lg";
+        default:
+          return "bg-amber-400 text-black hover:bg-amber-500 md:px-10 md:py-5 md:text-lg px-8 py-4 text-base";
+      }
+    };
 
-  const defaultButtonClass = `
-    rounded-full 
-    font-semibold 
-    transition-colors 
-    flex items-center gap-2
-    ${getVariantClasses()}
-  `;
+    const defaultButtonClass = `
+      rounded-full 
+      font-semibold 
+      transition-colors 
+      flex items-center gap-2
+      ${getVariantClasses()}
+    `;
 
-  const buttonClass = `${defaultButtonClass} ${className}`;
+    const buttonClass = `${defaultButtonClass} ${className}`;
 
-  const content = (
-    <>
-      {children}
-      {icon && <span className="ml-1.5">{icon}</span>}
-    </>
-  );
-
-  if (href) {
-    return (
-      <Link href={href} className={buttonClass}>
-        {content}
-      </Link>
+    const content = (
+      <>
+        {children}
+        {icon && <span className="ml-1.5">{icon}</span>}
+      </>
     );
-  } else {
+
+    if (href) {
+      return (
+        <Link href={href} className={buttonClass} ref={ref as React.Ref<HTMLAnchorElement>}>
+          {content}
+        </Link>
+      );
+    }
+
     return (
-      <button className={buttonClass} onClick={onClick}>
+      <button 
+        className={buttonClass} 
+        onClick={onClick} 
+        ref={ref as React.Ref<HTMLButtonElement>}
+      >
         {content}
       </button>
     );
   }
-};
+);
+
+// Add display name
+CustomButton.displayName = 'CustomButton';
 
 interface AppointmentDialogProps {
   buttonText?: string;
@@ -107,7 +110,7 @@ const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
           </CustomButton>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%]">
+      <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] mt-16 mb-8">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>

@@ -66,9 +66,6 @@ export const metadata: Metadata = {
       url: "https://readysetllc.com",
     },
   ],
-  verification: {
-    google: "add-your-google-verification-code",
-  },
   category: "Business Services",
   classification: "Virtual Assistant and Business Optimization",
   other: {
