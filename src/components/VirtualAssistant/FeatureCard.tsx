@@ -18,31 +18,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Feeling trapped",
-    },
-    {
-      icon: (
-        <Image
-          src="/images/virtual/2.webp"
-          alt="Can't take on more clients icon"
-          width={100}
-          height={100}
-          className="h-18 w-18 object-contain"
-        />
-      ),
-      title: "Can't take on",
-    },
-    {
-      icon: (
-        <Image
-          src="/images/virtual/3.webp"
-          alt="No work life balance icon"
-          width={100}
-          height={100}
-          className="h-18 w-18 object-contain"
-        />
-      ),
-      title: "No work life balance",
+      title: "Drowning in the Daily Grind",
     },
     {
       icon: (
@@ -54,7 +30,31 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Your business",
+      title: "Maxed out and missing new opportunities",
+    },
+    {
+      icon: (
+        <Image
+          src="/images/virtual/2.webp"
+          alt="Can't take on more clients icon"
+          width={100}
+          height={100}
+          className="h-18 w-18 object-contain"
+        />
+      ),
+      title: "Work-Life Balance...What's That?",
+    },
+    {
+      icon: (
+        <Image
+          src="/images/virtual/3.webp"
+          alt="No work life balance icon"
+          width={100}
+          height={100}
+          className="h-18 w-18 object-contain"
+        />
+      ),
+      title: "Your business stuck in a Growth Rut?",
     },
   ];
 
