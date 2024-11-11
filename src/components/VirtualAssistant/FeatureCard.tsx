@@ -1,4 +1,3 @@
-import React from "react";
 import Image from "next/image";
 import AppointmentDialog from "./Appointment";
 
@@ -19,7 +18,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Drowning in the Daily Grind",
+      title: "Feeling trapped",
     },
     {
       icon: (
@@ -31,7 +30,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Work-Life Balance... What's that?",
+      title: "Can't take on",
     },
     {
       icon: (
@@ -43,7 +42,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Maxed out and missing new opportunities",
+      title: "No work life balance",
     },
     {
       icon: (
@@ -126,9 +125,9 @@ const BusinessOverwhelm = () => {
           <div className="flex flex-col justify-start space-y-16 pt-8">
             {challenges.map((challenge, index) => (
               <div key={index} className="flex items-center gap-6">
-                <div className="flex-shrink-0 w-24">{challenge.icon}</div>
+                <div className="w-24 flex-shrink-0">{challenge.icon}</div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold leading-snug whitespace-normal">
+                  <h3 className="whitespace-normal text-xl font-bold leading-snug">
                     {challenge.title}
                   </h3>
                 </div>
