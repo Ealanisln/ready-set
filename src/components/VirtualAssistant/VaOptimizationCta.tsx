@@ -46,7 +46,7 @@ const BusinessScaleSection = () => {
 
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Stop struggling with </span>the pieces you're
+            <span className="text-yellowd-500">Stop struggling with </span>the pieces you&apos;re
             missing. Let Ready Set VAs bring your business vision together.
           </h2>
           <div className="space-y-4 text-lg">
