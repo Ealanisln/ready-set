@@ -6,6 +6,7 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
+import MetricoolScript from "@/components/Metricool";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -31,8 +32,8 @@ export default function RootLayout({
         {/* Vercel Tools */}
         {shouldInjectToolbar && <VercelToolbar />}
         <Analytics />
+        <MetricoolScript />
         <SpeedInsights />
-
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
       </body>
