@@ -10,7 +10,7 @@ const BusinessScaleSection = () => {
       alt: "Business collaboration",
       title: "Develop a business that runs smoothly on Its own",
       description:
-        "Imagine a business that grows even when you're not involved.",
+        "We offer you the chance to escape the hustle and build a business that runs on autopilot.",
     },
     {
       imageWebp: "/images/virtual/content-creation.webp",
@@ -18,7 +18,7 @@ const BusinessScaleSection = () => {
       alt: "Work life balance",
       title: "Unlock extra time for what you love",
       description:
-        "A skilled VA can lighten your workload, giving you space to focus on what you love!",
+        "Our skilled VA eases your workload, giving you the freedom to focus on what drives results.",
       isFlipped: true, // Added this flag to identify which image to flip
     },
     {
@@ -27,7 +27,7 @@ const BusinessScaleSection = () => {
       alt: "Remote work setup",
       title: "Grow your wealth without the added stress!",
       description:
-        "Picture your wealth growing while dedicated help manages the day-to-day, letting you relax and stay inspired.",
+        "Let our support handle daily tasks, so you can focus on what matters most.",
     },
   ];
 
@@ -46,8 +46,8 @@ const BusinessScaleSection = () => {
 
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Let Ready Set VAs </span>be the
-            part of your business solution.
+            <span className="text-yellowd-500">Stop struggling with </span>the pieces you&apos;re
+            missing. Let Ready Set VAs bring your business vision together.
           </h2>
           <div className="space-y-4 text-lg">
             {" "}
@@ -73,12 +73,12 @@ const BusinessScaleSection = () => {
       <div className="space-y-12">
         <div className="space-y-4 text-center">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Build your business up </span>
-            the smart way!
+            <span className="text-yellowd-500">Take your business </span>
+            to the next level the smart way!
           </h2>
           <p className="text-xl">
-            By having proper tools, efficient workflows, and expert assistance,
-            you can:
+            Supercharge your success with tools, workflows, and 
+            expert help so you can:
           </p>
         </div>
 
