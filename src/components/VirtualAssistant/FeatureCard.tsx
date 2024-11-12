@@ -18,7 +18,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Drowning in the Daily Grind",
+      title: "Drowning in the daily grind",
     },
     {
       icon: (
@@ -42,7 +42,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Work-Life Balance...What's That?",
+      title: "Work-life balance...What's that?",
     },
     {
       icon: (
@@ -54,7 +54,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Your business stuck in a Growth Rut?",
+      title: "Business stuck in a growth rut",
     },
   ];
 
@@ -75,33 +75,21 @@ const BusinessOverwhelm = () => {
               relies on you. You are exhausted!
             </div>
 
-            <div className="font-bold text-gray-700">
-              You&apos;ve probably considered hiring a virtual assistant to
-              lighten the load.
+            <div className="text-gray-700">
+              You&apos;re not alone. Many entrepreneurs find themselves stuck in
+              this cycle. It&apos;s exhausting, and it&apos;s not sustainable.
             </div>
 
             <div className="text-gray-700">
-              But let&apos;s face it, simply delegating tasks won&apos;t solve
-              the root problems holding your business back. Without clear
-              systems and processes in place, the bottleneck remains,
-              you&apos;ll still be burdened by decisions and unable to truly
-              leverage the support of a VA.
+              Ready for a real change? It&apos;s time to build a business that
+              thrives with or without your constant involvement. Ready Set VAs help
+              you create efficient workflows and empower your team, so you can
+              finally step away without everything falling apart.
             </div>
 
             <div className="text-gray-700">
-              In fact, bringing someone into a disorganized environment could
-              actually amplify your stress, leaving you feeling more overwhelmed
-              than ever. It&apos;s time to build a business that can thrive with
-              or without your constant involvement.
-            </div>
-
-            <div className="text-gray-700">
-              <span className="font-bold">
-                The truth is, simply hiring a VA isn&apos;t enough.
-              </span>{" "}
-              You need a different approach – Empower your business to run
-              smoothly, with or without you. That&apos;s where we come in. Ready
-              Set to the rescue! Ready when you are!
+              Here&apos;s where we come in. Ready Set to the rescue! Ready when
+              you are!
             </div>
 
             <div className="rounded-lg bg-amber-300 p-6 shadow-sm">

@@ -8,17 +8,17 @@ const BusinessScaleSection = () => {
       imageWebp: "/images/virtual/customer-service.webp",
       imageFallback: "/images/virtual/customer-service.jpg",
       alt: "Business collaboration",
-      title: "Develop a business that runs smoothly on Its own",
+      title: "Develop a business that runs smoothly on it's own",
       description:
-        "We offer you the chance to escape the hustle and build a business that runs on autopilot.",
+        "Escape the hustle and build a business that runs on autopilot.",
     },
     {
       imageWebp: "/images/virtual/content-creation.webp",
       imageFallback: "/images/virtual/content-creation.jpg",
       alt: "Work life balance",
-      title: "Unlock extra time for what you love",
+      title: "​Unlock extra time for what drives results​",
       description:
-        "Our skilled VA eases your workload, giving you the freedom to focus on what drives results.",
+        "Our skilled VAs lighten your workload, giving you space to focus on what moves the needle.",
       isFlipped: true, // Added this flag to identify which image to flip
     },
     {
@@ -27,7 +27,7 @@ const BusinessScaleSection = () => {
       alt: "Remote work setup",
       title: "Grow your wealth without the added stress!",
       description:
-        "Let our support handle daily tasks, so you can focus on what matters most.",
+        "Let our dedicated support manage the day-to-day so you can expand.",
     },
   ];
 
@@ -46,8 +46,9 @@ const BusinessScaleSection = () => {
 
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Stop struggling with </span>the pieces you&apos;re
-            missing. Let Ready Set VAs bring your business vision together.
+            <span className="text-yellowd-500">Stop struggling with </span>the
+            pieces you&apos;re missing. Let Ready Set VAs bring your business
+            vision together.
           </h2>
           <div className="space-y-4 text-lg">
             {" "}
@@ -74,11 +75,11 @@ const BusinessScaleSection = () => {
         <div className="space-y-4 text-center">
           <h2 className="text-4xl font-semibold">
             <span className="text-yellowd-500">Take your business </span>
-            to the next level the smart way!
+            to the next level!
           </h2>
           <p className="text-xl">
-            Supercharge your success with tools, workflows, and 
-            expert help so you can:
+            Supercharge your success with tools, workflows, and expert help so
+            you can:
           </p>
         </div>
 
