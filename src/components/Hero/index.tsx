@@ -61,8 +61,8 @@ const ButtonLink: React.FC<ButtonLinkProps> = ({
 
 const LandingPage: React.FC = () => {
   const logoSources = {
-    webp: "/images/logo/full-logo-dark.webp",
-    fallback: "/images/logo/full-logo-dark.png",
+    webp: "/images/logo/full-logo-light.webp",
+    fallback: "/images/logo/full-logo-light.png",
   };
 
   const containerVariants = {
@@ -82,9 +82,9 @@ const LandingPage: React.FC = () => {
         <picture>
           <source srcSet="/images/hero/hero-bg.webp" type="image/webp" />
           <img
-            src="/images/hero/hero-bg.jpg"
+            src="/images/hero/hero-bg.png"
             alt="Hero background"
-            className="h-full w-full object-cover brightness-50"
+            className="h-full w-full object-cover"
           />
         </picture>
       </div>
@@ -97,7 +97,7 @@ const LandingPage: React.FC = () => {
       >
         <div className="mx-auto w-full max-w-[600px]">
           <motion.h1
-            className="mb-6 mt-6 text-balance text-3xl font-bold text-yellow-400 sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
+            className="mb-6 mt-6 text-balance text-3xl font-bold text-black sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -128,7 +128,7 @@ const LandingPage: React.FC = () => {
         </motion.div>
 
         <motion.p
-          className="mt-4 text-balance text-xl text-yellow-400 dark:text-gray-200 sm:mt-6 sm:text-2xl"
+          className="mt-4 text-balance text-xl text-black dark:text-gray-200 sm:mt-6 sm:text-2xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.5 }}
