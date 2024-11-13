@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppointmentDialog from "./Appointment";
+import { client } from "@/sanity/lib/client";
 
 const BusinessScaleSection = () => {
   const benefits = [
@@ -68,7 +69,7 @@ const BusinessScaleSection = () => {
           />
         </div>
       </div>
-
+      
       {/* Bottom Section with Scale Message and Images */}
       <div className="space-y-12">
         <div className="space-y-4 text-center">
