@@ -1,13 +1,14 @@
-// app/payment/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense } from "react";
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-export default function PaymentPage() {
+// Create a separate component for the payment content
+function PaymentContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -27,11 +28,8 @@ export default function PaymentPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 100, // $100 USD
+          amount: 100,
           currency: "usd",
-          // Add any other required parameters
-          // successUrl: `${window.location.origin}/payment?status=success`,
-          // cancelUrl: `${window.location.origin}/payment?status=canceled`,
         }),
       });
 
@@ -40,8 +38,6 @@ export default function PaymentPage() {
       }
 
       const { url } = await response.json();
-
-      // Redirect to Stripe Checkout
       window.location.href = url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -98,5 +94,22 @@ export default function PaymentPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+// Main page component wrapped with Suspense
+export default function PaymentPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="container mx-auto max-w-2xl py-40">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </div>
+      }
+    >
+      <PaymentContent />
+    </Suspense>
   );
 }

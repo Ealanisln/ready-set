@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -15,8 +15,13 @@ const ChangePassword = () => {
     ReNewPassword: "",
   });
   const [loader, setLoader] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -51,13 +56,8 @@ const ChangePassword = () => {
         toast.success("Password changed successfully. Please log in again.");
         setData({ newPassword: "", ReNewPassword: "" });
         
-        // Log the user out
         await signOut({ redirect: false });
-
-        // Redirect to login page
-        setTimeout(() => {
-          router.push("/signin");
-        }, 2000);
+        router.push("/signin");
       }
 
       setLoader(false);
@@ -68,9 +68,17 @@ const ChangePassword = () => {
     }
   };
 
-  if (!session || !session.user?.isTemporaryPassword) {
-    // Redirect to home if user doesn't need to change password
-    router.push("/");
+  // Wait for session to be loaded and component to be mounted
+  if (!mounted || status === "loading") {
+    return <Loader />;
+  }
+
+  // Handle unauthorized access
+  if (!session?.user?.isTemporaryPassword) {
+    // Only redirect on client side
+    if (typeof window !== "undefined") {
+      router.push("/");
+    }
     return null;
   }
 
