@@ -85,7 +85,7 @@ const Footer = () => {
               <ul>
                 <li>
                   <a
-                    href="/#"
+                    href="/"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Home
@@ -101,7 +101,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="/#"
+                    href="/about"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     About
@@ -224,7 +224,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="/#"
+                    href="/about"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     About
