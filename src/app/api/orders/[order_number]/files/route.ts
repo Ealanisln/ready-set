@@ -59,10 +59,8 @@ export async function DELETE(request: Request) {
   }
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { order_number: string } },
-) {
+export async function GET(request: Request, props: { params: Promise<{ order_number: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

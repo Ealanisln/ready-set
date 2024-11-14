@@ -56,10 +56,8 @@ function serializeOrder(data: any): any {
   ));
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { order_number: string } },
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -139,10 +137,8 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { order_number: string } },
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 
 interface ButtonLinkProps {
   href: string;
@@ -33,17 +33,21 @@ const ButtonLink: React.FC<ButtonLinkProps> = ({
     >
       <Link href={href} className="group block">
         <motion.div
-          className="flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:p-6"
-          whileHover={{
-            scale: 1.05,
-            transition: { duration: 0.2 },
-          }}
-          whileTap={{ scale: 0.95 }}
+          {...({
+            className: "flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:p-6",
+            whileHover: {
+              scale: 1.05,
+              transition: { duration: 0.2 },
+            },
+            whileTap: { scale: 0.95 }
+          } as HTMLMotionProps<"div">)}
         >
           <motion.div
-            className="mb-2 text-primary sm:mb-4"
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
+            {...({
+              className: "mb-2 text-primary sm:mb-4",
+              whileHover: { rotate: 360 },
+              transition: { duration: 0.5 }
+            } as HTMLMotionProps<"div">)}
           >
             {icon}
           </motion.div>
@@ -90,27 +94,33 @@ const LandingPage: React.FC = () => {
       </div>
       
       <motion.header
-        className="mb-12 flex w-full flex-col items-center px-4 text-center sm:mb-16 sm:px-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        {...({
+          className: "mb-12 flex w-full flex-col items-center px-4 text-center sm:mb-16 sm:px-6",
+          initial: { opacity: 0, y: -20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.6 }
+        } as HTMLMotionProps<"header">)}
       >
         <div className="mx-auto w-full max-w-[600px]">
           <motion.h1
-            className="mb-6 mt-6 text-balance text-3xl font-bold text-black sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            {...({
+              className: "mb-6 mt-6 text-balance text-3xl font-bold text-yellow-400 sm:mb-8 sm:mt-8 sm:text-4xl md:text-5xl",
+              initial: { opacity: 0, y: 20 },
+              animate: { opacity: 1, y: 0 },
+              transition: { delay: 0.3, duration: 0.5 }
+            } as HTMLMotionProps<"h1">)}
           >
             Ready Set Group LLC
           </motion.h1>
         </div>
 
         <motion.div
-          className="relative mb-6 h-[200px] w-[300px] sm:mb-10 sm:h-[300px] sm:w-[400px] md:h-[400px] md:w-[500px]"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
+          {...({
+            className: "relative mb-6 h-[200px] w-[300px] sm:mb-10 sm:h-[300px] sm:w-[400px] md:h-[400px] md:w-[500px]",
+            initial: { scale: 0.8, opacity: 0 },
+            animate: { scale: 1, opacity: 1 },
+            transition: { delay: 0.5, duration: 0.5 }
+          } as HTMLMotionProps<"div">)}
         >
           <div className="relative h-full w-full">
             <picture>
@@ -128,20 +138,24 @@ const LandingPage: React.FC = () => {
         </motion.div>
 
         <motion.p
-          className="mt-4 text-balance text-xl text-black dark:text-gray-200 sm:mt-6 sm:text-2xl"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
+          {...({
+            className: "mt-4 text-balance text-xl text-yellow-400 dark:text-gray-200 sm:mt-6 sm:text-2xl",
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: { delay: 0.7, duration: 0.5 }
+          } as HTMLMotionProps<"p">)}
         >
           How can we help?
         </motion.p>
       </motion.header>
 
       <motion.div
-        className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:gap-12 lg:px-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        {...({
+          className: "grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:gap-12 lg:px-8",
+          variants: containerVariants,
+          initial: "hidden",
+          animate: "visible"
+        } as HTMLMotionProps<"div">)}
       >
         <ButtonLink
           href="/logistics"

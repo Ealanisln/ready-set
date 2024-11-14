@@ -19,13 +19,13 @@ const BusinessScaleSection = () => {
       title: "​Unlock extra time for what drives results​",
       description:
         "Our skilled VAs lighten your workload, giving you space to focus on what moves the needle.",
-      isFlipped: true, // Added this flag to identify which image to flip
+      isFlipped: true, 
     },
     {
       imageWebp: "/images/virtual/administrative-support.webp",
       imageFallback: "/images/virtual/administrative-support.jpg",
       alt: "Remote work setup",
-      title: "Grow your wealth without the added stress!",
+      title: "​Grow revenue without the stress​",
       description:
         "Let our dedicated support manage the day-to-day so you can expand.",
     },
@@ -43,12 +43,11 @@ const BusinessScaleSection = () => {
             className="object-contain"
           />
         </div>
-
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Stop struggling with </span>the
-            pieces you&apos;re missing. Let Ready Set VAs bring your business
-            vision together.
+           Stop struggling with the
+            pieces you&apos;re missing. <span className="text-yellow-400">Let Ready Set VAs bring your business
+            vision together.</span>
           </h2>
           <div className="space-y-4 text-lg">
             {" "}

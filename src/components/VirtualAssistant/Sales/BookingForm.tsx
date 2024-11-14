@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 interface FormData {
   name: string;
@@ -18,8 +19,19 @@ interface FormData {
   preferredStartDate: Date | undefined;
 }
 
-const BookingForm = () => {
-  // Initialize searchParams safely
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="max-w-2xl mx-auto px-4 pt-40">
+      <div className="flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    </div>
+  );
+}
+
+// Form content component
+function BookingFormContent() {
   const searchParams = useSearchParams();
   const selectedPlan = searchParams?.get('plan') ?? '';
   
@@ -40,17 +52,7 @@ const BookingForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically send the data to your backend
       console.log('Form submitted:', formData);
-      // Add your API call here
-      
-      // Example API call:
-      // await fetch('/api/bookings', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...formData, plan: selectedPlan }),
-      // });
-      
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
@@ -79,6 +81,8 @@ const BookingForm = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* ... Rest of your form fields remain the same ... */}
+            {/* I'm keeping the code concise here, but all your existing form fields would go here unchanged */}
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -187,6 +191,13 @@ const BookingForm = () => {
       </Card>
     </div>
   );
-};
+}
 
-export default BookingForm;
+// Main component with Suspense
+export default function BookingForm() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <BookingFormContent />
+    </Suspense>
+  );
+}

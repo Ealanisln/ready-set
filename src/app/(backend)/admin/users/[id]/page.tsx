@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronLeft, Upload } from "lucide-react";
@@ -57,7 +57,8 @@ interface UserFormValues extends User {
   head_count?: string;
 }
 
-export default function EditUser({ params }: { params: { id: string } }) {
+export default function EditUser(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();

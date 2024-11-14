@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +59,8 @@ interface UserFormValues extends User {
   displayName: string;
 }
 
-export default function EditUser({ params }: { params: { id: string } }) {
+export default function EditUser(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);

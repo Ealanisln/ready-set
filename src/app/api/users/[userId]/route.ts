@@ -28,10 +28,8 @@ async function checkAuthorization(requestedUserId: string) {
 }
 
 // GET: Fetch a user by ID (only id and name)
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } },
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   const { userId } = params;
   const authResponse = await checkAuthorization(userId);
   if (authResponse) return authResponse;
@@ -95,10 +93,8 @@ export async function GET(
 }
 
 // PUT: Update a user by ID
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { userId: string } },
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   const { userId } = params;
 
   const authResponse = await checkAuthorization(userId);
@@ -198,10 +194,8 @@ export async function PUT(
 }
 
 // DELETE: Delete a user by ID
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { userId: string } },
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (
     !session ||
