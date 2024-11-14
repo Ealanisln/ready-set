@@ -2,12 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ orderId: string }> }) {
+  const params = await props.params;
   const { orderId } = params;
-  
+
   try {
     // Fetch the dispatch with the specific cateringRequestId or on_demandId
     const dispatch = await prisma.dispatch.findFirst({

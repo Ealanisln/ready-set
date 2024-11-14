@@ -69,7 +69,8 @@ const components: PortableTextComponents = {
   },
 };
 
-export default async function Page({ params }: { params: any }) {
+export default async function Page(props: { params: Promise<any> }) {
+  const params = await props.params;
   const data: FullPost = await getData(params.slug);
 
   if (!data) {

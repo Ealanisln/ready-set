@@ -12,10 +12,8 @@ enum UserType {
   super_admin = 'super_admin'
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   try {
     const { userId } = params;
     const { newRole } = await request.json();
