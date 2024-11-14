@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,14 +10,18 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 
-const PopupDemo = () => {
-  const [open, setOpen] = React.useState(false);
+const PopupReadySet = () => {
+  const [open, setOpen] = React.useState(true); // Inicialmente true para que se abra automáticamente
+
+  // Opcional: Si quieres controlar exactamente cuándo se abre
+  useEffect(() => {
+    setOpen(true);
+  }, []); // Se ejecuta solo una vez al montar el componente
 
   return (
     <div className="p-4">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="default">Open Pop-up</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -44,7 +48,7 @@ const PopupDemo = () => {
                 setOpen(false);
               }}
             >
-              Acceept
+              Accept
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -53,4 +57,4 @@ const PopupDemo = () => {
   );
 };
 
-export default PopupDemo;
+export default PopupReadySet;
