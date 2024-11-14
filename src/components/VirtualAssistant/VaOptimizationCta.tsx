@@ -1,11 +1,10 @@
-'use client'  
+
 
 import { useState } from 'react'
 import Image from "next/image";
 import Link from "next/link";
 import AppointmentDialog from "./Appointment";
 import { client } from "@/sanity/lib/client";
-import PopupReadySet from "./popup";
 
 const BusinessScaleSection = () => {
   const benefits = [
@@ -38,10 +37,7 @@ const BusinessScaleSection = () => {
 
   return (
     <>
-      {/* Popup component */}
-      <PopupReadySet />
-      
-      <section className="mx-auto max-w-7xl px-4 py-16">
+            <section className="mx-auto max-w-7xl px-4 py-16">
         {/* Top Section with Venn Diagram and CTA */}
         <div className="mb-20 grid items-center gap-8 md:grid-cols-2">
           <div className="relative aspect-square w-full max-w-md">

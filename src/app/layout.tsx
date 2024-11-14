@@ -1,3 +1,5 @@
+'use client'
+
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -6,6 +8,7 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
+import CCPABanner from "@/components/VirtualAssistant/banner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -32,6 +35,8 @@ export default function RootLayout({
         {shouldInjectToolbar && <VercelToolbar />}
         <Analytics />
         <SpeedInsights />
+      
+        <CCPABanner />
 
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
