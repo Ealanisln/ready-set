@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const CCPABanner = () => {
+const CookieConsentBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if user has already accepted the notice
-    const hasAccepted = localStorage.getItem('ccpaAccepted');
-    if (!hasAccepted) {
+    // Check if user has already responded to the cookie consent
+    const consentStatus = localStorage.getItem('cookieConsentStatus');
+    if (!consentStatus) {
       setIsVisible(true);
     }
   }, []);
 
-  const handleAccept = () => {
-    localStorage.setItem('ccpaAccepted', 'true');
+  const handleAcceptAll = () => {
+    localStorage.setItem('cookieConsentStatus', 'accepted');
+    setIsVisible(false);
+  };
+
+  const handleRejectAll = () => {
+    localStorage.setItem('cookieConsentStatus', 'rejected');
     setIsVisible(false);
   };
 
@@ -28,7 +33,12 @@ const CCPABanner = () => {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex-1">
           <p className="text-sm text-gray-600">
-            Under the California Consumer Privacy Act (CCPA), we inform you about the personal information we collect and how it is used. You have the right to know what personal information we collect about you and to request its deletion. To learn more about your privacy rights, please visit our{' '}
+            We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. 
+            By clicking "Accept All", you consent to our use of cookies. To learn more, read our{' '}
+            <a href="/cookie-policy" className="text-blue-600 hover:text-blue-800 underline">
+              Cookie Policy
+            </a>{' '}
+            and{' '}
             <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline">
               Privacy Policy
             </a>.
@@ -36,10 +46,16 @@ const CCPABanner = () => {
         </div>
         <div className="flex items-center gap-4">
           <button
-            onClick={handleAccept}
+            onClick={handleAcceptAll}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
           >
-            Accept
+            Accept All
+          </button>
+          <button
+            onClick={handleRejectAll}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Reject All
           </button>
           <button
             onClick={handleClose}
@@ -54,4 +70,5 @@ const CCPABanner = () => {
   );
 };
 
-export default CCPABanner;
+export default CookieConsentBanner;
+
