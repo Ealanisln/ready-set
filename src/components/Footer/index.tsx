@@ -84,36 +84,36 @@ const Footer = () => {
               </h4>
               <ul>
                 <li>
-                  <a
+                  <Link
                     href="/"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Home
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Features
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/about"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Testimonial
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -125,36 +125,36 @@ const Footer = () => {
               </h4>
               <ul>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     How it works
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Privacy policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Refund policy
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -166,28 +166,28 @@ const Footer = () => {
               </h4>
               <ul>
                 <li>
-                  <a
+                  <Link
                     href="/logistics"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Logistics
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/va"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Virtual Assistant
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/join-the-team"
                     className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
                   >
                     Join the team
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -199,36 +199,36 @@ const Footer = () => {
               </h4>
               <ul>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/#"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Support
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="/about"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -242,24 +242,24 @@ const Footer = () => {
             <div className="w-full px-4 md:w-2/3 lg:w-1/2">
               <div className="my-1">
                 <div className="-mx-3 flex items-center justify-center md:justify-start">
-                  <a
+                  <Link
                     href="/#"
                     className="px-3 text-base text-gray-400 hover:text-gray-200 hover:underline"
                   >
                     Privacy policy
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/#"
                     className="px-3 text-base text-gray-400 hover:text-gray-200 hover:underline"
                   >
                     Legal notice
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/#"
                     className="px-3 text-base text-gray-400 hover:text-gray-200 hover:underline"
                   >
                     Terms of service
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -267,14 +267,14 @@ const Footer = () => {
               <div className="my-1 flex justify-center md:justify-end">
                 <p className="text-base text-gray-7">
                   Developed by{" "}
-                  <a
+                  <Link
                     href="https://alanis.dev"
                     rel="nofollow noopner noreferrer"
                     target="_blank"
                     className="text-gray-200 hover:underline"
                   >
                     Alanis Dev
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>
