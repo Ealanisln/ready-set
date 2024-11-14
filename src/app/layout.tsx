@@ -8,7 +8,8 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
-import CCPABanner from "@/components/VirtualAssistant/banner";
+import MetricoolScript from "@/components/Metricool";
+import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary';
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -29,15 +30,15 @@ export default function RootLayout({
       lang="en"
     >
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <ErrorBoundary>
+          <ClientLayout>{children}</ClientLayout>
+        </ErrorBoundary>
 
         {/* Vercel Tools */}
         {shouldInjectToolbar && <VercelToolbar />}
         <Analytics />
+        <MetricoolScript />
         <SpeedInsights />
-      
-        <CCPABanner />
-
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
       </body>
