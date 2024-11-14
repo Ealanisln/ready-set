@@ -216,17 +216,17 @@ const teamData: TeamType[] = [
     twitterLink: "/#",
     instagramLink: "/#",
   },
-  {
-    id: 20,
-    name: "Michael Pinzon",
-    designation: "SEO Specialist and Social Media Coordinator",
-    image: "/images/team/Pinzon_Michael.png",
-    skills: ["SEO Optimization", "Social Media Management", "Content Creation"],
-    description: "Excels at developing and executing strategic plans to enhance client revenue through optimization and data analysis.",
-    facebookLink: "/#",
-    twitterLink: "/#",
-    instagramLink: "/#",
-  },
+  // {
+  //   id: 20,
+  //   name: "Michael Pinzon",
+  //   designation: "SEO Specialist and Social Media Coordinator",
+  //   image: "/images/team/Pinzon_Michael.png",
+  //   skills: ["SEO Optimization", "Social Media Management", "Content Creation"],
+  //   description: "Excels at developing and executing strategic plans to enhance client revenue through optimization and data analysis.",
+  //   facebookLink: "/#",
+  //   twitterLink: "/#",
+  //   instagramLink: "/#",
+  // },
 ];
 
 const Team = () => {

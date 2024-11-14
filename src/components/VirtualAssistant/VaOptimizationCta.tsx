@@ -8,26 +8,26 @@ const BusinessScaleSection = () => {
       imageWebp: "/images/virtual/customer-service.webp",
       imageFallback: "/images/virtual/customer-service.jpg",
       alt: "Business collaboration",
-      title: "Develop a business that runs smoothly on Its own",
+      title: "Develop a business that runs smoothly on it's own",
       description:
-        "Imagine a business that grows even when you're not involved.",
+        "Escape the hustle and build a business that runs on autopilot.",
     },
     {
       imageWebp: "/images/virtual/content-creation.webp",
       imageFallback: "/images/virtual/content-creation.jpg",
       alt: "Work life balance",
-      title: "Unlock extra time for what you love",
+      title: "​Unlock extra time for what drives results​",
       description:
-        "A skilled VA can lighten your workload, giving you space to focus on what you love!",
-      isFlipped: true, // Added this flag to identify which image to flip
+        "Our skilled VAs lighten your workload, giving you space to focus on what moves the needle.",
+      isFlipped: true, 
     },
     {
       imageWebp: "/images/virtual/administrative-support.webp",
       imageFallback: "/images/virtual/administrative-support.jpg",
       alt: "Remote work setup",
-      title: "Grow your wealth without the added stress!",
+      title: "​Grow revenue without the stress​",
       description:
-        "Picture your wealth growing while dedicated help manages the day-to-day, letting you relax and stay inspired.",
+        "Let our dedicated support manage the day-to-day so you can expand.",
     },
   ];
 
@@ -43,11 +43,11 @@ const BusinessScaleSection = () => {
             className="object-contain"
           />
         </div>
-
         <div className="space-y-6">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Let Ready Set VAs </span>be the
-            part of your business solution.
+           Stop struggling with the
+            pieces you&apos;re missing. <span className="text-yellow-400">Let Ready Set VAs bring your business
+            vision together.</span>
           </h2>
           <div className="space-y-4 text-lg">
             {" "}
@@ -73,11 +73,11 @@ const BusinessScaleSection = () => {
       <div className="space-y-12">
         <div className="space-y-4 text-center">
           <h2 className="text-4xl font-semibold">
-            <span className="text-yellowd-500">Build your business up </span>
-            the smart way!
+            <span className="text-yellowd-500">Take your business </span>
+            to the next level!
           </h2>
           <p className="text-xl">
-            By having proper tools, efficient workflows, and expert assistance,
+            Supercharge your success with tools, workflows, and expert help so
             you can:
           </p>
         </div>
