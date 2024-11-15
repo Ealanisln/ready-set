@@ -45,7 +45,7 @@ const CookieConsentBanner = () => {
               Cookie Policy
             </a>{' '}
             and{' '}
-            <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline">
+            <a href="/app/Cookieprivacypolicy.tsx" className="text-blue-600 hover:text-blue-800 underline">
               Privacy Policy
             </a>.
           </p>
