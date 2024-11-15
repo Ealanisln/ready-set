@@ -41,7 +41,7 @@ const CookieConsentBanner = () => {
           We use cookies to enhance your experience, serve personalized ads or content, and analyze traffic. 
           Under the California Consumer Privacy Act (CCPA) and other U.S. privacy laws, you have the right to manage your cookie preferences. 
           By clicking &quot;Accept All,&quot; you consent to our use of cookies. To learn more, read our{' '}
-            <a href="/cookie-policy" className="text-blue-600 hover:text-blue-800 underline">
+            <a href="https://support.google.com/analytics/answer/6004245?hl=en" className="text-blue-600 hover:text-blue-800 underline">
               Cookie Policy
             </a>{' '}
             and{' '}
