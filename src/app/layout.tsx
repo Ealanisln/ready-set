@@ -10,7 +10,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import MetricoolScript from "@/components/Metricool";
 import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary';
-import CCPABanner from "@/components/Clients/banner";
+import CookieConsentBanner from "@/components/Clients/banner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -37,10 +37,10 @@ export default function RootLayout({
 
         {/* Vercel Tools */}
         {shouldInjectToolbar && <VercelToolbar />}
-        <CCPABanner />
         <Analytics />
         <MetricoolScript />
         <SpeedInsights />
+        <CookieConsentBanner />
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
       </body>
