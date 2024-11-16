@@ -83,12 +83,16 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen p-4">
+      {/* Yellow background */}
+      <div className="fixed inset-0 -z-20 bg-primary" />
+      
+      {/* Background image with blend mode */}
       <div className="fixed inset-0 -z-10">
         <Image
-          src="/images/hero/hero-bg.png"
+          src="/images/hero/hero-bg-final.png"
           alt="Hero background"
           fill
-          className="object-cover"
+          className="object-cover mix-blend-multiply"
           priority
           quality={100}
         />
