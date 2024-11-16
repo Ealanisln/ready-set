@@ -4,8 +4,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion, MotionProps } from "framer-motion";
 
+// Type definitions
 interface ButtonLinkProps {
   href: string;
   icon: React.ReactElement<LucideIcon>;
@@ -13,6 +14,14 @@ interface ButtonLinkProps {
   description: string;
   delay: number;
 }
+
+// Motion component types
+type MotionDivProps = Omit<React.HTMLProps<HTMLDivElement>, keyof MotionProps> & MotionProps;
+
+// Custom motion components
+const MotionDiv: React.FC<MotionDivProps> = motion('div');
+const MotionHeader: React.FC<MotionDivProps> = motion('header');
+const MotionHeading: React.FC<MotionDivProps> = motion('h2');
 
 const ButtonLink: React.FC<ButtonLinkProps> = ({
   href,
@@ -22,7 +31,7 @@ const ButtonLink: React.FC<ButtonLinkProps> = ({
   delay,
 }) => {
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -32,39 +41,36 @@ const ButtonLink: React.FC<ButtonLinkProps> = ({
       }}
     >
       <Link href={href} className="group block">
-        <motion.div
-          {...({
-            className:
-              "flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:p-6",
-            whileHover: {
-              scale: 1.05,
-              transition: { duration: 0.2 },
-            },
-            whileTap: { scale: 0.95 },
-          } as HTMLMotionProps<"div">)}
+        <MotionDiv
+          initial={false}
+          whileHover={{
+            scale: 1.05,
+            transition: { duration: 0.2 },
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 sm:p-6"
         >
-          <motion.div
-            {...({
-              className: "mb-2 text-primary sm:mb-4",
-              whileHover: { rotate: 360 },
-              transition: { duration: 0.5 },
-            } as HTMLMotionProps<"div">)}
+          <MotionDiv
+            initial={false}
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+            className="mb-2 text-primary sm:mb-4"
           >
             {icon}
-          </motion.div>
+          </MotionDiv>
           <h3 className="mb-1 text-balance text-xl font-semibold text-gray-800 dark:text-gray-100 sm:mb-2 sm:text-2xl">
             {title}
           </h3>
           <p className="text-balance text-center text-sm text-gray-600 dark:text-gray-300 sm:text-base">
             {description}
           </p>
-        </motion.div>
+        </MotionDiv>
       </Link>
-    </motion.div>
+    </MotionDiv>
   );
 };
 
-const LandingPage: React.FC = () => {
+const Hero: React.FC = () => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -76,77 +82,60 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen p-4">
-      {/* Fixed background div */}
+    <section className="relative min-h-screen p-4">
       <div className="fixed inset-0 -z-10">
-        <picture>
-          <source srcSet="/images/hero/hero-bg.webp" type="image/webp" />
-          <img
-            src="/images/hero/hero-bg.png"
-            alt="Hero background"
-            className="h-full w-full object-cover"
-          />
-        </picture>
+        <Image
+          src="/images/hero/hero-bg.png"
+          alt="Hero background"
+          fill
+          className="object-cover"
+          priority
+          quality={100}
+        />
       </div>
 
       <div className="flex min-h-screen flex-col items-center">
-        {/* Logo section - positioned at the top */}
-        <motion.header
-          {...({
-            className: "w-full flex flex-col items-center px-4 sm:px-6 pt-8 sm:pt-16",
-            initial: { opacity: 0, y: -20 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.6 },
-          } as HTMLMotionProps<"header">)}
+        <MotionHeader
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full flex flex-col items-center px-4 sm:px-6 pt-8 sm:pt-16"
         >
-          <motion.div
-            {...({
-              className:
-                "relative h-[200px] w-[300px] sm:h-[300px] sm:w-[400px] md:h-[400px] md:w-[500px]",
-              initial: { scale: 0.8, opacity: 0 },
-              animate: { scale: 1, opacity: 1 },
-              transition: { delay: 0.5, duration: 0.5 },
-            } as HTMLMotionProps<"div">)}
+          <MotionDiv
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="relative h-[200px] w-[300px] sm:h-[300px] sm:w-[400px] md:h-[400px] md:w-[500px]"
           >
             <div className="relative h-full w-full">
-              <picture>
-                <Image
-                  src="/images/logo/logo-white.png"
-                  alt="Ready Set Group LLC Logo"
-                  fill
-                  sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, 500px"
-                  className="object-contain"
-                  priority
-                />
-              </picture>
+              <Image
+                src="/images/logo/logo-white.png"
+                alt="Ready Set Group LLC Logo"
+                fill
+                sizes="(max-width: 640px) 300px, (max-width: 768px) 400px, 500px"
+                className="object-contain"
+                priority
+              />
             </div>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.h2
-            {...({
-              className:
-                "mt-4 text-balance text-xl text-yellow-400 dark:text-gray-200 sm:mt-6 sm:text-2xl",
-              initial: { opacity: 0 },
-              animate: { opacity: 1 },
-              transition: { delay: 0.7, duration: 0.5 },
-            } as HTMLMotionProps<"h2">)}
+          <MotionHeading
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            className="mt-4 text-balance text-xl text-black dark:text-gray-200 sm:mt-6 sm:text-2xl"
           >
             How can we help?
-          </motion.h2>
-        </motion.header>
+          </MotionHeading>
+        </MotionHeader>
 
-        {/* Flex spacer to push content down */}
         <div className="flex-1" />
 
-        {/* Cards section - now positioned at the bottom with margin */}
-        <motion.div
-          {...({
-            className:
-              "mb-8 sm:mb-12 grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:gap-12 lg:px-8",
-            variants: containerVariants,
-            initial: "hidden",
-            animate: "visible",
-          } as HTMLMotionProps<"div">)}
+        <MotionDiv
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mb-8 sm:mb-12 grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:gap-12 lg:px-8"
         >
           <ButtonLink
             href="/logistics"
@@ -184,10 +173,10 @@ const LandingPage: React.FC = () => {
             description="Explore various exciting positions available in our growing company"
             delay={1.3}
           />
-        </motion.div>
+        </MotionDiv>
       </div>
-    </div>
+    </section>
   );
 };
 
-export default LandingPage;
+export default Hero;

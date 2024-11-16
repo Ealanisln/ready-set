@@ -1,36 +1,48 @@
-'use client';
+// src/components/ErrorBoundary/ErrorBoundary.tsx
+"use client";
 
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode }) {
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = {
+      hasError: false,
+    };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error,
+    };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error('Error caught by ErrorBoundary:', error, errorInfo);
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
-      return (
-        <div className="flex h-screen items-center justify-center">
+      return this.props.fallback || (
+        <div className="flex min-h-screen items-center justify-center p-4">
           <div className="text-center">
-            <h2 className="mb-4 text-2xl font-bold text-red-600">Something went wrong</h2>
-            <button
-              onClick={() => this.setState({ hasError: false })}
-              className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-            >
-              Try again
-            </button>
+            <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+              Something went wrong
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Please try refreshing the page
+            </p>
           </div>
         </div>
       );
