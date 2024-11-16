@@ -7,7 +7,7 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "backup": "bun run src/utils/local-backup.ts",
+    "backup": "bun run src/scripts/backup-db.ts",
     "db:sync": "bun run scripts/db-sync.ts",
     "db:reset": "bunx prisma migrate reset",
     "db:seed": "bunx prisma db seed",
