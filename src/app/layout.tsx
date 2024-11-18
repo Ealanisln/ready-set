@@ -1,5 +1,4 @@
-'use client'
-
+// src/app/layout.tsx
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -22,26 +21,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const shouldInjectToolbar = process.env.NODE_ENV === "development";
-
   return (
     <html
       suppressHydrationWarning={true}
       className={`!scroll-smooth ${montserrat.className}`}
       lang="en"
     >
-      <body>
-        <ErrorBoundary>
-          <ClientLayout>{children}</ClientLayout>
+      <body className="overflow-x-hidden">
+        <ErrorBoundary fallback={<div>Something went wrong</div>}>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </ErrorBoundary>
 
-        {/* Vercel Tools */}
-        {shouldInjectToolbar && <VercelToolbar />}
+        {process.env.NODE_ENV === "development" && <VercelToolbar />}
         <Analytics />
         <MetricoolScript />
         <SpeedInsights />
-        <CookieConsentBanner />
-        {/* Google Analytics */}
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
       </body>
     </html>

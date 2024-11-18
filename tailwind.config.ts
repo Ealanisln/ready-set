@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#fbce04',
+        primary: '#FBD113',
         'custom-yellow': "#ffc61a",
       },
       keyframes: {

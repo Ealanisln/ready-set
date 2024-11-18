@@ -1,0 +1,14 @@
+[install]
+peer = true
+hoistPattern = ["*"]
+production = false
+
+[install.cache]
+dir = ".bun/cache"
+disable = false
+
+[test]
+coverage = true
+
+[debug]
+enabled = false
