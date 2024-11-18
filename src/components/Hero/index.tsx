@@ -86,15 +86,21 @@ const Hero: React.FC = () => {
       {/* Yellow background */}
       <div className="fixed inset-0 -z-20 bg-primary" />
       
-      {/* Background image with blend mode */}
-      <div className="fixed inset-0 -z-10">
+          {/* Background image container */}
+          <div className="fixed inset-0 -z-10">
+        {/* WebP version */}
         <Image
-          src="/images/hero/hero-bg-final.png"
+          src="/images/hero/hero-bg.webp"
           alt="Hero background"
           fill
           className="object-cover mix-blend-multiply"
           priority
           quality={100}
+          onError={(e) => {
+            // If WebP fails, replace source with PNG
+            const imgElement = e.currentTarget;
+            imgElement.src = '/images/hero/hero-bg.png';
+          }}
         />
       </div>
 
