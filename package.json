@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npx prisma generate && next build",
+    "build": "bunx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "backup": "bun run src/scripts/backup-db.ts",
@@ -109,7 +109,7 @@
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "autoprefixer": "^10.4.20",
-    "eslint": "^8.57.1",
+    "eslint": "^9.0.0",
     "eslint-config-next": "15.0.3",
     "postcss": "^8.4.47",
     "prisma": "^5.22.0",
