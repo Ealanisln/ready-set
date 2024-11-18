@@ -39,6 +39,7 @@ export default function RootLayout({
         <MetricoolScript />
         <SpeedInsights />
         <GoogleAnalytics gaId="G-PHGL28W4NP" />
+        <CookieConsentBanner />
       </body>
     </html>
   );

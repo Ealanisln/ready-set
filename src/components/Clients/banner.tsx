@@ -1,3 +1,6 @@
+"use client";
+
+import Link from 'next/link'
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
@@ -37,20 +40,18 @@ const CookieConsentBanner = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-50">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex-1">
-          <p className="text-sm text-gray-600">
-          We use cookies to enhance your experience, serve personalized ads or content, and analyze traffic. 
-          Under the California Consumer Privacy Act (CCPA) and other U.S. privacy laws, you have the right to manage your cookie preferences. 
-          By clicking &quot;Accept All,&quot; you consent to our use of cookies. To learn more, read our{' '}
-            <a href="https://support.google.com/analytics/answer/6004245?hl=en" className="text-blue-600 hover:text-blue-800 underline">
-              Cookie Policy
-            </a>{' '}
-            and{' '}
-            <a href="/app/Cookieprivacypolicy.tsx" className="text-blue-600 hover:text-blue-800 underline">
-              Privacy Policy
-            </a>.
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
+        <p className="text-sm text-gray-600">
+  We use cookies to enhance your experience, serve personalized ads or content, and analyze traffic. 
+  Under the California Consumer Privacy Act (CCPA) and other U.S. privacy laws, you have the right to manage your cookie preferences. 
+  By clicking &quot;Accept All,&quot; you consent to our use of cookies. To learn more, read our{' '}
+  <Link href="https://support.google.com/analytics/answer/6004245?hl=en" className="text-blue-600 hover:text-blue-800 underline">
+  Cookie Policy
+</Link>{' '}
+and{' '}
+<Link href="/components/Clients/Privacypolicy.tsx" className="text-blue-600 hover:text-blue-800 underline">
+  Privacy Policy
+</Link>
+</p>
           <button
             onClick={handleAcceptAll}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"

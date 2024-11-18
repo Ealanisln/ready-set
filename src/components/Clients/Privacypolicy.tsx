@@ -1,3 +1,5 @@
+"use client";
+
 // app/cookie-policy/page.tsx
 import { Metadata } from 'next'
 
