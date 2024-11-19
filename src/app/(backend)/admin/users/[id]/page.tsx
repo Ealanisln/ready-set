@@ -91,6 +91,29 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     setHasUnsavedChanges(isDirty);
   }, [isDirty]);
 
+  const defaultFormValues = {
+    id: "",
+    displayName: "",
+    email: "",
+    contact_number: "",
+    type: "client" as const,
+    street1: "",
+    city: "",
+    state: "",
+    zip: "",
+    company_name: "",
+    website: "",
+    street2: "",
+    parking_loading: "",
+    countiesServed: [] as string[],
+    timeNeeded: [] as string[],
+    cateringBrokerage: [] as string[],
+    frequency: "",
+    provisions: [] as string[],
+    head_count: "",
+    status: "pending" as const,
+  } satisfies UserFormValues;
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -98,42 +121,14 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
 
-        // Set form values
-        setValue("id", data.id);
-        setValue(
-          "displayName",
-          data.displayName || data.contact_name || data.name || "",
-        );
-        setValue("company_name", data.company_name || "");
-        setValue("contact_number", data.contact_number || "");
-        setValue("email", data.email || "");
-        setValue("website", data.website || "");
-        setValue("street1", data.street1 || "");
-        setValue("street2", data.street2 || "");
-        setValue("city", data.city || "");
-        setValue("state", data.state || "");
-        setValue("zip", data.zip || "");
-        setValue("parking_loading", data.parking_loading || "");
-        setValue("type", data.type || "");
-        setValue("status", data.status || "pending");
+        const formData = {
+          ...defaultFormValues,
+          ...data,
+          displayName: data.displayName || data.contact_name || data.name || "",
+          provisions: data.provide ? data.provide.split(", ") : [],
+        };
 
-        // Only set timeNeeded and countiesServed if the user is a vendor or client
-        if (data.type === "vendor" || data.type === "client") {
-          setValue("timeNeeded", data.timeNeeded || []);
-          setValue("countiesServed", data.countiesServed || []);
-        }
-
-        // Vendor specific fields
-        if (data.type === "vendor") {
-          setValue("cateringBrokerage", data.cateringBrokerage || []);
-          setValue("frequency", data.frequency || "");
-          setValue("provisions", data.provide ? data.provide.split(", ") : []);
-        }
-
-        if (data.type === "client") {
-          setValue("head_count", data.head_count || "");
-          setValue("frequency", data.frequency || "");
-        }
+        reset(formData);
       } catch (error) {
         console.error("Error fetching user:", error);
         toast.error("Failed to fetch user data");
@@ -143,7 +138,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     };
 
     fetchUser();
-  }, [params.id, setValue]);
+  }, [params.id, reset]);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
