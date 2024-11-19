@@ -76,7 +76,7 @@ export function DashboardHome() {
 
   if (loading || metricsLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-yellow-50/50">
+      <div className="flex h-screen items-center justify-center">
         <div className="flex items-center space-x-2">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-yellow-400 border-t-transparent"></div>
           <p className="text-lg font-semibold text-yellow-700">Loading...</p>
@@ -96,7 +96,7 @@ export function DashboardHome() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gradient-to-br from-yellow-50/30 to-white sm:pl-14">
+    <div className="flex min-h-screen w-full flex-col sm:pl-14">
       <main className="flex flex-1 flex-col gap-6 p-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
