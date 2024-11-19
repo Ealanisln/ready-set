@@ -88,7 +88,7 @@ const AboutPage = () => {
       <OverwhelmSection />
       <DiscoveryCallSection />
       <BusinessScaleSection />
-      <Pricing />
+      {/* <Pricing /> */}
       <DiscoveryBanner />
     </main>
   );
