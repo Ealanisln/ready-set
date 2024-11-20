@@ -42,13 +42,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
                 rules={{ 
                   required: userType !== "driver" && userType !== 'helpdesk' ? "Company name is required" : false 
                 }}
-                render={({ field, fieldState: { error } }) => (
+                render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
                   <>
                     <Input
                       id="company_name"
                       type="text"
                       className={`w-full ${error ? "border-red-500" : ""}`}
-                      {...field}
+                      {...fieldProps}
+                      value={value ?? ''}
                     />
                     {error && (
                       <p className="mt-1 text-sm text-red-500">{error.message}</p>
@@ -66,13 +67,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
               control={control}
               defaultValue=""
               rules={{ required: "Name is required" }}
-              render={({ field }) => (
+              render={({ field: { value, ...fieldProps } }) => (
                 <>
                   <Input
                     id="displayName"
                     type="text"
                     className={`w-full ${errors.displayName ? "border-red-500" : ""}`}
-                    {...field}
+                    {...fieldProps}
+                    value={value ?? ''}
                   />
                   {errors.displayName && (
                     <p className="mt-1 text-sm text-red-500">
@@ -91,14 +93,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
               control={control}
               defaultValue=""
               rules={{ required: "Contact number is required" }}
-              render={({ field, fieldState: { error } }) => (
+              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
                 <>
                   <Input
                     id="contact_number"
                     type="tel"
                     className={`w-full ${error ? "border-red-500" : ""}`}
                     placeholder="Phone number"
-                    {...field}
+                    {...fieldProps}
+                    value={value ?? ''}
                   />
                   {error && (
                     <p className="mt-1 text-sm text-red-500">{error.message}</p>
@@ -121,14 +124,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
                   message: "Invalid email address",
                 },
               }}
-              render={({ field, fieldState: { error } }) => (
+              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
                 <>
                   <Input
                     id="email"
                     type="email"
                     className={`w-full ${error ? "border-red-500" : ""}`}
                     placeholder="Email"
-                    {...field}
+                    {...fieldProps}
+                    value={value ?? ''}
                   />
                   {error && (
                     <p className="mt-1 text-sm text-red-500">{error.message}</p>
@@ -151,14 +155,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
                   message: "Invalid website URL",
                 },
               }}
-              render={({ field, fieldState: { error } }) => (
+              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
                 <>
                   <Input
                     id="website"
                     type="url"
                     className={`w-full ${error ? "border-red-500" : ""}`}
                     placeholder="Website"
-                    {...field}
+                    {...fieldProps}
+                    value={value ?? ''}
                   />
                   {error && (
                     <p className="mt-1 text-sm text-red-500">{error.message}</p>
