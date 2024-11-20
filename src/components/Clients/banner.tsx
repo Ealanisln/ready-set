@@ -52,7 +52,8 @@ and{' '}
   Privacy Policy
 </Link>
 </p>
-<div className="space-x-4">
+<div className="space-x-4 pt-4">
+          
           <button
             onClick={handleAcceptAll}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
@@ -86,4 +87,3 @@ and{' '}
 };
 
 export default CookieConsentBanner;
-
