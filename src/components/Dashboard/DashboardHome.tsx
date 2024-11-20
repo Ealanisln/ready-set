@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Activity, ClipboardList, Users } from "lucide-react";
-
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { MetricCard } from "./ui/MetricCard";
 import { RecentOrdersTable } from "./ui/RecentOrders";
 import { RecentUsersTable } from "./ui/RecentUsersTable";
 import { DashboardCard } from "./ui/DashboardCard";
-import { Card, CardContent } from "../ui/card";
-import { Button } from "../ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface CateringOrder {
@@ -60,8 +59,9 @@ export function DashboardHome() {
         ]);
 
         setRecentOrders(ordersData);
-        // Filter active orders
-        const filteredActiveOrders = ordersData.filter((order: CateringOrder) => order.status === "active");
+        const filteredActiveOrders = ordersData.filter(
+          (order: CateringOrder) => order.status === "active"
+        );
         setActiveOrders(filteredActiveOrders);
         setUsers(usersData);
       } catch (error: any) {
@@ -77,22 +77,31 @@ export function DashboardHome() {
   if (loading || metricsLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="ml-4 text-lg font-semibold">Loading...</p>
+        <div className="flex items-center space-x-2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-yellow-400 border-t-transparent"></div>
+          <p className="text-lg font-semibold text-yellow-700">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (error || metricsError) {
-    return <div>Error: {error || metricsError}</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-red-50">
+        <div className="rounded-lg bg-white p-6 shadow-lg">
+          <p className="text-red-600">Error: {error || metricsError}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="flex min-h-screen w-full flex-col sm:pl-14">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <main className="flex flex-1 flex-col gap-6 p-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="Active Orders"
-            value={activeOrders.length.toString()}
+            value={activeOrders.length}
             icon={ClipboardList}
             change={`${((activeOrders.length / recentOrders.length) * 100).toFixed(1)}% of total orders`}
           />
@@ -108,18 +117,25 @@ export function DashboardHome() {
             icon={Activity}
             change="+180.1% from last month"
           />
-          <Card className="w-full max-w-sm">
-            <CardContent className="space-y-2 pt-6">
+          <Card className="h-[140px] flex flex-col justify-center">
+            <CardContent className="space-y-3">
               <Link href="/catering-request" className="block w-full">
-                <Button className="w-full">Create new order</Button>
+                <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-white">
+                  Create new order
+                </Button>
               </Link>
               <Link href="/admin/users/new-user" className="block w-full">
-                <Button className="w-full" variant="outline">Create new user</Button>
+                <Button 
+                  className="w-full border-yellow-400 text-yellow-700 hover:bg-yellow-50"
+                  variant="outline"
+                >
+                  Create new user
+                </Button>
               </Link>
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+        <div className="grid gap-6 md:gap-8 lg:grid-cols-2">
           <DashboardCard
             title="Active Catering Orders"
             linkText="View All Catering Orders"
