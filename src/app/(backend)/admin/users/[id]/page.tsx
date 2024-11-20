@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronLeft } from "lucide-react";
@@ -66,6 +66,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   const userId = params.id;
 
+  // Form setup with default values
   const {
     control,
     handleSubmit,
@@ -85,65 +86,90 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     },
   });
 
+  // Important: Watch all form values
   const watchedValues = watch();
 
+  // Memoize the default form values
+  const defaultFormValues = useMemo(
+    () => ({
+      id: "",
+      displayName: "",
+      email: "",
+      contact_number: "",
+      type: "client" as const,
+      street1: "",
+      city: "",
+      state: "",
+      zip: "",
+      company_name: "",
+      website: "",
+      street2: "",
+      parking_loading: "",
+      countiesServed: [] as string[],
+      timeNeeded: [] as string[],
+      cateringBrokerage: [] as string[],
+      frequency: "",
+      provisions: [] as string[],
+      head_count: "",
+      status: "pending" as const,
+    }),
+    [],
+  );
+
+  // Fetch user data
+  const fetchUser = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/users/${userId}?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const data = await response.json();
+
+      const formData = {
+        ...defaultFormValues,
+        ...data,
+        displayName: data.displayName || data.contact_name || data.name || "",
+        provisions: data.provide ? data.provide.split(", ") : [],
+      };
+
+      reset(formData);
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      toast.error("Failed to fetch user data");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, reset, defaultFormValues]);
+
+  // Initial fetch and refresh handling
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser, refreshTrigger]);
+
+  // Watch for form changes
   useEffect(() => {
     setHasUnsavedChanges(isDirty);
   }, [isDirty]);
 
-  const defaultFormValues = {
-    id: "",
-    displayName: "",
-    email: "",
-    contact_number: "",
-    type: "client" as const,
-    street1: "",
-    city: "",
-    state: "",
-    zip: "",
-    company_name: "",
-    website: "",
-    street2: "",
-    parking_loading: "",
-    countiesServed: [] as string[],
-    timeNeeded: [] as string[],
-    cateringBrokerage: [] as string[],
-    frequency: "",
-    provisions: [] as string[],
-    head_count: "",
-    status: "pending" as const,
-  } satisfies UserFormValues;
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`/api/users/${params.id}`);
-        if (!response.ok) throw new Error("Failed to fetch user");
-        const data = await response.json();
-
-        const formData = {
-          ...defaultFormValues,
-          ...data,
-          displayName: data.displayName || data.contact_name || data.name || "",
-          provisions: data.provide ? data.provide.split(", ") : [],
-        };
-
-        reset(formData);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        toast.error("Failed to fetch user data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [params.id, reset]);
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
       const submitData: User = { ...data };
-
       delete (submitData as any).displayName;
 
       if (data.type === "driver" || data.type === "helpdesk") {
@@ -159,9 +185,13 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         submitData.head_count = data.head_count;
       }
 
-      const response = await fetch(`/api/users/${params.id}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
         body: JSON.stringify(submitData),
       });
 
@@ -172,62 +202,103 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
       const updatedUser = await response.json();
 
-      toast.success("User saved successfully!");
-      reset(updatedUser);
+      const formData = {
+        ...defaultFormValues,
+        ...updatedUser,
+        displayName: updatedUser.contact_name || updatedUser.name || "",
+        provisions: updatedUser.provide ? updatedUser.provide.split(", ") : [],
+      };
+
+      reset(formData);
       setHasUnsavedChanges(false);
+      toast.success("User saved successfully!");
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Failed to save user. Please try again.");
     }
   };
 
-  const breadcrumbs = [
-    { href: "/admin/", label: "Dashboard" },
-    { href: "/admin/users", label: "Users" },
-  ];
+  const handleStatusChange = async (newStatus: User["status"]) => {
+    if (isUpdatingStatus || !newStatus) return;
 
-  const currentPageTitle = loading
-    ? "Loading..."
-    : `Editing ${watchedValues.displayName || "User"}`;
+    setIsUpdatingStatus(true);
+
+    try {
+      const response = await fetch("/api/users/updateUserStatus", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+        body: JSON.stringify({
+          userId: params.id,
+          newStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error(
+              `Invalid request: ${data.error}${data.details ? ` - ${JSON.stringify(data.details)}` : ""}`,
+            );
+          case 404:
+            throw new Error("User not found");
+          default:
+            throw new Error(data.error || "Failed to update user status");
+        }
+      }
+
+      setValue("status", newStatus);
+      toast.success(data.message || "User status updated successfully");
+      setRefreshTrigger((prev) => prev + 1);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update user status",
+      );
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleRoleChange = async (newRole: string) => {
+    try {
+      const response = await fetch(`/api/users/${params.id}/change-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+        body: JSON.stringify({ newRole }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Failed to update user role: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const data = await response.json();
+      setValue("type", newRole as User["type"]);
+      toast.success("User role updated successfully!");
+      setRefreshTrigger((prev) => prev + 1);
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update user role:", error);
+      toast.error("Failed to update user role. Please try again.");
+    }
+  };
 
   const handleDiscard = () => {
-    const fetchAndResetUser = async () => {
-      try {
-        const response = await fetch(`/api/users/${params.id}`);
-        if (!response.ok) throw new Error("Failed to fetch user");
-        const data = await response.json();
-
-        // Reset form with fetched data
-        reset({
-          id: data.id,
-          displayName: data.displayName || data.contact_name || data.name || "",
-          company_name: data.company_name || "",
-          contact_number: data.contact_number || "",
-          email: data.email || "",
-          website: data.website || "",
-          street1: data.street1 || "",
-          street2: data.street2 || "",
-          city: data.city || "",
-          state: data.state || "",
-          zip: data.zip || "",
-          parking_loading: data.parking_loading || "",
-          type: data.type || "",
-          status: data.status || "pending",
-          timeNeeded: data.timeNeeded || [],
-          countiesServed: data.countiesServed || [],
-          cateringBrokerage: data.cateringBrokerage || [],
-          frequency: data.frequency || "",
-          provisions: data.provide ? data.provide.split(", ") : [],
-          head_count: data.head_count || "",
-        });
-      } catch (error) {
-        console.error("Error resetting user data:", error);
-        toast.error("Failed to reset user data");
-      }
-    };
-
-    fetchAndResetUser();
-    setHasUnsavedChanges(false);
+    fetchUser();
     toast("Changes discarded", { icon: "🔄" });
     router.push("/admin/users");
   };
@@ -253,80 +324,6 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     }
   };
 
-  const handleStatusChange = async (newStatus: User["status"]) => {
-    if (isUpdatingStatus || !newStatus) return;
-
-    setIsUpdatingStatus(true);
-
-    try {
-      const response = await fetch("/api/users/updateUserStatus", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: params.id,
-          newStatus,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        switch (response.status) {
-          case 400:
-            throw new Error(
-              `Invalid request: ${data.error}${data.details ? ` - ${JSON.stringify(data.details)}` : ""}`,
-            );
-          case 404:
-            throw new Error("User not found");
-          default:
-            throw new Error(data.error || "Failed to update user status");
-        }
-      }
-
-      setValue("status", newStatus);
-      toast.success(data.message || "User status updated successfully");
-    } catch (error) {
-      console.error("Failed to update user status:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update user status",
-      );
-    } finally {
-      setIsUpdatingStatus(false);
-    }
-  };
-
-  const handleRoleChange = async (newRole: string) => {
-    try {
-      const response = await fetch(`/api/users/${params.id}/change-role`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ newRole }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to update user role: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const data = await response.json();
-      setValue("type", newRole as User["type"]);
-      toast.success("User role updated successfully!");
-    } catch (error) {
-      console.error("Failed to update user role:", error);
-      toast.error("Failed to update user role. Please try again.");
-    }
-  };
-
-  const handleUploadSuccess = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-  }, []);
-
   const useUploadFileHook = (category: string) => {
     const {
       onUpload: originalOnUpload,
@@ -350,6 +347,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
     const onUpload = async (files: FileWithPath[]): Promise<void> => {
       await originalOnUpload(files);
+      handleUploadSuccess();
     };
 
     return {
@@ -369,6 +367,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
   } as const;
+
+  const breadcrumbs = [
+    { href: "/admin/", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+  ];
+
+  const currentPageTitle = loading
+    ? "Loading..."
+    : `Editing ${watchedValues.displayName || "User"}`;
 
   if (loading) {
     return (
