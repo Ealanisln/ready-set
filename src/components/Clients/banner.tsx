@@ -28,6 +28,7 @@ const CookieConsentBanner = () => {
   };
 
   const handleRejectAll = () => {
+    // Implement the "Reject All" functionality
     localStorage.setItem('cookieConsentStatus', 'rejected');
     localStorage.setItem('cookiePreferences', JSON.stringify({
       necessary: true,
