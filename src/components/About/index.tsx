@@ -12,7 +12,7 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]">
-                Ready Set: Your favorite restaurant's go-to logistics partner for catered delivery since 2019. 
+                Ready Set: Your favorite restaurant&apos;s go-to logistics partner for catered delivery since 2019. 
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
                   Ready Set HQ is in the beautiful San Francisco-Bay Area, expanding across Atlanta, GA and Austin, TX with plans to scale in one of the most challenging markets, the Big Apple. For your daily on-site team lunches, corporate events, and special occasions, we&apos;ve got you covered. We&apos;re proud to have served top tech giants like Apple, Google, Facebook, and Netflix, and we&apos;re committed to providing the highest quality food and timely delivery.
