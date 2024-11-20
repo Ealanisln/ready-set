@@ -1,6 +1,7 @@
-// types/next-auth.d.ts
 import "next-auth";
 import { User as PrismaUser } from "@prisma/client";
+
+type UsersType = "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
 
 declare module "next-auth" {
   interface Session {
@@ -14,7 +15,10 @@ declare module "next-auth" {
     };
   }
 
-  interface User extends PrismaUser {}
+  interface User extends PrismaUser {
+    type: UsersType;
+    isTemporaryPassword: boolean;
+  }
 }
 
 declare module "next-auth/jwt" {
@@ -24,5 +28,3 @@ declare module "next-auth/jwt" {
     isTemporaryPassword: boolean;
   }
 }
-
-type UsersType = "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";

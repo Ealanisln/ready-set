@@ -12,46 +12,23 @@ const About = () => {
             <div className="w-full px-4 lg:w-1/2">
               <div className="mb-12 max-w-[540px] lg:mb-0">
                 <h2 className="mb-5 text-3xl font-bold leading-tight text-dark dark:text-white sm:text-[40px] sm:leading-[1.2]">
-                  At Ready Set, Delivering Excellence Across the San Francisco
-                  Bay Area and Austin
+                Ready Set: Your favorite restaurant&apos;s go-to logistics partner for catered delivery since 2019. 
                 </h2>
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
-                  We&apos;re more than just a delivery service; we&apos;re your
-                  dedicated partner for getting things where they need to be, on
-                  time and with care. If you need a delivery solution,
-                  contracted work for an event, or some help with your
-                  day-to-day operations, we&apos;ve got you covered.
-                  <br /> <br />
-                  With a team committed to excellence and a passion for
-                  convenience, we specialize in providing exceptional same-day
-                  delivery, emergency deliveries, catering delivery & setup, or
-                  any package delivery you need. Our experienced couriers are
-                  ready to pick up and deliver your items with care and speed,
-                  ensuring your <strong>delivery in the San Francisco Bay Area</strong> and {" "}
-                  <strong>Austin</strong>{" "} is seamless and efficient.
+                  Ready Set HQ is in the beautiful San Francisco-Bay Area, expanding across Atlanta, GA and Austin, TX with plans to scale in one of the most challenging markets, the Big Apple. For your daily on-site team lunches, corporate events, and special occasions, we&apos;ve got you covered. We&apos;re proud to have served top tech giants like Apple, Google, Facebook, and Netflix, and we&apos;re committed to providing the highest quality food and timely delivery.
                 </p>
-                <p className="mb-10 text-lg leading-relaxed text-body-color dark:text-dark-6">
-                  <strong>Your Business is Our Priority</strong>
+                
+                <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
+                  When the world changed due to the pandemic, we adapted. We partnered with local flower shops to bring joy and beauty to people&apos;s homes, even during the toughest times. Our team of virtual assistants helped these businesses manage orders, dispatch drives, and stay organized. Ready Set could not have weathered the storm without them!
                 </p>
 
                 <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
-                  At Ready Set, we treat your business as an extension of our
-                  own. Each driver undergoes comprehensive training programs to
-                  maximize the client experience. Our drivers are also required
-                  to abide by the Health Insurance Portability and
-                  Accountability Act (HIPAA) and obtain a Food Handlers
-                  Certificate in compliance with California standards. They
-                  adhere to a dress code, wear disposable gloves, and maintain
-                  proper handling equipment for the safety of our clients and
-                  their guests.
+                  As the world began to heal, we returned to our roots of catering delivery. But we couldn&apos;t forget about all the amazing and skilled virtual assistants we&apos;d worked with to carry Ready Set to the next level. We saw an opportunity to help even more businesses thrive, and so Ready Set VA was born. Now Ready Set is empowering businesses of all sizes with top-notch virtual assistance to help businesses grow.
                 </p>
 
-                {/* <a
-                  href="/#"
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-7 py-3 text-center text-base font-medium text-white duration-300 hover:bg-primary/90"
-                >
-                  Know More
-                </a> */}
+                <p className="mb-10 text-base leading-relaxed text-body-color dark:text-dark-6">
+                  <strong>Ready Set: More than just delivery logistics. Your partner in business growth, powered by virtual expertise.</strong>
+                </p>
               </div>
             </div>
 

@@ -1,11 +1,9 @@
-// src/app/(backend)/admin/users/[id]/page.tsx
-
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ChevronLeft, Upload } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +58,7 @@ interface UserFormValues extends User {
 export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const [loading, setLoading] = useState(true);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -67,8 +66,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   const userId = params.id;
 
-  console.log(userId);
-
+  // Form setup with default values
   const {
     control,
     handleSubmit,
@@ -88,69 +86,90 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     },
   });
 
+  // Important: Watch all form values
   const watchedValues = watch();
 
+  // Memoize the default form values
+  const defaultFormValues = useMemo(
+    () => ({
+      id: "",
+      displayName: "",
+      email: "",
+      contact_number: "",
+      type: "client" as const,
+      street1: "",
+      city: "",
+      state: "",
+      zip: "",
+      company_name: "",
+      website: "",
+      street2: "",
+      parking_loading: "",
+      countiesServed: [] as string[],
+      timeNeeded: [] as string[],
+      cateringBrokerage: [] as string[],
+      frequency: "",
+      provisions: [] as string[],
+      head_count: "",
+      status: "pending" as const,
+    }),
+    [],
+  );
+
+  // Fetch user data
+  const fetchUser = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/users/${userId}?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const data = await response.json();
+
+      const formData = {
+        ...defaultFormValues,
+        ...data,
+        displayName: data.displayName || data.contact_name || data.name || "",
+        provisions: data.provide ? data.provide.split(", ") : [],
+      };
+
+      reset(formData);
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      toast.error("Failed to fetch user data");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, reset, defaultFormValues]);
+
+  // Initial fetch and refresh handling
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser, refreshTrigger]);
+
+  // Watch for form changes
   useEffect(() => {
     setHasUnsavedChanges(isDirty);
   }, [isDirty]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`/api/users/${params.id}`);
-        if (!response.ok) throw new Error("Failed to fetch user");
-        const data = await response.json();
-
-        // Set form values
-        setValue("id", data.id);
-        setValue(
-          "displayName",
-          data.displayName || data.contact_name || data.name || "",
-        );
-        setValue("company_name", data.company_name || "");
-        setValue("contact_number", data.contact_number || "");
-        setValue("email", data.email || "");
-        setValue("website", data.website || "");
-        setValue("street1", data.street1 || "");
-        setValue("street2", data.street2 || "");
-        setValue("city", data.city || "");
-        setValue("state", data.state || "");
-        setValue("zip", data.zip || "");
-        setValue("parking_loading", data.parking_loading || "");
-        setValue("type", data.type || "");
-        setValue("status", data.status || "pending");
-
-        // Only set timeNeeded and countiesServed if the user is a vendor or client
-        if (data.type === "vendor" || data.type === "client") {
-          setValue("timeNeeded", data.timeNeeded || []);
-          setValue("countiesServed", data.countiesServed || []);
-        }
-
-        // Vendor specific fields
-        if (data.type === "vendor") {
-          setValue("cateringBrokerage", data.cateringBrokerage || []);
-          setValue("frequency", data.frequency || "");
-          setValue("provisions", data.provide ? data.provide.split(", ") : []);
-        }
-
-        if (data.type === "client") {
-          setValue("head_count", data.head_count || "");
-          setValue("frequency", data.frequency || "");
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [params.id, setValue]);
+  const handleUploadSuccess = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
       const submitData: User = { ...data };
-
       delete (submitData as any).displayName;
 
       if (data.type === "driver" || data.type === "helpdesk") {
@@ -166,9 +185,13 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         submitData.head_count = data.head_count;
       }
 
-      const response = await fetch(`/api/users/${params.id}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
         body: JSON.stringify(submitData),
       });
 
@@ -179,73 +202,68 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
       const updatedUser = await response.json();
 
-      toast.success("User saved successfully!");
-      reset(updatedUser);
+      const formData = {
+        ...defaultFormValues,
+        ...updatedUser,
+        displayName: updatedUser.contact_name || updatedUser.name || "",
+        provisions: updatedUser.provide ? updatedUser.provide.split(", ") : [],
+      };
 
+      reset(formData);
       setHasUnsavedChanges(false);
+      toast.success("User saved successfully!");
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Failed to save user. Please try again.");
     }
   };
 
-  const breadcrumbs = [
-    { href: "/admin/", label: "Dashboard" },
-    { href: "/admin/users", label: "Users" },
-  ];
+  const handleStatusChange = async (newStatus: User["status"]) => {
+    if (isUpdatingStatus || !newStatus) return;
 
-  const currentPageTitle = loading
-    ? "Loading..."
-    : `Editing ${watchedValues.displayName || "User"}`;
+    setIsUpdatingStatus(true);
 
-  const handleBack = () => {
-    reset(); // Reset the form
-    setHasUnsavedChanges(false);
-    toast("Changes discarded", { icon: "🔄" });
-    router.push("/admin/users");
-  };
-
-  const handleDiscard = () => {
-    setHasUnsavedChanges(false);
-    toast("Changes discarded", { icon: "🔄" });
-    router.push("/admin/users");
-  };
-
-  const handleUploadSuccess = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-  }, []);
-
-  const handleStatusChange = async (
-    newStatus: "active" | "pending" | "deleted",
-  ) => {
     try {
       const response = await fetch("/api/users/updateUserStatus", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
         },
         body: JSON.stringify({
           userId: params.id,
-          newStatus: newStatus,
+          newStatus,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Response status:", response.status);
-        console.error("Response data:", errorData);
-        throw new Error(
-          `Failed to update user status: ${response.status} ${response.statusText}`,
-        );
+        switch (response.status) {
+          case 400:
+            throw new Error(
+              `Invalid request: ${data.error}${data.details ? ` - ${JSON.stringify(data.details)}` : ""}`,
+            );
+          case 404:
+            throw new Error("User not found");
+          default:
+            throw new Error(data.error || "Failed to update user status");
+        }
       }
 
-      const data = await response.json();
-      // Update local state
       setValue("status", newStatus);
-      toast.success("User status updated successfully!");
+      toast.success(data.message || "User status updated successfully");
+      setRefreshTrigger((prev) => prev + 1);
+      router.refresh();
     } catch (error) {
       console.error("Failed to update user status:", error);
-      toast.error("Failed to update user status. Please try again.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update user status",
+      );
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -255,6 +273,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
         },
         body: JSON.stringify({ newRole }),
       });
@@ -267,12 +287,40 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
 
       const data = await response.json();
-      // Update local state
       setValue("type", newRole as User["type"]);
       toast.success("User role updated successfully!");
+      setRefreshTrigger((prev) => prev + 1);
+      router.refresh();
     } catch (error) {
       console.error("Failed to update user role:", error);
       toast.error("Failed to update user role. Please try again.");
+    }
+  };
+
+  const handleDiscard = () => {
+    fetchUser();
+    toast("Changes discarded", { icon: "🔄" });
+    router.push("/admin/users");
+  };
+
+  const handleBack = () => {
+    if (hasUnsavedChanges) {
+      handleDiscardWithConfirmation();
+    } else {
+      router.push("/admin/users");
+    }
+  };
+
+  const handleDiscardWithConfirmation = () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to discard them?",
+      );
+      if (confirmed) {
+        handleDiscard();
+      }
+    } else {
+      handleDiscard();
     }
   };
 
@@ -297,9 +345,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       entityId: params.id,
     });
 
-    // Wrap the onUpload function to match the expected type
     const onUpload = async (files: FileWithPath[]): Promise<void> => {
       await originalOnUpload(files);
+      handleUploadSuccess();
     };
 
     return {
@@ -319,6 +367,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
   } as const;
+
+  const breadcrumbs = [
+    { href: "/admin/", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+  ];
+
+  const currentPageTitle = loading
+    ? "Loading..."
+    : `Editing ${watchedValues.displayName || "User"}`;
 
   if (loading) {
     return (
@@ -340,27 +397,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
               <div className="flex items-center gap-4">
-                {hasUnsavedChanges ? (
-                  <UnsavedChangesAlert
-                    onConfirm={handleBack}
-                    triggerButton={
-                      <Button variant="outline" size="icon" className="h-7 w-7">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                      </Button>
-                    }
-                  />
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={handleBack}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Back</span>
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={handleBack}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+                </Button>
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
                   Type of account
                 </h1>
@@ -368,26 +413,17 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                   {watchedValues.type}
                 </Badge>
                 <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                  {hasUnsavedChanges ? (
-                    <UnsavedChangesAlert
-                      onConfirm={handleDiscard}
-                      triggerButton={
-                        <Button variant="outline" size="sm">
-                          Discard
-                        </Button>
-                      }
-                    />
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDiscard}
-                      type="button"
-                    >
-                      Discard
-                    </Button>
-                  )}
-                  <Button size="sm">Save User</Button>
+                  <UnsavedChangesAlert
+                    onConfirm={handleDiscardWithConfirmation}
+                    triggerButton={
+                      <Button variant="outline" size="sm">
+                        Discard
+                      </Button>
+                    }
+                  />
+                  <Button size="sm" type="submit">
+                    Save User
+                  </Button>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -403,10 +439,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                       watchedValues={watchedValues}
                     />
                   )}
-                  <Card
-                    className="overflow-hidden"
-                    x-chunk="dashboard-07-chunk-4"
-                  >
+                  <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle>Uploaded Files</CardTitle>
                       <CardDescription>
@@ -438,10 +471,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                     onRoleChange={handleRoleChange}
                     currentUserRole={session?.user?.type || ""}
                   />
-                  <Card
-                    className="overflow-hidden"
-                    x-chunk="dashboard-07-chunk-4"
-                  >
+                  <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle>User Docs</CardTitle>
                       <CardDescription>Add your documents here</CardDescription>
@@ -454,19 +484,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                           setRefreshTrigger((prev) => prev + 1)
                         }
                       />
-                      {/* <div className="py-2">
-                        {userId ? (
-                          <UserFilesDisplay
-                            userId={userId}
-                            refreshTrigger={refreshTrigger}
-                          />
-                        ) : (
-                          <p>Loading user information...</p>
-                        )}
-                      </div> */}
                     </CardContent>
                   </Card>
-                  <Card x-chunk="dashboard-07-chunk-5">
+                  <Card>
                     <CardHeader>
                       <CardTitle>Archive User</CardTitle>
                       <CardDescription>
@@ -483,9 +503,14 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 md:hidden">
-                <Button variant="outline" size="sm">
-                  Discard
-                </Button>
+                <UnsavedChangesAlert
+                  onConfirm={handleDiscardWithConfirmation}
+                  triggerButton={
+                    <Button variant="outline" size="sm">
+                      Discard
+                    </Button>
+                  }
+                />
                 <Button size="sm" type="submit">
                   Save User
                 </Button>
