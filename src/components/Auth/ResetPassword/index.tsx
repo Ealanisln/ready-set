@@ -1,5 +1,3 @@
-// src/components/Auth/ResetPassword/index.tsx
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -72,17 +70,18 @@ const ResetPassword = ({ token }: { token: string }) => {
       const res = await axios.post(`/api/forgot-password/update`, {
         email: user?.email,
         password: data.newPassword,
+        token: token  // Add the token here
       });
 
       if (res.status === 200) {
-        toast.success(res.data);
+        toast.success(res.data.message);  // Updated to access the message property
         setData({ newPassword: "", ReNewPassword: "" });
         router.push("/signin");
       }
 
       setLoader(false);
     } catch (error: any) {
-      toast.error(error.response.data);
+      toast.error(error.response.data.error);  // Updated to access the error property
       setLoader(false);
     }
   };
