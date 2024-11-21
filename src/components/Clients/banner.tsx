@@ -57,7 +57,15 @@ const CookieConsentBanner = () => {
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-50">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto relative">
+          <button 
+          onClick={handleClose}
+          className="absolute -top-2 right-0 text-gray-500 hover:text-gray-700 p-2" 
+            aria-label="Close banner"
+          >
+             <X size={20} />
+          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pr-8">
           <div className="flex-1">
             <p className="text-sm text-gray-600">
               We use cookies to enhance your experience, serve personalized ads or content, and analyze traffic. 
@@ -91,14 +99,8 @@ const CookieConsentBanner = () => {
                 Reject All
               </button>
             </div>
-            <button
-              onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700"
-              aria-label="Close banner"
-            >
-              <X size={20} />
-            </button>
           </div>
+        </div>
         </div>
       </div>
 
