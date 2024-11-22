@@ -236,14 +236,7 @@ export function OrderFilesManager({
             maxFileCount={10}
             multiple={true}
           />
-
-          <UploadedFilesViewer
-            files={allFiles}
-            title={`${getDisplayText(orderType)} Order Files`}
-            description={`Files for Order #${orderNumber}`}
-            isLoading={isLoading}
-            onFileClick={handleFileClick}
-          />
+          <UploadedFilesViewer files={allFiles} isLoading={isLoading} />
         </CardContent>
       </Card>
 

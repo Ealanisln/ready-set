@@ -1,4 +1,3 @@
-// src/components/Orders/SingleOrder.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -284,76 +283,89 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   }
 
   return (
-    <main className="container mx-auto p-6">
-      <Card className="mx-auto w-full max-w-5xl pt-2">
-        <OrderHeader
-          orderNumber={order.order_number}
-          date={order.date}
-          driverInfo={driverInfo}
-          onAssignDriver={handleOpenDriverDialog}
-          orderType={order.order_type as OrderType}
-          orderId={order.id}
-          onDeleteSuccess={onDeleteSuccess}
-        />
-        <Separator />
-
-        <CardContent className="pt-6">
-          <OrderStatusCard
-            orderType={order.order_type as OrderType}
-            initialStatus={order.status as OrderStatus}
-            orderId={order.id}
-            onStatusChange={handleOrderStatusChange}
-          />
-        </CardContent>
-        <Separator />
-
-        <CardContent className="pt-6">
-          <OrderDetails order={order} />
-          <Separator />
-          <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-2">
-            {order.address && (
-              <AddressInfo address={order.address} title="Pickup Address" />
-            )}
-            {order.delivery_address && (
-              <AddressInfo
-                address={order.delivery_address}
-                title="Delivery Address"
-              />
-            )}
-          </div>
-          <Separator className="my-4" />
-          <CustomerInfo name={order.user?.name} email={order.user?.email} />
-          <Separator />
-          <AdditionalInfo
-            clientAttention={order.client_attention}
-            pickupNotes={order.pickup_notes}
-            specialNotes={order.special_notes}
-          />
-          <Separator />
-          <OrderFilesManager
+    <main className="container mx-auto space-y-6 p-6">
+      <div className="mx-auto w-full max-w-5xl space-y-6">
+        <Card>
+          <OrderHeader
             orderNumber={order.order_number}
+            date={order.date}
+            driverInfo={driverInfo}
+            onAssignDriver={handleOpenDriverDialog}
             orderType={order.order_type as OrderType}
-            orderId={order.id.toString()}
-            initialFiles={files}
+            orderId={order.id}
+            onDeleteSuccess={onDeleteSuccess}
           />
-        </CardContent>
-      </Card>
+          <Separator />
 
-      <div className="py-8">
-        <DriverStatusCard
-          order={{
-            id: order.id,
-            status: order.status,
-            driver_status: order.driver_status,
-            user_id: order.user_id,
-            pickup_time: order.pickup_time,
-            arrival_time: order.arrival_time,
-            complete_time: order.complete_time,
-            updated_at: order.updated_at,
-          }}
-          driverInfo={driverInfo}
-          updateDriverStatus={updateDriverStatus}
-        />
+          <CardContent className="space-y-6">
+            <OrderStatusCard
+              orderType={order.order_type as OrderType}
+              initialStatus={order.status as OrderStatus}
+              orderId={order.id}
+              onStatusChange={handleOrderStatusChange}
+            />
+
+            <Separator />
+
+            <OrderDetails order={order} />
+            
+            <Separator />
+            
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {order.address && (
+                <AddressInfo address={order.address} title="Pickup Address" />
+              )}
+              {order.delivery_address && (
+                <AddressInfo
+                  address={order.delivery_address}
+                  title="Delivery Address"
+                />
+              )}
+            </div>
+
+            <Separator />
+            
+            <CustomerInfo name={order.user?.name} email={order.user?.email} />
+            
+            <Separator />
+            
+            <AdditionalInfo
+              clientAttention={order.client_attention}
+              pickupNotes={order.pickup_notes}
+              specialNotes={order.special_notes}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <OrderFilesManager
+              orderNumber={order.order_number}
+              orderType={order.order_type as OrderType}
+              orderId={order.id.toString()}
+              initialFiles={files}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <DriverStatusCard
+              order={{
+                id: order.id,
+                status: order.status,
+                driver_status: order.driver_status,
+                user_id: order.user_id,
+                pickup_time: order.pickup_time,
+                arrival_time: order.arrival_time,
+                complete_time: order.complete_time,
+                updated_at: order.updated_at,
+              }}
+              driverInfo={driverInfo}
+              updateDriverStatus={updateDriverStatus}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       <DriverAssignmentDialog
