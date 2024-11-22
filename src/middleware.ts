@@ -6,9 +6,12 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     const baseUrl = new URL(request.url).origin;
 
-    // Handle landing page redirect for authenticated users
+    // Check if this is the first login (you'll need to set this in your session)
+    const isFirstLogin = token?.firstLogin === true;
+
+    // Handle landing page redirect only on first login for authenticated users
     if (request.nextUrl.pathname === '/') {
-      if (token) {
+      if (token && isFirstLogin) {
         const typeRoutes = {
           admin: '/admin',
           super_admin: '/admin',
@@ -19,9 +22,12 @@ export async function middleware(request: NextRequest) {
         };
         const redirectPath = typeRoutes[token.type as keyof typeof typeRoutes];
         if (redirectPath) {
+          // After redirecting, you should update the session to remove firstLogin flag
           return NextResponse.redirect(new URL(redirectPath, baseUrl));
         }
       }
+      // If it's not first login or no token, allow access to home page
+      return NextResponse.next();
     }
 
     // Check if user has a temporary password
