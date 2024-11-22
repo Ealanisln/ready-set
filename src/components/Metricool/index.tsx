@@ -1,8 +1,7 @@
-// app/components/MetricoolScript.tsx
 "use client";
 
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -12,28 +11,47 @@ declare global {
   }
 }
 
-export default function MetricoolScript() {
+interface TrackingPreferences {
+  analytics?: boolean;
+  marketing?: boolean;
+}
+
+export default function MetricoolScript({ trackingHash }: { trackingHash: string }) {
+  const [shouldLoadScript, setShouldLoadScript] = useState(false);
+
   useEffect(() => {
-    // Initialize Metricool after the script loads
+    try {
+      const preferences: TrackingPreferences = JSON.parse(
+        localStorage.getItem("cookiePreferences") || "{}"
+      );
+      
+      setShouldLoadScript(!!preferences.analytics || !!preferences.marketing);
+    } catch (error) {
+      console.error("Error parsing cookie preferences:", error);
+      setShouldLoadScript(false);
+    }
+  }, []);
+
+  useEffect(() => {
     const initializeMetricool = () => {
       if (window.beTracker) {
-        window.beTracker.t({ hash: "5e4d77df771777117a249111f4fc9683" });
+        window.beTracker.t({ hash: trackingHash });
       }
     };
 
-    // Add event listener for script load
-    window.addEventListener("load", initializeMetricool);
+    if (shouldLoadScript) {
+      window.addEventListener("load", initializeMetricool);
+      return () => {
+        window.removeEventListener("load", initializeMetricool);
+      };
+    }
+  }, [shouldLoadScript, trackingHash]);
 
-    return () => {
-      window.removeEventListener("load", initializeMetricool);
-    };
-  }, []);
-
-  return (
+  return shouldLoadScript ? (
     <Script
       src="https://tracker.metricool.com/resources/be.js"
       strategy="afterInteractive"
       id="metricool-script"
     />
-  );
+  ) : null;
 }
