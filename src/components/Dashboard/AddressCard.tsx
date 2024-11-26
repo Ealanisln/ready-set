@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import { Controller } from "react-hook-form";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -36,11 +42,10 @@ const AddressCard: React.FC<AddressCardProps> = ({ control, errors }) => {
                     className={`w-full ${error ? "border-red-500" : ""}`}
                     placeholder="Street"
                     {...field}
+                    value={field.value || ""} // Handle null/undefined values
                   />
                   {error && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {error.message}
-                    </p>
+                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
                   )}
                 </>
               )}
@@ -80,9 +85,7 @@ const AddressCard: React.FC<AddressCardProps> = ({ control, errors }) => {
                     {...field}
                   />
                   {error && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {error.message}
-                    </p>
+                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
                   )}
                 </>
               )}
@@ -105,9 +108,7 @@ const AddressCard: React.FC<AddressCardProps> = ({ control, errors }) => {
                     {...field}
                   />
                   {error && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {error.message}
-                    </p>
+                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
                   )}
                 </>
               )}
@@ -136,9 +137,7 @@ const AddressCard: React.FC<AddressCardProps> = ({ control, errors }) => {
                     {...field}
                   />
                   {error && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {error.message}
-                    </p>
+                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
                   )}
                 </>
               )}
@@ -146,9 +145,7 @@ const AddressCard: React.FC<AddressCardProps> = ({ control, errors }) => {
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="parking_loading">
-              Parking / Loading
-            </Label>
+            <Label htmlFor="parking_loading">Parking / Loading</Label>
             <Controller
               name="parking_loading"
               control={control}

@@ -141,6 +141,11 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         ...data,
         displayName: data.displayName || data.contact_name || data.name || "",
         provisions: data.provide ? data.provide.split(", ") : [],
+        // Ensure other fields aren't null
+        company_name: data.company_name || "",
+        website: data.website || "",
+        street2: data.street2 || "",
+        parking_loading: data.parking_loading || "",
       };
 
       reset(formData);

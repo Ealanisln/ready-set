@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
@@ -23,7 +23,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
     name: "type",
     defaultValue: "driver",
   });
-  
+
   return (
     <Card>
       <CardHeader>
@@ -32,145 +32,159 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
       </CardHeader>
       <CardContent className="grid gap-3">
         <div className="grid gap-6">
-        {userType !== "driver" && (
+          {userType !== "driver" && (
             <div className="grid gap-3">
               <Label htmlFor="company_name">Company name</Label>
               <Controller
                 name="company_name"
                 control={control}
                 defaultValue=""
-                rules={{ 
-                  required: userType !== "driver" && userType !== 'helpdesk' ? "Company name is required" : false 
+                rules={{
+                  required:
+                    userType !== "driver" && userType !== "helpdesk"
+                      ? "Company name is required"
+                      : false,
                 }}
-                render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
+                render={({ field, fieldState: { error } }) => (
                   <>
                     <Input
                       id="company_name"
                       type="text"
                       className={`w-full ${error ? "border-red-500" : ""}`}
-                      {...fieldProps}
-                      value={value ?? ''}
+                      {...field}
+                      value={field.value || ""}
                     />
                     {error && (
-                      <p className="mt-1 text-sm text-red-500">{error.message}</p>
+                      <p className="mt-1 text-sm text-red-500">
+                        {error.message}
+                      </p>
                     )}
                   </>
                 )}
               />
             </div>
           )}
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="displayName">Name / Contact name</Label>
-            <Controller
-              name="displayName"
-              control={control}
-              defaultValue=""
-              rules={{ required: "Name is required" }}
-              render={({ field: { value, ...fieldProps } }) => (
-                <>
-                  <Input
-                    id="displayName"
-                    type="text"
-                    className={`w-full ${errors.displayName ? "border-red-500" : ""}`}
-                    {...fieldProps}
-                    value={value ?? ''}
-                  />
-                  {errors.displayName && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.displayName?.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          </div>
+        </div>
+        <div className="grid gap-3">
+          <Label htmlFor="displayName">Name / Contact name</Label>
+          <Controller
+            name="displayName"
+            control={control}
+            defaultValue=""
+            rules={{ required: "Name is required" }}
+            render={({ field: { value, ...fieldProps } }) => (
+              <>
+                <Input
+                  id="displayName"
+                  type="text"
+                  className={`w-full ${errors.displayName ? "border-red-500" : ""}`}
+                  {...fieldProps}
+                  value={value ?? ""}
+                />
+                {errors.displayName && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.displayName?.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
+        </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="contact_number">Contact phone number</Label>
-            <Controller
-              name="contact_number"
-              control={control}
-              defaultValue=""
-              rules={{ required: "Contact number is required" }}
-              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
-                <>
-                  <Input
-                    id="contact_number"
-                    type="tel"
-                    className={`w-full ${error ? "border-red-500" : ""}`}
-                    placeholder="Phone number"
-                    {...fieldProps}
-                    value={value ?? ''}
-                  />
-                  {error && (
-                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
-                  )}
-                </>
-              )}
-            />
-          </div>
+        <div className="grid gap-3">
+          <Label htmlFor="contact_number">Contact phone number</Label>
+          <Controller
+            name="contact_number"
+            control={control}
+            defaultValue=""
+            rules={{ required: "Contact number is required" }}
+            render={({
+              field: { value, ...fieldProps },
+              fieldState: { error },
+            }) => (
+              <>
+                <Input
+                  id="contact_number"
+                  type="tel"
+                  className={`w-full ${error ? "border-red-500" : ""}`}
+                  placeholder="Phone number"
+                  {...fieldProps}
+                  value={value ?? ""}
+                />
+                {error && (
+                  <p className="mt-1 text-sm text-red-500">{error.message}</p>
+                )}
+              </>
+            )}
+          />
+        </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="email">Email</Label>
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              }}
-              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
-                <>
-                  <Input
-                    id="email"
-                    type="email"
-                    className={`w-full ${error ? "border-red-500" : ""}`}
-                    placeholder="Email"
-                    {...fieldProps}
-                    value={value ?? ''}
-                  />
-                  {error && (
-                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
-                  )}
-                </>
-              )}
-            />
-          </div>
+        <div className="grid gap-3">
+          <Label htmlFor="email">Email</Label>
+          <Controller
+            name="email"
+            control={control}
+            defaultValue=""
+            rules={{
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            }}
+            render={({
+              field: { value, ...fieldProps },
+              fieldState: { error },
+            }) => (
+              <>
+                <Input
+                  id="email"
+                  type="email"
+                  className={`w-full ${error ? "border-red-500" : ""}`}
+                  placeholder="Email"
+                  {...fieldProps}
+                  value={value ?? ""}
+                />
+                {error && (
+                  <p className="mt-1 text-sm text-red-500">{error.message}</p>
+                )}
+              </>
+            )}
+          />
+        </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="website">Website</Label>
-            <Controller
-              name="website"
-              control={control}
-              defaultValue=""
-              rules={{
-                pattern: {
-                  value:
-                    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-                  message: "Invalid website URL",
-                },
-              }}
-              render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
-                <>
-                  <Input
-                    id="website"
-                    type="url"
-                    className={`w-full ${error ? "border-red-500" : ""}`}
-                    placeholder="Website"
-                    {...fieldProps}
-                    value={value ?? ''}
-                  />
-                  {error && (
-                    <p className="mt-1 text-sm text-red-500">{error.message}</p>
-                  )}
-                </>
-              )}
-            />
+        <div className="grid gap-3">
+          <Label htmlFor="website">Website</Label>
+          <Controller
+            name="website"
+            control={control}
+            defaultValue=""
+            rules={{
+              pattern: {
+                value:
+                  /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+                message: "Invalid website URL",
+              },
+            }}
+            render={({
+              field: { value, ...fieldProps },
+              fieldState: { error },
+            }) => (
+              <>
+                <Input
+                  id="website"
+                  type="url"
+                  className={`w-full ${error ? "border-red-500" : ""}`}
+                  placeholder="Website"
+                  {...fieldProps}
+                  value={value ?? ""}
+                />
+                {error && (
+                  <p className="mt-1 text-sm text-red-500">{error.message}</p>
+                )}
+              </>
+            )}
+          />
         </div>
       </CardContent>
     </Card>
