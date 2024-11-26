@@ -13,11 +13,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   imagePath,
 }) => (
   <div className="flex flex-col items-center space-y-4 rounded-2xl bg-white p-8 text-center">
-    <div className="flex h-20 w-20 items-center justify-center">
+    <div className="relative flex h-20 w-20 items-center justify-center">
       <Image
         src={imagePath}
         alt={title}
-        className="h-full w-full object-contain"
+        fill
+        sizes="(max-width: 80px) 100vw"
+        className="object-contain"
       />
     </div>
     <h3 className="text-xl font-bold">{title}</h3>
