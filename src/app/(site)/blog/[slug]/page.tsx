@@ -3,8 +3,38 @@ import { FullPost } from "@/types/simple-blog-card";
 import Image from "next/image";
 import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { notFound } from "next/navigation";
+import { Metadata, ResolvingMetadata } from "next";
 
-export const revalidate = 30; // revalidate at most every hour
+export const revalidate = 30;
+
+// Type for generateMetadata
+type MetadataProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  props: MetadataProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const params = await props.params;
+  const data = await getData(params.slug);
+
+  if (!data) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+
+  return {
+    title: `${data.title} | Ready Set LLC`,
+    description: data.title,
+    openGraph: {
+      title: data.title,
+      images: [urlFor(data.mainImage).url()],
+    },
+  };
+}
 
 async function getData(slug: string) {
   const query = `
@@ -17,11 +47,9 @@ async function getData(slug: string) {
     }[0]`;
 
   const data = await client.fetch(query);
-
   return data;
 }
 
-// Define custom components for Portable Text
 const components: PortableTextComponents = {
   types: {
     image: ({ value }) => {
@@ -30,6 +58,8 @@ const components: PortableTextComponents = {
           src={urlFor(value).url()}
           alt={value.alt || "Blog Image"}
           className="mt-8 rounded-xl"
+          width={800}
+          height={600}
         />
       );
     },
@@ -40,7 +70,7 @@ const components: PortableTextComponents = {
   },
   block: {
     normal: ({ children }) => (
-      <p style={{ whiteSpace: 'pre-line', marginBottom: '2em' }}>{children}</p>
+      <p style={{ whiteSpace: "pre-line", marginBottom: "2em" }}>{children}</p>
     ),
     h1: ({ children }) => <h1 className="text-4xl font-bold">{children}</h1>,
     h2: ({ children }) => <h2 className="text-3xl font-bold">{children}</h2>,
@@ -69,9 +99,13 @@ const components: PortableTextComponents = {
   },
 };
 
-export default async function Page(props: { params: Promise<any> }) {
-  const params = await props.params;
-  const data: FullPost = await getData(params.slug);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const data: FullPost = await getData(slug);
 
   if (!data) {
     notFound();
@@ -97,11 +131,11 @@ export default async function Page(props: { params: Promise<any> }) {
               className="mt-8 rounded-xl"
             />
 
-            <div className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16" style={{ whiteSpace: 'pre-line' }}>
-              <PortableText
-                value={data.body}
-                components={components}
-              />
+            <div
+              className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16"
+              style={{ whiteSpace: "pre-line" }}
+            >
+              <PortableText value={data.body} components={components} />
             </div>
           </div>
         </div>

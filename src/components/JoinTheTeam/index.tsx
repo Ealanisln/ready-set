@@ -1,3 +1,4 @@
+// components/JoinOurTeam/index.tsx
 "use client";
 
 import { useState } from "react";
@@ -63,7 +64,59 @@ export default function JoinOurTeam() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-yellow-50">
+      {/* Hidden SEO content */}
+      <div className="sr-only" role="complementary" aria-label="Career Opportunities">
+        <h1>Career Opportunities at Ready Set Group LLC</h1>
+        <p>Join the Bay Area&apos;s leading business solutions provider, offering exciting career opportunities in logistics, delivery services, and virtual assistance. Since 2019, we&apos;ve been providing exceptional service to Silicon Valley&apos;s top tech companies, and we&apos;re growing our team of dedicated professionals.</p>
+        
+        <div role="navigation" aria-label="Available Positions">
+          <h2>Current Opportunities</h2>
+          <div>
+            <h3>Catering Delivery Specialists</h3>
+            <ul>
+              <li>Full-time and flexible schedule positions available</li>
+              <li>Temperature-controlled vehicle operation experience preferred</li>
+              <li>Food handling certification opportunities</li>
+              <li>Competitive pay and benefits</li>
+              <li>Growth opportunities within logistics operations</li>
+              <li>Local routes throughout the Bay Area</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3>Virtual Assistant Positions</h3>
+            <ul>
+              <li>Remote work opportunities available</li>
+              <li>Administrative and customer service experience valued</li>
+              <li>Full-time and part-time positions</li>
+              <li>Training and professional development provided</li>
+              <li>Opportunity to work with leading tech companies</li>
+              <li>Flexible scheduling options</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div role="contentinfo" aria-label="Company Benefits">
+          <h2>Why Work With Us?</h2>
+          <ul>
+            <li>Competitive compensation packages</li>
+            <li>Health and wellness benefits</li>
+            <li>Professional development opportunities</li>
+            <li>Flexible scheduling options</li>
+            <li>Positive work environment</li>
+            <li>Career advancement pathways</li>
+            <li>Team-oriented culture</li>
+            <li>Regular recognition programs</li>
+          </ul>
+          
+          <h3>Company Culture</h3>
+          <p>At Ready Set Group LLC, we foster a culture of excellence, innovation, and mutual respect. Our team members enjoy a supportive environment where their contributions are valued and professional growth is encouraged. We prioritize work-life balance while maintaining our commitment to exceptional service.</p>
+        </div>
+      </div>
+
+      {/* Existing visual content */}
       <div className="container mx-auto px-4 py-16 pt-36">
+        {/* Rest of your existing JSX code... */}
         <header className="mb-16 text-center">
           <h1 className="mb-4 text-4xl font-bold text-gray-800">
             Join Our Amazing Team!

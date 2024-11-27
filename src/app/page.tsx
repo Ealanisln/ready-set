@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title:
     "Ready Set Group LLC | Premier Bay Area Catering Delivery & Virtual Assistant Services",
   description:
-    "Since 2019, Ready Set has been the trusted delivery partner for Silicon Valley giants like Apple, Google, and Facebook. Offering specialized catering delivery and professional virtual assistant services across multiple industries. HIPAA and Food Safety certified.",
+    "Since 2019, Ready Set has been the trusted delivery partner for Silicon Valley giants like Apple, Google, and Facebook. Offering specialized catering delivery and professional virtual assistant services across multiple industries.",
   keywords: [
     "catering delivery",
     "virtual assistant services",
