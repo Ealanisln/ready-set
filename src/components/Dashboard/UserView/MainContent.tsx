@@ -2,22 +2,17 @@
 
 import React, { useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
 import Link from "next/link";
-import { PlusCircle, Users2, AlertCircle, Search } from "lucide-react";
+import { PlusCircle, Users2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserTable } from "./UserTable";
-import { UserFilter } from "./UserFilter";
 import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
+import { UserFilter } from "./UserFilter";
 
 interface User {
   id: string;
@@ -68,39 +63,43 @@ export const MainContent: React.FC<MainContentProps> = ({
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [paginationInfo, setPaginationInfo] = useState({
-    start: 0,
-    end: 0,
-    total: 0,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [activeTab, setActiveTab] = useState("active");
   const { toast } = useToast();
   const { data: session } = useSession();
 
-  const currentUserRole = session?.user?.type === "super_admin" ? "super_admin" : "admin";
+  const getFilteredUsers = useCallback(() => {
+    return users?.filter((user) => {
+      if (!user) return false;
+      if (filter && user.type !== filter) return false;
+      if (activeTab === "all") return true;
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          user.name?.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower) ||
+          user.contact_name?.toLowerCase().includes(searchLower)
+        );
+      }
+      return user.status === activeTab;
+    }) ?? [];
+  }, [users, filter, activeTab, searchTerm]);
 
-  const filteredUsers = users?.filter((user) => {
-    if (!user) return false;
-    if (filter && user.type !== filter) return false;
-    if (activeTab === "all") return true;
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        user.name?.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        user.contact_name?.toLowerCase().includes(searchLower)
-      );
-    }
-    return user.status === activeTab;
-  }) ?? [];
+  const calculatePaginationInfo = useCallback(() => {
+    const filteredUsers = getFilteredUsers();
+    const total = filteredUsers.length;
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, total);
 
-  const handlePaginationChange = (
-    start: number,
-    end: number,
-    total: number,
-  ) => {
-    setPaginationInfo({ start, end, total });
-  };
+    return {
+      start: total > 0 ? start + 1 : 0,
+      end,
+      total,
+      currentItems: filteredUsers.slice(start, end),
+      totalPages: Math.ceil(total / itemsPerPage)
+    };
+  }, [currentPage, itemsPerPage, getFilteredUsers]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -124,17 +123,20 @@ export const MainContent: React.FC<MainContentProps> = ({
     }
   }, [toast]);
 
-  const handleUserDeleted = useCallback(() => {
-    fetchUsers();
-    toast({
-      title: "User deleted",
-      description: "The user has been successfully removed.",
-    });
-  }, [fetchUsers, toast]);
-
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, activeTab, searchTerm]);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const { start, end, total, currentItems, totalPages } = calculatePaginationInfo();
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -191,55 +193,80 @@ export const MainContent: React.FC<MainContentProps> = ({
             <TabsContent value={activeTab} className="space-y-4">
               {loading ? (
                 <LoadingSkeleton />
-              ) : filteredUsers.length > 0 ? (
-                <div className="rounded-md border">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">User</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Contact</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.map((user) => (
-                        <tr key={user.id} className="border-b transition-colors hover:bg-muted/50">
-                          <td className="p-4">
-                            <div className="font-medium">{user.name || user.contact_name}</div>
-                            <div className="text-sm text-muted-foreground">{user.email}</div>
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${userTypeColors[user.type]}`}>
-                              {user.type.replace('_', ' ')}
-                            </span>
-                          </td>
-                          <td className="p-4 hidden md:table-cell">
-                            <div className="text-sm">{user.contact_number}</div>
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[user.status]}`}>
-                              {user.status}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              asChild
-                              className="mr-2"
-                            >
-                              <Link href={`/admin/users/${user.id}`}>
-                                Edit
-                              </Link>
-                            </Button>
-                          </td>
+              ) : currentItems.length > 0 ? (
+                <>
+                  <div className="rounded-md border">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">User</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Contact</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
                         </tr>
+                      </thead>
+                      <tbody>
+                        {currentItems.map((user) => (
+                          <tr key={user.id} className="border-b transition-colors hover:bg-muted/50">
+                            <td className="p-4">
+                              <Link 
+                                href={`/admin/users/${user.id}`}
+                                className="hover:underline"
+                              >
+                                <div className="font-medium">{user.name || user.contact_name}</div>
+                                <div className="text-sm text-muted-foreground">{user.email}</div>
+                              </Link>
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${userTypeColors[user.type]}`}>
+                                {user.type.replace('_', ' ')}
+                              </span>
+                            </td>
+                            <td className="p-4 hidden md:table-cell">
+                              <div className="text-sm">{user.contact_number}</div>
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[user.status]}`}>
+                                {user.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {totalPages > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      {[...Array(totalPages)].map((_, i) => (
+                        <Button
+                          key={i + 1}
+                          variant={currentPage === i + 1 ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(i + 1)}
+                        >
+                          {i + 1}
+                        </Button>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Users2 className="h-12 w-12 text-muted-foreground mb-4" />
@@ -253,7 +280,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               )}
 
               <div className="text-xs text-muted-foreground">
-                Showing {paginationInfo.start}-{paginationInfo.end} of {paginationInfo.total} users
+                Showing {start}-{end} of {total} users
               </div>
             </TabsContent>
           </Tabs>

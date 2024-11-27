@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose
 } from "@/components/ui/dialog";
 import { ChevronRight } from "lucide-react";
 import { ServiceName, serviceDetails } from './types';
@@ -47,7 +48,9 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({ service, children }) => {
           </ul>
         </div>
         <div className="mt-6 flex justify-end">
-          <Button variant="outline">Close</Button>
+          <DialogClose asChild>
+            <Button variant="outline">Close</Button>
+          </DialogClose>
         </div>
       </DialogContent>
     </Dialog>
