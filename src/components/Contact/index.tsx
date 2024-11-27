@@ -58,6 +58,35 @@ const Contact = () => {
 
   return (
     <section id="contact" className="relative py-20 md:py-[120px]">
+
+
+
+       {/* Hidden SEO content */}
+       <div className="sr-only" role="complementary" aria-label="Contact Methods">
+        <h2>Get in Touch with Ready Set</h2>
+        <p>Ready Set Group LLC welcomes inquiries about our premium business solutions. Whether you need catering delivery services or virtual assistant support, our team is here to help.</p>
+        
+        <div role="contentinfo" aria-label="Contact Methods">
+          <h3>Ways to Connect</h3>
+          <ul>
+            <li>Email: info@ready-set.co - For general inquiries and quote requests</li>
+            <li>Phone Support: Available during business hours for immediate assistance</li>
+            <li>Online Form: Submit your request through our secure contact form</li>
+            <li>Service Areas: Covering the entire Bay Area and Austin metropolitan region</li>
+          </ul>
+        </div>
+        
+        <div role="contentinfo" aria-label="Service Inquiries">
+          <h3>Information We Need</h3>
+          <ul>
+            <li>Contact details for prompt response</li>
+            <li>Service type needed (Logistics or Virtual Assistant)</li>
+            <li>Preferred service area</li>
+            <li>Timeline and scheduling requirements</li>
+            <li>Specific service requirements or special instructions</li>
+          </ul>
+        </div>
+      </div>
       <div className="absolute left-0 top-0 -z-[1] h-full w-full dark:bg-dark"></div>
       <div className="absolute left-0 top-0 -z-[1] h-1/2 w-full bg-[#E9F9FF] dark:bg-dark-700 lg:h-[45%] xl:h-1/2"></div>
       <div className="container px-4">

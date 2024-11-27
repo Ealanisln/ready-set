@@ -1,3 +1,4 @@
+// components/Hero/index.tsx
 "use client";
 
 import React from "react";
@@ -83,12 +84,45 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen p-4">
-      {/* Yellow background */}
+      {/* Hidden SEO content */}
+      <div className="sr-only" role="complementary" aria-label="Company Overview">
+        <h1>Ready Set Group LLC - Bay Area&apos;s Premier Business Solutions Provider</h1>
+        <p>Ready Set Group LLC, founded in 2019, has established itself as a cornerstone of Silicon Valley&apos;s business infrastructure. Our comprehensive suite of services, including specialized catering delivery and virtual assistant solutions, has earned the trust of industry leaders like Apple, Google, and Facebook. As a HIPAA-compliant and food safety-certified organization, we maintain the highest standards of professionalism and reliability across the Bay Area.</p>
+        
+        <div role="navigation" aria-label="Main Services">
+          <h2>Our Comprehensive Service Portfolio</h2>
+          <ul>
+            <li>
+              <h3>Logistics Excellence</h3>
+              <p>Our logistics division specializes in time-sensitive deliveries, handling everything from corporate catering to specialized item transport. We maintain strict food safety protocols and offer same-day delivery options across the Bay Area.</p>
+            </li>
+            <li>
+              <h3>Virtual Assistant Solutions</h3>
+              <p>Our VA services support diverse sectors including real estate, education, and retail. We provide comprehensive administrative support, from order management to customer service, all backed by our commitment to confidentiality and efficiency.</p>
+            </li>
+            <li>
+              <h3>Career Growth Opportunities</h3>
+              <p>Join our dynamic team of professionals serving Silicon Valley&apos;s most innovative companies. We offer competitive positions in logistics, customer service, and administrative support roles.</p>
+            </li>
+          </ul>
+        </div>
+        
+        <div role="contentinfo" aria-label="Company Highlights">
+          <h2>Why Choose Ready Set Group LLC?</h2>
+          <ul>
+            <li>HIPAA-compliant operations ensuring data security</li>
+            <li>Food safety certified delivery services</li>
+            <li>Trusted partner to Silicon Valley&apos;s leading tech companies</li>
+            <li>Comprehensive business support solutions</li>
+            <li>Professional team with industry expertise</li>
+            <li>Flexible service options tailored to client needs</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Visual content */}
       <div className="fixed inset-0 -z-20 bg-primary" />
-      
-          {/* Background image container */}
-          <div className="fixed inset-0 -z-10">
-        {/* WebP version */}
+      <div className="fixed inset-0 -z-10">
         <Image
           src="/images/hero/hero-bg.webp"
           alt="Hero background"
@@ -97,7 +131,6 @@ const Hero: React.FC = () => {
           priority
           quality={100}
           onError={(e) => {
-            // If WebP fails, replace source with PNG
             const imgElement = e.currentTarget;
             imgElement.src = '/images/hero/hero-bg.png';
           }}

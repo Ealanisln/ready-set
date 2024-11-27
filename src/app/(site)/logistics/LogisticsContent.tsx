@@ -1,3 +1,4 @@
+// components/Logistics/LogisticsContent.tsx
 "use client";
 
 import { useState } from "react";
@@ -8,7 +9,6 @@ import { QuoteRequestForm } from "@/components/Logistics/QuoteRequestForm";
 import ServiceDialog from "./ServiceDialog";
 import { ServiceName } from "./types";
 
-// Main Component
 export default function LogisticsContent() {
   const [formSubmitted, setFormSubmitted] = useState(false);
 
@@ -17,7 +17,6 @@ export default function LogisticsContent() {
     setFormSubmitted(true);
   };
 
-  // Define services with proper typing
   const services: Array<{
     icon: React.ReactNode;
     title: ServiceName;
@@ -45,8 +44,88 @@ export default function LogisticsContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Gradient Overlay */}
+      {/* Hidden SEO content */}
+      <div
+        className="sr-only"
+        role="complementary"
+        aria-label="Logistics Services Overview"
+      >
+        <h1>Premium Catering Logistics Services - Ready Set Group LLC</h1>
+        <p>
+          Ready Set Group LLC has been the Bay Area&apos;s premier catering logistics
+          provider since 2019, delivering excellence to Silicon Valley&apos;s most
+          prestigious companies. Our specialized delivery services combine
+          state-of-the-art temperature control with professional handling to
+          ensure your catering arrives in perfect condition.
+        </p>
+
+        <div role="navigation" aria-label="Core Services">
+          <h2>Comprehensive Logistics Solutions</h2>
+          <ul>
+            <li>
+              <h3>Temperature-Controlled Fleet</h3>
+              <p>
+                Our specialized fleet maintains optimal temperature throughout
+                transit, ensuring food quality and safety for corporate catering
+                deliveries. Each vehicle is equipped with advanced monitoring
+                systems and follows strict sanitization protocols.
+              </p>
+            </li>
+            <li>
+              <h3>Professional Handling</h3>
+              <p>
+                Our trained logistics team specializes in handling premium
+                catering items, following detailed protocols for loading,
+                transport, and delivery. We maintain food safety certification
+                and HACCP compliance throughout the delivery process.
+              </p>
+            </li>
+            <li>
+              <h3>Time-Critical Delivery</h3>
+              <p>
+                Utilizing advanced route optimization and real-time tracking, we
+                guarantee punctual delivery for your corporate events. Our
+                dedicated dispatch team monitors each delivery to ensure timely
+                arrival and proper handling.
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div role="contentinfo" aria-label="Service Excellence">
+          <h2>Industry Leadership</h2>
+          <p>
+            Trusted by Silicon Valley giants including Apple, Google, Facebook,
+            and Netflix, our logistics services set the standard for corporate
+            catering delivery. We maintain a 99.9% on-time delivery rate while
+            ensuring food safety and quality.
+          </p>
+
+          <h3>Key Advantages</h3>
+          <ul>
+            <li>Advanced temperature monitoring systems</li>
+            <li>Professional handling protocols</li>
+            <li>Real-time delivery tracking</li>
+            <li>Dedicated account management</li>
+            <li>Flexible scheduling options</li>
+            <li>Comprehensive insurance coverage</li>
+            <li>Emergency response protocols</li>
+            <li>Sustainable delivery practices</li>
+          </ul>
+
+          <h3>Service Areas</h3>
+          <p>
+            Serving the entire Bay Area including San Francisco, Silicon Valley,
+            San Jose, Oakland, and surrounding communities. Specialized in
+            corporate campus deliveries, tech office complexes, and large-scale
+            event venues.
+          </p>
+        </div>
+      </div>
+
+      {/* Existing visual content */}
       <div className="relative bg-gradient-to-r from-yellow-50 to-gray-50">
+        {/* Rest of your existing JSX code... */}
         <div className="absolute inset-0 bg-black/5" />
         <div className="container relative mx-auto px-4 pb-24 pt-32">
           <div className="mx-auto max-w-3xl text-center">
