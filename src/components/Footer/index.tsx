@@ -10,7 +10,7 @@ const Footer = () => {
       <div className="container">
         <div className="-mx-4 flex flex-wrap">
           <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-4/12 xl:w-3/12">
-            <div className="mb-10 w-full">
+            <div className="mb-10 w-full text-center">
               <Link href="/" className="mb-6 inline-block max-w-[160px]">
                 <Image
                   src="/images/logo/logo-dark.png"
@@ -20,14 +20,15 @@ const Footer = () => {
                   className="max-w-full"
                 />
               </Link>
-              <p className="mb-8 max-w-[270px] text-base text-gray-400">
+              <p className="mx-auto mb-8 text-base text-gray-400">
                 Always ready for you.
               </p>
-              <div className="-mx-3 flex items-center">
+              <div className="flex items-center justify-center gap-2">
                 <Link
                   aria-label="Facebook"
                   href="https://www.facebook.com/ReadySetCoGroup/"
-                  className="mx-2 px-3 text-gray-400 hover:text-white"
+                  target="_blank"
+                  className="text-gray-400 hover:text-white"
                 >
                   <svg
                     width="22"
@@ -43,6 +44,7 @@ const Footer = () => {
                 <Link
                   aria-label="tiktok"
                   href="https://www.tiktok.com/@readyset.co"
+                  target="_blank"
                   className="mx-2 px-3 text-gray-400 hover:text-white"
                 >
                   <svg
@@ -59,6 +61,7 @@ const Footer = () => {
                 <Link
                   aria-label="instagram"
                   href="https://www.instagram.com/readyset.co/"
+                  target="_blank"
                   className="mx-2 px-3 text-gray-400 hover:text-white"
                 >
                   <svg
@@ -72,6 +75,35 @@ const Footer = () => {
                     <path d="M11.0297 14.4305C12.9241 14.4305 14.4598 12.8948 14.4598 11.0004C14.4598 9.10602 12.9241 7.57031 11.0297 7.57031C9.13529 7.57031 7.59958 9.10602 7.59958 11.0004C7.59958 12.8948 9.13529 14.4305 11.0297 14.4305Z" />
                     <path d="M14.7554 1.8335H7.24463C4.25807 1.8335 1.83334 4.25823 1.83334 7.24479V14.6964C1.83334 17.7421 4.25807 20.1668 7.24463 20.1668H14.6962C17.7419 20.1668 20.1667 17.7421 20.1667 14.7555V7.24479C20.1667 4.25823 17.7419 1.8335 14.7554 1.8335ZM11.0296 15.4948C8.51614 15.4948 6.53496 13.4545 6.53496 11.0002C6.53496 8.54586 8.54571 6.50554 11.0296 6.50554C13.4839 6.50554 15.4946 8.54586 15.4946 11.0002C15.4946 13.4545 13.5134 15.4948 11.0296 15.4948ZM17.2393 6.91952C16.9436 7.24479 16.5 7.42221 15.9973 7.42221C15.5538 7.42221 15.1102 7.24479 14.7554 6.91952C14.4301 6.59425 14.2527 6.18027 14.2527 5.67758C14.2527 5.17489 14.4301 4.79049 14.7554 4.43565C15.0807 4.08081 15.4946 3.90339 15.9973 3.90339C16.4409 3.90339 16.914 4.08081 17.2393 4.40608C17.535 4.79049 17.7419 5.23403 17.7419 5.70715C17.7124 6.18027 17.535 6.59425 17.2393 6.91952Z" />
                     <path d="M16.0276 4.96777C15.6432 4.96777 15.318 5.29304 15.318 5.67745C15.318 6.06186 15.6432 6.38713 16.0276 6.38713C16.412 6.38713 16.7373 6.06186 16.7373 5.67745C16.7373 5.29304 16.4416 4.96777 16.0276 4.96777Z" />
+                  </svg>
+                </Link>
+
+                <Link
+                  aria-label="LinkedIn"
+                  href="http://linkedin.com/company/ready-set-group-llc/"
+                  target="_blank"
+                  className="mx-2 px-3 text-gray-400 hover:text-white"
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="fill-current"
+                  >
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 22 22"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M20.3763 0H1.62375C0.726562 0 0 0.726562 0 1.62375V20.3763C0 21.2734 0.726562 22 1.62375 22H20.3763C21.2734 22 22 21.2734 22 20.3763V1.62375C22 0.726562 21.2734 0 20.3763 0ZM6.81094 18.7688H3.47969V8.25469H6.81094V18.7688ZM5.14531 6.81094C4.07656 6.81094 3.20625 5.94063 3.20625 4.87188C3.20625 3.80313 4.07656 2.93281 5.14531 2.93281C6.21406 2.93281 7.08438 3.80313 7.08438 4.87188C7.08438 5.94063 6.21406 6.81094 5.14531 6.81094ZM18.7688 18.7688H15.4375V13.6531C15.4375 12.4469 15.4375 10.8906 13.7719 10.8906C12.1063 10.8906 11.8328 12.2063 11.8328 13.5219V18.7688H8.50156V8.25469H11.6688V9.69844H11.7781C12.2063 8.86719 13.3125 8.00781 14.9781 8.00781C18.3594 8.00781 18.7688 10.2094 18.7688 13.0156V18.7688Z"
+                        fill="currentColor"
+                      />
+                    </svg>
                   </svg>
                 </Link>
               </div>
@@ -208,7 +240,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/#"
+                    href="/blog"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Blog
