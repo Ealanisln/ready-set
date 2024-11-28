@@ -37,7 +37,6 @@ const Contact = () => {
         reset();
       }, 3000);
     } catch (error: unknown) {
-      // Explicitly type error as unknown
       let errorMessage =
         "We're sorry, there was an error sending your message.";
 
@@ -58,24 +57,40 @@ const Contact = () => {
 
   return (
     <section id="contact" className="relative py-20 md:py-[120px]">
-
-
-
-       {/* Hidden SEO content */}
-       <div className="sr-only" role="complementary" aria-label="Contact Methods">
+      {/* Hidden SEO content */}
+      <div
+        className="sr-only"
+        role="complementary"
+        aria-label="Contact Methods"
+      >
         <h2>Get in Touch with Ready Set</h2>
-        <p>Ready Set Group LLC welcomes inquiries about our premium business solutions. Whether you need catering delivery services or virtual assistant support, our team is here to help.</p>
-        
+        <p>
+          Ready Set Group LLC welcomes inquiries about our premium business
+          solutions. Whether you need catering delivery services or virtual
+          assistant support, our team is here to help.
+        </p>
+
         <div role="contentinfo" aria-label="Contact Methods">
           <h3>Ways to Connect</h3>
           <ul>
-            <li>Email: info@ready-set.co - For general inquiries and quote requests</li>
-            <li>Phone Support: Available during business hours for immediate assistance</li>
-            <li>Online Form: Submit your request through our secure contact form</li>
-            <li>Service Areas: Covering the entire Bay Area and Austin metropolitan region</li>
+            <li>
+              Email: info@ready-set.co - For general inquiries and quote
+              requests
+            </li>
+            <li>
+              Phone Support: Available during business hours for immediate
+              assistance
+            </li>
+            <li>
+              Online Form: Submit your request through our secure contact form
+            </li>
+            <li>
+              Service Areas: Covering the entire Bay Area and Austin
+              metropolitan region
+            </li>
           </ul>
         </div>
-        
+
         <div role="contentinfo" aria-label="Service Inquiries">
           <h3>Information We Need</h3>
           <ul>
@@ -87,8 +102,9 @@ const Contact = () => {
           </ul>
         </div>
       </div>
+
       <div className="absolute left-0 top-0 -z-[1] h-full w-full dark:bg-dark"></div>
-      <div className="absolute left-0 top-0 -z-[1] h-1/2 w-full bg-[#E9F9FF] dark:bg-dark-700 lg:h-[45%] xl:h-1/2"></div>
+      <div className="absolute left-0 top-0 -z-[1] h-1/2 w-full bg-amber-50 dark:bg-dark-700 lg:h-[45%] xl:h-1/2"></div>
       <div className="container px-4">
         <div className="-mx-4 flex flex-wrap items-center">
           <div className="w-full px-4 lg:w-7/12 xl:w-8/12">
@@ -103,7 +119,7 @@ const Contact = () => {
               </div>
               <div className="mb-12 flex flex-wrap justify-between lg:mb-0">
                 <div className="mb-8 flex w-[330px] max-w-full">
-                  <div className="mr-6 text-[32px] text-primary">
+                  <div className="mr-6 text-[32px] text-yellow-600">
                     <svg
                       width="29"
                       height="35"
@@ -126,7 +142,7 @@ const Contact = () => {
                   </div>
                 </div>
                 <div className="mb-8 flex w-[330px] max-w-full">
-                  <div className="mr-6 text-[32px] text-primary">
+                  <div className="mr-6 text-[32px] text-yellow-600">
                     <svg
                       width="34"
                       height="25"
@@ -156,8 +172,7 @@ const Contact = () => {
           <div className="w-full px-4 lg:w-5/12 xl:w-4/12">
             <div
               className="wow fadeInUp rounded-lg bg-white px-8 py-10 shadow-testimonial dark:bg-dark-2 dark:shadow-none sm:px-10 sm:py-12 md:p-[60px] lg:p-10 lg:px-10 lg:py-12 2xl:p-[60px]"
-              data-wow-delay=".2s
-              "
+              data-wow-delay=".2s"
             >
               <h3 className="mb-8 text-2xl font-semibold text-dark dark:text-white md:text-[28px] md:leading-[1.42]">
                 Send us a Message
@@ -179,7 +194,7 @@ const Contact = () => {
                     type="text"
                     name="name"
                     placeholder="Adam Gelius"
-                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
+                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-yellow-600 focus:outline-none dark:border-dark-3 dark:text-white"
                   />
                   {errors.name && (
                     <span className="mt-1 text-sm text-red-500">
@@ -199,7 +214,7 @@ const Contact = () => {
                     type="email"
                     name="email"
                     placeholder="example@yourmail.com"
-                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
+                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-yellow-600 focus:outline-none dark:border-dark-3 dark:text-white"
                   />
                   {errors.email && (
                     <span className="mt-1 text-sm text-red-500">
@@ -219,7 +234,7 @@ const Contact = () => {
                     type="text"
                     name="phone"
                     placeholder="415-123-2222"
-                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
+                    className="w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-yellow-600 focus:outline-none dark:border-dark-3 dark:text-white"
                   />
                   {errors.phone && (
                     <span className="mt-1 text-sm text-red-500">
@@ -242,7 +257,7 @@ const Contact = () => {
                     name="message"
                     rows={1}
                     placeholder="type your message here"
-                    className="w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-primary focus:outline-none dark:border-dark-3 dark:text-white"
+                    className="w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 text-dark placeholder:text-body-color/60 focus:border-yellow-600 focus:outline-none dark:border-dark-3 dark:text-white"
                   ></textarea>
                   {errors.email && (
                     <span className="mt-1 text-sm text-red-500">
@@ -253,18 +268,17 @@ const Contact = () => {
                 <div className="mb-0">
                   <Button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-md bg-primary px-10 py-3 text-base font-medium text-slate-600 transition duration-300 ease-in-out hover:bg-primary/90"
+                    className="inline-flex items-center justify-center rounded-md bg-yellow-500 px-10 py-3 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-yellow-600"
                   >
                     Send
                   </Button>
                 </div>
               </form>
-              {/* Display confirmation or error message */}
               {message && (
                 <div
                   className={`mt-4 rounded p-3 ${
                     message.type === "success"
-                      ? "bg-yellow-200 text-green-800"
+                      ? "bg-yellow-100 text-yellow-800"
                       : "bg-red-200 text-red-800"
                   }`}
                 >

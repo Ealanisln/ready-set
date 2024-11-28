@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChevronRight, Truck, Headphones, Users } from "lucide-react";
 import Link from "next/link";
 import sendEmail from "@/app/actions/email";
+import { CateringModal } from "./CateringModal";
+import { VAModal } from "./VAModal";
 
 interface FormInputs {
   name: string;
@@ -127,6 +129,7 @@ export default function JoinOurTeam() {
         </header>
 
         <div className="mb-16 grid gap-12 md:grid-cols-2">
+          {/* Catering Deliveries Card */}
           <div className="transform rounded-lg bg-white p-8 shadow-lg transition-transform duration-300 hover:scale-105">
             <Truck className="mb-4 h-12 w-12 text-yellow-400" />
             <h2 className="mb-4 text-2xl font-semibold text-gray-800">
@@ -136,11 +139,10 @@ export default function JoinOurTeam() {
               Do you have experience in catering deliveries? Join our team and
               help us deliver exceptional dining experiences to our clients.
             </p>
-            <Button className="bg-yellow-400 text-gray-800 hover:bg-yellow-500">
-              Learn More <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+            <CateringModal />
           </div>
 
+          {/* Virtual Assistant Card */}
           <div className="transform rounded-lg bg-white p-8 shadow-lg transition-transform duration-300 hover:scale-105">
             <Headphones className="mb-4 h-12 w-12 text-yellow-400" />
             <h2 className="mb-4 text-2xl font-semibold text-gray-800">
@@ -150,14 +152,7 @@ export default function JoinOurTeam() {
               Are you a talented virtual assistant? Put your skills to work and
               help our team stay organized and efficient.
             </p>
-            <Button asChild>
-              <Link
-                href="/va"
-                className="flex items-center bg-yellow-400 !text-gray-800 hover:bg-yellow-500"
-              >
-                Learn More <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <VAModal />
           </div>
         </div>
 
