@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { QuoteRequestForm } from "@/components/Logistics/QuoteRequestForm";
 import ServiceDialog from "./ServiceDialog";
 import { ServiceName } from "./types";
+import { useRouter } from 'next/router'
+
 
 export default function LogisticsContent() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -136,12 +138,20 @@ export default function LogisticsContent() {
               Bay Area&apos;s Most Trusted Catering Delivery Partner Since 2019
             </p>
             <div className="flex justify-center gap-4">
-              <Button className="bg-yellow-400 px-8 py-6 text-gray-800 hover:bg-yellow-500">
-                Get Started <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="px-8 py-6">
-                Learn More
-              </Button>
+            <Button asChild 
+            className="bg-yellow-400 px-8 py-6 text-gray-800 hover:bg-yellow-500">
+            <a href="/get-started">
+            Get Started <ChevronRight className="ml-2 h-4 w-4" />
+            </a>
+            </Button>
+            <Button 
+            variant="outline" 
+            asChild 
+            className="px-8 py-6">
+            <a href="/learn-more">
+              Learn More
+            </a>
+          </Button>
             </div>
           </div>
         </div>
