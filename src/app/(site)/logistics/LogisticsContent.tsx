@@ -140,7 +140,7 @@ export default function LogisticsContent() {
             <div className="flex justify-center gap-4">
             <Button asChild 
             className="bg-yellow-400 px-8 py-6 text-gray-800 hover:bg-yellow-500">
-            <a href="/get-started">
+            <a href="src/components/Templates/page-in-process.tsx">
             Get Started <ChevronRight className="ml-2 h-4 w-4" />
             </a>
             </Button>
