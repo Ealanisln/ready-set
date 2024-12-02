@@ -166,7 +166,7 @@ const Hero: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.5 }}
-            className="mt-4 text-balance text-xl text-black dark:text-gray-200 sm:mt-6 sm:text-2xl"
+            className="mt-4 text-balance text-xl text-white dark:text-gray-200 sm:mt-6 sm:text-2xl"
           >
             How can we help?
           </MotionHeading>

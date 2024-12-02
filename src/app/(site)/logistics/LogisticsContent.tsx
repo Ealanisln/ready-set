@@ -1,6 +1,7 @@
 // components/Logistics/LogisticsContent.tsx
 "use client";
 
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Truck, Clock, Shield, Check } from "lucide-react";
@@ -9,6 +10,7 @@ import { QuoteRequestForm } from "@/components/Logistics/QuoteRequestForm";
 import ServiceDialog from "./ServiceDialog";
 import { ServiceName } from "./types";
 import { useRouter } from 'next/router'
+
 
 
 export default function LogisticsContent() {
@@ -140,7 +142,7 @@ export default function LogisticsContent() {
             <div className="flex justify-center gap-4">
             <Button asChild 
             className="bg-yellow-400 px-8 py-6 text-gray-800 hover:bg-yellow-500">
-            <a href="/Templates/page-in-process">
+            <a href="/logistics/in-process">
             Get Started <ChevronRight className="ml-2 h-4 w-4" />
             </a>
             </Button>
