@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
       <div className="bg-white shadow-md rounded-lg p-8">
         <p className="text-gray-600 mb-6">
           We are actively working on our comprehensive privacy policy to ensure transparency 
-          and protect our users' data. Our team is carefully crafting a detailed document 
+          and protect our users data. Our team is carefully crafting a detailed document 
           that will outline:
         </p>
 
