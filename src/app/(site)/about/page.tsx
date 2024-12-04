@@ -5,7 +5,7 @@ import Team from "@/components/Team";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Ready Set | Professional Delivery & Business Services in SF Bay Area & Austin",
+  title: "About Us | Ready Set Business Solutions",
   description: "Since 2019, Ready Set has delivered excellence through HIPAA-compliant, food safety certified services across San Francisco Bay Area and Austin. Our professional team specializes in same-day delivery, catering setup, and emergency courier services with a commitment to exceptional care and reliability.",
   keywords: [
     "Ready Set delivery",
