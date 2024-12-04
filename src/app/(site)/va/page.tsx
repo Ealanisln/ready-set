@@ -10,7 +10,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title:
-    "Virtual Assistant Services | Ready Set - Business Optimization & VA Solutions",
+    "Virtual Assistant Services | Ready Set",
   description:
     "Transform your business operations with Ready Set's comprehensive virtual assistant solutions. Beyond just VA staffing, we optimize processes, implement technology, and create scalable systems to help you save 20+ hours weekly and achieve true work-life balance.",
   keywords: [
