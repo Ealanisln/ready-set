@@ -10,7 +10,8 @@ export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Ready Set Blog | Insights on Logistics & Virtual Assistant Services",
-  description: "Expert insights on catering delivery logistics, virtual assistant services, and business solutions in the Bay Area. Stay updated with industry trends, tips, and best practices from Ready Set Group LLC.",
+  description:
+    "Expert insights on catering delivery logistics, virtual assistant services, and business solutions in the Bay Area. Stay updated with industry trends, tips, and best practices from Ready Set Group LLC.",
   keywords: [
     "logistics blog",
     "virtual assistant insights",
@@ -26,11 +27,12 @@ export const metadata: Metadata = {
     "Silicon Valley logistics",
     "business management",
     "service excellence",
-    "industry best practices"
+    "industry best practices",
   ],
   openGraph: {
     title: "Ready Set Blog | Business Insights & Industry Expertise",
-    description: "Discover expert insights on logistics, virtual assistant services, and business solutions. Learn from Bay Area&apos;s leading business solutions provider.",
+    description:
+      "Discover expert insights on logistics, virtual assistant services, and business solutions. Learn from Bay Area&apos;s leading business solutions provider.",
     type: "website",
     locale: "en_US",
     siteName: "Ready Set Group LLC",
@@ -38,7 +40,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Ready Set Blog | Business Solutions Insights",
-    description: "Expert articles on logistics, virtual assistant services, and business solutions from Ready Set Group LLC.",
+    description:
+      "Expert articles on logistics, virtual assistant services, and business solutions from Ready Set Group LLC.",
   },
 };
 
@@ -71,8 +74,13 @@ export default async function Blog() {
       {/* Hidden SEO content */}
       <div className="sr-only" role="complementary" aria-label="Blog Overview">
         <h1>Ready Set Group LLC Blog - Industry Insights & Expertise</h1>
-        <p>Welcome to the Ready Set Blog, your source for expert insights on logistics, virtual assistant services, and business solutions in the Bay Area. Our team of industry professionals shares valuable knowledge, tips, and best practices to help your business thrive.</p>
-        
+        <p>
+          Welcome to the Ready Set Blog, your source for expert insights on
+          logistics, virtual assistant services, and business solutions in the
+          Bay Area. Our team of industry professionals shares valuable
+          knowledge, tips, and best practices to help your business thrive.
+        </p>
+
         <div role="navigation" aria-label="Blog Categories">
           <h2>Expert Knowledge Base</h2>
           <div>
@@ -86,7 +94,7 @@ export default async function Blog() {
               <li>Quality control measures</li>
             </ul>
           </div>
-          
+
           <div>
             <h3>Virtual Assistant Excellence</h3>
             <ul>
@@ -99,11 +107,16 @@ export default async function Blog() {
             </ul>
           </div>
         </div>
-        
+
         <div role="contentinfo" aria-label="Industry Expertise">
           <h2>Industry Leadership</h2>
-          <p>Our blog showcases insights from experienced professionals who have served Silicon Valley&apos;s leading companies. Learn from real-world experiences and stay updated with the latest trends in business solutions.</p>
-          
+          <p>
+            Our blog showcases insights from experienced professionals who have
+            served Silicon Valley&apos;s leading companies. Learn from
+            real-world experiences and stay updated with the latest trends in
+            business solutions.
+          </p>
+
           <h3>Featured Topics</h3>
           <ul>
             <li>Business efficiency strategies</li>

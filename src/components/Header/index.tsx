@@ -177,16 +177,17 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
   return (
     <>
       {pathUrl !== "/" || isVirtualAssistantPage ? (
-        <>
-          <Link
+        <div className="flex items-center gap-3">
+           <Link
             href="/signin"
-            className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 lg:block ${
-              sticky 
-                ? "text-dark dark:text-white"
+            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
+              ${sticky 
+                ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
                 : isVirtualAssistantPage 
-                  ? "text-white"
-                  : "text-dark dark:text-white"
-            }`}
+                  ? "bg-white/90 text-dark shadow-md hover:bg-white"
+                  : "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+              }
+            `}
           >
             Sign In
           </Link>
@@ -196,16 +197,17 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
           >
             Sign Up
           </Link>
-        </>
+        </div>
       ) : (
         <>
-          <Link
+       <Link
             href="/signin"
-            className={`hidden px-7 py-3 text-base font-medium hover:opacity-70 md:block ${
-              sticky 
-                ? "text-dark dark:text-white"
-                : "text-white dark:text-white"
-            }`}
+            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
+              ${sticky 
+                ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                : "bg-white/90 text-dark shadow-md hover:bg-white"
+              }
+            `}
           >
             Sign In
           </Link>
