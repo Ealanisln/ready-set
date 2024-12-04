@@ -38,10 +38,7 @@ const Breadcrumb = ({
                   </li>
                   <li>
                     <p className="flex items-center gap-[10px] text-base font-medium text-gray-800">
-                      <span className="text-gray-600">
-                        {" "}
-                        /{" "}
-                      </span>
+
                       {pageDescription}
                     </p>
                   </li>
