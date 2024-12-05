@@ -1,10 +1,6 @@
 // src/app/api/register/route.ts
-
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
-import sgMail from "@sendgrid/mail";
 
 const prisma = new PrismaClient();
 
@@ -55,41 +51,6 @@ type RequestBody =
   | ClientFormData
   | DriverFormData
   | HelpDeskFormData;
-
-const sendRegistrationEmail = async (
-  email: string,
-  temporaryPassword: string,
-  passwordResetToken: string,
-) => {
-  sgMail.setApiKey(process.env.SEND_API_KEY || "");
-
-  const body = `
-      <h1>Welcome to Ready Set Platform</h1>
-      <p>Your account has been successfully created. Here are your login details:</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
-      <p>For security reasons, you will be required to change your password upon your first login.</p>
-      <p>Please click on the following link to log in and change your password:</p>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/change-password?token=${passwordResetToken}">Change Password</a>
-      <p>This link will expire in 24 hours.</p>
-      <p>If you did not request this account, please ignore this email.</p>
-    `;
-
-  const msg = {
-    to: email,
-    from: process.env.FROM_EMAIL || "emmanuel@alanis.dev", // Update this with your verified sender email
-    subject: "Welcome to Our Platform - Account Created",
-    html: body,
-  };
-
-  try {
-    await sgMail.send(msg);
-    console.log("Registration email sent successfully");
-  } catch (error) {
-    console.error("Error sending registration email:", error);
-    throw new Error("Failed to send registration email");
-  }
-};
 
 export async function POST(request: Request) {
   try {
@@ -154,18 +115,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate a temporary password
-    const temporaryPassword = crypto.randomBytes(4).toString("hex");
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
-
-    // Generate a password reset token
-    const passwordResetToken = crypto.randomBytes(32).toString("hex");
-    const passwordResetTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-
     const userData: Prisma.userCreateInput = {
       email: email.toLowerCase(),
       contact_number: phoneNumber,
-      password: hashedPassword,
       type: userType as users_type,
       name:
         userType === "driver" || userType === "helpdesk"
@@ -183,9 +135,7 @@ export async function POST(request: Request) {
       zip: body.zip,
       created_at: new Date(),
       updated_at: new Date(),
-      isTemporaryPassword: true,
-      passwordResetToken,
-      passwordResetTokenExp,
+      isTemporaryPassword: false,
 
       // Conditional fields
       ...(userType !== "driver" &&
@@ -270,20 +220,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // TODO: Send email with temporary password and reset token to user
-    // You should implement an email sending function here
-    // Example: await sendRegistrationEmail(newUser.email, temporaryPassword, passwordResetToken);
-
-    await sendRegistrationEmail(
-      newUser.email!,
-      temporaryPassword,
-      passwordResetToken,
-    );
-
     return NextResponse.json(
       {
-        message:
-          "User created successfully! Please check your email for login instructions.",
+        message: "User created successfully!",
       },
       { status: 200 },
     );
