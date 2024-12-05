@@ -82,33 +82,39 @@ model on_demand {
   updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
   delivery_address_id String
   driver_status       driver_status?
-  dispatch            dispatch[]
-  fileUploads         file_upload[]
-  address             address                @relation("PickupAddress", fields: [address_id], references: [id])
-  user                user                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // Relations
+  address          address       @relation("PickupAddress", fields: [address_id], references: [id])
+  delivery_address address       @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
+  user             user          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  dispatch         dispatch[]
+  fileUploads      file_upload[]
 }
 
 model address {
-  id               String             @id @default(cuid())
-  county           String?
-  street1          String
-  street2          String?
-  city             String
-  state            String
-  zip              String
-  createdAt        DateTime           @default(now())
-  createdBy        String?
-  isRestaurant     Boolean            @default(false)
-  isShared         Boolean            @default(false)
-  locationNumber   String?
-  parkingLoading   String?
-  updatedAt        DateTime           @updatedAt
-  name             String?
-  creator          user?              @relation(fields: [createdBy], references: [id])
-  pickupRequests   catering_request[] @relation("PickupAddress")
-  deliveryRequests catering_request[] @relation("DeliveryAddress")
-  onDemandsPickup  on_demand[]        @relation("PickupAddress")
-  userAddresses    userAddress[]
+  id             String   @id @default(cuid())
+  county         String?
+  street1        String
+  street2        String?
+  city           String
+  state          String
+  zip            String
+  createdAt      DateTime @default(now())
+  createdBy      String?
+  isRestaurant   Boolean  @default(false)
+  isShared       Boolean  @default(false)
+  locationNumber String?
+  parkingLoading String?
+  updatedAt      DateTime @updatedAt
+  name           String?
+
+  // Relations
+  creator           user?              @relation(fields: [createdBy], references: [id])
+  pickupRequests    catering_request[] @relation("PickupAddress")
+  deliveryRequests  catering_request[] @relation("DeliveryAddress")
+  onDemandsPickup   on_demand[]        @relation("PickupAddress")
+  onDemandsDelivery on_demand[]        @relation("DeliveryAddress")
+  userAddresses     userAddress[]
 }
 
 model userAddress {
