@@ -187,6 +187,12 @@ const Footer = () => {
                   >
                     Refund policy
                   </Link>
+                  <p className="mt-10 text-center text-sm text-gray-400">
+                  Ready Set Group, LLC<br />
+                  166 Geary St<br />
+                  STE 1500 #1937<br />
+                  San Francisco, CA 94108
+                  </p>
                 </li>
               </ul>
             </div>
@@ -308,6 +314,7 @@ const Footer = () => {
                     Alanis Dev
                   </Link>
                 </p>
+                
               </div>
             </div>
           </div>
