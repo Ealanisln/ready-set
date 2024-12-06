@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import Newsletter from '@/components/Newsletter';
+
 
 const Footer = () => {
   return (
@@ -268,6 +270,17 @@ const Footer = () => {
                     About
                   </Link>
                 </li>
+                <li>
+  <Link
+    href="/about"
+    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+  >
+    About
+  </Link>
+</li>
+<li>
+  <NewsletterSignup />
+</li>
               </ul>
             </div>
           </div>
