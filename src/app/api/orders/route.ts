@@ -317,10 +317,10 @@ export async function POST(req: NextRequest) {
               select: {
                 name: true,
                 email: true,
-              },
+              }
             },
             address: true,
-            delivery_address: true, // Changed to match schema
+            delivery_address: true,
           },
         });
       } else {

@@ -1,18 +1,6 @@
-services:
-  app:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - POSTGRES_PRISMA_URL=postgresql://postgres:postgres@db:5432/mydatabase?pgbouncer=true&connection_limit=1
-      - POSTGRES_URL_NON_POOLING=postgresql://postgres:postgres@db:5432/mydatabase
-    env_file:
-      - .env.local
-    depends_on:
-      - db
+version: '3.8'
 
+services:
   db:
     image: postgres:15-alpine
     ports:
@@ -23,6 +11,11 @@ services:
       - POSTGRES_DB=mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

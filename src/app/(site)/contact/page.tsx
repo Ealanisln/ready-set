@@ -86,7 +86,7 @@ const ContactPage = () => {
         </div>
       </div>
 
-      <Breadcrumb pageName="Contact Page" pageDescription="About us"  />
+      <Breadcrumb pageName="Contact Page" />
       <Contact />
       <BayAreaMap />
       <AustinMap />
