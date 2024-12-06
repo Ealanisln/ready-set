@@ -1,11 +1,12 @@
-// src/app/api/register/route.ts
 import { NextResponse } from "next/server";
 import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 interface BaseFormData {
   email: string;
+  password: string;  // Required for registration
   phoneNumber: string;
   userType: users_type;
   street1: string;
@@ -46,30 +47,35 @@ interface HelpDeskFormData extends BaseFormData {
   name: string;
 }
 
-type RequestBody =
-  | VendorFormData
-  | ClientFormData
-  | DriverFormData
-  | HelpDeskFormData;
+type RequestBody = VendorFormData | ClientFormData | DriverFormData | HelpDeskFormData;
 
 export async function POST(request: Request) {
   try {
     const body: RequestBody = await request.json();
+    const { email, password, phoneNumber, userType } = body;
 
-    const { email, phoneNumber, userType } = body;
-
-    if (!email || !phoneNumber || !userType) {
+    // Basic field validation
+    if (!email || !password || !phoneNumber || !userType) {
       return NextResponse.json(
         {
           error: "Missing required fields",
-          missingFields: ["email", "phoneNumber", "userType"].filter(
-            (field) => !body[field as keyof RequestBody],
+          missingFields: ["email", "password", "phoneNumber", "userType"].filter(
+            (field) => !body[field as keyof RequestBody]
           ),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
+    // Password strength validation
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters long" },
+        { status: 400 }
+      );
+    }
+
+    // Additional required fields based on user type
     const commonFields = ["street1", "city", "state", "zip"];
     let requiredFields: string[] = [...commonFields];
 
@@ -89,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     const missingFields = requiredFields.filter(
-      (field) => !(body as any)[field],
+      (field) => !(body as any)[field]
     );
 
     if (missingFields.length > 0) {
@@ -98,10 +104,11 @@ export async function POST(request: Request) {
           error: `Missing required fields for ${userType}`,
           missingFields,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
+    // Check for existing user
     const exist = await prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
@@ -111,12 +118,17 @@ export async function POST(request: Request) {
     if (exist) {
       return NextResponse.json(
         { error: "User already exists!" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Prepare user data
     const userData: Prisma.userCreateInput = {
       email: email.toLowerCase(),
+      password: hashedPassword,
       contact_number: phoneNumber,
       type: userType as users_type,
       name:
@@ -137,33 +149,30 @@ export async function POST(request: Request) {
       updated_at: new Date(),
       isTemporaryPassword: false,
 
-      // Conditional fields
-      ...(userType !== "driver" &&
-        userType !== "helpdesk" && {
-          parking_loading: "parking" in body ? body.parking : undefined,
-          counties:
-            "countiesServed" in body
-              ? ((
-                  body as VendorFormData | ClientFormData
-                )?.countiesServed?.join(", ") ?? "")
-              : undefined,
-          time_needed:
-            "timeNeeded" in body
-              ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ")
-              : undefined,
-          frequency:
-            "frequency" in body
-              ? (body as VendorFormData | ClientFormData).frequency
-              : undefined,
-          head_count:
-            "head_count" in body
-              ? (body as ClientFormData).head_count
-              : undefined,
-          website:
-            "website" in body
-              ? (body as VendorFormData | ClientFormData).website
-              : undefined,
-        }),
+      // Conditional fields for vendor and client
+      ...(userType !== "driver" && userType !== "helpdesk" && {
+        parking_loading: "parking" in body ? body.parking : undefined,
+        counties:
+          "countiesServed" in body
+            ? ((body as VendorFormData | ClientFormData)?.countiesServed?.join(", ") ?? "")
+            : undefined,
+        time_needed:
+          "timeNeeded" in body
+            ? (body as VendorFormData | ClientFormData).timeNeeded.join(", ")
+            : undefined,
+        frequency:
+          "frequency" in body
+            ? (body as VendorFormData | ClientFormData).frequency
+            : undefined,
+        head_count:
+          "head_count" in body
+            ? (body as ClientFormData).head_count
+            : undefined,
+        website:
+          "website" in body
+            ? (body as VendorFormData | ClientFormData).website
+            : undefined,
+      }),
 
       // Vendor-specific fields
       ...(userType === "vendor" && {
@@ -178,12 +187,13 @@ export async function POST(request: Request) {
       }),
     };
 
+    // Create the user
     const newUser = await prisma.user.create({
       data: userData,
     });
 
-    // Creating a default address for the user
-    await prisma.address.create({
+    // Create default address
+    const address = await prisma.address.create({
       data: {
         name: "Main Address",
         street1: body.street1,
@@ -207,14 +217,11 @@ export async function POST(request: Request) {
       },
     });
 
-    // Creating a userAddress relation
+    // Create user-address relation
     await prisma.userAddress.create({
       data: {
         userId: newUser.id,
-        addressId: (await prisma.address.findFirst({
-          where: { createdBy: newUser.id },
-          select: { id: true },
-        }))!.id,
+        addressId: address.id,
         alias: "Main Address",
         isDefault: true,
       },
@@ -223,45 +230,45 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: "User created successfully!",
+        userId: newUser.id,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     console.error("Registration error:", error);
+    
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         return NextResponse.json(
           {
-            error:
-              "A unique constraint would be violated on the User model. (Duplicate email)",
+            error: "A unique constraint would be violated on the User model. (Duplicate email)",
           },
-          { status: 400 },
+          { status: 400 }
         );
       }
-      console.error("Prisma Client Known Request Error:", error.message);
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database error", details: error.message },
+        { status: 500 }
+      );
     }
+    
     if (error instanceof Prisma.PrismaClientInitializationError) {
-      console.error("Prisma Client Initialization Error:", error.message);
       return NextResponse.json(
-        { error: "Database connection error" },
-        { status: 500 },
+        { error: "Database connection error", details: error.message },
+        { status: 500 }
       );
     }
+    
     if (error instanceof Prisma.PrismaClientValidationError) {
-      console.error("Prisma Client Validation Error:", error.message);
       return NextResponse.json(
-        { error: "Invalid data provided" },
-        { status: 400 },
+        { error: "Invalid data provided", details: error.message },
+        { status: 400 }
       );
     }
-    if (error instanceof Error) {
-      console.error("Unexpected error:", error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 },
+      { error: "An unexpected error occurred", details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
     );
   }
 }
