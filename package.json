@@ -17,7 +17,7 @@
     "db:restore": "bun run scripts/restore-db.ts",
     "db": "bun run src/scripts/db-tasks.ts",
     "db:prod": "NODE_ENV=production bun run src/scripts/db-tasks.ts",
-    "test": "bun test",
+    "test": "bun test --preload ./test/test.setup.ts",
     "test:watch": "bun test --watch",
     "studio": "dotenv -e .env.local -- npx prisma studio"
   },
@@ -110,8 +110,10 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.1",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.14",
@@ -120,16 +122,21 @@
     "@types/prismjs": "^1.26.5",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/testing-library__dom": "^7.5.0",
+    "@types/testing-library__jest-dom": "^6.0.0",
+    "@types/testing-library__user-event": "^4.2.0",
     "autoprefixer": "^10.4.20",
     "bun-types": "^1.1.38",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.0.3",
     "jest-environment-jsdom": "^29.7.0",
+    "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "prisma": "5.7.0",
     "tailwindcss": "^3.4.16",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "overrides": {
     "@types/react": "npm:types-react@19.0.0-rc.1",
