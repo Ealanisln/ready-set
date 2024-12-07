@@ -12,3 +12,6 @@ coverage = true
 
 [debug]
 enabled = false
+
+[test]
+preload = ["./test.setup.ts"]
