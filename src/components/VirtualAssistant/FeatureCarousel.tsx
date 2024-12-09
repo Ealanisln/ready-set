@@ -40,7 +40,7 @@ export default function FeatureCarousel() {
             <h2 className="text-xl font-bold leading-tight text-white lg:text-2xl">
               YOUR <br /> PRODUCTIVITY
               <br />
-              PARNTER, ANYTIME
+              PARTNER, ANYTIME
               <br />
               ANYWHERE!
             </h2>
