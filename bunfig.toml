@@ -9,9 +9,6 @@ disable = false
 
 [test]
 coverage = true
-
+preload = ["./test/test.setup.ts"] 
 [debug]
 enabled = false
-
-[test]
-preload = ["./test.setup.ts"]
