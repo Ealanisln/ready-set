@@ -1,22 +1,47 @@
-import React, { useState } from 'react';
+"use client";
+
+import axios from 'axios';
+import React, { FormEvent, useState } from 'react';
+import toast from "react-hot-toast";
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [status, setStatus] = useState<
+    "success" | "error" | "loading" | "idle"
+  >("idle");
+  const [responseMsg, setResponseMsg] = useState<string>("");
+  const [statusCode, setStatusCode] = useState<number>();
 
-  const handleSubmit = (e) => {
+  async function handleSubscribe(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Add your newsletter signup logic here (e.g., API call)
-    console.log('Subscribing email:', email);
-    setSubscribed(true);
-    setEmail('');
-  };
+    setStatus("loading");
+    try {
+      const response = await axios.post("/api/subscribe", { email });
+
+      setStatus("success");
+      setStatusCode(response.status);
+      setEmail("");
+      setResponseMsg(response.data.message);
+      toast.success("Subscription was successful");
+
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setStatus("error");
+        setStatusCode(err.response?.status);
+        setResponseMsg(err.response?.data.error);
+        toast.error(err.response?.data.error);
+
+      }
+    }
+  }
+
 
   return (
     <div className="mt-4">
       <h3 className="text-base text-gray-400 mb-2">Subscribe to our Newsletter</h3>
       {!subscribed ? (
-        <form onSubmit={handleSubmit} className="flex">
+        <form onSubmit={handleSubscribe} className="flex">
           <input
             type="email"
             value={email}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import Newsletter from '@/components/Newsletter';
-
+import Newsletter from "@/components/Newsletter";
+import NewsletterSignup from "../Newsletter/newsLetterSignUp";
 
 const Footer = () => {
   return (
@@ -189,12 +189,6 @@ const Footer = () => {
                   >
                     Refund policy
                   </Link>
-                  <p className="mt-10 text-center text-sm text-gray-400">
-                  Ready Set Group, LLC<br />
-                  166 Geary St<br />
-                  STE 1500 #1937<br />
-                  San Francisco, CA 94108
-                  </p>
                 </li>
               </ul>
             </div>
@@ -271,17 +265,34 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-  <Link
-    href="/about"
-    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-  >
-    About
-  </Link>
-</li>
-<li>
-  <NewsletterSignup />
-</li>
+                  <Link
+                    href="/about"
+                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                  >
+                    About
+                  </Link>
+                </li>
               </ul>
+            </div>
+          </div>
+
+          <div className="w-full px-4 md:w-1/3 lg:w-6/12 xl:w-2/12">
+            <div className="mb-10 w-full">
+              <h4 className="mb-9 text-lg font-semibold text-white">
+                Contact & Updates
+              </h4>
+              <div className="space-y-4">
+                <NewsletterSignup />
+                <p className="text-sm text-gray-400">
+                  Ready Set Group, LLC
+                  <br />
+                  166 Geary St
+                  <br />
+                  STE 1500 #1937
+                  <br />
+                  San Francisco, CA 94108
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -327,7 +338,6 @@ const Footer = () => {
                     Alanis Dev
                   </Link>
                 </p>
-                
               </div>
             </div>
           </div>
