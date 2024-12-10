@@ -267,9 +267,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/about"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    About
+                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200">
                   </Link>
                 </li>
               </ul>
