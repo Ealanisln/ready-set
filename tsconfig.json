@@ -21,14 +21,23 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["bun-types", "@testing-library/jest-dom", "jest"]
+    "types": [
+      "bun-types",
+      "@testing-library/jest-dom",
+      "jest",
+      "node"
+    ],
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "experimentalDecorators": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "global.d.ts"
+    "global.d.ts",
+    "test/test.setup.ts"
   ],
-   "exclude": ["node_modules"]
+  "exclude": ["node_modules"]
 }

@@ -20,31 +20,86 @@ const Signin = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: "",
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      email: "",
+      password: "",
+      general: "",
+    };
+
+    // Email validation
+    if (!loginData.email) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(loginData.email)) {
+      newErrors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!loginData.password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const getErrorMessage = (error: string) => {
+    const errorMessages: { [key: string]: string } = {
+      CredentialsSignin: "Invalid email or password. Please try again.",
+      AccessDenied: "You don't have permission to access this resource.",
+      EmailNotVerified: "Please verify your email before signing in.",
+      AccountLocked: "Your account has been locked. Please contact support.",
+      TooManyAttempts: "Too many failed attempts. Please try again later.",
+      Default: "An unexpected error occurred. Please try again.",
+    };
+
+    return errorMessages[error] || errorMessages["Default"];
+  };
 
   const loginUser = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await signIn("credentials", {
         ...loginData,
         redirect: false,
       });
-  
+
       if (result?.error) {
         console.error("SignIn error:", result.error);
-        toast.error(result.error);
-        setLoading(false);
+        const errorMessage = getErrorMessage(result.error);
+        toast.error(errorMessage);
+        setErrors((prev) => ({ ...prev, general: errorMessage }));
         return;
       }
-  
+
       if (result?.ok) {
-        toast.success("Login successful");
-        
+        toast.success("Welcome back! Sign in successful.");
+
         // Get the session to check if the password is temporary
         const session = await getSession();
-        
+
         if (session?.user.isTemporaryPassword) {
+          // Using toast() instead of toast.info()
+          toast("Please change your temporary password to continue.", {
+            icon: "🔑", // Optional: adds an icon to make it look like an info message
+            duration: 4000,
+          });
           router.push("/change-password");
         } else {
           router.push("/");
@@ -52,10 +107,20 @@ const Signin = () => {
       }
     } catch (err) {
       console.error("Detailed error:", err);
-      toast.error("An error occurred during sign in. Please try again.");
+      const errorMessage =
+        "Unable to connect to the server. Please check your internet connection and try again.";
+      toast.error(errorMessage);
+      setErrors((prev) => ({ ...prev, general: errorMessage }));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };
 
   return (
@@ -86,7 +151,7 @@ const Signin = () => {
                 </Link>
               </div>
 
-                        {/* <SocialSignIn /> */}
+              {/* <SocialSignIn /> */}
 
               {/* <span className="z-1 relative my-8 block text-center">
                 <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
@@ -100,33 +165,63 @@ const Signin = () => {
                 setIsPassword={setIsPassword}
               /> */}
 
-              <form onSubmit={loginUser}>
+              <form onSubmit={loginUser} noValidate>
                 <div className="mb-[22px]">
                   <input
                     type="email"
+                    name="email"
                     placeholder="Email"
-                    onChange={(e) =>
-                      setLoginData({ ...loginData, email: e.target.value })
-                    }
-                    className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+                    value={loginData.email}
+                    onChange={handleInputChange}
+                    className={`w-full rounded-md border ${
+                      errors.email ? "border-red-500" : "border-stroke"
+                    } bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary`}
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-left text-sm text-red-500">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
+
                 <div className="mb-[22px]">
                   <input
                     type="password"
+                    name="password"
                     placeholder="Password"
-                    onChange={(e) =>
-                      setLoginData({ ...loginData, password: e.target.value })
-                    }
-                    className="w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+                    value={loginData.password}
+                    onChange={handleInputChange}
+                    className={`w-full rounded-md border ${
+                      errors.password ? "border-red-500" : "border-stroke"
+                    } bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary`}
                   />
+                  {errors.password && (
+                    <p className="mt-1 text-left text-sm text-red-500">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
+
+                {errors.general && (
+                  <div className="mb-4">
+                    <p className="text-sm text-red-500">{errors.general}</p>
+                  </div>
+                )}
+
                 <div className="mb-9">
                   <button
                     type="submit"
-                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90"
+                    disabled={loading}
+                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    Sign In {loading && <Loader />}
+                    {loading ? (
+                      <>
+                        <span>Signing in</span>
+                        <Loader />
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </button>
                 </div>
               </form>
