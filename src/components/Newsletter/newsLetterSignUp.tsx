@@ -3,6 +3,7 @@
 import axios from 'axios';
 import React, { FormEvent, useState } from 'react';
 import toast from "react-hot-toast";
+import Newsletter from '../Blog/Newsletter';
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
@@ -39,7 +40,9 @@ const NewsletterSignup = () => {
 
   return (
     <div className="mt-4">
-      <h3 className="text-base text-gray-400 mb-2">Subscribe to our Newsletter</h3>
+      <h3 className="mb-3 inline-block text-base text-gray-400">Subscribe to our</h3>
+      <div className="mt-2.3">
+      <h3 className="mb-3 inline-block text-base text-gray-400">Newsletter</h3>
       {!subscribed ? (
         <form onSubmit={handleSubscribe} className="flex">
           <input
@@ -60,6 +63,7 @@ const NewsletterSignup = () => {
       ) : (
         <p className="text-green-500">Thank you for subscribing!</p>
       )}
+    </div>
     </div>
   );
 };
