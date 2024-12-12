@@ -111,9 +111,8 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          <div className="flex gap-6">
-          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-            <div className="mb-10 w-full">
+          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+            <div className="mb-10 w-full"> 
               <h4 className="mb-9 text-lg font-semibold text-white">
                 About Us
               </h4>
@@ -153,7 +152,7 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
             <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
                 Features
@@ -194,7 +193,7 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
             <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
                 Our Products
@@ -275,10 +274,10 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6">
-          <div className="mb-6 w-full">
+          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+          <div className="mb-10 w-full">
            <h4 className="mb-9 text-lg font-semibold text-white">
-              Contact & Updates
+              Updates
               </h4>
               <div className="space-y-4">
                 <NewsletterSignup />
@@ -287,7 +286,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-      </div>
+      
 
       <div className="mt-12 border-t border-gray-700 border-opacity-40 py-8 lg:mt-[60px]">
         <div className="container">
