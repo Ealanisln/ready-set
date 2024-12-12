@@ -1,3 +1,5 @@
+import { SeoType } from "@/sanity/schemaTypes/seo";
+
 interface MainImage {
   alt: string;
   asset: any; // You might want to create a separate interface for the 'image' type
@@ -17,14 +19,15 @@ export interface SimpleBlogCard {
 }
 
 export interface FullPost {
+  seo: SeoType | null;
   currentSlug: string;
   title: string;
   body: Block[];
   mainImage: {
-    _type: 'image';
+    _type: "image";
     asset: {
       _ref: string;
-      _type: 'reference';
+      _type: "reference";
     };
   };
 }
@@ -32,13 +35,13 @@ export interface FullPost {
 interface Block {
   markDefs: any[];
   children: Child[];
-  _type: 'block';
-  style: 'normal';
+  _type: "block";
+  style: "normal";
   _key: string;
 }
 
 interface Child {
-  _type: 'span';
+  _type: "span";
   text: string;
   marks: any[];
   _key: string;
