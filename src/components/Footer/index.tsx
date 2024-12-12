@@ -112,8 +112,8 @@ const Footer = () => {
             </div>
           </div>
           <div className="flex gap-6">
-          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6">
-            <div className="mb-6 w-full">
+          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+            <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
                 About Us
               </h4>
@@ -153,8 +153,8 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6">
-            <div className="mb-6 w-full">
+          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+            <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
                 Features
               </h4>
@@ -194,8 +194,8 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/6">
-            <div className="mb-6 w-full">
+          <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+            <div className="mb-10 w-full">
               <h4 className="mb-9 text-lg font-semibold text-white">
                 Our Products
               </h4>
@@ -228,8 +228,8 @@ const Footer = () => {
             </div>
           </div>
          
-          <div className="w-full px-1 sm:w-1/2 md:w-1/3 lg:w-1/6">
-          <div className="mb-6 w-full">
+          <div className="w-full px-4 md:w-2/3 lg:w-6/12 xl:w-3/12">
+          <div className="mb-10 w-full">
            <h4 className="mb-9 text-lg font-semibold text-white">
                 Useful Links
               </h4>
