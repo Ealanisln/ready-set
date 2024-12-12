@@ -287,6 +287,16 @@ const Footer = () => {
             </div>
           </div>
         </div>
+        <div className="w-full mt-8 border-t border-gray-700 pt-8">
+  <div className="flex justify-center">
+    <address className="text-center text-gray-400 not-italic">
+    <strong>Ready Set Group, LLC<br /> </strong>
+    166 Geary St<br />
+    STE 1500 #1937<br />
+    San Francisco, CA 94108<br />
+    </address>
+  </div>
+</div>
         </div>
       
 
