@@ -1,100 +1,143 @@
 // src/app/(site)/blog/[slug]/page.tsx
-
 import { client, urlFor } from "@/sanity/lib/client";
-import { FullPost } from "@/types/simple-blog-card";
+import { postQuery } from "@/sanity/lib/queries";
+import type {
+  PortableTextMarkComponentProps,
+  PortableTextComponents,
+} from "@portabletext/react";
+import { PortableText } from "@portabletext/react";
 import Image from "next/image";
-import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { notFound } from "next/navigation";
-import { Metadata, ResolvingMetadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import CustomNextSeo from "@/components/Blog/CustomSeo";
+import type { PostDocument } from "@/sanity/schemaTypes/seo";
 
 export const revalidate = 30;
 
-// Type for generateMetadata
-type MetadataProps = {
+type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
-async function getData(slug: string) {
-  const query = `
-    *[_type == "post" && slug.current == '${slug}'] {
-      "currentSlug": slug.current,
-      title,
-      body,
-      mainImage,
-      code,
-      seo  
-    }[0]`;
+async function getPost(slug: string): Promise<PostDocument | null> {
+  if (!slug) return null;
 
-  const data = await client.fetch(query);
-  return data;
+  try {
+    return await client.fetch(postQuery, { slug });
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return null;
+  }
 }
 
 export async function generateMetadata(
-  props: MetadataProps,
+  { params }: { params: Props["params"] },
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const params = await props.params;
-  const data = await getData(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
-  if (!data) {
+  if (!post) {
     return {
       title: "Post Not Found",
     };
   }
 
+  const { seo, title, mainImage } = post;
+
+  const ogImage = seo?.openGraph?.image
+    ? urlFor(seo.openGraph.image).url()
+    : mainImage
+      ? urlFor(mainImage).url()
+      : undefined;
+
   return {
-    title: `${data.title} | Ready Set LLC`,
-    description: data.title,
+    title: seo?.metaTitle ?? `${title} | Ready Set LLC`,
+    description: seo?.metaDescription ?? title,
     openGraph: {
-      title: data.title,
-      images: [urlFor(data.mainImage).url()],
+      title: seo?.openGraph?.title ?? title,
+      description: seo?.openGraph?.description ?? seo?.metaDescription ?? title,
+      images: ogImage ? [{ url: ogImage }] : undefined,
+      siteName: seo?.openGraph?.siteName ?? "Ready Set LLC",
+      url: seo?.openGraph?.url,
     },
+    twitter: seo?.twitter
+      ? {
+          card: seo.twitter.cardType as
+            | "summary"
+            | "summary_large_image"
+            | "app"
+            | "player",
+          site: seo.twitter.site,
+          creator: seo.twitter.creator,
+        }
+      : undefined,
+    keywords: seo?.seoKeywords?.join(", "),
   };
 }
 
-const components: PortableTextComponents = {
+const portableTextComponents: PortableTextComponents = {
   types: {
-    image: ({ value }) => {
-      return (
-        <Image
-          src={urlFor(value).url()}
-          alt={value.alt || "Blog Image"}
-          className="mt-8 rounded-xl"
-          width={800}
-          height={600}
-        />
-      );
-    },
+    image: ({ value }: { value: any }) => (
+      <Image
+        src={urlFor(value).url()}
+        alt={value.alt || "Blog Image"}
+        className="mt-8 rounded-xl"
+        width={800}
+        height={600}
+      />
+    ),
   },
   list: {
-    bullet: ({ children }) => <ul className="ml-8 list-disc">{children}</ul>,
-    number: ({ children }) => <ol className="ml-8 list-decimal">{children}</ol>,
+    bullet: ({ children }) => (
+      <ul className="ml-8 list-disc space-y-2">{children}</ul>
+    ),
+    number: ({ children }) => (
+      <ol className="ml-8 list-decimal space-y-2">{children}</ol>
+    ),
   },
   block: {
     normal: ({ children }) => (
-      <p style={{ whiteSpace: "pre-line", marginBottom: "2em" }}>{children}</p>
+      <p className="mb-8 whitespace-pre-line">{children}</p>
     ),
-    h1: ({ children }) => <h1 className="text-4xl font-bold">{children}</h1>,
-    h2: ({ children }) => <h2 className="text-3xl font-bold">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-2xl font-bold">{children}</h3>,
-    h4: ({ children }) => <h4 className="text-xl font-bold">{children}</h4>,
+    h1: ({ children }) => (
+      <h1 className="mb-6 text-4xl font-bold">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="mb-5 text-3xl font-bold">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="mb-4 text-2xl font-bold">{children}</h3>
+    ),
+    h4: ({ children }) => (
+      <h4 className="mb-4 text-xl font-bold">{children}</h4>
+    ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-primary pl-4 italic">
+      <blockquote className="mb-8 border-l-4 border-primary pl-4 italic">
         {children}
       </blockquote>
     ),
   },
   marks: {
-    link: ({ children, value }) => {
-      const target = value.href.startsWith("http") ? "_blank" : undefined;
+    link: ({
+      children,
+      value,
+    }: PortableTextMarkComponentProps<{
+      _type: string;
+      href: string;
+    }>) => {
+      if (!value?.href) {
+        return <>{children}</>;
+      }
+
+      const isExternal = value.href.startsWith("http");
+
       return (
         <a
           href={value.href}
-          target={target}
-          rel={target === "_blank" ? "noopener noreferrer" : undefined}
-          className="text-primary underline"
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="text-primary underline transition-colors hover:text-primary/80"
         >
           {children}
         </a>
@@ -103,50 +146,57 @@ const components: PortableTextComponents = {
   },
 };
 
-export default async function Page({
+export default async function BlogPost({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Props["params"];
 }) {
   const { slug } = await params;
-  const data: FullPost = await getData(slug);
+  const post = await getPost(slug);
 
-  if (!data) {
+  if (!post) {
     notFound();
   }
 
+  const { title, mainImage, body, seo } = post;
+  const seoSlug = `/blog/${slug}`;
+
   return (
-    <>
-      <CustomNextSeo seo={data.seo} slug={`/blog/${slug}`} />
-      <section className="pb-[120px] pt-[150px]">
+    <div>
+      <div key="seo">
+        <CustomNextSeo seo={seo ?? null} slug={seoSlug} />
+      </div>
+      <article className="pb-[120px] pt-[150px]">
         <div className="container">
           <div className="-mx-4 flex flex-wrap justify-center">
             <div className="w-full px-4 lg:w-8/12">
-              <h1>
-                <span className="mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight">
-                  {data.title}
-                </span>
+              <h1 className="mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight">
+                {title}
               </h1>
 
-              <Image
-                src={urlFor(data.mainImage).url()}
-                width={800}
-                height={800}
-                alt={data.title}
-                priority
-                className="mt-8 rounded-xl"
-              />
+              {mainImage && (
+                <Image
+                  src={urlFor(mainImage).url()}
+                  width={800}
+                  height={800}
+                  alt={title}
+                  priority
+                  className="mt-8 rounded-xl"
+                />
+              )}
 
-              <div
-                className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16"
-                style={{ whiteSpace: "pre-line" }}
-              >
-                <PortableText value={data.body} components={components} />
-              </div>
+              {body && (
+                <div className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16">
+                  <PortableText
+                    value={body}
+                    components={portableTextComponents}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </section>
-    </>
+      </article>
+    </div>
   );
 }

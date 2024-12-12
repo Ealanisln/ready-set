@@ -1,12 +1,13 @@
-// ./nextjs-app/sanity/lib/queries.ts
+// src/sanity/lib/queries.ts
+
 import { groq } from "next-sanity";
 import { client } from "./client";
 
 // SEO field fragments
 export const imageFields = groq`
-  type,
+  _type,
   crop{
-    type, 
+    _type, 
     right, 
     top, 
     left, 
@@ -19,11 +20,20 @@ export const imageFields = groq`
     height,
     width
   },
-  asset->
+  asset->{
+    _id,
+    url,
+    metadata {
+      dimensions {
+        width,
+        height
+      }
+    }
+  }
 `;
 
 export const openGraphQuery = groq`
-  type,
+  _type,
   siteName,
   url,
   description,
@@ -34,7 +44,7 @@ export const openGraphQuery = groq`
 `;
 
 export const twitterQuery = groq`
-  type,
+  _type,
   site,
   creator,
   cardType,
@@ -42,7 +52,7 @@ export const twitterQuery = groq`
 `;
 
 export const metaAttributesQuery = groq`
-  type,
+  _type,
   attributeValueString,
   attributeType,
   attributeKey,
@@ -52,7 +62,7 @@ export const metaAttributesQuery = groq`
 `;
 
 export const seoFields = groq`
-  type,
+  _type,
   metaTitle,
   nofollowAttributes,
   seoKeywords,
@@ -64,7 +74,7 @@ export const seoFields = groq`
     ${twitterQuery}
   },
   additionalMetaTags[]{
-    type,
+    _type,
     metaAttributes[]{
       ${metaAttributesQuery}
     }
@@ -75,8 +85,9 @@ export const seoFields = groq`
 export const postsQuery = groq`
   *[_type == "post" && defined(slug.current)]{
     _id,
+    _type,
     title,
-    slug,
+    "slug": slug.current,
     mainImage,
     seo{
       ${seoFields}
@@ -86,7 +97,10 @@ export const postsQuery = groq`
 
 export const postQuery = groq`
   *[_type == "post" && slug.current == $slug][0]{
+    _id,
+    _type,
     title,
+    "slug": slug.current,
     mainImage,
     body,
     seo{
@@ -95,14 +109,19 @@ export const postQuery = groq`
   }
 `;
 
-// The paths query can remain the same since it's just for generating routes
 export const postPathsQuery = groq`
   *[_type == "post" && defined(slug.current)][]{
-    "params": { "slug": slug.current }
+    "params": { 
+      "slug": slug.current 
+    }
   }
 `;
 
-// Example usage in your page component
-export const getPostWithSEO = async (slug: string) => {
+// Helper functions for fetching
+export async function getPostWithSEO(slug: string) {
   return await client.fetch(postQuery, { slug });
-};
+}
+
+export async function getAllPosts() {
+  return await client.fetch(postsQuery);
+}

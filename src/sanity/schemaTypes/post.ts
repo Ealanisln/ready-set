@@ -1,3 +1,4 @@
+// src/sanity/schemaTypes/post.ts
 import {defineField, defineType} from 'sanity'
 
 export default defineType({
@@ -55,6 +56,12 @@ export default defineType({
       name: 'body',
       title: 'Body',
       type: 'blockContent',
+    }),
+    // Add the SEO field
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seoMetaFields', // This type comes from the sanity-plugin-seo
     }),
   ],
 
