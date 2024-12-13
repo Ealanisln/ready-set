@@ -5,10 +5,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
-import MetricoolScript from "@/components/Metricool";
-import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary';
+import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
+import CookieConsentBanner from "../components/Cookies/Banner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -28,16 +27,16 @@ export default function RootLayout({
     >
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          <ClientLayout>
-            {children}
-          </ClientLayout>
+          <ClientLayout>{children}</ClientLayout>
         </ErrorBoundary>
 
         {process.env.NODE_ENV === "development" && <VercelToolbar />}
         <Analytics />
-        <MetricoolScript />
         <SpeedInsights />
-        <GoogleAnalytics gaId="G-PHGL28W4NP" />
+        <CookieConsentBanner
+          metricoolHash="5e4d77df771777117a249111f4fc9683"
+          gaMeasurementId="G-PHGL28W4NP"
+        />
       </body>
     </html>
   );

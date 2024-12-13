@@ -21,6 +21,7 @@ import {
   HelpdeskFormData,
   userTypes,
 } from "./FormSchemas";
+import { sendRegistrationNotification } from "@/lib/notifications"
 
 const userTypeIcons = {
   vendor: Store,
@@ -48,6 +49,9 @@ const SignUp = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || "An error occurred during registration");
       }
+
+            // Send notification email
+            await sendRegistrationNotification(data);
 
       toast.success("Successfully registered");
       router.push("/signin");
