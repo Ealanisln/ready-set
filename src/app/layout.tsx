@@ -5,10 +5,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
-import CookieConsentBanner from "@/components/Cookies/banner";
+import CookieConsentBanner from "@/components/Cookies/Banner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -34,9 +33,9 @@ export default function RootLayout({
         {process.env.NODE_ENV === "development" && <VercelToolbar />}
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId="G-PHGL28W4NP" />
         <CookieConsentBanner
-          metricoolHash={process.env.NEXT_PUBLIC_METRICOOL_TRACKING_HASH || ""}
+          metricoolHash="5e4d77df771777117a249111f4fc9683"
+          gaMeasurementId="G-PHGL28W4NP"
         />
       </body>
     </html>

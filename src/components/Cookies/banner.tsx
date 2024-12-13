@@ -3,27 +3,54 @@
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { GoogleAnalytics } from "@next/third-parties/google";
 import CookiePreferencesModal from './CookiePreferencesModal';
-import MetricoolScript from '@/components/Metricool'; // Add this import
+import MetricoolScript from '@/components/Analytics/MetriCool';
 
-const CookieConsentBanner = ({ metricoolHash }: { metricoolHash: string }) => {
+interface CookiePreferences {
+  necessary: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  personalization: boolean;
+}
+
+interface CookieConsentBannerProps {
+  metricoolHash: string;
+  gaMeasurementId: string;
+}
+
+const CookieConsentBanner = ({ metricoolHash, gaMeasurementId }: CookieConsentBannerProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
-  const [consentGiven, setConsentGiven] = useState(false);
+  const [consentGiven, setConsentGiven] = useState<CookiePreferences>({
+    necessary: true,
+    analytics: false,
+    marketing: false,
+    personalization: false
+  });
 
   useEffect(() => {
     const consentStatus = localStorage.getItem('cookieConsentStatus');
     if (!consentStatus) {
       setIsVisible(true);
     } else {
-      // Check if analytics consent was previously given
-      const preferences = JSON.parse(localStorage.getItem('cookiePreferences') || '{}');
-      setConsentGiven(preferences.analytics || preferences.marketing || false);
+      // Load saved preferences
+      try {
+        const savedPreferences = JSON.parse(localStorage.getItem('cookiePreferences') || '{}');
+        setConsentGiven(savedPreferences);
+        
+        // Apply saved preferences to GA
+        if (window && gaMeasurementId) {
+          window[`ga-disable-${gaMeasurementId}`] = !(savedPreferences.analytics || savedPreferences.marketing);
+        }
+      } catch (error) {
+        console.error('Error parsing cookie preferences:', error);
+      }
     }
-  }, []);
+  }, [gaMeasurementId]);
 
   const handleAcceptAll = () => {
-    const preferences = {
+    const preferences: CookiePreferences = {
       necessary: true,
       analytics: true,
       marketing: true,
@@ -31,12 +58,18 @@ const CookieConsentBanner = ({ metricoolHash }: { metricoolHash: string }) => {
     };
     localStorage.setItem('cookieConsentStatus', 'accepted');
     localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
-    setConsentGiven(true);
+    
+    // Enable GA
+    if (window && gaMeasurementId) {
+      window[`ga-disable-${gaMeasurementId}`] = false;
+    }
+    
+    setConsentGiven(preferences);
     setIsVisible(false);
   };
 
   const handleRejectAll = () => {
-    const preferences = {
+    const preferences: CookiePreferences = {
       necessary: true,
       analytics: false,
       marketing: false,
@@ -44,7 +77,17 @@ const CookieConsentBanner = ({ metricoolHash }: { metricoolHash: string }) => {
     };
     localStorage.setItem('cookieConsentStatus', 'rejected');
     localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
-    setConsentGiven(false);
+    
+    // Disable GA
+    if (window && gaMeasurementId) {
+      window[`ga-disable-${gaMeasurementId}`] = true;
+      // Remove GA cookies
+      document.cookie = '_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = '_gat=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = '_gid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
+    
+    setConsentGiven(preferences);
     setIsVisible(false);
   };
 
@@ -52,10 +95,23 @@ const CookieConsentBanner = ({ metricoolHash }: { metricoolHash: string }) => {
     setIsPreferencesModalOpen(true);
   };
 
-  const handlePreferencesSave = (preferences: any) => {
+  const handlePreferencesSave = (preferences: CookiePreferences) => {
     localStorage.setItem('cookieConsentStatus', 'preferences');
     localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
-    setConsentGiven(preferences.analytics || preferences.marketing);
+    
+    // Update GA based on analytics preference
+    if (window && gaMeasurementId) {
+      window[`ga-disable-${gaMeasurementId}`] = !(preferences.analytics || preferences.marketing);
+      
+      // Remove GA cookies if analytics is disabled
+      if (!preferences.analytics && !preferences.marketing) {
+        document.cookie = '_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = '_gat=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = '_gid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      }
+    }
+    
+    setConsentGiven(preferences);
     setIsVisible(false);
   };
 
@@ -65,8 +121,9 @@ const CookieConsentBanner = ({ metricoolHash }: { metricoolHash: string }) => {
 
   return (
     <>
-      {/* Metricool Script Component */}
+      {/* Analytics Scripts */}
       {metricoolHash && <MetricoolScript trackingHash={metricoolHash} />}
+      {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}
 
       {/* Cookie Banner */}
       {isVisible && (
