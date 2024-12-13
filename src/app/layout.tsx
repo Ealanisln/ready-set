@@ -7,7 +7,7 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
-import CookieConsentBanner from "../components/Cookies/Banner";
+import CookieConsentBanner from "../components/Banner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],

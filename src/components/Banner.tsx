@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { GoogleAnalytics } from "@next/third-parties/google";
-import CookiePreferencesModal from './CookiePreferencesModal';
+import CookiePreferencesModal from './Cookies/CookiePreferencesModal';
 import MetricoolScript from '@/components/Analytics/MetriCool';
 
 interface CookiePreferences {
