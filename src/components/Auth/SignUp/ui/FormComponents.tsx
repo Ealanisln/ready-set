@@ -1,6 +1,7 @@
 "use client";
 
-// FormComponents.tsx
+// src/components/Auth/SignUp/ui/FormComponents.tsx
+
 import React, { forwardRef } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 

@@ -1,3 +1,5 @@
+// src/scripts/backup-db.ts
+
 import { exec } from 'child_process';
 import { join } from 'path';
 import { mkdir, readdir, stat, unlink, readFile } from 'fs/promises';
