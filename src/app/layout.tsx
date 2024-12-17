@@ -5,7 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
-import { VercelToolbar } from "@vercel/toolbar/next";
+// import { VercelToolbar } from "@vercel/toolbar/next";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
 
@@ -30,7 +30,7 @@ export default function RootLayout({
           <ClientLayout>{children}</ClientLayout>
         </ErrorBoundary>
 
-        {process.env.NODE_ENV === "development" && <VercelToolbar />}
+        {/* {process.env.NODE_ENV === "development" && <VercelToolbar />} */}
         <Analytics />
         <SpeedInsights />
         <CookieConsentBanner
