@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
-import path from 'path';
-import { fileURLToPath } from 'url';
-import withVercelToolbar from '@vercel/toolbar/plugins/next';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const path = require('path');
+const withVercelToolbar = require('@vercel/toolbar/plugins/next');
 
 const nextConfig = {
   output: "standalone",
@@ -58,4 +54,4 @@ const nextConfig = {
   },
 };
 
-export default withVercelToolbar(nextConfig);
+module.exports = withVercelToolbar(nextConfig);
