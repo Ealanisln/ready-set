@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import withVercelToolbar from '@vercel/toolbar/plugins/next';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const nextConfig = {
   output: "standalone",
@@ -43,9 +48,14 @@ const nextConfig = {
       errorDetails: true
     };
 
+    // Add fallback for fs module
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
+
     return config;
   },
 };
 
-const withVercelToolbar = require('@vercel/toolbar/plugins/next')();
-module.exports = withVercelToolbar(nextConfig);
+export default withVercelToolbar(nextConfig);
