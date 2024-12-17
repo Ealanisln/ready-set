@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { Session } from "@auth/core/types";
+import { Session } from "next-auth";
 
 interface AuthButtonsProps {
   session: Session | null;
@@ -9,7 +9,11 @@ interface AuthButtonsProps {
   pathUrl: string;
 }
 
-const AuthButtons: React.FC<AuthButtonsProps> = ({ session, sticky, pathUrl }) => {
+const AuthButtons: React.FC<AuthButtonsProps> = ({
+  session,
+  sticky,
+  pathUrl,
+}) => {
   if (session?.user) {
     return (
       <>
@@ -57,7 +61,9 @@ const SignInButton: React.FC<ButtonProps> = ({ sticky, pathUrl }) => (
   <Link
     href="/signin"
     className={`px-7 py-3 text-base font-medium hover:opacity-70 ${
-      pathUrl !== "/" || sticky ? "dark:text-white" : "text-black dark:text-white"
+      pathUrl !== "/" || sticky
+        ? "dark:text-white"
+        : "text-black dark:text-white"
     }`}
   >
     Sign In

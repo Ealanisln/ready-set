@@ -30,16 +30,13 @@ const nextConfig = {
     ];
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Add additional webpack configuration
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.join(__dirname, 'src'),
     };
     
-    // Add additional module resolution paths
     config.resolve.modules.push(path.resolve('./src'));
     
-    // Enable detailed error messages
     config.stats = {
       errorDetails: true
     };
@@ -54,4 +51,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withVercelToolbar(nextConfig);
+module.exports = nextConfig;
