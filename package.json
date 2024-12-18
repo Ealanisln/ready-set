@@ -17,7 +17,7 @@
     "db:restore": "tsx scripts/restore-db.ts",
     "db": "tsx src/scripts/db-tasks.ts",
     "db:prod": "cross-env NODE_ENV=production tsx src/scripts/db-tasks.ts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
+    "test": "jest --config jest.config.mjs",
     "test:watch": "jest --watch",
     "studio": "dotenv -e .env.local -- npx prisma studio"
   },
