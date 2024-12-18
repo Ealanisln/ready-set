@@ -1,5 +1,4 @@
 import * as React from "react"
-
 import { useCallbackRef } from "./use-callback-ref"
 
 /**
@@ -14,10 +13,13 @@ type UseControllableStateParams<T> = {
 
 type SetStateFn<T> = (prevState?: T) => T
 
+// Define a noop function to avoid the empty function error
+const noop = () => undefined
+
 function useControllableState<T>({
   prop,
   defaultProp,
-  onChange = () => {},
+  onChange = noop,  // Use noop instead of empty arrow function
 }: UseControllableStateParams<T>) {
   const [uncontrolledProp, setUncontrolledProp] = useUncontrolledState({
     defaultProp,
