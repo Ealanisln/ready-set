@@ -1,3 +1,5 @@
+// src/scripts/restore-db.ts
+
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';

@@ -1,5 +1,6 @@
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'production' ? '.env.production' : '.env';
+import { spawn } from 'child_process';
 
 console.log(`Running in ${env} mode using ${envFile}`);
 
@@ -103,56 +104,75 @@ async function runTests() {
   }
 }
 
+function spawnProcess(command: string[], options: any): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const childProcess = spawn('pnpm', command, {
+      ...options,
+      stdio: 'inherit',
+      shell: true
+    });
+
+    childProcess.on('close', (code) => {
+      resolve(code ?? 0);
+    });
+
+    childProcess.on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
 switch (command) {
   case 'generate':
     console.log('🔄 Generating Prisma Client...');
-    Bun.spawn(['bunx', 'prisma', 'generate'], {
-      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile },
-      studio: 'inherit'
+    spawnProcess(['prisma', 'generate'], {
+      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
+    }).catch(error => {
+      console.error('❌ Generation failed:', error);
+      process.exit(1);
     });
     break;
 
   case 'migrate':
     if (env === 'production') {
       console.log('🚀 Running production migration deploy...');
-      try {
-        const migrationProcess = Bun.spawn(['bunx', 'prisma', 'migrate', 'deploy'], {
-          env: { ...process.env, PRISMA_SCHEMA_FILE: envFile },
-          studio: 'inherit'
-        });
-
-        migrationProcess.exited.then(async (exitCode) => {
-          if (exitCode === 0) {
-            console.log('✅ Migration completed');
-            const statusOk = await checkMigrationStatus();
-            const testsOk = await runTests();
-            
-            if (!statusOk || !testsOk) {
-              process.exit(1);
-            }
-          } else {
-            console.error('❌ Migration failed with exit code:', exitCode);
+      spawnProcess(['prisma', 'migrate', 'deploy'], {
+        env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
+      }).then(async (exitCode) => {
+        if (exitCode === 0) {
+          console.log('✅ Migration completed');
+          const statusOk = await checkMigrationStatus();
+          const testsOk = await runTests();
+          
+          if (!statusOk || !testsOk) {
             process.exit(1);
           }
-        });
-      } catch (error) {
+        } else {
+          console.error('❌ Migration failed with exit code:', exitCode);
+          process.exit(1);
+        }
+      }).catch(error => {
         console.error('❌ Migration error:', error);
         process.exit(1);
-      }
+      });
     } else {
       console.log('🔄 Running development migration...');
-      Bun.spawn(['bunx', 'prisma', 'migrate', 'dev'], {
-        env: { ...process.env, PRISMA_SCHEMA_FILE: envFile },
-        studio: 'inherit'
+      spawnProcess(['prisma', 'migrate', 'dev'], {
+        env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
+      }).catch(error => {
+        console.error('❌ Migration failed:', error);
+        process.exit(1);
       });
     }
     break;
 
   case 'studio':
     console.log('🔄 Starting Prisma Studio...');
-    Bun.spawn(['bunx', 'prisma', 'studio'], {
-      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile },
-      studio: 'inherit'
+    spawnProcess(['prisma', 'studio'], {
+      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
+    }).catch(error => {
+      console.error('❌ Studio failed to start:', error);
+      process.exit(1);
     });
     break;
 
@@ -174,9 +194,11 @@ switch (command) {
 
   case 'status':
     console.log('🔄 Checking migration status...');
-    Bun.spawn(['bunx', 'prisma', 'migrate', 'status'], {
-      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile },
-      studio: 'inherit'
+    spawnProcess(['prisma', 'migrate', 'status'], {
+      env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
+    }).catch(error => {
+      console.error('❌ Status check failed:', error);
+      process.exit(1);
     });
     break;
 

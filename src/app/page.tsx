@@ -1,19 +1,9 @@
-import About from "@/components/About";
-import HomeBlogSection from "@/components/Blog/HomeBlogSection";
-import CallToAction from "@/components/CallToAction";
-import Clients from "@/components/Clients";
 import ScrollUp from "@/components/Common/ScrollUp";
-import Contact from "@/components/Contact";
-import Faq from "@/components/Faq";
-import Features from "@/components/Features";
 import Hero from "@/components/Hero/index";
-import Team from "@/components/Team";
-import Testimonials from "@/components/Testimonials";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "Ready Set | Catering Delivery & Virtual Assistant Services",
+  title: "Ready Set | Catering Delivery & Virtual Assistant Services",
   description:
     "Since 2019, Ready Set has been the trusted delivery partner for Silicon Valley giants like Apple, Google, and Facebook. Offering specialized catering delivery and professional virtual assistant services across multiple industries.",
   keywords: [
@@ -72,19 +62,7 @@ export default function Home() {
   return (
     <main>
       <ScrollUp />
-
       <Hero />
-      {/*
-			<Features />
-      <About />
-      <CallToAction />
-      <HomeBlogSection />
-      <Pricing />
-      <Testimonials />
-      <Faq />
-      <Team />
-      <Contact />
-      {/* <Clients />  */}
     </main>
   );
 }

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Session } from "@auth/core/types";
+import { Session } from "next-auth";
 
 interface MenuItem {
   title: string;

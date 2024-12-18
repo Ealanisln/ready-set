@@ -22,7 +22,6 @@
       "@/*": ["./src/*"]
     },
     "types": [
-      "bun-types",
       "@testing-library/jest-dom",
       "jest",
       "node"
@@ -38,6 +37,6 @@
     ".next/types/**/*.ts",
     "global.d.ts",
     "test/test.setup.ts"
-  ],
+, "next.config.js", "jest.config.mjs"  ],
   "exclude": ["node_modules"]
 }
