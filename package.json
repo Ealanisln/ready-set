@@ -14,7 +14,7 @@
     "db:review": "npx prisma studio",
     "db:full-sync": "tsx scripts/db-full-sync.ts",
     "db:backup": "tsx scripts/backup-db.ts",
-    "db:restore": "tsx scripts/restore-db.ts",
+    "db:restore": "tsx src/scripts/restore-db.ts",
     "db": "tsx src/scripts/db-tasks.ts",
     "db:prod": "cross-env NODE_ENV=production tsx src/scripts/db-tasks.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",

@@ -1,19 +1,18 @@
-// src/scripts/restore-db.ts
-
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
+import path from 'path';
 
 const execAsync = promisify(exec);
 
 async function restoreDatabase() {
   if (!process.argv[2]) {
     console.error('❌ Please provide a backup file name');
-    console.error('Usage: bun run restore-db.ts <backup-file>');
+    console.error('Usage: pnpm db:restore <backup-file>');
     process.exit(1);
   }
 
-  const backupPath = process.argv[2];
+  const backupPath = path.resolve(process.argv[2]);
 
   if (!existsSync(backupPath)) {
     console.error(`❌ Backup file not found: ${backupPath}`);
@@ -43,17 +42,15 @@ async function restoreDatabase() {
     }
     
     console.log('✅ Database restored successfully!');
-  } catch (error: unknown) {
-    console.error('❌ Error restoring backup:', error);
+  } catch (error: any) {
+    console.error('❌ Error restoring backup:', error.message);
     
-    if (error instanceof Error) {
-      if (error.message.includes('No such container')) {
-        console.error('Make sure your Docker Compose services are running:');
-        console.error('$ docker compose up -d');
-      } else if (error.message.includes('connection refused')) {
-        console.error('Database connection failed. Check if the database container is healthy:');
-        console.error('$ docker compose ps');
-      }
+    if (error.message.includes('No such container')) {
+      console.error('Make sure your Docker Compose services are running:');
+      console.error('$ docker compose up -d');
+    } else if (error.message.includes('connection refused')) {
+      console.error('Database connection failed. Check if the database container is healthy:');
+      console.error('$ docker compose ps');
     }
     
     process.exit(1);
