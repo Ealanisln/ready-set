@@ -42,7 +42,7 @@ const BusinessOverwhelm = () => {
           className="h-18 w-18 object-contain"
         />
       ),
-      title: "Work-life balance...What's that?",
+      title: "Work-life balance... What's that?",
     },
     {
       icon: (

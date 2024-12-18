@@ -6,6 +6,7 @@ import OverwhelmSection from "@/components/VirtualAssistant/FeatureCard";
 import Features from "@/components/VirtualAssistant/Features";
 import Pricing from "@/components/VirtualAssistant/Pricing";
 import BusinessScaleSection from "@/components/VirtualAssistant/VaOptimizationCta";
+import VirtualAssistantProjects from "@/components/VirtualAssistant/VAProjects";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -86,6 +87,7 @@ const AboutPage = () => {
       {/* <FeatureCarousel /> */}
       {/* <Features /> */}
       <OverwhelmSection />
+      <VirtualAssistantProjects />
       <DiscoveryCallSection />
       <BusinessScaleSection />
       {/* <Pricing /> */}
