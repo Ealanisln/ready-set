@@ -1,49 +1,39 @@
+// src/components/Newsletter/newsLetterSignUp.tsx
 "use client";
 
 import axios from 'axios';
 import React, { FormEvent, useState } from 'react';
 import toast from "react-hot-toast";
-import Newsletter from '../Blog/Newsletter';
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  const [status, setStatus] = useState<
-    "success" | "error" | "loading" | "idle"
-  >("idle");
-  const [responseMsg, setResponseMsg] = useState<string>("");
-  const [statusCode, setStatusCode] = useState<number>();
+  const [status, setStatus] = useState<"success" | "error" | "loading" | "idle">("idle");
 
   async function handleSubscribe(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
+    
     try {
       const response = await axios.post("/api/subscribe", { email });
-
       setStatus("success");
-      setStatusCode(response.status);
       setEmail("");
-      setResponseMsg(response.data.message);
-      toast.success("Subscription was successful");
-
+      toast.success(response.data.message);
     } catch (err) {
+      setStatus("error");
       if (axios.isAxiosError(err)) {
-        setStatus("error");
-        setStatusCode(err.response?.status);
-        setResponseMsg(err.response?.data.error);
-        toast.error(err.response?.data.error);
-
+        toast.error(err.response?.data.error || "An error occurred");
       }
+    } finally {
+      // Reset status after a delay
+      setTimeout(() => setStatus("idle"), 3000);
     }
   }
-
 
   return (
     <div className="mt-4">
       <h3 className="mb-3 inline-block text-base text-gray-400">Subscribe to our</h3>
       <div className="mt-2.3">
-      <h3 className="mb-3 inline-block text-base text-gray-400">Newsletter</h3>
-      {!subscribed ? (
+        <h3 className="mb-3 inline-block text-base text-gray-400">Newsletter</h3>
         <form onSubmit={handleSubscribe} className="flex">
           <input
             type="email"
@@ -51,19 +41,22 @@ const NewsletterSignup = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             required
+            disabled={status === "loading"}
             className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="submit"
-            className="px-4 py-2 text-sm text-white bg-blue-600 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={status === "loading"}
+            className={`px-4 py-2 text-sm text-white rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              status === "loading" 
+                ? "bg-blue-400 cursor-not-allowed" 
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Subscribe
+            {status === "loading" ? "Subscribing..." : "Subscribe"}
           </button>
         </form>
-      ) : (
-        <p className="text-green-500">Thank you for subscribing!</p>
-      )}
-    </div>
+      </div>
     </div>
   );
 };
