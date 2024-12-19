@@ -103,7 +103,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
   try {
     const data = await request.json();
 
-    let processedData: any = { ...data };
+    const processedData: any = { ...data };
 
     // Map fields to match Prisma schema
     if (processedData.countiesServed) {

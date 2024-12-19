@@ -1,4 +1,6 @@
 import React from 'react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
+
 
 const HowItWorks = () => {
   const steps = [
@@ -35,10 +37,9 @@ const HowItWorks = () => {
       <div className="bg-yellow-50">
         <div className="container mx-auto px-4">
           <nav className="flex justify-between items-center py-4">
-            
             </nav>
         </div>
-        <h1 className="text-4xl font-bold text-center py-12">How it Works</h1>
+        <h1 className="text-4xl font-bold text-center py-24">How it Works</h1>
       </div>
 
       {/* Main Content */}
@@ -67,13 +68,12 @@ const HowItWorks = () => {
           <h2 className="text-2xl font-bold">Get Started Today!</h2>
           <p className="text-gray-600">Click below to book a consultation or request a quote.</p>
           <p className="text-gray-600">Let us handle the details so you can focus on growing your business.</p>
-          <button className="mt-4 px-6 py-3 bg-yellow-400 rounded-md text-gray-800 flex items-center gap-2 mx-auto">
-            Book a Discovery call
-          </button>
         </div>
       </div>
+      <Breadcrumb />
      </div>
     );
 };
+
 
 export default HowItWorks;
