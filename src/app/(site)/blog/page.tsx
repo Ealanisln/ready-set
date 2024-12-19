@@ -52,7 +52,7 @@ export async function generateStaticParams() {
 
 async function getData() {
   const query = `
-  *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] {
+  *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] | order(_updatedAt desc) {
     _id,
     _updatedAt,
     title,
