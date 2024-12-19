@@ -1,6 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import AppointmentDialog from "./Appointment";
 
 interface ServiceCardProps {
   title: string;
@@ -112,11 +113,11 @@ const VirtualAssistantProjects = () => {
           ))}
         </div>
 
-        <div className="mt-8 text-center md:mt-12 lg:mt-16 xl:mt-20">
-          <button className="mx-auto flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-base font-semibold text-white transition-colors duration-300 hover:bg-gray-700 md:px-6 md:py-3 lg:px-7 lg:py-3.5 xl:px-8 xl:py-4 xl:text-lg">
-            <span>BOOK A DISCOVERY CALL</span>
-            <span className="inline-block">👆</span>
-          </button>
+        <div className="mt-8 flex justify-center items-center md:mt-12 lg:mt-16 xl:mt-20">
+          <AppointmentDialog
+            buttonVariant="black"
+            calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+          />
         </div>
       </div>
     </div>
