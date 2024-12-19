@@ -161,7 +161,7 @@ const Footer = () => {
               <ul>
                 <li>
                   <Link
-                    href="/#"
+                    href="/how-it-works"
                     className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     How it works
