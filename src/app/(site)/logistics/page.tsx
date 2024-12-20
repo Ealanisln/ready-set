@@ -1,10 +1,15 @@
 import { Metadata } from "next";
 import LogisticsContent from "./LogisticsContent";
+<<<<<<< Updated upstream
 import LogisticsHero from "@/components/Logistics/LogisticsHero";
+=======
+import FoodServices from "@/components/Logistics/FoodServices";
+>>>>>>> Stashed changes
 
 export const metadata: Metadata = {
   title: "Premium Catering Logistics Services | Ready Set Group LLC",
-  description: "Bay Area's trusted catering delivery partner since 2019. Specialized in temperature-controlled deliveries, serving tech giants like Apple, Google, and Facebook. Professional handling with real-time tracking.",
+  description:
+    "Bay Area's trusted catering delivery partner since 2019. Specialized in temperature-controlled deliveries, serving tech giants like Apple, Google, and Facebook. Professional handling with real-time tracking.",
   keywords: [
     "catering logistics",
     "food delivery service",
@@ -20,11 +25,12 @@ export const metadata: Metadata = {
     "same-day catering delivery",
     "food safety certified delivery",
     "professional catering transport",
-    "Bay Area food logistics"
+    "Bay Area food logistics",
   ],
   openGraph: {
     title: "Premium Catering Logistics Services | Ready Set Group LLC",
-    description: "Expert catering delivery services in the Bay Area. Temperature-controlled vehicles, professional handling, and real-time tracking for corporate events.",
+    description:
+      "Expert catering delivery services in the Bay Area. Temperature-controlled vehicles, professional handling, and real-time tracking for corporate events.",
     type: "website",
     locale: "en_US",
     siteName: "Ready Set Group LLC",
@@ -32,10 +38,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Premium Catering Logistics Services | Ready Set Delivery",
-    description: "Specialized catering logistics for Bay Area businesses. Trusted by tech giants for reliable, temperature-controlled delivery services.",
+    description:
+      "Specialized catering logistics for Bay Area businesses. Trusted by tech giants for reliable, temperature-controlled delivery services.",
   },
 };
-
 
 export default function LogisticsPage() {
   return <>
