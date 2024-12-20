@@ -1,6 +1,5 @@
 import React from "react";
 import AppointmentDialog from "../VirtualAssistant/Appointment";
-import FoodServices from "../Logistics/FoodServices";
 
 
 
@@ -84,7 +83,7 @@ const HowItWorks = () => {
           />
         </div>
         </div>
-        <FoodServices />
+    
       </div>
   );
 };

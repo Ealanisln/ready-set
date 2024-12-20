@@ -1,5 +1,4 @@
-// app/components/FoodServices.tsx
-'use client';
+import React from 'react';
 
 interface Partner {
   name: string;
@@ -13,6 +12,41 @@ interface FoodServicesProps {
   partners?: Partner[];
   finalNote?: string;
 }
+
+const formatDescription = (text: string) => {
+  // Only bold the first instance of "Ready Set" in the description
+  return text.replace(
+    /At (Ready Set),/,
+    'At <strong>$1</strong>,'
+  ).split(/<strong>|<\/strong>/).map((part, index) => 
+    index % 2 === 1 ? <strong key={index} className="font-bold">{part}</strong> : part
+  );
+};
+
+const formatFinalNote = (text: string) => {
+  // Only bold "Ready Set" at the start of the final note
+  return text.replace(
+    /(Ready Set) is/,
+    '<strong>$1</strong> is'
+  ).split(/<strong>|<\/strong>/).map((part, index) => 
+    index % 2 === 1 ? <strong key={index} className="font-bold">{part}</strong> : part
+  );
+};
+
+const formatPartnerName = (name: string) => {
+  // Bold all partner names
+  const terms = [
+    'Foodee',
+    'Destino',
+    'Guerilla Catering SF',
+    'Conviva',
+    'Korean Bobcha'
+  ];
+  
+  return terms.includes(name) ? 
+    <strong className="font-bold">{name}</strong> : 
+    name;
+};
 
 const FoodServices: React.FC<FoodServicesProps> = ({
   title = "OUR SERVICES",
@@ -33,18 +67,20 @@ const FoodServices: React.FC<FoodServicesProps> = ({
       {/* Title Section - Outside the yellow box */}
       <div className="max-w-7xl mx-auto px-8 md:px-16 mb-8">
         <h1 className="text-5xl font-bold text-gray-800 text-center mb-4">{title}</h1>
-        <p className="text-gray-700 italic text-center max-w-3xl mx-auto">{subtitle}</p>
+        <p className="text-gray-700 italic text-center max-w-3xl mx-auto">
+          {subtitle}
+        </p>
       </div>
 
       {/* Main Content - Yellow Box */}
-      <div className="w-full bg-[#FFE270] p-8 md:p-16">
+      <div className="w-full bg-amber-300 p-8 md:p-16">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column - Text Content */}
             <div className="space-y-8">
               <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-gray-800">Food Deliveries</h2>
-                <p className="text-gray-700">{description}</p>
+                <h2 className="text-4xl font-bold text-white">Food Deliveries</h2>
+                <p className="text-gray-700">{formatDescription(description)}</p>
                 <p className="text-gray-700">{longDescription}</p>
 
                 <div className="space-y-4">
@@ -52,12 +88,14 @@ const FoodServices: React.FC<FoodServicesProps> = ({
                   <p className="text-gray-700">We're proud to collaborate with some of the top names in the industry:</p>
                   <ul className="list-disc list-inside space-y-1">
                     {partners.map((partner, index) => (
-                      <li key={index} className="text-gray-700 italic">{partner.name}</li>
+                      <li key={index} className="text-gray-700 italic">
+                        {formatPartnerName(partner.name)}
+                      </li>
                     ))}
                   </ul>
                 </div>
 
-                <p className="text-gray-700 italic">{finalNote}</p>
+                <p className="text-gray-700 italic">{formatFinalNote(finalNote)}</p>
 
                 <button className="bg-white px-6 py-3 rounded-md font-bold text-gray-800 hover:bg-gray-100 transition-colors">
                   Request a Quote
@@ -69,7 +107,7 @@ const FoodServices: React.FC<FoodServicesProps> = ({
             <div className="relative h-full min-h-[400px] lg:min-h-0">
               <div className="rounded-lg overflow-hidden h-full">
                 <img
-                  src="/api/placeholder/800/600"
+                  src="/images/logistics/foodpic.png"
                   alt="Food delivery containers with various meals"
                   className="w-full h-full object-cover"
                 />
