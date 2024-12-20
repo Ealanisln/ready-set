@@ -1,3 +1,4 @@
+// FoodServices.tsx
 import React from 'react';
 
 interface Partner {
@@ -14,7 +15,6 @@ interface FoodServicesProps {
 }
 
 const formatDescription = (text: string) => {
-  // Only bold the first instance of "Ready Set" in the description
   return text.replace(
     /At (Ready Set),/,
     'At <strong>$1</strong>,'
@@ -24,7 +24,6 @@ const formatDescription = (text: string) => {
 };
 
 const formatFinalNote = (text: string) => {
-  // Only bold "Ready Set" at the start of the final note
   return text.replace(
     /(Ready Set) is/,
     '<strong>$1</strong> is'
@@ -34,7 +33,6 @@ const formatFinalNote = (text: string) => {
 };
 
 const formatPartnerName = (name: string) => {
-  // Bold all partner names
   const terms = [
     'Foodee',
     'Destino',
@@ -65,7 +63,7 @@ const FoodServices: React.FC<FoodServicesProps> = ({
   return (
     <div className="w-full">
       {/* Title Section - Outside the yellow box */}
-      <div className="max-w-7xl mx-auto px-8 md:px-16 mb-8">
+      <div className="mx-auto max-w-7xl px-8 md:px-16 mb-8">
         <h1 className="text-5xl font-bold text-gray-800 text-center mb-4">{title}</h1>
         <p className="text-gray-700 italic text-center max-w-3xl mx-auto">
           {subtitle}
@@ -73,8 +71,8 @@ const FoodServices: React.FC<FoodServicesProps> = ({
       </div>
 
       {/* Main Content - Yellow Box */}
-      <div className="w-full bg-amber-300 p-8 md:p-16">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full bg-amber-300">
+        <div className="mx-auto max-w-7xl px-8 md:px-16 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column - Text Content */}
             <div className="space-y-8">
