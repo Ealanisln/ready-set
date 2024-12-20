@@ -1,10 +1,9 @@
 import { Metadata } from "next";
 import LogisticsContent from "./LogisticsContent";
-<<<<<<< Updated upstream
 import LogisticsHero from "@/components/Logistics/LogisticsHero";
-=======
+import WhyChoose from "@/components/Logistics/WhyChoose";
 import FoodServices from "@/components/Logistics/FoodServices";
->>>>>>> Stashed changes
+import ImageCarousel from "@/components/Logistics/ImagesCarousel";
 
 export const metadata: Metadata = {
   title: "Premium Catering Logistics Services | Ready Set Group LLC",
@@ -46,5 +45,8 @@ export const metadata: Metadata = {
 export default function LogisticsPage() {
   return <>
   <LogisticsHero />
+  <WhyChoose />
+  <ImageCarousel />
+  <FoodServices />
   </>;
 }

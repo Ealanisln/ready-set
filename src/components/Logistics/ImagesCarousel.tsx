@@ -92,13 +92,6 @@ const ImageCarousel = () => {
           </CarouselNext>
         </Carousel>
       </div>
-      
-      <div className="text-center max-w-3xl mx-auto px-4">
-        <h2 className="text-5xl font-bold mb-4 text-gray-800">OUR SERVICES</h2>
-        <p className="text-lg text-gray-600 italic">
-          With Ready Set, you can trust your delivery needs are handled with precision and professionalism. Let's keep your business moving—fresh, fast, and on time.
-        </p>
-      </div>
     </div>
   );
 };
