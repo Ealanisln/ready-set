@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url = env("POSTGRES_PRISMA_URL")
-    directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model user {
@@ -43,6 +43,13 @@ model user {
   created_at            DateTime           @default(now()) @db.Timestamptz(6)
   updated_at            DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
   isTemporaryPassword   Boolean            @default(false)
+  days_per_week         String?
+  service_type          String?
+  total_staff           String?
+  deliveries_per_day    String?
+  partnered_services    String?
+  multiple_locations    Boolean?           @default(false)
+  delivery_radius       String?
   accounts              account[]
   createdAddresses      address[]
   catering_requests     catering_request[]

@@ -4,6 +4,8 @@ import WhyChoose from "@/components/Logistics/WhyChoose";
 import FoodServices from "@/components/Logistics/FoodServices";
 import ImageCarousel from "@/components/Logistics/ImagesCarousel";
 import FlowerDeliveryPage from "@/components/Logistics/FlowerDeliveryPage";
+import SpecialtyDelivery from "@/components/Logistics/SpecialtyDelivery";
+import BakeryDeliverySection from "@/components/Logistics/BakeryDelivery";
 
 export const metadata: Metadata = {
   title: "Premium Catering Logistics Services | Ready Set Group LLC",
@@ -50,6 +52,8 @@ export default function LogisticsPage() {
       <ImageCarousel />
       <FoodServices />
       <FlowerDeliveryPage />
+      <BakeryDeliverySection />
+      <SpecialtyDelivery />
     </>
   );
 }
