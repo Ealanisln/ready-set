@@ -1,3 +1,5 @@
+// src/app/(site)/logistics/page.tsx
+
 import { Metadata } from "next";
 import LogisticsHero from "@/components/Logistics/LogisticsHero";
 import WhyChoose from "@/components/Logistics/WhyChoose";
@@ -6,6 +8,7 @@ import ImageCarousel from "@/components/Logistics/ImagesCarousel";
 import FlowerDeliveryPage from "@/components/Logistics/FlowerDeliveryPage";
 import SpecialtyDelivery from "@/components/Logistics/SpecialtyDelivery";
 import BakeryDeliverySection from "@/components/Logistics/BakeryDelivery";
+import { ClientFormWrapper } from "@/components/Logistics/QuoteRequest/ClientFormWrapper";
 
 export const metadata: Metadata = {
   title: "Premium Catering Logistics Services | Ready Set Group LLC",
@@ -45,15 +48,18 @@ export const metadata: Metadata = {
 };
 
 export default function LogisticsPage() {
+
   return (
     <>
+    <ClientFormWrapper>
       <LogisticsHero />
       <WhyChoose />
       <ImageCarousel />
       <FoodServices />
       <FlowerDeliveryPage />
       <BakeryDeliverySection />
-      <SpecialtyDelivery />
+      {/* <SpecialtyDelivery /> */}
+    </ClientFormWrapper>
     </>
   );
 }

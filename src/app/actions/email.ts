@@ -41,7 +41,7 @@ const sendEmail = async (data: FormInputs) => {
     },
     to: [
       {
-        email: "info@ready-set.co",
+        email: "info@readysetllc.com",
         name: "Ready Set",
       },
     ],
