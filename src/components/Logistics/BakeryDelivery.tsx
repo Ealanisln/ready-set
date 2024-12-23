@@ -78,12 +78,15 @@ const BakeryDeliverySection = () => {
         </div>
 
         <div className="relative h-full">
-          <img
-            src="/images/logistics/bakerypic.png"
-            alt="Bakery display case showing various pastries and baked goods"
-            className="w-full h-full object-cover rounded-2xl"
-          />
-        </div>
+  <picture>
+    <source srcSet="/images/logistics/bakerypic.webp" type="image/webp" />
+    <img
+      src="/images/logistics/bakerypic.png"
+      alt="Bakery display case showing various pastries and baked goods"
+      className="w-full h-full object-cover rounded-2xl"
+    />
+  </picture>
+</div>
       </div>
     </section>
   );
