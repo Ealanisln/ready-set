@@ -1,15 +1,14 @@
-// src/components/Logistics/LogisticsHero.tsx
+import React from "react";
 import { Clock, Truck, Shield } from "lucide-react";
 import Link from "next/link";
-import AppointmentDialog from "../VirtualAssistant/Appointment";
-import ScheduleDialog from "./Schedule";
 import GetQuoteButton from "./GetQuoteButton";
+import ScheduleDialog from "./Schedule";
 
 const LogisticsPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative h-screen">
+      <div className="relative min-h-screen">
         {/* Background Image */}
         <div className="absolute inset-0">
           <div
@@ -17,23 +16,23 @@ const LogisticsPage = () => {
             style={{
               backgroundImage: "url('/images/logistics/bg-hero.jpg')",
               backgroundSize: "cover",
-              height: "100vh",
             }}
           />
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex h-full flex-col">
-          <div className="flex flex-grow items-center justify-center px-4 pt-20">
-            <div className="max-w-2xl rounded-2xl bg-white/95 p-10 text-center shadow-lg backdrop-blur-sm">
-              <h1 className="mb-3 text-4xl font-bold text-gray-900">
+        <div className="relative z-10 flex min-h-screen flex-col">
+          {/* Centered Card */}
+          <div className="flex flex-1 items-center justify-center px-4 pt-28 pb-8 md:pt-40">
+            <div className="w-full max-w-2xl rounded-2xl bg-white/95 p-4 text-center shadow-lg backdrop-blur-sm md:p-10">
+              <h1 className="mb-3 text-2xl font-bold text-gray-900 md:text-4xl">
                 Premium Logistics Services
               </h1>
-              <p className="mb-8 text-lg text-gray-600">
+              <p className="mb-6 text-sm text-gray-600 md:mb-8 md:text-lg">
                 Bay Area's Most Trusted Delivery Partner Since 2019
               </p>
-              <div className="flex justify-center gap-4">
+              <div className="flex flex-col justify-center gap-3 sm:flex-row md:gap-4">
                 <GetQuoteButton />
                 <ScheduleDialog
                   calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
@@ -42,71 +41,72 @@ const LogisticsPage = () => {
               </div>
             </div>
           </div>
+
           {/* Service Cards */}
-          <div className="px-4 pb-16">
+          <div className="px-4 pb-8 md:pb-16">
             <div className="mx-auto max-w-6xl">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
                 {/* Specialized Delivery Card */}
-                <div className="rounded-2xl bg-white p-8 shadow-lg">
-                  <div className="mb-4">
-                    <Truck className="h-8 w-8 text-yellow-400" />
+                <div className="rounded-xl bg-white p-5 shadow-lg">
+                  <div className="mb-2">
+                    <Truck className="h-5 w-5 text-yellow-400" />
                   </div>
-                  <h3 className="mb-3 text-xl font-semibold">
+                  <h3 className="mb-2 text-base font-semibold">
                     Specialized Delivery
                   </h3>
-                  <p className="mb-6 text-gray-600">
+                  <p className="mb-4 text-sm text-gray-600">
                     Expert handling of your needs with temperature-controlled
                     vehicles and trained professionals.
                   </p>
-                  {/* <Link 
+                  <Link
                     href="/learn-more"
-                    className="inline-flex items-center text-yellow-500 font-medium hover:text-yellow-600"
+                    className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link> */}
+                  </Link>
                 </div>
 
                 {/* Time-Critical Delivery Card */}
-                <div className="rounded-2xl bg-white p-8 shadow-lg">
-                  <div className="mb-4">
-                    <Clock className="h-8 w-8 text-yellow-400" />
+                <div className="rounded-xl bg-white p-5 shadow-lg">
+                  <div className="mb-2">
+                    <Clock className="h-5 w-5 text-yellow-400" />
                   </div>
-                  <h3 className="mb-3 text-xl font-semibold">
+                  <h3 className="mb-2 text-base font-semibold">
                     Time-Critical Delivery
                   </h3>
-                  <p className="mb-6 text-gray-600">
+                  <p className="mb-4 text-sm text-gray-600">
                     Guaranteed on-time delivery for your events with real-time
                     tracking and dedicated route optimization.
                   </p>
-                  {/* <Link
+                  <Link
                     href="/learn-more"
-                    className="inline-flex items-center font-medium text-yellow-500 hover:text-yellow-600"
+                    className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link> */}
+                  </Link>
                 </div>
 
                 {/* Quality Guaranteed Card */}
-                <div className="rounded-2xl bg-white p-8 shadow-lg">
-                  <div className="mb-4">
-                    <Shield className="h-8 w-8 text-yellow-400" />
+                <div className="rounded-xl bg-white p-5 shadow-lg">
+                  <div className="mb-2">
+                    <Shield className="h-5 w-5 text-yellow-400" />
                   </div>
-                  <h3 className="mb-3 text-xl font-semibold">
+                  <h3 className="mb-2 text-base font-semibold">
                     Quality Guaranteed
                   </h3>
-                  <p className="mb-6 text-gray-600">
+                  <p className="mb-4 text-sm text-gray-600">
                     Trusted by leading tech companies including Apple, Google,
                     Facebook, and Netflix for reliable service.
                   </p>
-                  {/* <Link
+                  <Link
                     href="/learn-more"
-                    className="inline-flex items-center font-medium text-yellow-500 hover:text-yellow-600"
+                    className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link> */}
+                  </Link>
                 </div>
               </div>
             </div>
