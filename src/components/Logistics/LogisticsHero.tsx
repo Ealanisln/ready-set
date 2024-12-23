@@ -87,13 +87,13 @@ const LogisticsPage = () => {
                     Guaranteed on-time delivery for your events with real-time
                     tracking and dedicated route optimization.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/learn-more"
                     className="inline-flex items-center font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link>
+                  </Link> */}
                 </div>
 
                 {/* Quality Guaranteed Card */}
@@ -108,13 +108,13 @@ const LogisticsPage = () => {
                     Trusted by leading tech companies including Apple, Google,
                     Facebook, and Netflix for reliable service.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/learn-more"
                     className="inline-flex items-center font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>
