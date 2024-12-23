@@ -6,17 +6,17 @@ interface RegisterProps {
 
 export const CountiesSelection = ({ register }: RegisterProps) => {
   const californiaCounties = [
-    "alameda",
-    "marin",
-    "sanFrancisco",
-    "solano",
-    "contraCosta",
-    "napa",
-    "sanMateo",
-    "sonoma",
+    "Alameda",
+    "Marin",
+    "SanFrancisco",
+    "Solano",
+    "ContraCosta",
+    "Napa",
+    "SanMateo",
+    "Sonoma",
   ];
 
-  const texasCounties = ["dallas", "travis"];
+  const texasCounties = ["Dallas", "Travis"];
 
   return (
     <div className="space-y-4">
@@ -27,8 +27,12 @@ export const CountiesSelection = ({ register }: RegisterProps) => {
           <div className="space-y-2">
             {californiaCounties.map((county) => (
               <label key={county} className="flex items-center space-x-2">
-                <input type="checkbox" {...register(`counties.${county}`)} />
-                <span>{county.charAt(0).toUpperCase() + county.slice(1)}</span>
+                <input 
+                  type="checkbox" 
+                  value={county}
+                  {...register('selectedCounties')} 
+                />
+                <span>{county}</span>
               </label>
             ))}
           </div>
@@ -38,8 +42,12 @@ export const CountiesSelection = ({ register }: RegisterProps) => {
           <div className="space-y-2">
             {texasCounties.map((county) => (
               <label key={county} className="flex items-center space-x-2">
-                <input type="checkbox" {...register(`counties.${county}`)} />
-                <span>{county.charAt(0).toUpperCase() + county.slice(1)}</span>
+                <input 
+                  type="checkbox" 
+                  value={county}
+                  {...register('selectedCounties')} 
+                />
+                <span>{county}</span>
               </label>
             ))}
           </div>

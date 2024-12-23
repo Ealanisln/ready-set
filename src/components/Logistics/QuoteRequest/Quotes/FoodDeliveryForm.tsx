@@ -1,9 +1,12 @@
+// src/components/Logistics/QuoteRequest/Quotes/FoodDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
 import { CountiesSelection } from "./Form/CountiesSelection";
 import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { RadioGroup } from "./Form/RadioGroup";
+import { FoodFormData } from "../types";
 
 interface FormData {
   driversNeeded: string;
@@ -19,7 +22,7 @@ interface FormData {
 }
 
 export const FoodDeliveryForm = () => {
-  const { register } = useForm<FormData>();
+  const { register } = useForm<FoodFormData>();
 
   const deliveryTimeOptions = [
     { value: "breakfast", label: "Breakfast" },
@@ -48,7 +51,7 @@ export const FoodDeliveryForm = () => {
   ];
 
   return (
-    <DeliveryForm title="Food Delivery Questionnaire">
+    <DeliveryForm title="Food Delivery Questionnaire" formType="food">
       <div className="space-y-4">
         <input
           {...register("driversNeeded")}

@@ -6,9 +6,24 @@ import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { CountiesSelection } from "./Form/CountiesSelection";
 import { DeliveryFrequency } from "./Form/DeliveryFrequency";
 import { SupplyPickupFrequency } from "./Form/SupplyPickupFrequency";
+import { BakeryFormData } from "../types";
 
 export const BakeGoodsDeliveryForm = () => {
-  const { register } = useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<BakeryFormData>({
+    defaultValues: {
+      formType: "bakery",
+      deliveryTypes: [],
+      selectedCounties: [],
+      partnerServices: "",
+      routingApp: "",
+      deliveryFrequency: "",
+      supplyPickupFrequency: "",
+    },
+  });
 
   const deliveryTypeOptions = [
     {
@@ -25,7 +40,7 @@ export const BakeGoodsDeliveryForm = () => {
   ];
 
   return (
-    <DeliveryForm title="Bake Goods Delivery Questionnaire">
+    <DeliveryForm title="Bake Goods Delivery Questionnaire" formType="bakery">
       <DeliveryQuestions register={register} />
       <VendorInfoFields register={register} />
       <CheckboxGroup

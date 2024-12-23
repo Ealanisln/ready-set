@@ -1,24 +1,17 @@
+// src/components/Logistics/QuoteRequest/Quotes/SpecialtyDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
-import { DeliveryQuestions } from "./Form/DeliveryQuestions";
-
-interface FormData {
-  driversNeeded: string;
-  serviceType: string;
-  deliveryRadius: string;
-  deliveryTypes: string[];
-  fragilePackage: string;
-  packageDescription: string;
-}
 import { VendorInfoFields } from "./Form/VendorInfoFields";
 import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { CountiesSelection } from "./Form/CountiesSelection";
 import { DeliveryFrequency } from "./Form/DeliveryFrequency";
 import { SupplyPickupFrequency } from "./Form/SupplyPickupFrequency";
 import { RadioGroup } from "./Form/RadioGroup";
+import { SpecialtyFormData } from "../types";
 
 export const SpecialtyDeliveryForm = () => {
-  const { register } = useForm<FormData>();
+  const { register } = useForm<SpecialtyFormData>();
 
   const deliveryTypeOptions = [
     {
@@ -40,7 +33,10 @@ export const SpecialtyDeliveryForm = () => {
   ];
 
   return (
-    <DeliveryForm title="Specialty Deliveries Questionnaire">
+    <DeliveryForm
+      title="Specialty Deliveries Questionnaire"
+      formType="specialty"
+    >
       <div className="space-y-4">
         <input
           {...register("driversNeeded")}

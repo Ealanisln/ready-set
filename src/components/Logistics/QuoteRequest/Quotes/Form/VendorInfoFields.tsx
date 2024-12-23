@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/Form/VendorInfoFields.tsx
+
 import { UseFormRegister } from "react-hook-form";
 
 interface RegisterProps {
@@ -20,7 +22,7 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Email Address"
       />
       <input
-        {...register("companyName")}
+        {...register("companyNa`me")}
         className="w-full rounded border p-2"
         placeholder="Company Name"
       />

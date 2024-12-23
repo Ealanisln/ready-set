@@ -120,7 +120,6 @@ const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
             src={calendarUrl}
             width="100%"
             height="100%"
-            frameBorder="0"
             className="border-0"
           ></iframe>
         </div>

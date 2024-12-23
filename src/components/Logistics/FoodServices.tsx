@@ -70,7 +70,7 @@ const FoodServices: React.FC<FoodServicesProps> = ({
   };
   
   return (
-    <div className="w-full">
+    <div className="w-full" id="food-services">
       {/* Title Section - Outside the yellow box */}
       <div className="mx-auto max-w-7xl px-8 md:px-16 mb-8">
         <h1 className="text-5xl font-bold text-gray-800 text-center mb-4">{title}</h1>

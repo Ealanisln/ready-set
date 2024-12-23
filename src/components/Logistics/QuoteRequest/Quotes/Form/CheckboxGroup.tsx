@@ -1,19 +1,17 @@
 import { UseFormRegister } from "react-hook-form";
 
-interface CheckboxOption {
+interface Option {
   value: string;
   label: string;
   description?: string;
 }
 
-interface RegisterProps {
+interface CheckboxGroupProps {
   register: UseFormRegister<any>;
-}
-
-interface CheckboxGroupProps extends RegisterProps {
   name: string;
-  options: CheckboxOption[];
-  title?: string;
+  options: Option[];
+  title: string;
+  required?: boolean;
 }
 
 export const CheckboxGroup = ({
@@ -21,21 +19,29 @@ export const CheckboxGroup = ({
   name,
   options,
   title,
-}: CheckboxGroupProps) => (
-  <div className="space-y-4">
-    {title && <h3 className="font-medium">{title}</h3>}
-    <div className="grid grid-cols-2 gap-4">
-      {options.map((option) => (
-        <label key={option.value} className="flex items-center space-x-2">
-          <input type="checkbox" {...register(`${name}.${option.value}`)} />
-          <div>
-            <span className="font-medium">{option.label}</span>
-            {option.description && (
-              <p className="text-sm text-gray-600">{option.description}</p>
-            )}
-          </div>
-        </label>
-      ))}
+  required
+}: CheckboxGroupProps) => {
+  return (
+    <div className="space-y-4">
+      <h3 className="font-medium">{title}</h3>
+      <div className="space-y-4">
+        {options.map((option) => (
+          <label key={option.value} className="flex items-start space-x-3">
+            <input
+              type="checkbox"
+              value={option.value}
+              {...register(name, { required: required })}
+              className="mt-1"
+            />
+            <div>
+              <p className="font-medium">{option.label}</p>
+              {option.description && (
+                <p className="text-sm text-gray-500">{option.description}</p>
+              )}
+            </div>
+          </label>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};

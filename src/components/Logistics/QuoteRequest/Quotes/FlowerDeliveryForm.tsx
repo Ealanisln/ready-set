@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/FlowerDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { DeliveryQuestions } from "./Form/DeliveryQuestions";
@@ -6,9 +8,10 @@ import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { CountiesSelection } from "./Form/CountiesSelection";
 import { DeliveryFrequency } from "./Form/DeliveryFrequency";
 import { SupplyPickupFrequency } from "./Form/SupplyPickupFrequency";
+import { FlowerFormData } from "../types";
 
 export const FlowerDeliveryForm = () => {
-    const { register } = useForm<FormData>();
+  const { register } = useForm<FlowerFormData>();
   
     const deliveryTypeOptions = [
       {
@@ -36,7 +39,7 @@ export const FlowerDeliveryForm = () => {
     ];
   
     return (
-      <DeliveryForm title="Flower Delivery Questionnaire">
+      <DeliveryForm title="Flower Delivery Questionnaire" formType="flower">
         <DeliveryQuestions register={register} />
         <VendorInfoFields register={register} />
         <CheckboxGroup
@@ -56,4 +59,4 @@ export const FlowerDeliveryForm = () => {
         <SupplyPickupFrequency register={register} />
       </DeliveryForm>
     );
-  };
+  }
