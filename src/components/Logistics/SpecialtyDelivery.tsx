@@ -24,13 +24,14 @@ const SpecialtyDelivery = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
       <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="relative">
-          <img 
-            src="/images/logistics/specialtydeliverypic.png"
-            alt="Delivery professional with package"
-            className="rounded-lg shadow-lg w-full object-cover"
-          />
-        </div>
+      <div className="relative h-full">
+        <picture>
+        <source srcSet="/images/logistics/specialtydeliverypic.webp" type="image/webp" />
+        <img src="/images/logistics/specialtydeliverypic.png"
+             alt="Delivery professional with package"
+            className="w-full h-full object-cover rounded-2xl"/>
+        </picture>
+      </div>
         
         <div className="space-y-6">
           <h2 className="text-4xl font-bold text-yellow-400">
