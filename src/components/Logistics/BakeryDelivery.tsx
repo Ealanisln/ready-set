@@ -86,7 +86,7 @@ const BakeryDeliverySection = () => {
       className="w-full h-full object-cover rounded-2xl"
     />
   </picture>
-</div>
+      </div>
       </div>
     </section>
   );
