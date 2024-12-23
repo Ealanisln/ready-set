@@ -35,21 +35,13 @@ const LogisticsPage = () => {
               </p>
               <div className="flex justify-center gap-4">
                 <GetQuoteButton />
-                {/* <Link
-                  href="/schedule"
-                  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-medium border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  Schedule a Call
-                </Link> */}
-
                 <ScheduleDialog
-                  calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+                  calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
                   buttonText="Schedule a Call"
                 />
               </div>
             </div>
           </div>
-
           {/* Service Cards */}
           <div className="px-4 pb-16">
             <div className="mx-auto max-w-6xl">
