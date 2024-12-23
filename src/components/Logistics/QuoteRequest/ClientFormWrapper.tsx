@@ -6,22 +6,24 @@ import { FormManager } from "./Quotes/FormManager";
 import { FormType } from "./types";
 
 interface WrapperProps {
-  children: React.ReactElement<{ onRequestQuote?: (formType: FormType) => void }> | React.ReactElement<{ onRequestQuote?: (formType: FormType) => void }>[];
+  children: React.ReactNode;
 }
 
 export const ClientFormWrapper: React.FC<WrapperProps> = ({ children }) => {
   const { openForm, closeForm, DialogForm } = FormManager();
 
   const childrenWithProps = React.Children.map(children, (child) => {
-    if (React.isValidElement(child)) {
-      // Pasar la prop onRequestQuote a todos los elementos hijos
-      return React.cloneElement(child, {
-        ...(typeof child.props === 'object' ? child.props : {}),
+    if (React.isValidElement(child) && typeof child.type !== 'string') {
+      // Create a new props object explicitly
+      const newProps = {
+        ...child.props as object, // Cast to object to ensure spread works
         onRequestQuote: (formType: FormType) => {
           console.log('ClientFormWrapper - onRequestQuote called with:', formType);
           openForm(formType);
         }
-      });
+      };
+      
+      return React.cloneElement(child, newProps);
     }
     return child;
   });

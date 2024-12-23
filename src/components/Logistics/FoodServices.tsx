@@ -1,11 +1,13 @@
-// FoodServices.tsx
-import React from 'react';
+"use client";
+
+import { FormType } from './QuoteRequest/types';
 
 interface Partner {
   name: string;
 }
 
 interface FoodServicesProps {
+  onRequestQuote?: (formType: FormType) => void;
   title?: string;
   subtitle?: string;
   description?: string;
@@ -47,6 +49,7 @@ const formatPartnerName = (name: string) => {
 };
 
 const FoodServices: React.FC<FoodServicesProps> = ({
+  onRequestQuote,
   title = "OUR SERVICES",
   subtitle = "With Ready Set, you can trust your delivery needs are handled with precision and professionalism. Let's keep your business moving—fresh, fast, and on time.",
   description = "At Ready Set, we redefine food delivery services to cater to your business needs. As a trusted logistics partner in the food industry, we specialize in delivering fresh, high-quality, and perishable goods right on time and in pristine condition. Whether you're searching for the best food delivery service for your business or need reliable solutions, we've got you covered.",
@@ -60,6 +63,12 @@ const FoodServices: React.FC<FoodServicesProps> = ({
   ],
   finalNote = "Ready Set is the go-to choice for foodies and businesses alike. Whether it's a bustling restaurant or a corporate event, we deliver more than just meals; we deliver satisfaction.",
 }) => {
+  const handleQuoteRequest = () => {
+    if (onRequestQuote) {
+      onRequestQuote("food");
+    }
+  };
+  
   return (
     <div className="w-full">
       {/* Title Section - Outside the yellow box */}
@@ -95,7 +104,10 @@ const FoodServices: React.FC<FoodServicesProps> = ({
 
                 <p className="text-gray-700 italic">{formatFinalNote(finalNote)}</p>
 
-                <button className="bg-white px-6 py-3 rounded-md font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={handleQuoteRequest}
+                  className="bg-white px-6 py-3 rounded-md font-bold text-gray-800 hover:bg-gray-100 transition-colors"
+                >
                   Request a Quote
                 </button>
               </div>

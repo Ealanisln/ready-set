@@ -1,11 +1,17 @@
-import React from 'react';
+"use client";
+
+import { FormType } from './QuoteRequest/types';
 
 interface DeliveryFeature {
   title: string;
   description: string;
 }
 
-const SpecialtyDelivery = () => {
+interface SpecialtyDeliveryProps {
+  onRequestQuote?: (formType: FormType) => void;
+}
+
+const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote }) => {
   const deliveryFeatures: DeliveryFeature[] = [
     {
       title: "Careful Handling",
@@ -20,6 +26,12 @@ const SpecialtyDelivery = () => {
       description: "We adapt to your schedule and provide tracking updates to keep you informed every step of the way."
     }
   ];
+
+  const handleQuoteRequest = () => {
+    if (onRequestQuote) {
+      onRequestQuote("specialty");
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
@@ -71,7 +83,10 @@ const SpecialtyDelivery = () => {
             </ul>
           </div>
           
-          <button className="mt-6 bg-yellow-400 text-black px-6 py-3 rounded-md font-semibold hover:bg-yellow-500 transition duration-200">
+          <button 
+            onClick={handleQuoteRequest}
+            className="mt-6 bg-yellow-400 text-black px-6 py-3 rounded-md font-semibold hover:bg-yellow-500 transition duration-200"
+          >
             Request a Quote
           </button>
         </div>
@@ -79,5 +94,7 @@ const SpecialtyDelivery = () => {
     </div>
   );
 };
+
+SpecialtyDelivery.displayName = 'SpecialtyDelivery';
 
 export default SpecialtyDelivery;

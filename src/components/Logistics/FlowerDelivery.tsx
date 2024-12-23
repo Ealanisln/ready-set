@@ -1,13 +1,21 @@
 // FlowerDeliverySection.tsx
-import React from "react";
+"use client";
+
 import Image from "next/image";
+import { FormType } from "./QuoteRequest/types";
 
 interface DeliveryOccasion {
   title: string;
   description: string;
 }
 
-const FlowerDeliverySection = () => {
+interface FlowerDeliverySectionProps {
+  onRequestQuote?: (formType: FormType) => void;
+}
+
+const FlowerDeliverySection: React.FC<FlowerDeliverySectionProps> = ({
+  onRequestQuote,
+}) => {
   const occasions: DeliveryOccasion[] = [
     {
       title: "Weddings & Anniversaries",
@@ -45,9 +53,15 @@ const FlowerDeliverySection = () => {
     "Bloom Nation",
   ];
 
+  const handleQuoteRequest = () => {
+    if (onRequestQuote) {
+      onRequestQuote("flower");
+    }
+  };
+
   return (
     <div className="w-full">
-      <div className="mx-auto max-w-7xl px-8 md:px-16 py-12">
+      <div className="mx-auto max-w-7xl px-8 py-12 md:px-16">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Image Section */}
           <div className="relative">
@@ -126,7 +140,13 @@ const FlowerDeliverySection = () => {
             </div>
 
             {/* CTA Button */}
-            <button className="rounded-md bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-colors duration-200 hover:bg-yellow-500">
+            {/* <button className="rounded-md bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-colors duration-200 hover:bg-yellow-500">
+              Request a Quote
+            </button> */}
+            <button
+              onClick={handleQuoteRequest}
+              className="rounded-md bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-colors duration-200 hover:bg-yellow-500"
+            >
               Request a Quote
             </button>
           </div>

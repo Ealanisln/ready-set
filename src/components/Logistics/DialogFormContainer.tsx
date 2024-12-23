@@ -68,16 +68,18 @@ const DialogFormContainer = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-yellow-500">
+      <DialogContent className="top-[50%] w-[90vw] max-w-3xl translate-y-[-50%] rounded-lg border bg-white p-4 shadow-lg sm:p-6 md:w-full">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-lg font-bold text-yellow-500 sm:text-xl">
             {getFormTitle(formType)}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-gray-600 sm:text-base">
             {getFormDescription(formType)}
           </DialogDescription>
         </DialogHeader>
-        {renderForm()}
+        <div className="max-h-[60vh] overflow-y-auto px-1">
+          {renderForm()}
+        </div>
       </DialogContent>
     </Dialog>
   );

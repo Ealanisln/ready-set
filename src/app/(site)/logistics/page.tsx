@@ -5,7 +5,7 @@ import LogisticsHero from "@/components/Logistics/LogisticsHero";
 import WhyChoose from "@/components/Logistics/WhyChoose";
 import FoodServices from "@/components/Logistics/FoodServices";
 import ImageCarousel from "@/components/Logistics/ImagesCarousel";
-import FlowerDeliveryPage from "@/components/Logistics/FlowerDeliveryPage";
+import FlowerDeliveryPage from "@/components/Logistics/FlowerDelivery";
 import SpecialtyDelivery from "@/components/Logistics/SpecialtyDelivery";
 import BakeryDeliverySection from "@/components/Logistics/BakeryDelivery";
 import { ClientFormWrapper } from "@/components/Logistics/QuoteRequest/ClientFormWrapper";
@@ -58,7 +58,7 @@ export default function LogisticsPage() {
       <FoodServices />
       <FlowerDeliveryPage />
       <BakeryDeliverySection />
-      {/* <SpecialtyDelivery /> */}
+      <SpecialtyDelivery />
     </ClientFormWrapper>
     </>
   );
