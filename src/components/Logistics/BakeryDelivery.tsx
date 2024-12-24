@@ -24,27 +24,27 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
 }) => {
   const services: ServiceItem[] = [
     {
-      title: "Wedding Cakes:",
+      title: "Wedding Cakes: ",
       description:
         "Ensuring that stunning centerpiece cakes arrive in pristine condition for the big day.",
     },
     {
-      title: "Birthday Cakes & Desserts:",
+      title: "Birthday Cakes & Desserts: ",
       description:
         "Keeping every celebration sweet, memorable, and hassle-free.",
     },
     {
-      title: "Holiday Orders:",
+      title: "Holiday Orders: ",
       description:
         "Delivering festive treats like cookies, pies, and specialty breads to spread seasonal cheer.",
     },
     {
-      title: "Corporate Events & Catering:",
+      title: "Corporate Events & Catering: ",
       description:
         "Providing seamless logistics for bulk orders and large gatherings.",
     },
     {
-      title: "Everyday Bread Deliveries:",
+      title: "Everyday Bread Deliveries: ",
       description:
         "Because fresh bread and baked goods are always in demand, we make sure they reach your customers daily, ensuring freshness with every bite.",
     },
@@ -80,10 +80,9 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             <ul className="list-none space-y-6">
               {services.map((service, index) => (
                 <li key={index} className="flex gap-3">
-                  <span className="text-yellow-400 text-2xl leading-none">•</span>
+                  <span className="text-gray-800 text-2xl leading-none">•</span>
                   <div className="flex-1">
-                    <span className="font-bold text-gray-800">{service.title}</span>
-                    {" "}
+                    <span className="font-semibold text-gray-800">{service.title}</span>
                     <span className="text-gray-700">{service.description}</span>
                   </div>
                 </li>
