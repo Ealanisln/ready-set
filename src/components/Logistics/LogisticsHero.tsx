@@ -24,7 +24,7 @@ const LogisticsPage = () => {
         {/* Content */}
         <div className="relative z-10 flex min-h-screen flex-col">
           {/* Centered Card */}
-          <div className="flex flex-1 items-center justify-center px-4 pt-28 pb-8 md:pt-40">
+          <div className="flex flex-1 items-center justify-center px-4 pb-8 pt-28 md:pt-40">
             <div className="w-full max-w-2xl rounded-2xl bg-white/95 p-4 text-center shadow-lg backdrop-blur-sm md:p-10">
               <h1 className="mb-3 text-2xl font-bold text-gray-900 md:text-4xl">
                 Premium Logistics Services
@@ -58,13 +58,13 @@ const LogisticsPage = () => {
                     Expert handling of your needs with temperature-controlled
                     vehicles and trained professionals.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/learn-more"
                     className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link>
+                  </Link> */}
                 </div>
 
                 {/* Time-Critical Delivery Card */}
@@ -79,13 +79,13 @@ const LogisticsPage = () => {
                     Guaranteed on-time delivery for your events with real-time
                     tracking and dedicated route optimization.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/learn-more"
                     className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link>
+                  </Link> */}
                 </div>
 
                 {/* Quality Guaranteed Card */}
@@ -100,13 +100,13 @@ const LogisticsPage = () => {
                     Trusted by leading tech companies including Apple, Google,
                     Facebook, and Netflix for reliable service.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/learn-more"
                     className="inline-flex items-center text-sm font-medium text-yellow-500 hover:text-yellow-600"
                   >
                     Learn More
                     <span className="ml-2">→</span>
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>

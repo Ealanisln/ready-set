@@ -8,19 +8,6 @@ import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { RadioGroup } from "./Form/RadioGroup";
 import { FoodFormData } from "../types";
 
-interface FormData {
-  driversNeeded: string;
-  serviceType: string;
-  totalStaff: string;
-  expectedDeliveries: string;
-  partneredServices: string;
-  multipleLocations: string;
-  deliveryRadius: string;
-  deliveryTimes: string[];
-  orderHeadcount: string[];
-  frequency: string;
-}
-
 export const FoodDeliveryForm = () => {
   const { register } = useForm<FoodFormData>();
 
