@@ -102,14 +102,14 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
           </button> */}
 <Button
         onClick={() => handleClick(onRequestQuote)}
-        className="bg-yellow-500 text-white hover:bg-yellow-600"
+        className="bg-black text-white hover:bg-gray-900"
       >
         Request Bakery Delivery Quote
       </Button>
         </div>
         <div className="relative h-full mt-20 min-h-[300px] max-h-[500px] lg:min-h-0 flex items-center">
            <div className="rounded-3xl overflow-hidden h-full w-full">
-           <img src="/images/logistics/bakerypic.png" alt="A bread container showing delicious breads"
+           <img src="/images/logistics/bakerypic.png" alt="A container showing delicious breads"
             className="w-full h-full object-cover"/>
           </div>
           </div>
