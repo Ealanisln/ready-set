@@ -1,5 +1,3 @@
-// src/components/Logistics/BakeryDelivery.tsx
-
 'use client'
 
 import { Button } from "../ui/button";
@@ -75,17 +73,23 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             and on time.
           </p>
 
-          <div className="space-y-2">
-            <p className="italic text-gray-800">
+          <div className="space-y-4">
+            <p className="italic text-gray-800 text-xl">
               Our services are perfect for key moments such as:
             </p>
-            <ul className="space-y-4">
+            <ul className="list-none space-y-6">
               {services.map((service, index) => (
-                <li key={index} className="flex gap-2">
-                  <span className="min-w-fit font-semibold text-gray-800">
-                    {service.title} –
-                  </span>
-                  <span className="text-gray-700">{service.description}</span>
+                <li key={index} className="flex items-baseline">
+                  <span className="text-yellow-600 text-2xl mr-3">•</span>
+                  <div className="flex flex-col md:flex-row md:items-baseline">
+                    <span className="text-xl font-semibold text-gray-800 md:min-w-fit">
+                      {service.title}
+                    </span>
+                    <span className="hidden md:inline mx-2 text-gray-800">–</span>
+                    <span className="text-gray-700 mt-1 md:mt-0">
+                      {service.description}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -96,30 +100,27 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             partner for dependable and timely service.
           </p>
 
-          {/* <button className="bg-white px-6 py-3 rounded-full font-semibold text-gray-800 
-            hover:bg-gray-50 transition-colors duration-200 shadow-sm">
-            Request a Quote
-          </button> */}
-<Button
-        onClick={() => handleClick(onRequestQuote)}
-        className="bg-black text-white hover:bg-gray-900"
-      >
-        Request Bakery Delivery Quote
-      </Button>
+          <Button
+            onClick={() => handleClick(onRequestQuote)}
+            className="bg-black text-white hover:bg-gray-900"
+          >
+            Request Bakery Delivery Quote
+          </Button>
         </div>
         <div className="relative h-full mt-20 min-h-[300px] max-h-[500px] lg:min-h-0 flex items-center">
-           <div className="rounded-3xl overflow-hidden h-full w-full">
-           <img src="/images/logistics/bakerypic.png" alt="A container showing delicious breads"
-            className="w-full h-full object-cover"/>
+          <div className="rounded-3xl overflow-hidden h-full w-full">
+            <img 
+              src="/images/logistics/bakerypic.png" 
+              alt="A container showing delicious breads"
+              className="w-full h-full object-cover"
+            />
           </div>
-          </div>
-  
+        </div>
       </div>
     </section>
   );
 };
 
 BakeryDeliverySection.displayName = 'BakeryDeliverySection';
-
 
 export default BakeryDeliverySection;
