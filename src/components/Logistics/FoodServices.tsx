@@ -114,7 +114,7 @@ const FoodServices: React.FC<FoodServicesProps> = ({
             </div>
 
             {/* Right Column - Image */}
-            <div className="relative h-full my-10 min-h-[300px] max-h-[500px] lg:min-h-0 flex items-center">
+            <div className="relative h-full mt-20 min-h-[300px] max-h-[500px] lg:min-h-0 flex items-center">
            <div className="rounded-3xl overflow-hidden h-full w-full">
            <img src="/images/logistics/foodpic.png" alt="Food delivery containers with various meals"
             className="w-full h-full object-cover"/>
