@@ -36,14 +36,7 @@ const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote })
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
       <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="relative">
-          <img 
-            src="/images/logistics/specialtydeliverypic.png"
-            alt="Delivery professional with package"
-            className="rounded-lg shadow-lg w-full object-cover"
-          />
-        </div>
-        
+        {/* Columna del contenido */}
         <div className="space-y-6">
           <h2 className="text-4xl font-bold text-yellow-400">
             Specialty Delivery
@@ -89,6 +82,15 @@ const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote })
           >
             Request a Quote
           </button>
+        </div>
+
+        {/* Columna de la imagen */}
+        <div className="mt-8 mb-8">
+          <img 
+            src="/images/specialty-delivery.jpg" // Asegúrate de usar la ruta correcta de tu imagen
+            alt="Specialty Delivery Service"
+            className="w-full h-auto rounded-lg shadow-lg object-cover"
+          />
         </div>
       </div>
     </div>
