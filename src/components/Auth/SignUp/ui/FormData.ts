@@ -120,6 +120,13 @@ export interface VendorFormData {
   frequency: string;
   provisions?: string[];
   website?: string;
+  days_per_week: string;
+  service_type: string;
+  total_staff: string;
+  deliveries_per_day: string;
+  partnered_services: string;
+  multiple_locations: boolean;
+  delivery_radius: string;
 }
 export interface ClientFormData {
   userType: "client";

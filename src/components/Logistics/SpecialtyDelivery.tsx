@@ -1,11 +1,18 @@
+"use client";
+
 import React from 'react';
+import { FormType } from './QuoteRequest/types';
 
 interface DeliveryFeature {
   title: string;
   description: string;
 }
 
-const SpecialtyDelivery = () => {
+interface SpecialtyDeliveryProps {
+onRequestQuote?: (formType: FormType) => void;
+}
+
+const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote }) => {
   const deliveryFeatures: DeliveryFeature[] = [
     {
       title: "Careful Handling",
@@ -21,17 +28,25 @@ const SpecialtyDelivery = () => {
     }
   ];
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-      <div className="grid md:grid-cols-2 gap-8 items-center">
-      <div className="relative h-full">
+const handleQuoteRequest = () => {
+if (onRequestQuote) {
+    onRequestQuote("specialty");
+}
+};
+
+return (
+<div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+    <div className="grid md:grid-cols-2 gap-8 items-center">
+    <div className="relative h-full">
         <picture>
         <source srcSet="/images/logistics/specialtydeliverypic.webp" type="image/webp" />
-        <img src="/images/logistics/specialtydeliverypic.png"
-             alt="Delivery professional with package"
-            className="w-full h-full object-cover rounded-2xl"/>
+        <img 
+            src="/images/logistics/specialtydeliverypic.png"
+            alt="Delivery professional with package"
+            className="w-full h-full object-cover rounded-2xl shadow-lg"
+        />
         </picture>
-      </div>
+    </div>
         
         <div className="space-y-6">
           <h2 className="text-4xl font-bold text-yellow-400">
@@ -72,7 +87,10 @@ const SpecialtyDelivery = () => {
             </ul>
           </div>
           
-          <button className="mt-6 bg-yellow-400 text-black px-6 py-3 rounded-md font-semibold hover:bg-yellow-500 transition duration-200">
+<button 
+onClick={handleQuoteRequest}
+className="mt-6 bg-yellow-400 text-black px-6 py-3 rounded-md font-semibold hover:bg-yellow-500 transition duration-200"
+>
             Request a Quote
           </button>
         </div>
@@ -80,5 +98,7 @@ const SpecialtyDelivery = () => {
     </div>
   );
 };
+
+SpecialtyDelivery.displayName = 'SpecialtyDelivery';
 
 export default SpecialtyDelivery;

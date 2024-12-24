@@ -62,6 +62,13 @@ export const vendorSchema = baseSchema.extend({
   frequency: z.enum(getValues(FREQUENCY)),
   provisions: z.array(z.enum(getValues(PROVISIONS))).optional(),
   company: z.string().nonempty("Company name is required"),
+  days_per_week: z.string().optional(),
+  service_type: z.string().optional(),
+  total_staff: z.string().optional(),
+  deliveries_per_day: z.string().optional(),
+  partnered_services: z.string().optional(),
+  multiple_locations: z.boolean().optional(),
+  delivery_radius: z.string().optional(),
 });
 
 export const clientSchema = z.object({
@@ -148,7 +155,11 @@ export const formSchema = z.discriminatedUnion("userType", [
   helpdeskSchema,
 ]);
 
-export type FormDataUnion = VendorFormData | ClientFormData | DriverFormData | HelpdeskFormData;
+export type FormDataUnion =
+  | VendorFormData
+  | ClientFormData
+  | DriverFormData
+  | HelpdeskFormData;
 
 export type DriverFormData = z.infer<typeof driverSchema>;
 export type VendorFormData = z.infer<typeof vendorSchema>;
