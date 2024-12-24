@@ -10,8 +10,10 @@ const WhyChoose = () => {
             <h2 className="mb-6 text-4xl font-bold text-gray-900">
               Why Choose Ready Set?
             </h2>
-            <p className="text-xl text-gray-600">
-            Ready Set offers a complete suite of logistics services that include Delivery, Routing , Dispatch, & Management for the following industries: Catered Food Delivery, Floral Delivery, Bakery Delivery, and Specialty Delivery
+            <p className="text-xl text-gray-600 text-center max-w-4xl mx-auto leading-relaxed">
+              Ready Set offers a complete suite of logistics services that include Delivery, 
+              Routing, Dispatch, & Management for the following industries: Catered Food 
+              Delivery, Floral Delivery, Bakery Delivery, and Specialty Delivery.
             </p>
           </div>
           <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
