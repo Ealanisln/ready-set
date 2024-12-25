@@ -88,7 +88,7 @@ const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote })
         <div className="mt-5 mb-10 max-w-md mx-auto"> {/* Agregué max-w-lg y mx-auto */}
          <img src="/images/logistics/specialtydeliverypic.png"
               alt="Specialty Delivery Service"
-             className="w-full h-auto rounded-lg shadow-lg object-cover"/>
+             className="w-full h-auto rounded-3xl shadow-lg object-cover"/>
           </div>
         </div>
       </div>
