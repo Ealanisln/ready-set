@@ -9,9 +9,9 @@ const teamData: TeamType[] = [
     designation: "Senior Brand Manager",
     image: "/images/team/Bautista_Gilbert.png",
     skills: [
-      "Strategic Brand Management",
-      "Cross-Functional Team Leadership",
-      "Financial Management and Cost Control",
+      "Brand Strategy",
+      "Digital Marketing & SEO",
+      "Operations & Finance",
     ],
     description:
       "Over 4 years of experience in brand management, product marketing, sales support, and graphic design.",
@@ -24,7 +24,7 @@ const teamData: TeamType[] = [
     name: "Bon Gonzales",
     designation: "Brand Manager",
     image: "/images/team/Gonzales_Bon.png",
-    skills: ["Marketing Campaigns", "Financial Analysis", "Customer Support"],
+    skills: ["Customer Service", "Brand Management", "Project & Marketing Management"],
     description:
       "Enjoys collaborating with teams and taking initiative in independent work, focusing on quality and efficiency.",
     facebookLink: "/#",
@@ -117,9 +117,9 @@ const teamData: TeamType[] = [
     designation: "Project and Human Resources Supervisor",
     image: "/images/team/Ducao_April.png",
     skills: [
-      "Project Managment",
-      "Recruitment & Onboarding",
-      "Resource Coordination",
+      "Team Managment",
+      "Process Improvement",
+      "Compliance Tracking",
     ],
     description:
       "I'm a dedicated professional with experience in operations management, administration, and customer service.",
@@ -245,9 +245,9 @@ const teamData: TeamType[] = [
     designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Fabian_Romelita.png",
     skills: [
-      "Customer Service Skills",
-      "MS Software (Excel, Word & PP)",
-      "Technical Support Skills",
+      "Client Management",
+      "Sales Support",
+      "Technical Support",
     ],
     description:
       "Confident and ambitious professional with extensive experience in Sales, Marketing, and Customer Service.",
