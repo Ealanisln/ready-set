@@ -34,9 +34,9 @@ const teamData: TeamType[] = [
   {
     id: 3,
     name: "Anne Leneth Logroño",
-    designation: "Brand Manager Support Lead",
+    designation: "Brand Manager Support Supervisor",
     image: "/images/team/Logroño_Leneth.png",
-    skills: ["Social Media Metrics", "Content Creation", "Team Leadership"],
+    skills: ["Social Media Management", "Logistics Coordination", "Campaign Monitoring"],
     description:
       "Strong organizational skills with proven ability to train teams on metrics and product analytics.",
     facebookLink: "/#",
@@ -45,10 +45,10 @@ const teamData: TeamType[] = [
   },
   {
     id: 4,
-    name: "Bryan Toralba",
-    designation: "Brand Manager Support Specialist",
+    name: "Bryan Paul Toralba",
+    designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Toralba_Bryan.png",
-    skills: ["Brand Management", "Project Coordination", "Technical Support"],
+    skills: ["Quality Assurance", "Tech-Savvy", "Brand Strategy"],
     description:
       "Punctual and adaptable with excellent problem-solving abilities and clear communication skills.",
     facebookLink: "/#",
@@ -60,7 +60,7 @@ const teamData: TeamType[] = [
     name: "Trishelle Batingana",
     designation: "Sales and Marketing Coordinator",
     image: "/images/team/Batingana_Trishelle.png",
-    skills: ["Customer Service", "Digital Marketing", "Graphic Design"],
+    skills: ["Customer Service", "Sales Support", "Digital Marketing"],
     description:
       "Focuses on delivering quality work and meeting deadlines efficiently, both independently and in team environments.",
     facebookLink: "/#",
@@ -217,9 +217,9 @@ const teamData: TeamType[] = [
     designation: "Marketing Coordinator",
     image: "/images/team/Yap_Maria_Noreen.png",
     skills: [
-      "Marketing Skills",
-      "Operations Management",
-      "Reliability & Resourcefulness",
+      "Marketing Operations",
+      "People Management",
+      "Administrative Support",
     ],
     description:
       "Drives impactful email campaigns and optimizes automation processes through cross-functional collaboration.",
@@ -230,9 +230,9 @@ const teamData: TeamType[] = [
   {
     id: 17,
     name: "Rochelle Lean Tan",
-    designation: "Marketing Assistant Coordinator",
+    designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Tan_Rochelle_Lean.png",
-    skills: ["Customer Service", "Marketing Campaigns", "Sales Support"],
+    skills: ["Customer Service", "Data Management", "Marketing and Social Media"],
     description:
       "Experienced in handling inbound and outbound calls, emails, and correspondences with strong communication skills.",
     facebookLink: "/#",
