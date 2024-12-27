@@ -106,9 +106,12 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
            <div className="relative w-full mt-8 md:mt-12 lg:mt-20">
            <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
            <div className="rounded-3xl overflow-hidden w-full h-full">
+            <picture>
+            <source srcSet="/images/logistics/bakerypic.webp" type="image/webp" />
             <img src="/images/logistics/bakerypic.png" 
               alt="A container showing delicious breads" 
               className="w-full h-full object-cover object-center"/>
+              </picture>
           </div>
         </div>
         </div>

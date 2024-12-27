@@ -39,11 +39,12 @@ const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote })
         {/* Image Column */}
         <div className="order-2 md:order-1">
           <div className="max-w-md mx-auto">
-            <img 
-              src="/images/logistics/specialtydeliverypic.png"
+            <picture>
+            <source srcSet="/images/logistics/specialtydeliverypic.webp" type="image/webp"/>
+            <img src="/images/logistics/specialtydeliverypic.png"
               alt="Specialty Delivery Service"
-              className="w-full h-auto rounded-3xl shadow-lg object-cover"
-            />
+              className="w-full h-auto rounded-3xl shadow-lg object-cover"/>
+              </picture>
           </div>
         </div>
 

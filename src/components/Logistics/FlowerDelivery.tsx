@@ -66,6 +66,8 @@ const FlowerDeliverySection: React.FC<FlowerDeliverySectionProps> = ({
           {/* Image Section */}
           <div className="relative">
             <div className="overflow-hidden">
+              <picture>
+              <source srcSet="/images/logistics/flowerpic.webp" type="image/webp" />
               <Image
                 src="/images/logistics/flowerpic.png"
                 alt="Flower delivery person holding a beautiful bouquet"
@@ -74,6 +76,7 @@ const FlowerDeliverySection: React.FC<FlowerDeliverySectionProps> = ({
                 height={600}
                 priority
               />
+              </picture>
             </div>
           </div>
 
