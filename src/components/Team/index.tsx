@@ -9,9 +9,9 @@ const teamData: TeamType[] = [
     designation: "Senior Brand Manager",
     image: "/images/team/Bautista_Gilbert.png",
     skills: [
-      "Strategic Brand Management",
-      "Cross-Functional Team Leadership",
-      "Financial Management and Cost Control",
+      "Brand Strategy",
+      "Digital Marketing & SEO",
+      "Operations & Finance",
     ],
     description:
       "Over 4 years of experience in brand management, product marketing, sales support, and graphic design.",
@@ -24,7 +24,7 @@ const teamData: TeamType[] = [
     name: "Bon Gonzales",
     designation: "Brand Manager",
     image: "/images/team/Gonzales_Bon.png",
-    skills: ["Marketing Campaigns", "Financial Analysis", "Customer Support"],
+    skills: ["Customer Service", "Brand Management", "Project & Marketing Management"],
     description:
       "Enjoys collaborating with teams and taking initiative in independent work, focusing on quality and efficiency.",
     facebookLink: "/#",
@@ -34,9 +34,9 @@ const teamData: TeamType[] = [
   {
     id: 3,
     name: "Anne Leneth Logroño",
-    designation: "Brand Manager Support Lead",
+    designation: "Brand Manager Support Supervisor",
     image: "/images/team/Logroño_Leneth.png",
-    skills: ["Social Media Metrics", "Content Creation", "Team Leadership"],
+    skills: ["Social Media Management", "Logistics Coordination", "Campaign Monitoring"],
     description:
       "Strong organizational skills with proven ability to train teams on metrics and product analytics.",
     facebookLink: "/#",
@@ -45,10 +45,10 @@ const teamData: TeamType[] = [
   },
   {
     id: 4,
-    name: "Bryan Toralba",
-    designation: "Brand Manager Support Specialist",
+    name: "Bryan Paul Toralba",
+    designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Toralba_Bryan.png",
-    skills: ["Brand Management", "Project Coordination", "Technical Support"],
+    skills: ["Quality Assurance", "Tech-Savvy", "Brand Strategy"],
     description:
       "Punctual and adaptable with excellent problem-solving abilities and clear communication skills.",
     facebookLink: "/#",
@@ -60,7 +60,7 @@ const teamData: TeamType[] = [
     name: "Trishelle Batingana",
     designation: "Sales and Marketing Coordinator",
     image: "/images/team/Batingana_Trishelle.png",
-    skills: ["Customer Service", "Digital Marketing", "Graphic Design"],
+    skills: ["Customer Service", "Sales Support", "Digital Marketing"],
     description:
       "Focuses on delivering quality work and meeting deadlines efficiently, both independently and in team environments.",
     facebookLink: "/#",
@@ -70,12 +70,12 @@ const teamData: TeamType[] = [
   {
     id: 6,
     name: "Honey Bagay",
-    designation: "Operations and Marketing Supervisor",
+    designation: "Marketing Supervisor",
     image: "/images/team/Bagay_Honey.png",
     skills: [
-      "Operations Managment",
-      "Communications Tools (Slack)",
-      "Documentations & Records",
+      "Content Creation",
+      "Operational Coordination",
+      "Marketing Management",
     ],
     description:
       "My objective is to drive operational efficiency, mentor and develop staff, to secure a challenging role as an Operations and Social Media Coordinator Supervisor.",
@@ -85,13 +85,13 @@ const teamData: TeamType[] = [
   },
   {
     id: 7,
-    name: "Zajarah Cardoza",
-    designation: "Logistics and Coordination Supervisor",
+    name: "Zajarah Mae Cardoza",
+    designation: "Logistics Supervisor",
     image: "/images/team/Cardoza_Zajarah.png",
     skills: [
-      "Sales & Prospecting",
-      "Administration Management",
-      "Software Proficiency",
+      "Logistics and Operations",
+      "Team Development",
+      "Supplier and Payroll Management",
     ],
     description:
       "Seeking to leverage my skills and expertise in a dynamic organization committed to delivering top-notch support solutions.",
@@ -102,9 +102,9 @@ const teamData: TeamType[] = [
   {
     id: 8,
     name: "Luther Homilda",
-    designation: "Logistics and Coordination Supervisor",
+    designation: "Logistics Supervisor",
     image: "/images/team/Homilda_Luther.png",
-    skills: ["Customer Service", "Technical Support", "Sales"],
+    skills: ["Logistics Coordination", "Customer Service & Sales", "Team Management"],
     description:
       "Analytical abilities, problem-solving, leadership and team management, as well as strong communication skills.",
     facebookLink: "/#",
@@ -117,9 +117,9 @@ const teamData: TeamType[] = [
     designation: "Project and Human Resources Supervisor",
     image: "/images/team/Ducao_April.png",
     skills: [
-      "Project Managment",
-      "Recruitment & Onboarding",
-      "Resource Coordination",
+      "Team Managment",
+      "Process Improvement",
+      "Compliance Tracking",
     ],
     description:
       "I'm a dedicated professional with experience in operations management, administration, and customer service.",
@@ -130,12 +130,12 @@ const teamData: TeamType[] = [
   {
     id: 10,
     name: "Annamoira Homilda",
-    designation: "Operations and Recruitment Coordinator",
+    designation: "Logistics Coordinator",
     image: "/images/team/Homilda_Annamoira.png",
     skills: [
-      "Google Voice Conversations",
-      "Data Entry",
-      "Delivery Route Planning",
+      "Logistics",
+      "Client and Vendor Communication",
+      "Data Management",
     ],
     description:
       "Dedicated and reliable, thriving in busy environments with strong attention to detail and organizational skills.",
@@ -145,13 +145,13 @@ const teamData: TeamType[] = [
   },
   {
     id: 11,
-    name: "Andrea Cartilla",
-    designation: "Operations and Social Media Coordinator",
+    name: "Andrea Fetalyn Cartilla",
+    designation: "Quality Assurance and Social Media Lead",
     image: "/images/team/Cartilla_Andrea.png",
     skills: [
-      "Marketing Platforms",
-      "Social Media Management",
-      "Creative Software",
+      "Quality Control",
+      "Social Media",
+      "Lead Generation",
     ],
     description:
       "Excels in efficient food order management, driver communication, and food drive oversight.",
@@ -162,9 +162,9 @@ const teamData: TeamType[] = [
   {
     id: 12,
     name: "Rochelle Dahan",
-    designation: "Operations and Social Media Coordinator",
+    designation: "Social Media Coordinator",
     image: "/images/team/Dahan_Rochelle.png",
-    skills: ["Administrative Skills", "Digital Marketing", "Content Creation"],
+    skills: ["Digital Marketing", "Lead Generation", "Quality Assurance"],
     description:
       "I seek for work efficiency and productivity to help fortify brand presence, drive customer loyalty, and achieve organizational success.",
     facebookLink: "/#",
@@ -174,12 +174,12 @@ const teamData: TeamType[] = [
   {
     id: 13,
     name: "Lezylane Andig",
-    designation: "Operations and Social Media Coordinator",
+    designation: "Senior Graphic Designer",
     image: "/images/team/Andig_Lezylane.png",
     skills: [
-      "Social Media Management",
-      "Marketing Services",
-      "Creative Design",
+      "Graphic Design",
+      "Administrative Support",
+      "Data Management",
     ],
     description:
       "Personally, I strive to learn and adapt to new technologies through internet resources.",
@@ -192,7 +192,7 @@ const teamData: TeamType[] = [
     name: "Emmanuel Alanis",
     designation: "Full Stack Developer",
     image: "/images/team/Alanis_Emmanuel.png",
-    skills: ["Web Development", "Problem Resolution", "Team Leadership"],
+    skills: ["Web Development", "Problem Solving", "Operation Management"],
     description:
       "Streamlines food orders, manages driver communication, and oversees food drives while enhancing customer experiences.",
     facebookLink: "/#",
@@ -202,9 +202,9 @@ const teamData: TeamType[] = [
   {
     id: 15,
     name: "Fernando Cardenas",
-    designation: "Operations and Web Development Specialist",
+    designation: "Web Development Specialist",
     image: "/images/team/Cardenas_Fernando.png",
-    skills: ["Communication", "Team Work", "Web Development"],
+    skills: ["Web Development", "Bilingual Communication (English/Spanish)", "Sales Support and Recruitment"],
     description:
       "Experienced in customer service, logistics, and administrative skills, currently expanding web development expertise.",
     facebookLink: "/#",
@@ -217,9 +217,9 @@ const teamData: TeamType[] = [
     designation: "Marketing Coordinator",
     image: "/images/team/Yap_Maria_Noreen.png",
     skills: [
-      "Marketing Skills",
-      "Operations Management",
-      "Reliability & Resourcefulness",
+      "Marketing Operations",
+      "People Management",
+      "Administrative Support",
     ],
     description:
       "Drives impactful email campaigns and optimizes automation processes through cross-functional collaboration.",
@@ -230,9 +230,9 @@ const teamData: TeamType[] = [
   {
     id: 17,
     name: "Rochelle Lean Tan",
-    designation: "Marketing Assistant Coordinator",
+    designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Tan_Rochelle_Lean.png",
-    skills: ["Customer Service", "Marketing Campaigns", "Sales Support"],
+    skills: ["Customer Service", "Data Management", "Marketing and Social Media"],
     description:
       "Experienced in handling inbound and outbound calls, emails, and correspondences with strong communication skills.",
     facebookLink: "/#",
@@ -245,9 +245,9 @@ const teamData: TeamType[] = [
     designation: "Customer Service & Sales Support Specialist",
     image: "/images/team/Fabian_Romelita.png",
     skills: [
-      "Customer Service Skills",
-      "MS Software (Excel, Word & PP)",
-      "Technical Support Skills",
+      "Client Management",
+      "Sales Support",
+      "Technical Support",
     ],
     description:
       "Confident and ambitious professional with extensive experience in Sales, Marketing, and Customer Service.",

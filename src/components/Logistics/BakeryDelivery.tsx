@@ -1,5 +1,3 @@
-// src/components/Logistics/BakeryDelivery.tsx
-
 'use client'
 
 import { Button } from "../ui/button";
@@ -26,27 +24,27 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
 }) => {
   const services: ServiceItem[] = [
     {
-      title: "Wedding Cakes",
+      title: "Wedding Cakes: ",
       description:
         "Ensuring that stunning centerpiece cakes arrive in pristine condition for the big day.",
     },
     {
-      title: "Birthday Cakes & Desserts",
+      title: "Birthday Cakes & Desserts: ",
       description:
         "Keeping every celebration sweet, memorable, and hassle-free.",
     },
     {
-      title: "Holiday Orders",
+      title: "Holiday Orders: ",
       description:
         "Delivering festive treats like cookies, pies, and specialty breads to spread seasonal cheer.",
     },
     {
-      title: "Corporate Events & Catering",
+      title: "Corporate Events & Catering: ",
       description:
         "Providing seamless logistics for bulk orders and large gatherings.",
     },
     {
-      title: "Everyday Bread Deliveries",
+      title: "Everyday Bread Deliveries: ",
       description:
         "Because fresh bread and baked goods are always in demand, we make sure they reach your customers daily, ensuring freshness with every bite.",
     },
@@ -75,17 +73,18 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             and on time.
           </p>
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             <p className="italic text-gray-800">
               Our services are perfect for key moments such as:
             </p>
-            <ul className="space-y-4">
+            <ul className="list-none space-y-6">
               {services.map((service, index) => (
-                <li key={index} className="flex gap-2">
-                  <span className="min-w-fit font-semibold text-gray-800">
-                    {service.title} –
-                  </span>
-                  <span className="text-gray-700">{service.description}</span>
+                <li key={index} className="flex gap-3">
+                  <span className="text-gray-800 text-2xl leading-none">•</span>
+                  <div className="flex-1">
+                    <span className="font-semibold text-gray-800">{service.title}</span>
+                    <span className="text-gray-700">{service.description}</span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -96,31 +95,32 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             partner for dependable and timely service.
           </p>
 
-          {/* <button className="bg-white px-6 py-3 rounded-full font-semibold text-gray-800 
-            hover:bg-gray-50 transition-colors duration-200 shadow-sm">
-            Request a Quote
-          </button> */}
-<Button
-        onClick={() => handleClick(onRequestQuote)}
-        className="bg-yellow-500 text-white hover:bg-yellow-600"
-      >
-        Request Bakery Delivery Quote
-      </Button>
+          <Button
+            onClick={() => handleClick(onRequestQuote)}
+            className="bg-black text-white hover:bg-gray-900"
+          >
+            Request Bakery Delivery Quote
+          </Button>
         </div>
-
-        <div className="relative h-full">
-          <img
-            src="/images/logistics/bakerypic.png"
-            alt="Bakery display case showing various pastries and baked goods"
-            className="h-full w-full rounded-2xl object-cover"
-          />
+        <div className="w-full px-4 md:px-6 lg:px-8">
+           <div className="relative w-full mt-8 md:mt-12 lg:mt-20">
+           <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
+           <div className="rounded-3xl overflow-hidden w-full h-full">
+            <picture>
+            <source srcSet="/images/logistics/bakerypic.webp" type="image/webp" />
+            <img src="/images/logistics/bakerypic.png" 
+              alt="A container showing delicious breads" 
+              className="w-full h-full object-cover object-center"/>
+              </picture>
+          </div>
         </div>
+        </div>
+       </div>
       </div>
     </section>
   );
 };
 
 BakeryDeliverySection.displayName = 'BakeryDeliverySection';
-
 
 export default BakeryDeliverySection;

@@ -36,15 +36,20 @@ const SpecialtyDelivery: React.FC<SpecialtyDeliveryProps> = ({ onRequestQuote })
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
       <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="relative">
-          <img 
-            src="/images/logistics/specialtydeliverypic.png"
-            alt="Delivery professional with package"
-            className="rounded-lg shadow-lg w-full object-cover"
-          />
+        {/* Image Column */}
+        <div className="order-2 md:order-1">
+          <div className="max-w-md mx-auto">
+            <picture>
+            <source srcSet="/images/logistics/specialtydeliverypic.webp" type="image/webp"/>
+            <img src="/images/logistics/specialtydeliverypic.png"
+              alt="Specialty Delivery Service"
+              className="w-full h-auto rounded-3xl shadow-lg object-cover"/>
+              </picture>
+          </div>
         </div>
-        
-        <div className="space-y-6">
+
+        {/* Content Column */}
+        <div className="space-y-6 order-1 md:order-2">
           <h2 className="text-4xl font-bold text-yellow-400">
             Specialty Delivery
           </h2>
