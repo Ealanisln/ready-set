@@ -18,6 +18,7 @@ interface HelpDeskFormData {
 
 interface HelpDeskFormProps {
   onSubmit: (data: HelpDeskFormData) => Promise<void>;
+  isLoading?: boolean;
 }
 
 const HelpDeskForm: React.FC<HelpDeskFormProps> = ({ onSubmit }) => {

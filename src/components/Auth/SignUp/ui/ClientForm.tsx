@@ -11,13 +11,14 @@ import {
   ClientFormData,
 } from "./FormData";
 import { CheckboxGroup, RadioGroup } from "./FormComponents";
+import toast from "react-hot-toast";
 
 interface ClientFormProps {
   onSubmit: (data: ClientFormData) => Promise<void>;
+  isLoading?: boolean;
 }
 
-const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const VendorForm: React.FC<ClientFormProps> = ({ onSubmit, isLoading = false }) => {
   const {
     register,
     handleSubmit,
@@ -36,15 +37,17 @@ const VendorForm: React.FC<ClientFormProps> = ({ onSubmit }) => {
 
   // Add this wrapper function
   const onSubmitWrapper = async (data: ClientFormData) => {
-    Object.entries(data).forEach(([key, value]) => {});
-
-    setIsLoading(true);
+    Object.entries(data).forEach(([key, value]) => {
+      console.log(`${key}:`, value);
+    });
+  
     try {
       await onSubmit(data);
     } catch (error) {
-      console.error("Form submission error:", error);
-    } finally {
-      setIsLoading(false);
+      // Handle any errors that occur during submission
+      console.error('Form submission error:', error);
+      // You could also show a toast message here if you want
+      toast.error('Failed to submit form. Please try again.');
     }
   };
 

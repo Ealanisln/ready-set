@@ -12,14 +12,15 @@ import {
   VendorFormData,
 } from "./FormData";
 import { CheckboxGroup, RadioGroup } from "./FormComponents";
+import toast from "react-hot-toast";
 
 interface VendorFormProps {
   onSubmit: (data: VendorFormData) => Promise<void>;
+  isLoading?: boolean; // Add this line
 }
 
-const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
+const VendorForm: React.FC<VendorFormProps> = ({ onSubmit, isLoading = false }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -39,16 +40,18 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
   });
 
   const onSubmitWrapper = async (data: VendorFormData) => {
-
+    // Log form data (optional, for debugging)
     Object.entries(data).forEach(([key, value]) => {
+      console.log(`${key}:`, value);
     });
-
-    setIsLoading(true);
+  
     try {
       await onSubmit(data);
     } catch (error) {
-    } finally {
-      setIsLoading(false);
+      // Handle any errors that occur during submission
+      console.error('Form submission error:', error);
+      // You could also show a toast message here if you want
+      toast.error('Failed to submit form. Please try again.');
     }
   };
 
@@ -71,6 +74,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
           {...register("parking")}
           placeholder="Parking / Loading (Optional)"
           className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+          disabled={isLoading}
         />
         {errors.parking && (
           <p className="mb-4 text-red-500">{errors.parking.message as string}</p>
@@ -79,6 +83,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
           <button
             type="button"
             onClick={handleNext}
+            disabled={isLoading}
             className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition"
           >
             Next
@@ -203,6 +208,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ onSubmit }) => {
             <button
               type="button"
               onClick={handlePrevious}
+              disabled={isLoading}
               className="hover:bg-gray-300 w-1/2 mr-2 rounded-md bg-gray-200 px-5 py-3 text-base font-semibold text-gray-700 transition"
             >
               Previous

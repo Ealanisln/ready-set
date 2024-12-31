@@ -21,23 +21,30 @@ import {
   HelpdeskFormData,
   userTypes,
 } from "./FormSchemas";
-import { sendRegistrationNotification } from "@/lib/notifications"
+import { sendRegistrationNotification } from "@/lib/notifications";
+import DriverSignupUploads from "@/components/Uploader/driver-signup-uploads";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const userTypeIcons = {
   vendor: Store,
   client: Users,
   driver: Truck,
   helpdesk: HeadsetIcon,
-};
+} as const;
 
 const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState<UserType | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (data: FormDataUnion) => {
+    console.log('Form submission started:', data); // Debug log
     setLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -50,13 +57,29 @@ const SignUp = () => {
         throw new Error(errorData.error || "An error occurred during registration");
       }
 
-            // Send notification email
-            await sendRegistrationNotification(data);
+      const userData = await response.json();
+      console.log('Registration response:', userData); // Debug log
+      
+      if (!userData.id) {
+        throw new Error("No user ID received from registration");
+      }
+      
+      setUserId(userData.id);
 
-      toast.success("Successfully registered");
-      router.push("/signin");
+      // Send notification email
+      await sendRegistrationNotification(data);
+
+      if (data.userType === 'driver') {
+        console.log('Setting step to 3 for driver uploads'); // Debug log
+        setStep(3);
+        toast.success("Registration successful. Please upload required documents.");
+      } else {
+        toast.success("Successfully registered");
+        router.push("/signin");
+      }
     } catch (err) {
       console.error("SignUp: Registration error:", err);
+      setError(err instanceof Error ? err.message : "An unknown error occurred");
       toast.error(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
       setLoading(false);
@@ -64,8 +87,22 @@ const SignUp = () => {
   };
 
   const handleUserTypeSelection = (type: UserType) => {
+    console.log('User type selected:', type); // Debug log
     setUserType(type);
     setStep(2);
+  };
+
+  const handleUploadComplete = () => {
+    console.log('Upload complete, redirecting to signin'); // Debug log
+    toast.success("Documents uploaded successfully");
+    router.push("/signin");
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      setError(null);
+    }
   };
 
   const renderUserTypeSelection = () => (
@@ -78,6 +115,7 @@ const SignUp = () => {
             onClick={() => handleUserTypeSelection(type)}
             variant="outline"
             className="h-24 flex flex-col items-center justify-center"
+            disabled={loading}
           >
             <Icon className="w-8 h-8 mb-2" />
             <span className="text-sm capitalize">{type}</span>
@@ -88,17 +126,81 @@ const SignUp = () => {
   );
 
   const renderForm = () => {
+    console.log('Rendering form for user type:', userType); // Debug log
     switch (userType) {
       case "vendor":
-        return <VendorForm onSubmit={(data: VendorFormData) => onSubmit({ ...data, userType: "vendor" })} />;
+        return (
+          <VendorForm
+            onSubmit={(data: VendorFormData) => 
+              onSubmit({ ...data, userType: "vendor" })}
+            isLoading={loading}
+          />
+        );
       case "client":
-        return <ClientForm onSubmit={(data: ClientFormData) => onSubmit({ ...data, userType: "client" })} />;
+        return (
+          <ClientForm
+            onSubmit={(data: ClientFormData) => 
+              onSubmit({ ...data, userType: "client" })}
+            isLoading={loading}
+          />
+        );
       case "driver":
-        return <DriverForm onSubmit={(data: DriverFormData) => onSubmit({ ...data, userType: "driver" })} />;
+        return (
+          <DriverForm
+            onSubmit={(data: DriverFormData) => 
+              onSubmit({ ...data, userType: "driver" })}
+            isLoading={loading}
+          />
+        );
       case "helpdesk":
-        return <HelpDeskForm onSubmit={(data: HelpdeskFormData) => onSubmit({ ...data, userType: "helpdesk" })} />;
+        return (
+          <HelpDeskForm
+            onSubmit={(data: HelpdeskFormData) => 
+              onSubmit({ ...data, userType: "helpdesk" })}
+            isLoading={loading}
+          />
+        );
       default:
         return null;
+    }
+  };
+
+  const renderContent = () => {
+    console.log('Rendering content for step:', step); // Debug log
+    switch (step) {
+      case 1:
+        return renderUserTypeSelection();
+      case 2:
+        return renderForm();
+      case 3:
+        console.log('Attempting to render driver uploads, userId:', userId); // Debug log
+        return userId ? (
+          <DriverSignupUploads 
+            userId={userId} 
+            onUploadComplete={handleUploadComplete}
+          />
+        ) : (
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error: User ID not found. Please try registering again.
+            </AlertDescription>
+          </Alert>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getStepTitle = () => {
+    switch (step) {
+      case 1:
+        return "Please select your user type to begin.";
+      case 2:
+        return userType ? `Sign up as ${userType}` : "Complete registration";
+      case 3:
+        return "Upload Required Documents";
+      default:
+        return "";
     }
   };
 
@@ -115,6 +217,7 @@ const SignUp = () => {
                   width={140}
                   height={30}
                   className="dark:hidden"
+                  priority
                 />
                 <Image
                   src="/images/logo/logo-dark.png"
@@ -122,36 +225,51 @@ const SignUp = () => {
                   width={140}
                   height={30}
                   className="hidden dark:block"
+                  priority
                 />
               </Link>
               <CardTitle>User Registration</CardTitle>
-              <CardDescription>
-                {step === 1 ? "Please select your user type to begin." : `Sign up as ${userType}`}
-              </CardDescription>
+              <CardDescription>{getStepTitle()}</CardDescription>
             </CardHeader>
             <CardContent>
-              {step === 1 ? renderUserTypeSelection() : renderForm()}
-              {step === 2 && (
-                <Button variant="outline" onClick={() => setStep(1)} className="mt-4">
-                  Back to user type selection
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              {renderContent()}
+              
+              {step > 1 && step !== 3 && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleBack} 
+                  className="mt-4"
+                  disabled={loading}
+                >
+                  Back
                 </Button>
               )}
-              <p className="text-sm text-gray-500 mt-6 text-center">
-                By creating an account you agree to our{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>{" "}
-                and{" "}
-                <Link href="/terms" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>
-              </p>
-              <p className="text-sm text-gray-500 mt-4 text-center">
-                Already have an account?{" "}
-                <Link href="/signin" className="text-primary hover:underline">
-                  Sign In
-                </Link>
-              </p>
+
+              <div className="mt-6 space-y-4">
+                <p className="text-sm text-gray-500 text-center">
+                  By creating an account you agree to our{" "}
+                  <Link href="/privacy" className="text-primary hover:underline">
+                    Privacy Policy
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/terms" className="text-primary hover:underline">
+                    Terms of Service
+                  </Link>
+                </p>
+                
+                <p className="text-sm text-gray-500 text-center">
+                  Already have an account?{" "}
+                  <Link href="/signin" className="text-primary hover:underline">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { driverSchema } from "@/components/Auth/SignUp/FormSchemas";
+import { Loader2 } from "lucide-react";
 
 interface DriverFormData {
-  userType: "driver"; // Add this line
+  userType: "driver";
   name: string;
   email: string;
   password: string;
@@ -18,37 +19,30 @@ interface DriverFormData {
 
 interface DriverFormProps {
   onSubmit: (data: DriverFormData) => Promise<void>;
+  isLoading?: boolean;
 }
 
-const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const DriverForm: React.FC<DriverFormProps> = ({ onSubmit, isLoading = false }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<DriverFormData>({
     resolver: zodResolver(driverSchema),
+    defaultValues: {
+      userType: "driver"
+    }
   });
 
-  const onSubmitWrapper = async (data: DriverFormData) => {
-
-    setIsLoading(true);
-    try {
-      await onSubmit(data);
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmitWrapper)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("userType")} value="driver" />
 
       <input
         {...register("name")}
         placeholder="Name"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.name && (
         <p className="mb-4 text-red-500">{errors.name.message as string}</p>
@@ -58,7 +52,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
         {...register("email")}
         type="email"
         placeholder="Email"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.email && (
         <p className="mb-4 text-red-500">{errors.email.message as string}</p>
@@ -68,7 +63,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
         {...register("password")}
         type="password"
         placeholder="Password"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.password && (
         <p className="mb-4 text-red-500">{errors.password.message as string}</p>
@@ -77,7 +73,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
       <input
         {...register("phoneNumber")}
         placeholder="Phone Number"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.phoneNumber && (
         <p className="mb-4 text-red-500">
@@ -88,7 +85,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
       <input
         {...register("street1")}
         placeholder="Street Address"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.street1 && (
         <p className="mb-4 text-red-500">{errors.street1.message as string}</p>
@@ -97,13 +95,15 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
       <input
         {...register("street2")}
         placeholder="Street Address 2 (Optional)"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
 
       <input
         {...register("city")}
         placeholder="City"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.city && (
         <p className="mb-4 text-red-500">{errors.city.message as string}</p>
@@ -112,7 +112,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
       <input
         {...register("state")}
         placeholder="State"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.state && (
         <p className="mb-4 text-red-500">{errors.state.message as string}</p>
@@ -121,7 +122,8 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
       <input
         {...register("zip")}
         placeholder="ZIP Code"
-        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary"
+        disabled={isLoading}
+        className="mb-4 w-full rounded-md border border-stroke bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary disabled:opacity-50"
       />
       {errors.zip && (
         <p className="mb-4 text-red-500">{errors.zip.message as string}</p>
@@ -142,9 +144,16 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50"
+          className="hover:bg-primary-dark w-full rounded-md bg-primary px-5 py-3 text-base font-semibold text-white transition disabled:opacity-50 flex items-center justify-center"
         >
-          {isLoading ? "Registering..." : "Register as Driver"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Registering...
+            </>
+          ) : (
+            "Register as Driver"
+          )}
         </button>
       </div>
     </form>
