@@ -22,7 +22,7 @@ const DiscoveryBanner: React.FC<CTAProps> = ({
 }) => {
   return (
     <div className="relative w-full">
-      <div className="relative w-full bg-[#ffd766] pt-10">
+      <div className="relative w-full bg-amber-300 pt-10">
         {/* Top curve */}
         <div className="absolute inset-x-0 top-0">
           <svg
