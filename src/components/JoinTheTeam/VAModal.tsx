@@ -107,7 +107,7 @@ export function VAModal() {
                 onClick={handleApplyClick}
                 className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 w-full md:w-auto"
               >
-                Apply Now
+                Apply Now!
               </Button>
             </div>
           </div>
