@@ -4,7 +4,6 @@
 
 import { UTApi } from "uploadthing/server";
 import { PrismaClient } from "@prisma/client";
-import { UploadedFile } from "@/types/upload";
 
 const utapi = new UTApi();
 const prisma = new PrismaClient();
@@ -13,11 +12,6 @@ type DeleteFileResult =
   | { success: true; message: string }
   | { success: false; message: string; error?: string };
 
-  type UploadFileResult =
-  | { success: true; files: UploadedFile[] }
-  | { success: false; message: string; error?: string };
-
- 
 export const deleteFile = async (
   userId: string,
   fileKey: string,

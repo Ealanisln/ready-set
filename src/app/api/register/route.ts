@@ -14,6 +14,7 @@ interface BaseFormData {
   city: string;
   state: string;
   zip: string;
+  location_number?: string;
 }
 
 interface VendorFormData extends BaseFormData {
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
     }
 
     const missingFields = requiredFields.filter(
-      (field) => !(body as any)[field]
+      (field) => !(field in body)
     );
 
     if (missingFields.length > 0) {
@@ -205,8 +206,7 @@ export async function POST(request: Request) {
           userType === "vendor" || userType === "client"
             ? (body as VendorFormData | ClientFormData).countiesServed?.[0]
             : undefined,
-        locationNumber:
-          "location_number" in body ? (body as any).location_number : undefined,
+          locationNumber: "location_number" in body ? (body as VendorFormData | ClientFormData).location_number : undefined,
         parkingLoading:
           "parking" in body
             ? (body as VendorFormData | ClientFormData).parking

@@ -33,36 +33,44 @@ const sendEmail = async (data: FormInputs) => {
 
   body += "</body></html>";
 
-  // Prepare the email payload according to Brevo's API structure
+  // Prepare the email payload according to SendGrid's API structure
   const emailData = {
-    sender: {
-      name: "Ready Set Website",
-      email: "updates@readysetllc.com",
-    },
-    to: [
+    personalizations: [
       {
-        email: "info@readysetllc.com",
-        name: "Ready Set",
-      },
+        to: [
+          {
+            email: "info@ready-set.co",
+            name: "Ready Set"
+          }
+        ]
+      }
     ],
+    from: {
+      email: "updates@readysetllc.com",
+      name: "Ready Set Website"
+    },
     subject: emailSubject,
-    htmlContent: body,
+    content: [
+      {
+        type: "text/html",
+        value: body
+      }
+    ]
   };
 
   try {
     const response = await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
+      "https://api.sendgrid.com/v3/mail/send",
       emailData,
       {
         headers: {
-          accept: "application/json",
-          "api-key": process.env.BREVO_API_KEY,
-          "content-type": "application/json",
-        },
-      },
+          "Authorization": `Bearer ${process.env.SEND_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
 
-    if (response.status === 201) {
+    if (response.status === 202) { // SendGrid returns 202 for successful requests
       return "Your message was sent successfully.";
     } else {
       throw new Error("Unexpected response from email service");
