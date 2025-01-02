@@ -105,7 +105,7 @@ export function VAModal() {
               <div className="font-medium mb-3 md:mb-4 text-sm md:text-base">
                 Ready to help businesses thrive while growing your career?
               </div>
-              <Link href="/your-application-page">
+              <Link href="/signup">
               <Button 
                 onClick={handleApplyClick}
                 className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 w-full md:w-auto"
