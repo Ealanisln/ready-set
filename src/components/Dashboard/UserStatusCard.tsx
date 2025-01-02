@@ -16,15 +16,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
+type UserType = "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
+type UserStatus = "active" | "pending" | "deleted";
+
 interface UserStatusCardProps {
   user: {
     id: string;
-    status?: "active" | "pending" | "deleted";
-    type: string;
+    status?: UserStatus;
+    type: UserType;
   };
-  onStatusChange: (newStatus: "active" | "pending" | "deleted") => Promise<void>;
-  onRoleChange: (newRole: string) => Promise<void>;
-  currentUserRole: string;
+  onStatusChange: (newStatus: UserStatus) => Promise<void>;
+  onRoleChange: (newRole: UserType) => Promise<void>;
+  currentUserRole: UserType;
 }
 
 const UserStatusCard: React.FC<UserStatusCardProps> = ({
@@ -34,6 +37,14 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
   currentUserRole,
 }) => {
   const isSuperAdmin = currentUserRole === "super_admin";
+
+  const availableRoles: UserType[] = [
+    "vendor",
+    "client",
+    "driver",
+    "admin",
+    "helpdesk"
+  ];
 
   return (
     <Card>
@@ -45,7 +56,7 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
           <div className="grid gap-3">
             <Label htmlFor="status">Status</Label>
             <Select
-              onValueChange={onStatusChange}
+              onValueChange={(value: UserStatus) => onStatusChange(value)}
               value={user.status}
               disabled={!isSuperAdmin}
             >
@@ -67,7 +78,7 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
                   <Button variant="outline">{user.type || "Select Role"}</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {["vendor", "client", "driver", "admin", "helpdesk"].map((role) => (
+                  {availableRoles.map((role) => (
                     <DropdownMenuItem 
                       key={role}
                       onClick={() => onRoleChange(role)}

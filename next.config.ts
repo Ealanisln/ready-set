@@ -1,8 +1,8 @@
-/** @type {import('next').NextConfig} */
-const path = require('path');
-const withVercelToolbar = require('@vercel/toolbar/plugins/next');
+import type { NextConfig } from 'next';
+import path from 'path';
+import type { Configuration as WebpackConfiguration } from 'webpack';
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
@@ -29,26 +29,29 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.join(__dirname, 'src'),
-    };
-    
-    config.resolve.modules.push(path.resolve('./src'));
-    
-    config.stats = {
-      errorDetails: true
+  webpack: (config: WebpackConfiguration) => {
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve?.alias,
+        '@': path.join(__dirname, 'src'),
+      },
+      modules: [
+        ...(config.resolve?.modules || []),
+        path.resolve('./src')
+      ],
+      fallback: {
+        ...config.resolve?.fallback,
+        fs: false,
+      }
     };
 
-    // Add fallback for fs module
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
+    config.stats = {
+      errorDetails: true
     };
 
     return config;
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

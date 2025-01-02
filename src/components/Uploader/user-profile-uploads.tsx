@@ -21,7 +21,7 @@ interface UserProfileUploadsProps {
     | "admin"
     | "helpdesk"
     | "super_admin";
-  onUploadSuccess: () => void; // Add this to props to notify parent
+  onUploadSuccess: () => void;
 }
 
 const driverUploadFields = [

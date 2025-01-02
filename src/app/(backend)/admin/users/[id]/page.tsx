@@ -25,6 +25,7 @@ import UserFilesDisplay from "@/components/User/user-files-display";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
+import { UserType } from "@/components/Auth/SignUp/FormSchemas";
 
 interface User {
   id: string;
@@ -174,15 +175,18 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
-      const submitData: User = { ...data };
-      delete (submitData as any).displayName;
+      // Use destructuring to properly remove displayName
+      const { displayName, ...finalSubmitData } = data;
+
+      // Type-safe submission data
+      const submitData: User = finalSubmitData;
 
       if (data.type === "driver" || data.type === "helpdesk") {
-        submitData.name = data.displayName;
+        submitData.name = displayName;
         delete submitData.contact_name;
         delete submitData.company_name;
       } else if (data.type === "vendor" || data.type === "client") {
-        submitData.contact_name = data.displayName;
+        submitData.contact_name = displayName;
         delete submitData.name;
       }
 
@@ -201,8 +205,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update user");
+        throw new Error("Failed to update user");
       }
 
       const updatedUser = await response.json();
@@ -285,13 +288,12 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
         throw new Error(
           `Failed to update user role: ${response.status} ${response.statusText}`,
         );
       }
 
-      const data = await response.json();
+      await response.json();
       setValue("type", newRole as User["type"]);
       toast.success("User role updated successfully!");
       setRefreshTrigger((prev) => prev + 1);
@@ -474,7 +476,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                     }}
                     onStatusChange={handleStatusChange}
                     onRoleChange={handleRoleChange}
-                    currentUserRole={session?.user?.type || ""}
+                    currentUserRole={
+                      (session?.user?.type as UserType) || "client"
+                    }
                   />
                   <Card className="overflow-hidden">
                     <CardHeader>
