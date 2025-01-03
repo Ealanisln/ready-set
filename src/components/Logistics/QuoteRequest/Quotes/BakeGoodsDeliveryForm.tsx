@@ -51,7 +51,7 @@ export const BakeGoodsDeliveryForm = ({ onSubmit }: BakeGoodsDeliveryFormProps) 
 
   return (
     <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
-      <DeliveryForm title="Bake Goods Delivery Questionnaire">
+      <DeliveryForm title="Bake Goods Delivery Questionnaire" formType="bakery">
         <div className="space-y-4">
           <input
             {...register("driversNeeded", { required: "This field is required" })}

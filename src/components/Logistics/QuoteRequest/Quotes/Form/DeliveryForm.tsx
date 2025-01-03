@@ -1,6 +1,7 @@
 interface DeliveryFormProps {
   title: string;
   children: React.ReactNode;
+  formType?: string;
 }
 
 export const DeliveryForm = ({ title, children }: DeliveryFormProps) => {
