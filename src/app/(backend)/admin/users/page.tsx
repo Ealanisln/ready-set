@@ -28,7 +28,7 @@ export default function Users() {
   const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session?.user?.type !== 'super_admin') {
+    if (!['admin', 'super_admin'].includes(session?.user?.type ?? '')) {
       router.push('/');
       return;
     }
@@ -58,6 +58,15 @@ export default function Users() {
   }, [session, router, toast]);
 
   const handleDelete = async (userId: string) => {
+    if (session?.user?.type !== 'super_admin') {
+      toast({
+        title: "Error",
+        description: "Only super admins can delete users",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const response = await fetch(`/api/user/delete-user?id=${userId}`, {
         method: 'DELETE',
@@ -100,6 +109,7 @@ export default function Users() {
           filter={filter} 
           setFilter={setFilter}
           onDelete={handleDelete}
+          userType={session?.user?.type ?? ''}
         />
       </div>
     </div>

@@ -8,7 +8,14 @@ import React, {
   SetStateAction,
 } from "react";
 import Link from "next/link";
-import { PlusCircle, Users2, Search, Trash2 } from "lucide-react";
+import {
+  PlusCircle,
+  Users2,
+  Search,
+  Trash2,
+  User,
+  UserPen,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -42,6 +49,7 @@ interface MainContentProps {
   filter: string | null;
   setFilter: Dispatch<SetStateAction<string | null>>;
   onDelete: (userId: string) => Promise<void>;
+  userType: string;
 }
 
 const userTypeColors = {
@@ -77,6 +85,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   filter,
   setFilter,
   onDelete,
+  userType,
 }) => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [loading, setLoading] = useState(true);
@@ -311,18 +320,30 @@ export const MainContent: React.FC<MainContentProps> = ({
                               </span>
                             </td>
                             <td className="p-4">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                                onClick={() => {
-                                  setUserToDelete(user);
-                                  setShowDeleteDialog(true);
-                                }}
-                                disabled={user.type === "super_admin"}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              {userType === "super_admin" ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                  onClick={() => {
+                                    setUserToDelete(user);
+                                    setShowDeleteDialog(true);
+                                  }}
+                                  disabled={user.type === "super_admin"}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <Link href={`/admin/users/${user.id}`}>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-black hover:bg-blue-50 hover:text-amber-700"
+                                  >
+                                    <UserPen className="ml-2 h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
                             </td>
                           </tr>
                         ))}
