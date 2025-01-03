@@ -164,10 +164,10 @@ export default function JoinOurTeam() {
             We&apos;re always on the lookout for great talent. Let us know how
             you can contribute!
           </p>
-          <Button className="bg-gray-800 text-white hover:bg-gray-900">
-            <Users className="mr-2 h-5 w-5" /> Join Our Talent Pool
+          <Button className="bg-gray-800 text-white hover:bg-gray-900 text-xl px-6 py-3">
+          <Users className="mr-2 h-8 w-8" /> Join Our Talent Pool
           </Button>
-        </div>
+         </div>
 
         <div className="mx-auto max-w-md rounded-lg bg-white p-8 shadow-lg">
           <h2 className="mb-4 text-2xl font-semibold text-gray-800">
