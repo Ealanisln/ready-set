@@ -1,6 +1,7 @@
 // components/JoinOurTeam/index.tsx
 "use client";
 
+
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import Link from "next/link";
 import sendEmail from "@/app/actions/email";
 import { CateringModal } from "./CateringModal";
 import { VAModal } from "./VAModal";
+import { TalentPoolModal } from "./TalentPoolModal";
 
 interface FormInputs {
   name: string;
@@ -164,9 +166,7 @@ export default function JoinOurTeam() {
             We&apos;re always on the lookout for great talent. Let us know how
             you can contribute!
           </p>
-          <Button className="bg-gray-800 text-white hover:bg-gray-900 text-xl px-6 py-3">
-          <Users className="mr-2 h-8 w-8" /> Join Our Talent Pool
-          </Button>
+          <TalentPoolModal />
         </div>
         </div>
         </div>
