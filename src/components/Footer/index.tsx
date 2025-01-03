@@ -203,7 +203,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/logistics"
-                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Logistics
                   </Link>
@@ -211,7 +211,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/va"
-                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Virtual Assistant
                   </Link>
@@ -219,7 +219,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/join-the-team"
-                    className="mb-3 inline-block text-base text-gray-7 hover:text-primary"
+                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                   >
                     Join the team
                   </Link>
