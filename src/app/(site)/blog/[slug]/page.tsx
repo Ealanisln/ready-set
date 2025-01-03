@@ -32,7 +32,6 @@ async function getPost(slug: string): Promise<PostDocument | null> {
 
 export async function generateMetadata(
   { params }: { params: Props["params"] },
-  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);

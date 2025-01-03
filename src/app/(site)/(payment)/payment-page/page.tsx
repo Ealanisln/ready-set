@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -12,7 +12,6 @@ function PaymentContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // Handle the success and canceled status from URL parameters
   const status = searchParams.get("status");
