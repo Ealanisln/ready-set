@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model user {
@@ -54,6 +53,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
+  FormSubmission        FormSubmission[]
 }
 
 model on_demand {
@@ -236,6 +236,31 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
+model FormSubmission {
+  id             String             @id @default(cuid())
+  formType       FormSubmissionType
+  userId         String?
+  companyName    String?
+  contactName    String?
+  email          String?
+  phone          String?
+  counties       String[]
+  frequency      String?
+  pickupAddress  Json?
+  specifications Json?
+  notes          String?
+  syncedToSheets Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  // Relations
+  user user? @relation(fields: [userId], references: [id])
+
+  @@index([formType])
+  @@index([createdAt])
+  @@index([syncedToSheets])
+}
+
 enum driver_status {
   arrived_at_vendor
   en_route_to_client
@@ -282,4 +307,11 @@ enum users_type {
   admin
   helpdesk
   super_admin
+}
+
+enum FormSubmissionType {
+  food
+  flower  
+  bakery
+  specialty
 }

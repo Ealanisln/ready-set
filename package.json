@@ -88,6 +88,7 @@
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.15.0",
     "glob": "11.0.0",
+    "googleapis": "^144.0.0",
     "gray-matter": "^4.0.3",
     "json-edit-react": "^1.19.1",
     "lucide-react": "^0.468.0",

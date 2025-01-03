@@ -1,15 +1,34 @@
-// src/components/Logistics/QuoteRequest/Quotes/FoodDeliveryForm.tsx
-
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
 import { CountiesSelection } from "./Form/CountiesSelection";
 import { CheckboxGroup } from "./Form/CheckboxGroup";
 import { RadioGroup } from "./Form/RadioGroup";
-import { FoodFormData } from "../types";
+import { FoodFormData, DeliveryFormData } from "../types";
+import { Button } from "@/components/ui/button";
 
-export const FoodDeliveryForm = () => {
-  const { register } = useForm<FoodFormData>();
+interface FoodDeliveryFormProps {
+  onSubmit: (formData: DeliveryFormData) => Promise<void>;
+}
+
+export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FoodFormData>({
+    defaultValues: {
+      formType: 'food'
+    }
+  });
+
+  const onSubmitHandler = async (data: FoodFormData) => {
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   const deliveryTimeOptions = [
     { value: "breakfast", label: "Breakfast" },
@@ -38,64 +57,104 @@ export const FoodDeliveryForm = () => {
   ];
 
   return (
-    <DeliveryForm title="Food Delivery Questionnaire" formType="food">
-      <div className="space-y-4">
-        <input
-          {...register("driversNeeded")}
-          className="w-full rounded border p-2"
-          placeholder="How many days per week do you require drivers?"
+    <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
+      <DeliveryForm title="Food Delivery Questionnaire" formType="food">
+        <div className="space-y-4">
+          <input
+            {...register("driversNeeded", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="How many days per week do you require drivers?"
+          />
+          {errors.driversNeeded && (
+            <p className="text-sm text-red-500">{errors.driversNeeded.message}</p>
+          )}
+
+          <input
+            {...register("serviceType", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="Will this service be seasonal or year-round?"
+          />
+          {errors.serviceType && (
+            <p className="text-sm text-red-500">{errors.serviceType.message}</p>
+          )}
+
+          <input
+            {...register("totalStaff", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="How many total staff do you currently have?"
+          />
+          {errors.totalStaff && (
+            <p className="text-sm text-red-500">{errors.totalStaff.message}</p>
+          )}
+
+          <input
+            {...register("expectedDeliveries", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="How many deliveries per day are we anticipating?"
+          />
+          {errors.expectedDeliveries && (
+            <p className="text-sm text-red-500">{errors.expectedDeliveries.message}</p>
+          )}
+
+          <input
+            {...register("partneredServices")}
+            className="w-full rounded border p-2"
+            placeholder="What services are you partnered with?"
+          />
+
+          <input
+            {...register("multipleLocations", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="Do you have multiple locations?"
+          />
+          {errors.multipleLocations && (
+            <p className="text-sm text-red-500">{errors.multipleLocations.message}</p>
+          )}
+
+          <input
+            {...register("deliveryRadius", { required: "This field is required" })}
+            className="w-full rounded border p-2"
+            placeholder="What delivery radius or areas do you want to cover from your store?"
+          />
+          {errors.deliveryRadius && (
+            <p className="text-sm text-red-500">{errors.deliveryRadius.message}</p>
+          )}
+        </div>
+
+        <VendorInfoFields register={register} />
+        <CountiesSelection register={register} />
+        
+        <CheckboxGroup
+          register={register}
+          name="deliveryTimes"
+          options={deliveryTimeOptions}
+          title="Delivery Times Needed"
         />
-        <input
-          {...register("serviceType")}
-          className="w-full rounded border p-2"
-          placeholder="Will this service be seasonal or year-round?"
+        
+        <CheckboxGroup
+          register={register}
+          name="orderHeadcount"
+          options={orderHeadcountOptions}
+          title="Order Headcount (Select all that apply)"
         />
-        <input
-          {...register("totalStaff")}
-          className="w-full rounded border p-2"
-          placeholder="How many total staff do you currently have?"
+        
+        <RadioGroup
+          register={register}
+          name="frequency"
+          options={frequencyOptions}
+          title="Frequency"
         />
-        <input
-          {...register("expectedDeliveries")}
-          className="w-full rounded border p-2"
-          placeholder="How many deliveries per day are we anticipating?"
-        />
-        <input
-          {...register("partneredServices")}
-          className="w-full rounded border p-2"
-          placeholder="What services are you partnered with?"
-        />
-        <input
-          {...register("multipleLocations")}
-          className="w-full rounded border p-2"
-          placeholder="Do you have multiple locations?"
-        />
-        <input
-          {...register("deliveryRadius")}
-          className="w-full rounded border p-2"
-          placeholder="What delivery radius or areas do you want to cover from your store?"
-        />
-      </div>
-      <VendorInfoFields register={register} />
-      <CountiesSelection register={register} />
-      <CheckboxGroup
-        register={register}
-        name="deliveryTimes"
-        options={deliveryTimeOptions}
-        title="Delivery Times Needed"
-      />
-      <CheckboxGroup
-        register={register}
-        name="orderHeadcount"
-        options={orderHeadcountOptions}
-        title="Order Headcount (Select all that apply)"
-      />
-      <RadioGroup
-        register={register}
-        name="frequency"
-        options={frequencyOptions}
-        title="Frequency"
-      />
-    </DeliveryForm>
+
+        <div className="mt-6 flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="bg-yellow-500 text-white hover:bg-yellow-600"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Request"}
+          </Button>
+        </div>
+      </DeliveryForm>
+    </form>
   );
 };
