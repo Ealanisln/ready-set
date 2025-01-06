@@ -1,10 +1,16 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import AppointmentDialog from "./Appointment";
 import { useState } from "react";
+import { FileDownIcon } from "lucide-react";
 
 interface ServiceCardProps {
   title: string;
@@ -23,39 +29,41 @@ interface Service {
 const services: Service[] = [
   {
     title: "Admin",
-    description: "Efficient management of calendars, emails, and data entry tasks.",
+    description:
+      "Efficient management of calendars, emails, and data entry tasks.",
     imageUrl: "/images/virtual/projects/1.png",
-    pdfName: "va-admin-services.pdf"
+    pdfName: "va-admin-services.pdf",
   },
   {
     title: "Customer Service & Sales",
     description: "Provide your clients with timely and professional support.",
     imageUrl: "/images/virtual/projects/2.png",
-    pdfName: "va-customer-services.pdf"
+    pdfName: "va-customer-services.pdf",
   },
   {
     title: "Design & Editing",
     description: "Plan, create, and post content to grow your online presence.",
     imageUrl: "/images/virtual/projects/3.png",
-    pdfName: "va-design-and-editing.pdf"
+    pdfName: "va-design-and-editing.pdf",
   },
   {
     title: "Social Media",
-    description: "Manage posts, schedule content, and engage with your audience.",
+    description:
+      "Manage posts, schedule content, and engage with your audience.",
     imageUrl: "/images/virtual/projects/4.png",
-    pdfName: "va-social-media.pdf"
+    pdfName: "va-social-media.pdf",
   },
   {
     title: "Web Development",
     description: "Build and optimize websites for seamless user experiences",
     imageUrl: "/images/virtual/projects/5.png",
-    pdfName: "va-web-development.pdf"
+    pdfName: "va-web-development.pdf",
   },
   {
     title: "Custom Requests",
     description: "Didn't find the service you need? We can help.",
     imageUrl: "/images/virtual/projects/6.png",
-    pdfName: ""
+    pdfName: "",
   },
 ];
 
@@ -121,7 +129,8 @@ const VirtualAssistantProjects = () => {
             Virtual Assistant Projects
           </h1>
           <p className="text-lg text-black md:text-lg lg:text-lg xl:text-xl">
-            Purchase blocks of hours whenever you need an assistant to get the job done
+            Purchase blocks of hours whenever you need an assistant to get the
+            job done
           </p>
         </div>
 
@@ -137,7 +146,7 @@ const VirtualAssistantProjects = () => {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center items-center md:mt-12 lg:mt-16 xl:mt-20">
+        <div className="mt-8 flex items-center justify-center md:mt-12 lg:mt-16 xl:mt-20">
           <AppointmentDialog
             buttonVariant="black"
             calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
