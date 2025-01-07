@@ -1,3 +1,4 @@
+// app/actions/send-email.ts
 "use server";
 
 import { Resend } from "resend";
@@ -14,6 +15,10 @@ interface FormInputs {
 }
 
 const sendEmail = async (data: FormInputs) => {
+  // Validate message length
+  if (data.message.length > 1000) {
+    throw new Error("Message cannot exceed 1000 characters.");
+  }
   // Determine if this is a job application
   const isJobApplication = !data.phone;
   const emailSubject = isJobApplication
@@ -22,7 +27,7 @@ const sendEmail = async (data: FormInputs) => {
 
   try {
     const { data: responseData, error } = await resend.emails.send({
-      from: "Ready Set Website <updates@readysetllc.com>",
+      from: "Ready Set Website <updates@updates.readysetllc.com>",
       to: ["info@ready-set.co"],
       subject: emailSubject,
       react: EmailTemplate({ data, isJobApplication }),
