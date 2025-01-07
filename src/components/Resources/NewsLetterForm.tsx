@@ -1,5 +1,4 @@
 import { useState, FormEvent } from 'react';
-import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 import Link from 'next/link';
 
 interface FormData {
@@ -191,11 +190,10 @@ export default function NewsletterForm() {
                     </svg>
                   </svg>
                 </Link>
-
+             </div>
+            </div>
         </div>
-      </div>
-    </div>
-    </div>
-  );
-}
+         </div>
+        );
+    }       
 
