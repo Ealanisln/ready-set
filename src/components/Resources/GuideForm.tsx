@@ -71,7 +71,7 @@ export default function GuideForm() {
     <div className="w-full max-w-xl mx-auto p-6 bg-white rounded-3xl shadow-lg">
       <div className="flex justify-center mb-8">
         <img 
-          src="/ready-set-logo.svg" 
+          src="/images/logo/logo-white.png" 
           alt="Ready Set Logo" 
           className="h-8"
         />
