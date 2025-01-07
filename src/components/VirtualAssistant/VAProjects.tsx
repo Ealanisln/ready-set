@@ -44,8 +44,8 @@ const services: Service[] = [
     imageUrl: "/images/virtual/projects/5.png",
   },
   {
-    title: "Incoming Services",
-    description: "Too be announced.",
+    title: "Custom Requests",
+    description: "Didn't find the service you need? We can help.",
     imageUrl: "/images/virtual/projects/6.png",
   },
 ];
@@ -54,40 +54,55 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   title,
   description,
   imageUrl,
-}) => (
-  <div className="relative h-48 w-full md:h-56 lg:h-64 xl:h-72">
-    {/* Image Container */}
-    <div className="absolute left-0 top-1/2 z-10 h-28 w-28 -translate-x-4 -translate-y-1/2 transition-all duration-300 md:h-32 md:w-32 md:-translate-x-6 lg:h-40 lg:w-40 lg:-translate-x-8 xl:h-48 xl:w-48 xl:-translate-x-12">
-      <Image
-        src={imageUrl}
-        alt={title}
-        width={208}
-        height={208}
-        className="h-full w-full object-contain"
-      />
-    </div>
+}) => {
+  const isCustomRequest = title === "Custom Requests";
+  const buttonText = title === "Custom Requests" ? "Let's talk" : "more";
 
-    {/* Card Container */}
-    <Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
-      <div className="flex h-full flex-col justify-center py-3 md:justify-between md:py-4 lg:py-5 xl:py-6">
-        <div>
-          <h3 className="mb-2 text-right text-lg font-bold text-gray-800 md:mb-2 md:text-lg lg:mb-3 lg:text-xl xl:mb-4 xl:text-2xl">
-            {title}
-          </h3>
-          <p className="text-right text-sm leading-snug text-gray-600 md:text-sm lg:text-base xl:text-lg">
-            {description}
-          </p>
-        </div>
-        <div className="mt-2 flex justify-end md:mt-2 lg:mt-1 xl:mt-0">
-          <button className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base">
-            more
-          </button>
-        </div>
+  return (
+    <div className="relative h-48 w-full md:h-56 lg:h-64 xl:h-72">
+      {/* Image Container */}
+      <div className="absolute left-0 top-1/2 z-10 h-28 w-28 -translate-x-4 -translate-y-1/2 transition-all duration-300 md:h-32 md:w-32 md:-translate-x-6 lg:h-40 lg:w-40 lg:-translate-x-8 xl:h-48 xl:w-48 xl:-translate-x-12">
+        <Image
+          src={imageUrl}
+          alt={title}
+          width={208}
+          height={208}
+          className="h-full w-full object-contain"
+        />
       </div>
-    </Card>
-  </div>
-);
 
+       {/* Card Container */}
+       <Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
+        <div className="flex h-full flex-col justify-center py-3 md:justify-between md:py-4 lg:py-5 xl:py-6">
+          <div>
+            <h3 className="mb-2 text-right text-lg font-bold text-gray-800 md:mb-2 md:text-lg lg:mb-3 lg:text-xl xl:mb-4 xl:text-2xl">
+              {title}
+            </h3>
+            <p className="text-right text-sm leading-snug text-gray-600 md:text-sm lg:text-base xl:text-lg">
+              {description}
+            </p>
+          </div>
+          <div className="mt-2 flex justify-end md:mt-2 lg:mt-1 xl:mt-0">
+            {isCustomRequest ? (
+              <AppointmentDialog
+                buttonText={buttonText}
+                buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+                calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+                buttonIcon={null}
+                dialogTitle="Schedule a Custom Request Discussion"
+                dialogDescription="Choose a time to discuss your custom project needs."
+              />
+            ) : (
+              <button className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base">
+                {buttonText}
+              </button>
+            )}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
 const VirtualAssistantProjects = () => {
   return (
     <div className="min-h-screen bg-amber-300 px-4 py-8 md:px-5 md:py-12 lg:px-6 lg:py-16 xl:px-8 xl:py-20">
@@ -116,7 +131,7 @@ const VirtualAssistantProjects = () => {
         <div className="mt-8 flex justify-center items-center md:mt-12 lg:mt-16 xl:mt-20">
           <AppointmentDialog
             buttonVariant="black"
-            calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+            calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
           />
         </div>
       </div>
