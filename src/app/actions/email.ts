@@ -1,6 +1,10 @@
+// app/actions/send-email.ts
 "use server";
 
-import axios from "axios";
+import { Resend } from "resend";
+import { EmailTemplate } from "@/components/Email/EmailTemplate";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface FormInputs {
   name: string;
@@ -11,70 +15,30 @@ interface FormInputs {
 }
 
 const sendEmail = async (data: FormInputs) => {
+  // Validate message length
+  if (data.message.length > 1000) {
+    throw new Error("Message cannot exceed 1000 characters.");
+  }
   // Determine if this is a job application
   const isJobApplication = !data.phone;
   const emailSubject = isJobApplication
     ? "New Job Application - Ready Set"
     : "Website message - Ready Set";
 
-  // Create the HTML body
-  let body = `
-    <html>
-      <body>
-        <p>${isJobApplication ? "New job application" : "Someone sent you a message"} from Ready Set Website:</p>
-  `;
-
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      const value = data[key as keyof FormInputs];
-      body += `<p><strong>${key}:</strong> ${value}</p>`;
-    }
-  }
-
-  body += "</body></html>";
-
-  // Prepare the email payload according to SendGrid's API structure
-  const emailData = {
-    personalizations: [
-      {
-        to: [
-          {
-            email: "info@ready-set.co",
-            name: "Ready Set"
-          }
-        ]
-      }
-    ],
-    from: {
-      email: "updates@readysetllc.com",
-      name: "Ready Set Website"
-    },
-    subject: emailSubject,
-    content: [
-      {
-        type: "text/html",
-        value: body
-      }
-    ]
-  };
-
   try {
-    const response = await axios.post(
-      "https://api.sendgrid.com/v3/mail/send",
-      emailData,
-      {
-        headers: {
-          "Authorization": `Bearer ${process.env.SEND_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    const { data: responseData, error } = await resend.emails.send({
+      from: "Ready Set Website <updates@updates.readysetllc.com>",
+      to: ["info@ready-set.co"],
+      subject: emailSubject,
+      react: EmailTemplate({ data, isJobApplication }),
+    });
 
-    if (response.status === 202) { // SendGrid returns 202 for successful requests
-      return "Your message was sent successfully.";
-    } else {
-      throw new Error("Unexpected response from email service");
+    if (error) {
+      console.error("Email sending error:", error);
+      throw new Error("Error trying to send the message.");
     }
+
+    return "Your message was sent successfully.";
   } catch (error) {
     console.error("Email sending error:", error);
     throw new Error("Error trying to send the message.");
