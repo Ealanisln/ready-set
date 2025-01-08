@@ -1,3 +1,5 @@
+// src/lib/form-submissions.ts
+
 import { prisma } from "@/utils/prismaDB";
 import { google } from "googleapis";
 import { FormType } from "@/components/Logistics/QuoteRequest/types";
@@ -7,6 +9,7 @@ const auth = new google.auth.GoogleAuth({
   credentials: {
     client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
     private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    project_id: process.env.GOOGLE_SHEETS_PROJECT_ID,
   },
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
@@ -23,7 +26,6 @@ export class FormSubmissionService {
       throw new Error("Form type is required");
     }
 
-    // Map the form type to the enum
     const formTypeMap: Record<string, FormSubmissionType> = {
       'food': FormSubmissionType.food,
       'flower': FormSubmissionType.flower,
@@ -32,40 +34,81 @@ export class FormSubmissionService {
     };
 
     try {
-      // Format the address and specifications data
-      const pickupAddress = {
-        street: data.formData.streetAddress,
-        city: data.formData.city,
-        state: data.formData.state,
-        zip: data.formData.zipCode,
+      // Format base specifications based on form type
+      let specifications: any = {
+        driversNeeded: data.formData.driversNeeded || '',
+        serviceType: data.formData.serviceType || '',
+        deliveryRadius: data.formData.deliveryRadius || '',
       };
 
-      const specifications = {
-        driversNeeded: data.formData.driversNeeded,
-        serviceType: data.formData.serviceType,
-        deliveryRadius: data.formData.deliveryRadius,
-        deliveryTypes: data.formData.deliveryTypes || [],
-        orderHeadcount: data.formData.orderHeadcount,
-      };
+      // Add form-specific fields
+      switch (data.formType) {
+        case 'bakery':
+          specifications = {
+            ...specifications,
+            deliveryTypes: data.formData.deliveryTypes || [],
+            partnerServices: data.formData.partnerServices || '',
+            routingApp: data.formData.routingApp || '',
+            deliveryFrequency: data.formData.deliveryFrequency || '',
+            supplyPickupFrequency: data.formData.supplyPickupFrequency || '',
+          };
+          break;
+        case 'flower':
+          specifications = {
+            ...specifications,
+            deliveryTypes: data.formData.deliveryTypes || [],
+            brokerageServices: data.formData.brokerageServices || [],
+            deliveryFrequency: data.formData.deliveryFrequency || '',
+            supplyPickupFrequency: data.formData.supplyPickupFrequency || '',
+          };
+          break;
+        case 'food':
+          specifications = {
+            ...specifications,
+            totalStaff: data.formData.totalStaff || '',
+            expectedDeliveries: data.formData.expectedDeliveries || '',
+            partneredServices: data.formData.partneredServices || '',
+            multipleLocations: data.formData.multipleLocations || '',
+            deliveryTimes: data.formData.deliveryTimes || [],
+            orderHeadcount: data.formData.orderHeadcount || [],
+            frequency: data.formData.frequency || '',
+          };
+          break;
+        case 'specialty':
+          specifications = {
+            ...specifications,
+            deliveryTypes: data.formData.deliveryTypes || [],
+            fragilePackage: data.formData.fragilePackage || 'no',
+            packageDescription: data.formData.packageDescription || '',
+            deliveryFrequency: data.formData.deliveryFrequency || '',
+            supplyPickupFrequency: data.formData.supplyPickupFrequency || '',
+          };
+          break;
+      }
 
-      // 1. Save to PostgreSQL
+      // Create submission
       const submission = await prisma.formSubmission.create({
         data: {
           formType: formTypeMap[data.formType.toLowerCase()],
           userId: data.userId,
-          companyName: data.formData.companyName,
-          contactName: data.formData.contactName,
-          email: data.formData.email,
-          phone: data.formData.phone,
+          companyName: data.formData.companyName || '',
+          contactName: data.formData.contactName || '',
+          email: data.formData.email || '',
+          phone: data.formData.phone || '',
           counties: data.formData.selectedCounties || [],
-          frequency: data.formData.frequency,
-          pickupAddress,
+          frequency: data.formData.frequency || '',
+          pickupAddress: {
+            street: data.formData.streetAddress || '',
+            city: data.formData.city || '',
+            state: data.formData.state || '',
+            zip: data.formData.zipCode || '',
+          },
           specifications,
           notes: data.formData.notes || "",
         },
       });
 
-      // 2. Sync to Google Sheets
+      // Sync to Google Sheets
       await this.syncToGoogleSheets(submission);
 
       return submission;
@@ -77,59 +120,74 @@ export class FormSubmissionService {
 
   private static async syncToGoogleSheets(submission: any) {
     try {
-      // Format the data for better readability in sheets
       const specifications = submission.specifications as any;
       const address = submission.pickupAddress as any;
       const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zip}`;
       
-      const values = [
-        [
-          submission.id,
-          submission.formType,
-          submission.companyName || 'N/A',
-          submission.contactName || 'N/A',
-          submission.email || 'N/A',
-          submission.phone || 'N/A',
-          submission.counties?.join(", ") || 'N/A',
-          submission.frequency || "N/A",
-          formattedAddress,
-          specifications?.driversNeeded || 'N/A',
-          specifications?.serviceType || 'N/A',
-          specifications?.deliveryRadius || 'N/A',
-          specifications?.deliveryTypes?.join(", ") || "N/A",
-          specifications?.orderHeadcount || "N/A",
-          submission.notes || 'N/A',
-          submission.createdAt.toISOString(),
-        ],
+      // Prepare base values array
+      const baseValues = [
+        submission.id,
+        submission.formType,
+        submission.companyName || 'N/A',
+        submission.contactName || 'N/A',
+        submission.email || 'N/A',
+        submission.phone || 'N/A',
+        submission.counties?.join(", ") || 'N/A',
+        submission.frequency || "N/A",
+        formattedAddress,
+        specifications?.driversNeeded || 'N/A',
+        specifications?.serviceType || 'N/A',
+        specifications?.deliveryRadius || 'N/A',
       ];
+
+      // Add form-specific values
+      let formSpecificValues: string[] = [];
+      switch (submission.formType) {
+        case 'FOOD':
+          formSpecificValues = [
+            specifications?.deliveryTimes?.join(", ") || "N/A",
+            specifications?.orderHeadcount?.join(", ") || "N/A",
+            specifications?.totalStaff || "N/A",
+            specifications?.expectedDeliveries || "N/A",
+          ];
+          break;
+        case 'FLOWER':
+        case 'BAKERY':
+          formSpecificValues = [
+            specifications?.deliveryTypes?.join(", ") || "N/A",
+            specifications?.deliveryFrequency || "N/A",
+            specifications?.supplyPickupFrequency || "N/A",
+          ];
+          break;
+        case 'SPECIALTY':
+          formSpecificValues = [
+            specifications?.deliveryTypes?.join(", ") || "N/A",
+            specifications?.fragilePackage || "N/A",
+            specifications?.packageDescription || "N/A",
+          ];
+          break;
+      }
+
+      const values = [[
+        ...baseValues,
+        ...formSpecificValues,
+        submission.notes || 'N/A',
+        submission.createdAt.toISOString(),
+      ]];
 
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEETS_SHEET_ID,
-        range: "Form Submissions!A:P", // Matches our columns
+        range: "user-quotes!A:P",
         valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values,
-        },
+        requestBody: { values },
       });
 
-      // Mark as synced in database
       await prisma.formSubmission.update({
         where: { id: submission.id },
         data: { syncedToSheets: true },
       });
     } catch (error) {
       console.error("Error syncing to Google Sheets:", error);
-      // Don't throw - we'll handle failed syncs separately
-    }
-  }
-
-  static async syncFailedSubmissions() {
-    const failedSubmissions = await prisma.formSubmission.findMany({
-      where: { syncedToSheets: false },
-    });
-
-    for (const submission of failedSubmissions) {
-      await this.syncToGoogleSheets(submission);
     }
   }
 }

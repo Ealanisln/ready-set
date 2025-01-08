@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/BakeGoodsDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
@@ -18,8 +20,21 @@ export const BakeGoodsDeliveryForm = ({ onSubmit }: BakeGoodsDeliveryFormProps) 
   } = useForm<BakeryFormData>({
     defaultValues: {
       formType: "bakery",
-      deliveryTypes: [],
+      name: "",
+      email: "",
+      companyName: "",
+      contactName: "",
+      website: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      driversNeeded: "",
+      serviceType: "",
+      deliveryRadius: "",
       selectedCounties: [],
+      deliveryTypes: [],
       partnerServices: "",
       routingApp: "",
       deliveryFrequency: "",

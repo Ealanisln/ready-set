@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/SpecialtyDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
@@ -10,7 +12,6 @@ import { Button } from "@/components/ui/button";
 interface SpecialtyDeliveryFormProps {
   onSubmit: (formData: DeliveryFormData) => Promise<void>;
 }
-
 export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) => {
   const {
     register,
@@ -19,13 +20,30 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
   } = useForm<SpecialtyFormData>({
     defaultValues: {
       formType: "specialty",
-      deliveryTypes: [],
+      // Base form fields
+      name: "",
+      email: "",
+      companyName: "",
+      contactName: "",
+      website: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      driversNeeded: "",
+      serviceType: "",
+      deliveryRadius: "",
       selectedCounties: [],
-      fragilePackage: "no",
+      
+      // Specialty-specific fields
+      deliveryTypes: [], // Array<'specialDelivery' | 'specialtyDelivery'>
+      fragilePackage: "no", // Default to "no"
       packageDescription: "",
+      deliveryFrequency: "",
+      supplyPickupFrequency: "",
     },
   });
-
   const onSubmitHandler = async (data: SpecialtyFormData) => {
     try {
       await onSubmit(data);

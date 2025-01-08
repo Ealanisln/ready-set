@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/FoodDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
@@ -18,8 +20,32 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
     formState: { errors, isSubmitting },
   } = useForm<FoodFormData>({
     defaultValues: {
-      formType: 'food'
-    }
+      formType: 'food',
+      // Base form fields
+      name: "",
+      email: "",
+      companyName: "",
+      contactName: "",
+      website: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      driversNeeded: "",
+      serviceType: "",
+      deliveryRadius: "",
+      selectedCounties: [],
+      
+      // Food-specific fields
+      totalStaff: "",
+      expectedDeliveries: "",
+      partneredServices: "",
+      multipleLocations: "",
+      deliveryTimes: [], // Array<'breakfast' | 'lunch' | 'dinner' | 'allDay'>
+      orderHeadcount: [], // string[]
+      frequency: "", // Required for food delivery
+    },
   });
 
   const onSubmitHandler = async (data: FoodFormData) => {

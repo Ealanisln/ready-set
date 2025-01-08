@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/Quotes/FlowerDeliveryForm.tsx
+
 import { useForm } from "react-hook-form";
 import { DeliveryForm } from "./Form/DeliveryForm";
 import { VendorInfoFields } from "./Form/VendorInfoFields";
@@ -18,6 +20,27 @@ export const FlowerDeliveryForm = ({ onSubmit }: FlowerDeliveryFormProps) => {
   } = useForm<FlowerFormData>({
     defaultValues: {
       formType: "flower",
+      // Base form fields
+      name: "",
+      email: "",
+      companyName: "",
+      contactName: "",
+      website: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      driversNeeded: "",
+      serviceType: "",
+      deliveryRadius: "",
+      selectedCounties: [],
+      
+      // Flower-specific fields
+      deliveryTypes: [],
+      brokerageServices: [],
+      deliveryFrequency: "",
+      supplyPickupFrequency: "",
     },
   });
 
