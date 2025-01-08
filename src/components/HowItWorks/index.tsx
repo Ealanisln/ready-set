@@ -7,6 +7,7 @@ import AppointmentDialog from "../VirtualAssistant/Appointment";
 
 
 
+
 const HowItWorks = () => {
   const steps = [
     {
@@ -86,6 +87,7 @@ const HowItWorks = () => {
             calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
           />
         </div>
+      
         </div>
       </div>
   );
