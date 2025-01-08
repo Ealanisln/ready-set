@@ -112,7 +112,7 @@ export default function NewsletterForm() {
                   aria-label="Facebook"
                   href="https://www.facebook.com/ReadySetCoGroup/"
                   target="_blank"
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-400 hover:text-yellow"
                 >
                   <svg
                     width="22"
@@ -129,7 +129,7 @@ export default function NewsletterForm() {
                   aria-label="tiktok"
                   href="https://www.tiktok.com/@readyset.co"
                   target="_blank"
-                  className="mx-2 px-3 text-gray-400 hover:text-white"
+                  className="mx-2 px-3 text-gray-400 hover:text-yellow"
                 >
                   <svg
                     width="22"
@@ -146,7 +146,7 @@ export default function NewsletterForm() {
                   aria-label="instagram"
                   href="https://www.instagram.com/readyset.co/"
                   target="_blank"
-                  className="mx-2 px-3 text-gray-400 hover:text-white"
+                  className="mx-2 px-3 text-gray-400 hover:text-yellow"
                 >
                   <svg
                     width="22"
@@ -166,7 +166,7 @@ export default function NewsletterForm() {
                   aria-label="LinkedIn"
                   href="http://linkedin.com/company/ready-set-group-llc/"
                   target="_blank"
-                  className="mx-2 px-3 text-gray-400 hover:text-white"
+                  className="mx-2 px-3 text-gray-400 hover:text-yellow"
                 >
                   <svg
                     width="22"
