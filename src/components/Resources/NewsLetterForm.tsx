@@ -96,12 +96,11 @@ export default function NewsletterForm() {
         </div>
         
         <div className="w-full md:w-1/3 flex flex-col items-center">
-  <img 
-    src="/images/logo/logo-white.png" 
-    alt="Penguin Logo" 
-    className="h-10 object-contain mb-4" // Añadimos mb-4 para separar el logo del texto
+  <img src="/images/logo/logo-white.png" 
+       alt="Penguin Logo" 
+       className="h-10 object-contain mb-4"
   />
-  <div className="text-gray-600 mb-6 text-center"> {/* Añadimos text-center para centrar el texto */}
+  <div className="text-gray-600 mb-6 text-center"> 
     Explore our{' '}
     <span className="font-medium">free guides, resources,</span> and{' '}
     <span className="font-medium">blogs</span>.
