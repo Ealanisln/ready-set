@@ -20,7 +20,8 @@
     "db:prod": "cross-env NODE_ENV=production tsx src/scripts/db-tasks.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
     "test:watch": "jest --watch",
-    "studio": "dotenv -e .env.local -- npx prisma studio"
+    "studio": "dotenv -e .env.local -- npx prisma studio",
+    "setup-sheets": "tsx src/scripts/setup-sheets.ts"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -83,7 +84,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "debug": "^4.4.0",
-    "dotenv": "^16.4.7",
     "embla-carousel-autoplay": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.15.0",
@@ -147,6 +147,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-next": "15.1.1",

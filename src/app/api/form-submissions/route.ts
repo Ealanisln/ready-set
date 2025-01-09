@@ -22,6 +22,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate form type
+    const validFormTypes = ['food', 'flower', 'bakery', 'specialty'];
+    if (!validFormTypes.includes(body.formType.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'Invalid form type' },
+        { status: 400 }
+      );
+    }
+
     // Log incoming request
     console.log('Received form submission:', {
       formType: body.formType,
@@ -39,7 +48,10 @@ export async function POST(req: Request) {
       formType: submission.formType,
     });
 
-    return NextResponse.json({ success: true, data: submission });
+    return NextResponse.json({ 
+      success: true, 
+      data: submission 
+    });
   } catch (error) {
     console.error('Error in form submission endpoint:', error);
     
