@@ -2,8 +2,25 @@
 
 import { prisma } from "@/utils/prismaDB";
 import { google } from "googleapis";
-import { FormType } from "@/components/Logistics/QuoteRequest/types";
+import {
+  DeliveryFormData,
+  FormType,
+} from "@/components/Logistics/QuoteRequest/types";
 import { FormSubmissionType } from "@prisma/client";
+
+// Define form types
+type FormSectionKey = "FOOD" | "FLOWER" | "BAKERY" | "SPECIALTY";
+
+type SheetColumnsType = {
+  COMMON: string[];
+  SECTIONS: {
+    [K in FormSectionKey]: {
+      title: string;
+      sheetName: string;
+      columns: string[];
+    };
+  };
+};
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
@@ -16,9 +33,8 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({ version: "v4", auth });
 
-// Define column headers for each form type
-const SHEET_COLUMNS = {
-  BASE_COLUMNS: [
+const SHEET_COLUMNS: SheetColumnsType = {
+  COMMON: [
     "ID",
     "Form Type",
     "Company Name",
@@ -26,48 +42,89 @@ const SHEET_COLUMNS = {
     "Email",
     "Phone",
     "Counties",
-    "Frequency",
     "Pickup Address",
-    "Drivers Needed",
-    "Service Type",
-    "Delivery Radius",
+    "Notes",
+    "Created At",
   ],
-  FOOD: [
-    "Delivery Times",
-    "Order Headcount",
-    "Total Staff",
-    "Expected Deliveries",
-    "Partnered Services",
-    "Multiple Locations",
-  ],
-  FLOWER: [
-    "Delivery Types",
-    "Brokerage Services",
-    "Delivery Frequency",
-    "Supply Pickup Frequency",
-  ],
-  BAKERY: [
-    "Delivery Types",
-    "Partner Services",
-    "Routing App",
-    "Delivery Frequency",
-    "Supply Pickup Frequency",
-  ],
-  SPECIALTY: [
-    "Delivery Types",
-    "Fragile Package",
-    "Package Description",
-    "Delivery Frequency",
-    "Supply Pickup Frequency",
-  ],
-  FINAL_COLUMNS: ["Notes", "Created At"],
+  SECTIONS: {
+    FOOD: {
+      title: "Food Delivery",
+      sheetName: "Food-Quotes",
+      columns: [
+        "Service Type",
+        "Delivery Radius",
+        "Delivery Times",
+        "Order Headcount",
+        "Total Staff",
+        "Expected Deliveries",
+        "Frequency",
+        "Drivers Needed",
+        "Partnered Services",
+        "Multiple Locations",
+      ],
+    },
+    FLOWER: {
+      title: "Flower Delivery",
+      sheetName: "Flower-Quotes",
+      columns: [
+        "Service Type",
+        "Delivery Radius",
+        "Delivery Types",
+        "Brokerage Services",
+        "Delivery Frequency",
+        "Supply Pickup Frequency",
+        "Frequency",
+        "Drivers Needed",
+      ],
+    },
+    BAKERY: {
+      title: "Bakery Delivery",
+      sheetName: "Bakery-Quotes",
+      columns: [
+        "Service Type",
+        "Delivery Radius",
+        "Delivery Types",
+        "Partner Services",
+        "Routing App",
+        "Delivery Frequency",
+        "Supply Pickup Frequency",
+        "Frequency",
+        "Drivers Needed",
+      ],
+    },
+    SPECIALTY: {
+      title: "Specialty Delivery",
+      sheetName: "Specialty-Quotes",
+      columns: [
+        "Service Type",
+        "Delivery Radius",
+        "Delivery Types",
+        "Fragile Package",
+        "Package Description",
+        "Delivery Frequency",
+        "Supply Pickup Frequency",
+        "Frequency",
+        "Drivers Needed",
+      ],
+    },
+  },
+};
+
+const normalizeValue = (value: any): string => {
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+  if (value === null || value === undefined || value === "") {
+    return "N/A";
+  }
+  return String(value);
 };
 
 export class FormSubmissionService {
   static async createSubmission(data: {
     formType: FormType;
     userId?: string;
-    formData: any;
+    formData: DeliveryFormData;
   }) {
     if (!data.formType) {
       throw new Error("Form type is required");
@@ -81,81 +138,44 @@ export class FormSubmissionService {
     };
 
     try {
-      // Format base specifications based on form type
-      let specifications: any = {
-        driversNeeded: data.formData.driversNeeded || "",
-        serviceType: data.formData.serviceType || "",
-        deliveryRadius: data.formData.deliveryRadius || "",
-      };
+      console.log(
+        "Processing submission with data:",
+        JSON.stringify(data, null, 2),
+      );
 
-      // Add form-specific fields
-      switch (data.formType) {
-        case "bakery":
-          specifications = {
-            ...specifications,
-            deliveryTypes: data.formData.deliveryTypes || [],
-            partnerServices: data.formData.partnerServices || "",
-            routingApp: data.formData.routingApp || "",
-            deliveryFrequency: data.formData.deliveryFrequency || "",
-            supplyPickupFrequency: data.formData.supplyPickupFrequency || "",
-          };
-          break;
-        case "flower":
-          specifications = {
-            ...specifications,
-            deliveryTypes: data.formData.deliveryTypes || [],
-            brokerageServices: data.formData.brokerageServices || [],
-            deliveryFrequency: data.formData.deliveryFrequency || "",
-            supplyPickupFrequency: data.formData.supplyPickupFrequency || "",
-          };
-          break;
-        case "food":
-          specifications = {
-            ...specifications,
-            totalStaff: data.formData.totalStaff || "",
-            expectedDeliveries: data.formData.expectedDeliveries || "",
-            partneredServices: data.formData.partneredServices || "",
-            multipleLocations: data.formData.multipleLocations || "",
-            deliveryTimes: data.formData.deliveryTimes || [],
-            orderHeadcount: data.formData.orderHeadcount || [],
-            frequency: data.formData.frequency || "",
-          };
-          break;
-        case "specialty":
-          specifications = {
-            ...specifications,
-            deliveryTypes: data.formData.deliveryTypes || [],
-            fragilePackage: data.formData.fragilePackage || "no",
-            packageDescription: data.formData.packageDescription || "",
-            deliveryFrequency: data.formData.deliveryFrequency || "",
-            supplyPickupFrequency: data.formData.supplyPickupFrequency || "",
-          };
-          break;
-      }
+      const specifications = data.formData.specifications;
 
-      // Create submission
       const submission = await prisma.formSubmission.create({
         data: {
           formType: formTypeMap[data.formType.toLowerCase()],
           userId: data.userId,
-          companyName: data.formData.companyName || "",
-          contactName: data.formData.contactName || "",
-          email: data.formData.email || "",
-          phone: data.formData.phone || "",
-          counties: data.formData.selectedCounties || [],
-          frequency: data.formData.frequency || "",
-          pickupAddress: {
-            street: data.formData.streetAddress || "",
-            city: data.formData.city || "",
-            state: data.formData.state || "",
-            zip: data.formData.zipCode || "",
+          companyName: normalizeValue(data.formData.companyName),
+          contactName: data.formData.contactName,
+          email: data.formData.email,
+          phone: data.formData.phone,
+          counties: data.formData.counties || [],
+          frequency:
+            "frequency" in specifications ? specifications.frequency : "N/A",
+          pickupAddress: data.formData.pickupAddress || {
+            street: "",
+            city: "",
+            state: "",
+            zip: "",
           },
-          specifications,
-          notes: data.formData.notes || "",
+          specifications: JSON.stringify(specifications),
+          notes: "",
         },
       });
 
-      // Sync to Google Sheets
+      console.log("Created submission:", {
+        id: submission.id,
+        formType: submission.formType,
+        specifications:
+          typeof submission.specifications === "string"
+            ? JSON.parse(submission.specifications)
+            : submission.specifications,
+      });
+
       await this.syncToGoogleSheets(submission);
 
       return submission;
@@ -165,141 +185,193 @@ export class FormSubmissionService {
     }
   }
 
-  private static async syncToGoogleSheets(submission: any) {
+  static async setupSheetHeaders() {
     try {
-      const specifications = submission.specifications as any;
-      const address = submission.pickupAddress as any;
-      const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zip}`;
+      const spreadsheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
 
-      // Prepare base values
-      const baseValues = [
-        submission.id,
-        submission.formType,
-        submission.companyName || "N/A",
-        submission.contactName || "N/A",
-        submission.email || "N/A",
-        submission.phone || "N/A",
-        submission.counties?.join(", ") || "N/A",
-        submission.frequency || "N/A",
-        formattedAddress,
-        specifications?.driversNeeded || "N/A",
-        specifications?.serviceType || "N/A",
-        specifications?.deliveryRadius || "N/A",
-      ];
+      const spreadsheet = await sheets.spreadsheets.get({
+        spreadsheetId,
+      });
 
-      // Add form-specific values based on form type
-      let formSpecificValues: string[] = [];
-      switch (submission.formType) {
-        case "FOOD":
-          formSpecificValues = [
-            specifications?.deliveryTimes?.join(", ") || "N/A",
-            specifications?.orderHeadcount?.join(", ") || "N/A",
-            specifications?.totalStaff || "N/A",
-            specifications?.expectedDeliveries || "N/A",
-            specifications?.partneredServices || "N/A",
-            specifications?.multipleLocations || "N/A",
-          ];
-          break;
-        case "FLOWER":
-          formSpecificValues = [
-            specifications?.deliveryTypes?.join(", ") || "N/A",
-            specifications?.brokerageServices?.join(", ") || "N/A",
-            specifications?.deliveryFrequency || "N/A",
-            specifications?.supplyPickupFrequency || "N/A",
-          ];
-          break;
-        case "BAKERY":
-          formSpecificValues = [
-            specifications?.deliveryTypes?.join(", ") || "N/A",
-            specifications?.partnerServices || "N/A",
-            specifications?.routingApp || "N/A",
-            specifications?.deliveryFrequency || "N/A",
-            specifications?.supplyPickupFrequency || "N/A",
-          ];
-          break;
-        case "SPECIALTY":
-          formSpecificValues = [
-            specifications?.deliveryTypes?.join(", ") || "N/A",
-            specifications?.fragilePackage || "N/A",
-            specifications?.packageDescription || "N/A",
-            specifications?.deliveryFrequency || "N/A",
-            specifications?.supplyPickupFrequency || "N/A",
-          ];
-          break;
+      const existingSheets =
+        spreadsheet.data.sheets?.map((sheet) => sheet.properties?.title) || [];
+
+      for (const [formType, section] of Object.entries(
+        SHEET_COLUMNS.SECTIONS,
+      )) {
+        if (!existingSheets.includes(section.sheetName)) {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+              requests: [
+                {
+                  addSheet: {
+                    properties: {
+                      title: section.sheetName,
+                    },
+                  },
+                },
+              ],
+            },
+          });
+        }
+
+        const headers = [...SHEET_COLUMNS.COMMON, ...section.columns];
+        const endColumn = String.fromCharCode(64 + headers.length);
+
+        await sheets.spreadsheets.values.clear({
+          spreadsheetId,
+          range: `${section.sheetName}!A1:${endColumn}1`,
+        });
+
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${section.sheetName}!A1:${endColumn}1`,
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: [headers],
+          },
+        });
+
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: [
+              {
+                repeatCell: {
+                  range: {
+                    sheetId: spreadsheet.data.sheets?.find(
+                      (sheet) => sheet.properties?.title === section.sheetName,
+                    )?.properties?.sheetId,
+                    startRowIndex: 0,
+                    endRowIndex: 1,
+                    startColumnIndex: 0,
+                    endColumnIndex: headers.length,
+                  },
+                  cell: {
+                    userEnteredFormat: {
+                      backgroundColor: { red: 0.8, green: 0.8, blue: 0.8 },
+                      textFormat: { bold: true },
+                      horizontalAlignment: "CENTER",
+                    },
+                  },
+                  fields:
+                    "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+                },
+              },
+            ],
+          },
+        });
       }
 
-      // Add final columns (notes and timestamp)
-      const finalValues = [
-        submission.notes || "N/A",
+      console.log("Sheet headers setup successfully");
+    } catch (error) {
+      console.error("Error setting up sheet headers:", error);
+      throw error;
+    }
+  }
+
+  private static getFormSpecificValues(
+    formType: FormSectionKey,
+    specifications: any,
+  ): string[] {
+    const section = SHEET_COLUMNS.SECTIONS[formType];
+    if (!section) {
+      console.warn(`Unknown form type: ${formType}`);
+      return [];
+    }
+
+    return section.columns.map((column) => {
+      // Convert column name to camelCase for matching object keys
+      const key = column
+        .toLowerCase()
+        .replace(/\s+(.)/g, (match, group1) => group1.toUpperCase())
+        .replace(/\s+/g, "");
+
+      let value = specifications[key];
+
+      // Special handling for arrays
+      if (Array.isArray(value)) {
+        return value.join(", ");
+      }
+
+      return normalizeValue(value);
+    });
+  }
+
+  private static async syncToGoogleSheets(submission: any) {
+    try {
+      const formType = submission.formType.toUpperCase() as FormSectionKey;
+      const section = SHEET_COLUMNS.SECTIONS[formType];
+
+      if (!section) {
+        throw new Error(`Unknown form type: ${formType}`);
+      }
+
+      const specifications =
+        typeof submission.specifications === "string"
+          ? JSON.parse(submission.specifications)
+          : submission.specifications;
+
+      console.log("Processing specifications:", specifications); // Debug log
+
+      const address = submission.pickupAddress;
+      const formattedAddress = address
+        ? `${address.street}, ${address.city}, ${address.state} ${address.zip}`
+        : "N/A";
+
+      const commonValues = [
+        submission.id,
+        submission.formType,
+        normalizeValue(submission.companyName),
+        normalizeValue(submission.contactName),
+        normalizeValue(submission.email),
+        normalizeValue(submission.phone),
+        submission.counties?.join(", ") || "N/A",
+        formattedAddress,
+        normalizeValue(submission.notes),
         submission.createdAt.toISOString(),
       ];
 
-      const values = [[...baseValues, ...formSpecificValues, ...finalValues]];
+      // Get form-specific values with better logging
+      const formSpecificValues = this.getFormSpecificValues(
+        formType,
+        specifications,
+      );
+      console.log("Form specific values:", {
+        formType,
+        values: formSpecificValues,
+        columns: section.columns,
+      });
 
-      // Calculate the range based on form type
-      const formTypeColumns =
-        SHEET_COLUMNS[submission.formType as keyof typeof SHEET_COLUMNS] || [];
-      const totalColumns =
-        SHEET_COLUMNS.BASE_COLUMNS.length +
-        formTypeColumns.length +
-        SHEET_COLUMNS.FINAL_COLUMNS.length;
-      const range = `user-quotes!A:${String.fromCharCode(64 + totalColumns)}`;
+      const values = [[...commonValues, ...formSpecificValues]];
 
-      // Append to sheets with dynamic range
+      // Log the final values being written
+      console.log("Writing to sheet:", {
+        sheetName: section.sheetName,
+        headers: [...SHEET_COLUMNS.COMMON, ...section.columns],
+        values: values[0],
+      });
+
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEETS_SHEET_ID,
-        range,
+        range: `${section.sheetName}!A2`,
         valueInputOption: "USER_ENTERED",
         requestBody: { values },
       });
 
-      // Update sync status
+      console.log("Successfully synced to sheets:", {
+        submissionId: submission.id,
+        formType,
+        sheetName: section.sheetName,
+      });
+
       await prisma.formSubmission.update({
         where: { id: submission.id },
         data: { syncedToSheets: true },
       });
     } catch (error) {
       console.error("Error syncing to Google Sheets:", error);
-      throw error;
-    }
-  }
-
-  // Helper method to set up sheet headers
-  static async setupSheetHeaders() {
-    try {
-      // Combine all possible columns to create the complete header row
-      const headers = [
-        ...SHEET_COLUMNS.BASE_COLUMNS,
-        ...SHEET_COLUMNS.FOOD,
-        ...SHEET_COLUMNS.FLOWER,
-        ...SHEET_COLUMNS.BAKERY,
-        ...SHEET_COLUMNS.SPECIALTY,
-        ...SHEET_COLUMNS.FINAL_COLUMNS,
-      ];
-  
-      // Calculate the end column letter based on the number of headers
-      const endColumn = String.fromCharCode(64 + headers.length).toUpperCase();
-  
-      // Use spreadsheets.values.clear first to remove existing headers
-      await sheets.spreadsheets.values.clear({
-        spreadsheetId: process.env.GOOGLE_SHEETS_SHEET_ID,
-        range: `user-quotes!A1:${endColumn}1`,
-      });
-  
-      // Then use append instead of update
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEETS_SHEET_ID,
-        range: `user-quotes!A1`,
-        valueInputOption: "USER_ENTERED",
-        insertDataOption: "OVERWRITE",
-        requestBody: {
-          values: [headers],
-        },
-      });
-  
-      console.log("Sheet headers setup successfully");
-    } catch (error) {
-      console.error("Error setting up sheet headers:", error);
       throw error;
     }
   }

@@ -1,16 +1,14 @@
-// src/scripts/setup-sheeets.ts
+// src/scripts/setup-sheets.ts
 
 import { FormSubmissionService } from '@lib/form-submissions';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 async function setupSheet() {
   try {
     console.log('Starting sheet headers setup...');
     
-    // Validate environment variables
     if (!process.env.GOOGLE_SHEETS_SHEET_ID) {
       throw new Error('GOOGLE_SHEETS_SHEET_ID environment variable is not set');
     }
@@ -21,7 +19,6 @@ async function setupSheet() {
       throw new Error('GOOGLE_SHEETS_PRIVATE_KEY environment variable is not set');
     }
 
-    // Set up the headers
     await FormSubmissionService.setupSheetHeaders();
     
     console.log('Headers set up successfully');
@@ -32,5 +29,4 @@ async function setupSheet() {
   }
 }
 
-// Run the setup
 setupSheet();

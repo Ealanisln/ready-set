@@ -22,7 +22,7 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Email Address"
       />
       <input
-        {...register("companyNa`me")}
+        {...register("companyName")}
         className="w-full rounded border p-2"
         placeholder="Company Name"
       />
