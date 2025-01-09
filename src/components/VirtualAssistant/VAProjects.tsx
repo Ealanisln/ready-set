@@ -60,8 +60,8 @@ const services: Service[] = [
     pdfName: "va-web-development.pdf",
   },
   {
-    title: "Incoming Services",
-    description: "Too be announced.",
+    title: "Custom Requests",
+    description: "Didn't find the service you need? We can help.",
     imageUrl: "/images/virtual/projects/6.png",
     pdfName: "",
   },
