@@ -59,7 +59,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   const buttonText = title === "Custom Requests" ? "Let's talk" : "more";
 
   return (
-    <div className="relative h-48 w-full md:h-56 lg:h-64 xl:h-72">
+    <div className="relative h-64 w-full md:h-72 lg:h-80 xl:h-96">
       {/* Image Container */}
       <div className="absolute left-0 top-1/2 z-10 h-28 w-28 -translate-x-4 -translate-y-1/2 transition-all duration-300 md:h-32 md:w-32 md:-translate-x-6 lg:h-40 lg:w-40 lg:-translate-x-8 xl:h-48 xl:w-48 xl:-translate-x-12">
         <Image
@@ -73,30 +73,35 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
       {/* Card Container */}
       <Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
-        <div className="flex h-full flex-col justify-center py-3 md:justify-between md:py-4 lg:py-5 xl:py-6">
-          <div>
-            <h3 className="mb-2 text-right text-lg font-bold text-gray-800 md:mb-2 md:text-lg lg:mb-3 lg:text-xl xl:mb-4 xl:text-2xl">
+        <div className="relative flex h-full flex-col">
+          {/* Content Section */}
+          <div className="flex-grow pt-6 md:pt-8 lg:pt-10">
+            <h3 className="mb-2 text-right text-lg font-bold text-gray-800 md:mb-3 md:text-lg lg:mb-4 lg:text-xl xl:text-2xl">
               {title}
             </h3>
             <p className="text-right text-sm leading-snug text-gray-600 md:text-sm lg:text-base xl:text-lg">
               {description}
             </p>
           </div>
-          <div className="mt-2 flex justify-end md:mt-2 lg:mt-1 xl:mt-0">
-            {isCustomRequest ? (
-              <AppointmentDialog
-                buttonText={buttonText}
-                buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-                calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-                buttonIcon={null}
-                dialogTitle="Schedule a Custom Request Discussion"
-                dialogDescription="Choose a time to discuss your custom project needs."
-              />
-            ) : (
-              <button className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base">
-                {buttonText}
-              </button>
-            )}
+
+          {/* Button Section - Fixed to bottom */}
+          <div className="pb-6 md:pb-8 lg:pb-10">
+            <div className="flex justify-end">
+              {isCustomRequest ? (
+                <AppointmentDialog
+                  buttonText={buttonText}
+                  buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+                  calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+                  buttonIcon={null}
+                  dialogTitle="Schedule a Custom Request Discussion"
+                  dialogDescription="Choose a time to discuss your custom project needs."
+                />
+              ) : (
+                <button className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base">
+                  {buttonText}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </Card>
