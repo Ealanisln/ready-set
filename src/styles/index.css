@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 @font-face {
   font-family: 'Kabel';
   src: url('/fonts/KabelC-Demi.otf') format('opentype');
@@ -104,3 +106,4 @@ h1, h2 {
 .theme-toggler span.dark\:block { /* Target the dark mode icon specifically */
   color: black; /* Dark mode color */
 }
+
