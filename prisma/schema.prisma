@@ -54,6 +54,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
+  JobApplication        JobApplication[]
 }
 
 model on_demand {
@@ -232,8 +233,57 @@ model file_upload {
   cateringRequest   catering_request? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
   onDemand          on_demand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
   user              user?             @relation(fields: [userId], references: [id])
+  JobApplication    JobApplication?   @relation(fields: [jobApplicationId], references: [id])
+  jobApplicationId  String?
 
   @@index([entityType, entityId])
+}
+
+model JobApplication {
+  id        String  @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  position  String
+
+  // Address fields
+  addressStreet String
+  addressCity   String
+  addressState  String
+  addressZip    String
+
+  // Education and Experience
+  education      String
+  workExperience String
+  skills         String[] // Array to store the 3 required skills
+  coverLetter    String?
+
+  // Document URLs
+  resumeUrl         String
+  driversLicenseUrl String?
+  insuranceUrl      String?
+  vehicleRegUrl     String?
+
+  // Status tracking
+  status    application_status @default(pending)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  // Relations
+  fileUploads file_upload[]
+  userId      String? // Link to user if application is approved
+  user        user?         @relation(fields: [userId], references: [id])
+
+  @@index([email])
+  @@index([position])
+}
+
+enum application_status {
+  pending
+  approved
+  rejected
+  interviewing
 }
 
 enum driver_status {
