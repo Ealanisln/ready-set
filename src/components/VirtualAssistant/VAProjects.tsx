@@ -91,38 +91,42 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         />
       </div>
 
-      {/* Card Container */}
-      <Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
-        <div className="flex h-full flex-col justify-center py-3 md:justify-between md:py-4 lg:py-5 xl:py-6">
-          <div>
-            <h3 className="mb-2 text-right text-lg font-bold text-gray-800 md:mb-2 md:text-lg lg:mb-3 lg:text-xl xl:mb-4 xl:text-2xl">
-              {title}
-            </h3>
-            <p className="text-right text-sm leading-snug text-gray-600 md:text-sm lg:text-base xl:text-lg">
-              {description}
-            </p>
-          </div>
-          <div className="mt-2 flex justify-end md:mt-2 lg:mt-1 xl:mt-0">
-            {isCustomRequest ? (
-              <AppointmentDialog
-                buttonText={buttonText}
-                buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-                calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-                buttonIcon={null}
-                dialogTitle="Schedule a Custom Request Discussion"
-                dialogDescription="Choose a time to discuss your custom project needs."
-              />
-            ) : (
-              <button 
-                onClick={handleMoreClick}
-                className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-              >
-                {buttonText}
-              </button>
-            )}
-          </div>
-        </div>
-      </Card>
+{/* Card Container */}
+<Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
+  {/* Cambiado a relative para mejor control del posicionamiento */}
+  <div className="relative flex h-full flex-col py-3 md:py-4 lg:py-5 xl:py-6">
+    <div className="mb-16 md:mb-20 lg:mb-24">
+      {/* Reducido el tamaño del texto del título */}
+      <h3 className="mb-2 text-right text-base font-bold text-gray-800 md:text-base lg:text-lg xl:text-xl">
+        {title}
+      </h3>
+      {/* Reducido el tamaño del texto de la descripción */}
+      <p className="text-right text-xs leading-snug text-gray-600 md:text-sm lg:text-sm xl:text-base">
+        {description}
+      </p>
+    </div>
+    {/* Posicionamiento absoluto del botón */}
+    <div className="absolute bottom-4 right-0">
+      {isCustomRequest ? (
+        <AppointmentDialog
+          buttonText={buttonText}
+          buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+          calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+          buttonIcon={null}
+          dialogTitle="Schedule a Custom Request Discussion"
+          dialogDescription="Choose a time to discuss your custom project needs."
+        />
+      ) : (
+        <button 
+          onClick={handleMoreClick}
+          className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+        >
+          {buttonText}
+        </button>
+      )}
+    </div>
+  </div>
+</Card>
 
       {/* PDF Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
