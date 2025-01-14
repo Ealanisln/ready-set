@@ -107,7 +107,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             {isCustomRequest ? (
               <AppointmentDialog
                 buttonText={buttonText}
-                buttonClassName="rounded-full bg-yellow-400 px-4 py-1.5 text-[10px] font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-xs"buttonClassName="rounded-full bg-yellow-400 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"buttonClassName="rounded-full bg-yellow-400 px-4 py-1.5 text-xs font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-sm"
+                buttonClassName="rounded-full bg-yellow-400 px-4 py-1.5 text-xs font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-sm"
                 calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
                 buttonIcon={null}
                 dialogTitle="Schedule a Custom Request Discussion"
