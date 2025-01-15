@@ -14,7 +14,7 @@ const BookNow: React.FC<AdCardProps> = ({
   title,
   subtitle,
   ctaText,
-  ctaLink,
+  ctaLink = '/booking-page',
   logoSrc = '/images/logo/logo-white.png'
 }) => {
   return (
