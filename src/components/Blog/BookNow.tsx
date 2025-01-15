@@ -10,7 +10,7 @@ interface AdCardProps {
   logoSrc?: string;
 }
 
-const AdCard: React.FC<AdCardProps> = ({
+const BookNow: React.FC<AdCardProps> = ({
   title,
   subtitle,
   ctaText,
@@ -91,4 +91,4 @@ const SocialIcon: React.FC<SocialIconProps> = ({ href, network }) => {
   );
 };
 
-export default AdCard;
+export default BookNow;

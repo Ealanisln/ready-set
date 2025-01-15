@@ -3,6 +3,7 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/lib/client";
 import Link from "next/link";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
+import BookNow from "./BookNow";
 
 interface PostsProps {
   data: SimpleBlogCard[];
