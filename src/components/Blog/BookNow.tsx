@@ -34,20 +34,20 @@ const BookNow: React.FC<AdCardProps> = ({
 
         {/* Content */}
         <div className="space-y-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
-            {title}
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-800">
+            Save 78% on Hiring Costs with a Virtual Assistant.
           </h2>
-          <p className="text-gray-600">
-            {subtitle}
+          <p className="text-gray-600 font-bold">
+            Save More. Gain Time. Book a Call Today.
           </p>
         </div>
 
         {/* CTA Button */}
         <Link 
           href={ctaLink}
-          className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-8 py-3 rounded-full transition-colors duration-200"
+          className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-8 py-3 rounded-full transition-colors duration-200"
         >
-          {ctaText}
+          Book Now
         </Link>
 
         {/* Social Share Section */}
