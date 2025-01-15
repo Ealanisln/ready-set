@@ -15,14 +15,14 @@ const BookNow: React.FC<AdCardProps> = ({
   subtitle,
   ctaText,
   ctaLink,
-  logoSrc = '/placeholder-logo.png'
+  logoSrc = '/images/logo/logo-white.png'
 }) => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <div className="relative w-12 h-6">
+          <div className="relative w-16 h-8">
             <Image
               src={logoSrc}
               alt="Company logo"
