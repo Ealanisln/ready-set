@@ -1,5 +1,10 @@
+"use client";
+
 import React from "react";
 import AppointmentDialog from "../VirtualAssistant/Appointment";
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Button } from "../ui/button";
 import { FormType } from "./QuoteRequest/types";
@@ -13,7 +13,7 @@ interface BakeryDeliverySectionProps {
 }
 
 const handleClick = (onRequestQuote?: (formType: FormType) => void) => {
-  console.log('Button clicked, onRequestQuote:', !!onRequestQuote);
+  console.log("Button clicked, onRequestQuote:", !!onRequestQuote);
   if (onRequestQuote) {
     onRequestQuote("bakery");
   }
@@ -80,9 +80,11 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
             <ul className="list-none space-y-6">
               {services.map((service, index) => (
                 <li key={index} className="flex gap-3">
-                  <span className="text-gray-800 text-2xl leading-none">•</span>
+                  <span className="text-2xl leading-none text-gray-800">•</span>
                   <div className="flex-1">
-                    <span className="font-semibold text-gray-800">{service.title}</span>
+                    <span className="font-semibold text-gray-800">
+                      {service.title}
+                    </span>
                     <span className="text-gray-700">{service.description}</span>
                   </div>
                 </li>
@@ -97,30 +99,35 @@ const BakeryDeliverySection: React.FC<BakeryDeliverySectionProps> = ({
 
           <Button
             onClick={() => handleClick(onRequestQuote)}
-            className="bg-black text-white hover:bg-gray-900"
+            className="rounded-md bg-white px-6 py-3 font-bold text-gray-800 transition-colors hover:bg-gray-100"
           >
-            Request Bakery Delivery Quote
+            Request a Quote
           </Button>
         </div>
         <div className="w-full px-4 md:px-6 lg:px-8">
-           <div className="relative w-full mt-8 md:mt-12 lg:mt-20">
-           <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
-           <div className="rounded-3xl overflow-hidden w-full h-full">
-            <picture>
-            <source srcSet="/images/logistics/bakerypic.webp" type="image/webp" />
-            <img src="/images/logistics/bakerypic.png" 
-              alt="A container showing delicious breads" 
-              className="w-full h-full object-cover object-center"/>
-              </picture>
+          <div className="relative mt-8 w-full md:mt-12 lg:mt-20">
+            <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
+              <div className="h-full w-full overflow-hidden rounded-3xl">
+                <picture>
+                  <source
+                    srcSet="/images/logistics/bakerypic.webp"
+                    type="image/webp"
+                  />
+                  <img
+                    src="/images/logistics/bakerypic.png"
+                    alt="A container showing delicious breads"
+                    className="h-full w-full object-cover object-center"
+                  />
+                </picture>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-       </div>
       </div>
     </section>
   );
 };
 
-BakeryDeliverySection.displayName = 'BakeryDeliverySection';
+BakeryDeliverySection.displayName = "BakeryDeliverySection";
 
 export default BakeryDeliverySection;
