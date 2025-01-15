@@ -4,7 +4,12 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import AppointmentDialog from "./Appointment";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FileDownIcon } from "lucide-react";
 
 interface ServiceCardProps {
@@ -24,39 +29,41 @@ interface Service {
 const services: Service[] = [
   {
     title: "Admin",
-    description: "Efficient management of calendars, emails, and data entry tasks.",
+    description:
+      "Efficient management of calendars, emails, and data entry tasks.",
     imageUrl: "/images/virtual/projects/1.png",
-    pdfName: "va-admin-services.pdf"
+    pdfName: "va-admin-services.pdf",
   },
   {
     title: "Customer Service & Sales",
     description: "Provide your clients with timely and professional support.",
     imageUrl: "/images/virtual/projects/2.png",
-    pdfName: "va-customer-services.pdf"
+    pdfName: "va-customer-services.pdf",
   },
   {
     title: "Design & Editing",
     description: "Plan, create, and post content to grow your online presence.",
     imageUrl: "/images/virtual/projects/3.png",
-    pdfName: "va-design-and-editing.pdf"
+    pdfName: "va-design-and-editing.pdf",
   },
   {
     title: "Social Media",
-    description: "Manage posts, schedule content, and engage with your audience.",
+    description:
+      "Manage posts, schedule content, and engage with your audience.",
     imageUrl: "/images/virtual/projects/4.png",
-    pdfName: "va-social-media.pdf"
+    pdfName: "va-social-media.pdf",
   },
   {
     title: "Web Development",
     description: "Build and optimize websites for seamless user experiences",
     imageUrl: "/images/virtual/projects/5.png",
-    pdfName: "va-web-development.pdf"
+    pdfName: "va-web-development.pdf",
   },
   {
     title: "Custom Requests",
     description: "Didn't find the service you need? We can help.",
     imageUrl: "/images/virtual/projects/6.png",
-    pdfName: "custom-services.pdf"
+    pdfName: "custom-services.pdf",
   },
 ];
 
@@ -95,10 +102,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       <Card className="absolute inset-0 rounded-lg bg-white pl-24 pr-4 shadow-lg transition-shadow duration-300 hover:shadow-xl md:pl-28 md:pr-4 lg:pl-36 lg:pr-5 xl:pl-44 xl:pr-6">
         <div className="relative flex h-full flex-col py-3 md:py-4 lg:py-5 xl:py-6">
           <div className="mb-16 md:mb-20 lg:mb-24">
-            <h3 className="mb-2 text-right text-base font-bold text-gray-800 md:text-base lg:text-lg xl:text-xl">
+            <h3 className="mb-4 text-right text-base font-bold text-gray-800 xs:text-lg md:text-xl">
               {title}
             </h3>
-            <p className="text-right text-sm leading-snug text-gray-600 md:text-base lg:text-base xl:text-lg">
+            <p className="text-right text-lg leading-snug text-gray-600 md:text-base lg:text-base xl:text-lg">
               {description}
             </p>
           </div>
@@ -107,14 +114,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             {isCustomRequest ? (
               <AppointmentDialog
                 buttonText={buttonText}
-                buttonClassName="rounded-full bg-yellow-400 px-4 py-1.5 text-xs font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-sm"
+                buttonClassName="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 xs:py-2 lg:py-2 xl:px-8 xl:text-base"
                 calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
                 buttonIcon={null}
                 dialogTitle="Schedule a Custom Request Discussion"
                 dialogDescription="Choose a time to discuss your custom project needs."
               />
             ) : (
-              <button 
+              <button
                 onClick={handleMoreClick}
                 className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
               >
@@ -151,7 +158,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           <div className="mt-4 h-[70vh] min-h-[400px] w-full">
             {showCalendar ? (
               <iframe
-                src="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+                src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
                 className="h-full w-full rounded-md border-0"
                 title="Booking Calendar"
               />
@@ -195,10 +202,10 @@ export default function VirtualAssistantProjects() {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center items-center md:mt-12 lg:mt-16 xl:mt-20">
+        <div className="mt-8 flex items-center justify-center md:mt-12 lg:mt-16 xl:mt-20">
           <AppointmentDialog
             buttonVariant="black"
-            calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true" 
+            calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
           />
         </div>
       </div>
