@@ -158,7 +158,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           <div className="mt-4 h-[70vh] min-h-[400px] w-full">
             {showCalendar ? (
               <iframe
-                src="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true"
+                src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
                 className="h-full w-full rounded-md border-0"
                 title="Booking Calendar"
               />
