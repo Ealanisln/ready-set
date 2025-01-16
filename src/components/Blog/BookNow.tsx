@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
+import { PhoneCall } from "lucide-react";
 import Link from 'next/link';
+import AppointmentDialog from '../VirtualAssistant/Appointment';
 
 interface AdCardProps {
   title: string;
@@ -17,12 +19,14 @@ const BookNow: React.FC<AdCardProps> = ({
   ctaLink = '/booking-page',
   logoSrc = '/images/logo/logo-white.png'
 }) => {
+  const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <div className="relative w-16 h-8">
+          <div className="relative w-32 h-16">
             <Image
               src={logoSrc}
               alt="Company logo"
@@ -42,13 +46,18 @@ const BookNow: React.FC<AdCardProps> = ({
           </p>
         </div>
 
-        {/* CTA Button */}
-        <Link 
-          href={ctaLink}
-          className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-8 py-3 rounded-full transition-colors duration-200"
-        >
-          Book Now
-        </Link>
+        {/* AppointmentDialog en lugar del CTA Button anterior */}
+        <div className="flex justify-center">
+          <AppointmentDialog
+            buttonText="Book Now"
+            buttonIcon={<PhoneCall size={20} />}
+            buttonVariant="amber"
+            buttonClassName="font-bold"
+            dialogTitle="Schedule Your Free Consultation"
+            dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
+            calendarUrl={calendarUrl}
+          />
+        </div>
 
         {/* Social Share Section */}
         <div className="pt-8 mt-8 border-t border-gray-200">
