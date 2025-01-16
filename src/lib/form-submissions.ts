@@ -305,23 +305,63 @@ export class FormSubmissionService {
     const specs = specifications.specifications || specifications;
   
     // Map column names to their corresponding field names in camelCase
-    const columnMapping = {
-      'Service Type': 'serviceType',
-      'Delivery Radius': 'deliveryRadius',
-      'Delivery Times': 'deliveryTimes',
-      'Order Headcount': 'orderHeadcount',
-      'Total Staff': 'totalStaff',
-      'Expected Deliveries': 'expectedDeliveries',
-      'Frequency': 'frequency',
-      'Drivers Needed': 'driversNeeded',
-      'Partnered Services': 'partneredServices',
-      'Multiple Locations': 'multipleLocations'
+    const columnMappings: Record<FormSectionKey, Record<string, string>> = {
+      FOOD: {
+        'Service Type': 'serviceType',
+        'Delivery Radius': 'deliveryRadius',
+        'Delivery Times': 'deliveryTimes',
+        'Order Headcount': 'orderHeadcount',
+        'Total Staff': 'totalStaff',
+        'Expected Deliveries': 'expectedDeliveries',
+        'Frequency': 'frequency',
+        'Drivers Needed': 'driversNeeded',
+        'Partnered Services': 'partneredServices',
+        'Multiple Locations': 'multipleLocations'
+      },
+      SPECIALTY: {
+        'Service Type': 'serviceType',
+        'Delivery Radius': 'deliveryRadius',
+        'Delivery Types': 'deliveryTypes',
+        'Fragile Package': 'fragilePackage',
+        'Package Description': 'packageDescription',
+        'Delivery Frequency': 'deliveryFrequency',
+        'Supply Pickup Frequency': 'supplyPickupFrequency',
+        'Frequency': 'frequency',
+        'Drivers Needed': 'driversNeeded'
+      },
+      FLOWER: {
+        'Service Type': 'serviceType',
+        'Delivery Radius': 'deliveryRadius',
+        'Delivery Types': 'deliveryTypes',
+        'Brokerage Services': 'brokerageServices',
+        'Delivery Frequency': 'deliveryFrequency',
+        'Supply Pickup Frequency': 'supplyPickupFrequency',
+        'Frequency': 'frequency',
+        'Drivers Needed': 'driversNeeded'
+      },
+      BAKERY: {
+        'Service Type': 'serviceType',
+        'Delivery Radius': 'deliveryRadius',
+        'Delivery Types': 'deliveryTypes',
+        'Partner Services': 'partnerServices',
+        'Routing App': 'routingApp',
+        'Delivery Frequency': 'deliveryFrequency',
+        'Supply Pickup Frequency': 'supplyPickupFrequency',
+        'Frequency': 'frequency',
+        'Drivers Needed': 'driversNeeded'
+      }
     };
   
     return section.columns.map((column) => {
-      const fieldName = columnMapping[column as keyof typeof columnMapping];
+      const formMapping = columnMappings[formType];
+      if (!formMapping) {
+        console.warn(`No mapping found for form type: ${formType}`);
+        return 'N/A';
+      }
+      
+      const fieldName = formMapping[column];
       if (!fieldName) {
-        console.warn(`No mapping found for column: ${column}`);
+        console.warn(`No mapping found for column: ${column} in form type: ${formType}`);
         return 'N/A';
       }
   
@@ -407,4 +447,5 @@ export class FormSubmissionService {
       throw error;
     }
   }
+  
 }
