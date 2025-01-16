@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model user {
@@ -237,21 +237,22 @@ model file_upload {
 }
 
 model FormSubmission {
-  id             String             @id @default(cuid())
-  formType       FormSubmissionType
-  userId         String?
-  companyName    String?
-  contactName    String?
-  email          String?
-  phone          String?
-  counties       String[]
-  frequency      String?
-  pickupAddress  Json?
-  specifications Json?
-  notes          String?
-  syncedToSheets Boolean            @default(false)
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  id                 String             @id @default(cuid())
+  formType           FormSubmissionType
+  userId             String?
+  companyName        String?
+  contactName        String?
+  email              String?
+  phone              String?
+  counties           String[]
+  frequency          String?
+  pickupAddress      Json?
+  specifications     Json?
+  notes              String?
+  additionalComments String?
+  syncedToSheets     Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   // Relations
   user user? @relation(fields: [userId], references: [id])
@@ -311,7 +312,7 @@ enum users_type {
 
 enum FormSubmissionType {
   food
-  flower  
+  flower
   bakery
   specialty
 }

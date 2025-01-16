@@ -66,5 +66,17 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Zip Code"
       />
     </div>
+
+    <div className="space-y-2">
+      <h3 className="font-medium">Additional Information</h3>
+      <textarea
+        {...register("additionalComments")}
+        className="w-full rounded border p-2"
+        placeholder="Additional Comments (Optional)"
+        maxLength={1000}
+        rows={4}
+      />
+      <p className="text-sm text-gray-500">Maximum 1000 characters</p>
+    </div>
   </div>
 );

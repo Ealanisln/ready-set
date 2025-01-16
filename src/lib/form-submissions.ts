@@ -6,7 +6,13 @@ import {
   DeliveryFormData,
   FormType,
 } from "@/components/Logistics/QuoteRequest/types";
-import { FormSubmissionType } from "@prisma/client";
+
+enum FormSubmissionType {
+  food = 'food',
+  flower = 'flower',
+  bakery = 'bakery',
+  specialty = 'specialty'
+}
 
 // Define form types
 type FormSectionKey = "FOOD" | "FLOWER" | "BAKERY" | "SPECIALTY";
@@ -43,6 +49,7 @@ const SHEET_COLUMNS: SheetColumnsType = {
     "Phone",
     "Counties",
     "Pickup Address",
+    "Additional Comments", // New column
     "Notes",
     "Created At",
   ],
@@ -143,7 +150,7 @@ export class FormSubmissionService {
         JSON.stringify(data, null, 2),
       );
 
-      const specifications = data.formData.specifications;
+      const specifications = (data.formData as any).specifications || {};
 
       const submission = await prisma.formSubmission.create({
         data: {
@@ -162,6 +169,7 @@ export class FormSubmissionService {
             state: "",
             zip: "",
           },
+          additionalComments: data.formData.additionalComments || "", 
           specifications: JSON.stringify(specifications),
           notes: "",
         },
@@ -328,7 +336,7 @@ export class FormSubmissionService {
         normalizeValue(submission.email),
         normalizeValue(submission.phone),
         submission.counties?.join(", ") || "N/A",
-        formattedAddress,
+        formattedAddress,// New field
         normalizeValue(submission.notes),
         submission.createdAt.toISOString(),
       ];

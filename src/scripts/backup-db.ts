@@ -22,7 +22,7 @@ const execAsync = (command: string): Promise<{ stdout: string; stderr: string }>
 };
 
 async function getDatabaseStats() {
-  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const databaseUrl = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
   if (!databaseUrl) {
     throw new Error('Database URL not found in environment variables');
   }
@@ -87,9 +87,9 @@ async function backupDatabase() {
     
     console.log('\n📦 Creating database backup...');
     
-    const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    const databaseUrl = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
     if (!databaseUrl) {
-      throw new Error('Neither DATABASE_URL nor POSTGRES_URL environment variable is set');
+      throw new Error('Neither POSTGRES_PRISMA_URL nor POSTGRES_URL environment variable is set');
     }
 
     const url = new URL(databaseUrl);
