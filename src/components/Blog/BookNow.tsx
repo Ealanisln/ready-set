@@ -61,7 +61,7 @@ const BookNow: React.FC<AdCardProps> = ({
 
         {/* Social Share Section */}
         <div className="pt-8 mt-8 border-t border-gray-200">
-          <h3 className="text-gray-600 mb-4">Share this article</h3>
+          <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
           <div className="flex justify-center space-x-4">
             <SocialIcon href="#" network="facebook" />
             <SocialIcon href="#" network="instagram" />
