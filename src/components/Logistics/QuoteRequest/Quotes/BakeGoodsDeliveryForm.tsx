@@ -26,14 +26,16 @@ export const BakeGoodsDeliveryForm = ({ onSubmit }: BakeGoodsDeliveryFormProps) 
       contactName: "",
       website: "",
       phone: "",
-      streetAddress: "",
-      city: "",
-      state: "",
-      zipCode: "",
+      pickupAddress: {  // Changed from flat fields to nested object
+        street: "",     // Changed from streetAddress to street
+        city: "",
+        state: "",
+        zip: "",        // Changed from zipCode to zip
+      },
+      counties: [],     // Changed from selectedCounties to counties
       driversNeeded: "",
       serviceType: "",
       deliveryRadius: "",
-      selectedCounties: [],
       deliveryTypes: [],
       partnerServices: "",
       routingApp: "",

@@ -46,24 +46,26 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Phone Number"
       />
       <input
-        {...register("streetAddress")}
+        {...register("pickupAddress.street", {
+          required: "Street address is required",
+        })}
         className="w-full rounded border p-2"
         placeholder="Street Address"
       />
       <input
-        {...register("city")}
+        {...register("pickupAddress.city", { required: "City is required" })}
         className="w-full rounded border p-2"
         placeholder="City"
       />
       <input
-        {...register("state")}
+        {...register("pickupAddress.state", { required: "State is required" })}
         className="w-full rounded border p-2"
         placeholder="State"
       />
       <input
-        {...register("zipCode")}
+        {...register("pickupAddress.zip", { required: "ZIP code is required" })}
         className="w-full rounded border p-2"
-        placeholder="Zip Code"
+        placeholder="ZIP Code"
       />
     </div>
 

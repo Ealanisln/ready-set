@@ -1,3 +1,5 @@
+// src/components/Logistics/QuoteRequest/types.ts
+
 import { UseFormRegister } from "react-hook-form";
 
 export type FormType = "food" | "flower" | "bakery" | "specialty" | null;

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import DialogFormContainer from "@/components/Logistics/DialogFormContainer";
-import { 
-  FormType, 
+import {
+  FormType,
   DeliveryFormData,
   BakeryFormData,
   FlowerFormData,
   FoodFormData,
-  SpecialtyFormData
+  SpecialtyFormData,
 } from "../types";
 
 interface APISubmissionData {
@@ -20,7 +20,7 @@ interface APISubmissionData {
     phone: string;
     website?: string;
     counties: string[];
-    additionalComments?: string;  // Add this field
+    additionalComments?: string; // Add this field
     pickupAddress: {
       street: string;
       city: string;
@@ -45,7 +45,7 @@ interface APISubmissionData {
       deliveryTimes?: string[];
       orderHeadcount?: string[];
       frequency?: string;
-      fragilePackage?: 'yes' | 'no';
+      fragilePackage?: "yes" | "no";
       packageDescription?: string;
     };
   };
@@ -56,7 +56,7 @@ export const FormManager = () => {
   const [activeFormType, setActiveFormType] = useState<FormType>(null);
 
   const openForm = (formType: FormType) => {
-    console.log('FormManager - Opening form with type:', formType);
+    console.log("FormManager - Opening form with type:", formType);
     setActiveFormType(formType);
     setIsDialogOpen(true);
   };
@@ -68,7 +68,6 @@ export const FormManager = () => {
 
   const handleSubmit = async (formData: DeliveryFormData) => {
     try {
-      // Base submission data structure
       const baseSubmission: APISubmissionData = {
         formType: formData.formType,
         formData: {
@@ -77,88 +76,92 @@ export const FormManager = () => {
           email: formData.email,
           phone: formData.phone,
           website: formData.website,
-          counties: formData.counties || [], // Use counties instead of selectedCounties
-          additionalComments: formData.additionalComments,
-          pickupAddress: formData.pickupAddress, // Use pickupAddress directly
+          counties: formData.counties, // Changed from selectedCounties to counties
+          additionalComments: formData.additionalComments, // Changed from data.additionalComments
+          pickupAddress: {
+            street: formData.pickupAddress.street, // Updated to use pickupAddress structure
+            city: formData.pickupAddress.city,
+            state: formData.pickupAddress.state,
+            zip: formData.pickupAddress.zip,
+          },
           specifications: {
-            driversNeeded: formData.specifications.driversNeeded,
-            serviceType: formData.specifications.serviceType,
-            deliveryRadius: formData.specifications.deliveryRadius,
+            driversNeeded: formData.driversNeeded,
+            serviceType: formData.serviceType,
+            deliveryRadius: formData.deliveryRadius,
           },
         },
       };
-  
+
       // Add form-specific fields based on form type
       switch (formData.formType) {
-        case 'bakery': {
+        case "bakery": {
           const bakeryData = formData as BakeryFormData;
           baseSubmission.formData.specifications = {
             ...baseSubmission.formData.specifications,
-            deliveryTypes: bakeryData.specifications.deliveryTypes,
-            deliveryFrequency: bakeryData.specifications.deliveryFrequency,
-            supplyPickupFrequency: bakeryData.specifications.supplyPickupFrequency,
-            partnerServices: bakeryData.specifications.partnerServices,
-            routingApp: bakeryData.specifications.routingApp,
+            deliveryTypes: bakeryData.deliveryTypes,
+            deliveryFrequency: bakeryData.deliveryFrequency,
+            supplyPickupFrequency: bakeryData.supplyPickupFrequency,
+            partnerServices: bakeryData.partnerServices,
+            routingApp: bakeryData.routingApp,
           };
           break;
         }
-        case 'flower': {
+        case "flower": {
           const flowerData = formData as FlowerFormData;
           baseSubmission.formData.specifications = {
             ...baseSubmission.formData.specifications,
-            deliveryTypes: flowerData.specifications.deliveryTypes,
-            deliveryFrequency: flowerData.specifications.deliveryFrequency,
-            supplyPickupFrequency: flowerData.specifications.supplyPickupFrequency,
-            brokerageServices: flowerData.specifications.brokerageServices,
+            deliveryTypes: flowerData.deliveryTypes,
+            deliveryFrequency: flowerData.deliveryFrequency,
+            supplyPickupFrequency: flowerData.supplyPickupFrequency,
+            brokerageServices: flowerData.brokerageServices,
           };
           break;
         }
-        case 'food': {
+        case "food": {
           const foodData = formData as FoodFormData;
           baseSubmission.formData.specifications = {
             ...baseSubmission.formData.specifications,
-            totalStaff: foodData.specifications.totalStaff,
-            expectedDeliveries: foodData.specifications.expectedDeliveries,
-            partneredServices: foodData.specifications.partneredServices,
-            multipleLocations: foodData.specifications.multipleLocations,
-            deliveryTimes: foodData.specifications.deliveryTimes,
-            orderHeadcount: foodData.specifications.orderHeadcount,
-            frequency: foodData.specifications.frequency,
+            totalStaff: foodData.totalStaff,
+            expectedDeliveries: foodData.expectedDeliveries,
+            partneredServices: foodData.partneredServices,
+            multipleLocations: foodData.multipleLocations,
+            deliveryTimes: foodData.deliveryTimes,
+            orderHeadcount: foodData.orderHeadcount,
+            frequency: foodData.frequency,
           };
           break;
         }
-        case 'specialty': {
+        case "specialty": {
           const specialtyData = formData as SpecialtyFormData;
           baseSubmission.formData.specifications = {
             ...baseSubmission.formData.specifications,
-            deliveryTypes: specialtyData.specifications.deliveryTypes,
-            deliveryFrequency: specialtyData.specifications.deliveryFrequency,
-            supplyPickupFrequency: specialtyData.specifications.supplyPickupFrequency,
-            fragilePackage: specialtyData.specifications.fragilePackage,
-            packageDescription: specialtyData.specifications.packageDescription,
+            deliveryTypes: specialtyData.deliveryTypes,
+            deliveryFrequency: specialtyData.deliveryFrequency,
+            supplyPickupFrequency: specialtyData.supplyPickupFrequency,
+            fragilePackage: specialtyData.fragilePackage,
+            packageDescription: specialtyData.packageDescription,
           };
           break;
         }
       }
-  
-      console.log('Submitting form data:', baseSubmission);
-  
-      const response = await fetch('/api/form-submissions', {
-        method: 'POST',
+
+      console.log("Submitting form data:", baseSubmission);
+
+      const response = await fetch("/api/form-submissions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(baseSubmission),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        throw new Error("Failed to submit form");
       }
-  
+
       closeForm();
-      
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
       // Handle error (show error message to user)
     }
   };
@@ -173,6 +176,6 @@ export const FormManager = () => {
         formType={activeFormType}
         onSubmit={handleSubmit}
       />
-    )
+    ),
   };
 };
