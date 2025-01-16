@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 interface SpecialtyDeliveryFormProps {
   onSubmit: (formData: DeliveryFormData) => Promise<void>;
 }
-export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) => {
+export const SpecialtyDeliveryForm = ({
+  onSubmit,
+}: SpecialtyDeliveryFormProps) => {
   const {
     register,
     handleSubmit,
@@ -27,15 +29,18 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
       contactName: "",
       website: "",
       phone: "",
-      streetAddress: "",
-      city: "",
-      state: "",
-      zipCode: "",
+      pickupAddress: {
+        // Changed from flat fields to nested object
+        street: "", // Changed from streetAddress to street
+        city: "",
+        state: "",
+        zip: "", // Changed from zipCode to zip
+      },
       driversNeeded: "",
       serviceType: "",
       deliveryRadius: "",
-      selectedCounties: [],
-      
+      counties: [],
+
       // Specialty-specific fields
       deliveryTypes: [], // Array<'specialDelivery' | 'specialtyDelivery'>
       fragilePackage: "no", // Default to "no"
@@ -73,15 +78,22 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
 
   return (
     <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
-      <DeliveryForm title="Specialty Deliveries Questionnaire" formType="specialty">
+      <DeliveryForm
+        title="Specialty Deliveries Questionnaire"
+        formType="specialty"
+      >
         <div className="space-y-4">
           <input
-            {...register("driversNeeded", { required: "This field is required" })}
+            {...register("driversNeeded", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="How many days per week do you require drivers?"
           />
           {errors.driversNeeded && (
-            <p className="text-sm text-red-500">{errors.driversNeeded.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.driversNeeded.message}
+            </p>
           )}
 
           <input
@@ -94,12 +106,16 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
           )}
 
           <input
-            {...register("deliveryRadius", { required: "This field is required" })}
+            {...register("deliveryRadius", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="What delivery radius or areas do you want to cover from your store?"
           />
           {errors.deliveryRadius && (
-            <p className="text-sm text-red-500">{errors.deliveryRadius.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.deliveryRadius.message}
+            </p>
           )}
 
           <input
@@ -117,27 +133,31 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
           <div className="space-y-2">
             <h3 className="font-medium">Describe your packages</h3>
             <textarea
-              {...register("packageDescription", { required: "This field is required" })}
+              {...register("packageDescription", {
+                required: "This field is required",
+              })}
               className="w-full rounded border p-2"
               rows={4}
               placeholder="Please provide details about your packages"
             />
             {errors.packageDescription && (
-              <p className="text-sm text-red-500">{errors.packageDescription.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.packageDescription.message}
+              </p>
             )}
           </div>
         </div>
 
         <VendorInfoFields register={register} />
         <CountiesSelection register={register} />
-        
+
         <CheckboxGroup
           register={register}
           name="deliveryTypes"
           options={deliveryTypeOptions}
           title="Please select the types of deliveries needed for your shop"
         />
-        
+
         <RadioGroup
           register={register}
           name="fragilePackage"
@@ -146,8 +166,8 @@ export const SpecialtyDeliveryForm = ({ onSubmit }: SpecialtyDeliveryFormProps) 
         />
 
         <div className="mt-6 flex justify-end">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
             className="bg-yellow-500 text-white hover:bg-yellow-600"
           >

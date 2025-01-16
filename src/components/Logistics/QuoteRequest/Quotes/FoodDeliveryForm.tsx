@@ -20,7 +20,7 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
     formState: { errors, isSubmitting },
   } = useForm<FoodFormData>({
     defaultValues: {
-      formType: 'food',
+      formType: "food",
       // Base form fields
       name: "",
       email: "",
@@ -28,15 +28,18 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
       contactName: "",
       website: "",
       phone: "",
-      streetAddress: "",
-      city: "",
-      state: "",
-      zipCode: "",
+      pickupAddress: {
+        // Changed from flat fields to nested object
+        street: "", // Changed from streetAddress to street
+        city: "",
+        state: "",
+        zip: "", // Changed from zipCode to zip
+      },
       driversNeeded: "",
       serviceType: "",
       deliveryRadius: "",
-      selectedCounties: [],
-      
+      counties: [],
+
       // Food-specific fields
       totalStaff: "",
       expectedDeliveries: "",
@@ -87,12 +90,16 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
       <DeliveryForm title="Food Delivery Questionnaire" formType="food">
         <div className="space-y-4">
           <input
-            {...register("driversNeeded", { required: "This field is required" })}
+            {...register("driversNeeded", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="How many days per week do you require drivers?"
           />
           {errors.driversNeeded && (
-            <p className="text-sm text-red-500">{errors.driversNeeded.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.driversNeeded.message}
+            </p>
           )}
 
           <input
@@ -114,12 +121,16 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
           )}
 
           <input
-            {...register("expectedDeliveries", { required: "This field is required" })}
+            {...register("expectedDeliveries", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="How many deliveries per day are we anticipating?"
           />
           {errors.expectedDeliveries && (
-            <p className="text-sm text-red-500">{errors.expectedDeliveries.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.expectedDeliveries.message}
+            </p>
           )}
 
           <input
@@ -129,41 +140,48 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
           />
 
           <input
-            {...register("multipleLocations", { required: "This field is required" })}
+            {...register("multipleLocations", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="Do you have multiple locations?"
           />
           {errors.multipleLocations && (
-            <p className="text-sm text-red-500">{errors.multipleLocations.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.multipleLocations.message}
+            </p>
           )}
 
           <input
-            {...register("deliveryRadius", { required: "This field is required" })}
+            {...register("deliveryRadius", {
+              required: "This field is required",
+            })}
             className="w-full rounded border p-2"
             placeholder="What delivery radius or areas do you want to cover from your store?"
           />
           {errors.deliveryRadius && (
-            <p className="text-sm text-red-500">{errors.deliveryRadius.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.deliveryRadius.message}
+            </p>
           )}
         </div>
 
         <VendorInfoFields register={register} />
-        <CountiesSelection register={register} />
-        
+        <CountiesSelection register={register} errors={errors} />
         <CheckboxGroup
           register={register}
           name="deliveryTimes"
           options={deliveryTimeOptions}
           title="Delivery Times Needed"
         />
-        
+
         <CheckboxGroup
           register={register}
           name="orderHeadcount"
           options={orderHeadcountOptions}
           title="Order Headcount (Select all that apply)"
         />
-        
+
         <RadioGroup
           register={register}
           name="frequency"
@@ -172,8 +190,8 @@ export const FoodDeliveryForm = ({ onSubmit }: FoodDeliveryFormProps) => {
         />
 
         <div className="mt-6 flex justify-end">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
             className="bg-yellow-500 text-white hover:bg-yellow-600"
           >

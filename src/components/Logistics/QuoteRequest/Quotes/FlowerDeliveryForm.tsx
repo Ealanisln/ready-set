@@ -20,21 +20,19 @@ export const FlowerDeliveryForm = ({ onSubmit }: FlowerDeliveryFormProps) => {
   } = useForm<FlowerFormData>({
     defaultValues: {
       formType: "flower",
-      // Base form fields
       name: "",
       email: "",
       companyName: "",
       contactName: "",
       website: "",
       phone: "",
-      streetAddress: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      driversNeeded: "",
-      serviceType: "",
-      deliveryRadius: "",
-      selectedCounties: [],
+      pickupAddress: {  // Changed from flat fields to nested object
+        street: "",     // Changed from streetAddress to street
+        city: "",
+        state: "",
+        zip: "",        // Changed from zipCode to zip
+      },
+      counties: [],   
       
       // Flower-specific fields
       deliveryTypes: [],
