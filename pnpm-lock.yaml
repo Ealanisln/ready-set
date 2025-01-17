@@ -225,6 +225,9 @@ importers:
       react-hot-toast:
         specifier: ^2.4.1
         version: 2.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-share:
+        specifier: ^5.1.2
+        version: 5.1.2(react@18.3.1)
       react-virtualized:
         specifier: ^9.22.5
         version: 9.22.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6248,6 +6251,9 @@ packages:
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
 
+  jsonp@0.2.1:
+    resolution: {integrity: sha512-pfog5gdDxPdV4eP7Kg87M8/bHgshlZ5pybl+yKxAnCZ5O7lCIn7Ixydj03wOlnDQesky2BPyA91SQ+5Y/mNwzw==}
+
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
@@ -7515,6 +7521,11 @@ packages:
       react: '>=16.3.0'
       schema-dts: '>=0.7.4'
       typescript: '>=3.1.6'
+
+  react-share@5.1.2:
+    resolution: {integrity: sha512-qwMT72LrGvDsg3E5lKlvUcXH4YWqjLcqlinxIomGaey2SoS/1/DBkTpan3TyzX9gDr0dcp1bl+z5LbdOOE4bmA==}
+    peerDependencies:
+      react: ^17 || ^18 || ^19
 
   react-side-effect@2.1.2:
     resolution: {integrity: sha512-PVjOcvVOyIILrYoyGEpDN3vmYNLdy1CajSFNt4TDsVQC5KpTijDvWVoR+/7Rz2xT978D8/ZtFceXxzsPwZEDvw==}
@@ -15908,6 +15919,12 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  jsonp@0.2.1:
+    dependencies:
+      debug: 4.4.0
+    transitivePeerDependencies:
+      - supports-color
+
   jsx-ast-utils@3.3.5:
     dependencies:
       array-includes: 3.1.8
@@ -17169,6 +17186,14 @@ snapshots:
       react: 18.3.1
       schema-dts: 1.1.2(typescript@5.7.2)
       typescript: 5.7.2
+
+  react-share@5.1.2(react@18.3.1):
+    dependencies:
+      classnames: 2.5.1
+      jsonp: 0.2.1
+      react: 18.3.1
+    transitivePeerDependencies:
+      - supports-color
 
   react-side-effect@2.1.2(react@18.3.1):
     dependencies:
