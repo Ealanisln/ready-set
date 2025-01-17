@@ -11,15 +11,11 @@ const BayAreaMap = () => {
   const regions = [
     { name: "SAN FRANCISCO" },
     { name: "MARIN" },
-    { name: "EAST BAY - RICHMOND" },
-    { name: "EAST BAY - CONCORD" },
-    { name: "EAST BAY - OAKLAND" },
-    { name: "EAST BAY - HAYWARD" },
-    { name: "PENINSULA - NORTH" },
-    { name: "PENINSULA COAST" },
-    { name: "PENINSULA - SOUTH" },
-    { name: "SAN JOSE - EAST" },
-    { name: "SAN JOSE - WEST" },
+    { name: "CONTRA COSTA" },
+    { name: "ALAMEDA" },
+    { name: "SANTA CLARA" },
+    { name: "SAN MATEO" },
+    { name: "SANTA CRUZ" },
   ];
 
   return (

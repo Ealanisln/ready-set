@@ -9,13 +9,15 @@ const AustinMap = () => {
   const [selectedRegion, setSelectedRegion] = useState("");
 
   const regions = [
-    { name: "6801 N Capital of Texas Hwy" },
-    { name: "8322 Cross Park Dr" },
-    { name: "1122 Colorado St" },
-    { name: "600 Congress Av" },
-    { name: "301 Congress Av" },
-    { name: "East Saint Elmor Rd" },
-    { name: "4401 Freidrich Ln" },
+    { name: "Northwest Austin" },
+    { name: "North Austin" },
+    { name: "Northeast Austin" },
+    { name: "East Austin" },
+    { name: "Central Austin" },
+    { name: "Southeast Austin" },
+    { name: "South Austin" },
+    { name: "Southwest Austin" },
+    { name: "West Austin" },
   ];
 
   return (
