@@ -91,9 +91,6 @@ const BookNow: React.FC<AdCardProps> = ({
               <TwitterIcon size={40} round />
             </TwitterShareButton>
 
-            <WhatsappShareButton url={shareUrl} title={shareTitle}>
-              <WhatsappIcon size={40} round />
-            </WhatsappShareButton>
 
             <EmailShareButton url={shareUrl} subject={shareTitle}>
               <EmailIcon size={40} round />
