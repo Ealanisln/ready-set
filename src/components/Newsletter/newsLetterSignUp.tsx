@@ -47,10 +47,10 @@ const NewsletterSignup = () => {
           <button
             type="submit"
             disabled={status === "loading"}
-            className={`px-4 py-2 text-sm text-white rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`px-4 py-2 text-sm text-black rounded-r-md focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
               status === "loading" 
-                ? "bg-blue-400 cursor-not-allowed" 
-                : "bg-blue-600 hover:bg-blue-700"
+                ? "bg-yellow-500 cursor-not-allowed" 
+                : "bg-yellow-400 hover:bg-yellow-600"
             }`}
           >
             {status === "loading" ? "Subscribing..." : "Subscribe"}
