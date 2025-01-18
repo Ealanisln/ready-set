@@ -1,4 +1,3 @@
-// api/subscribe/route.ts
 import { NextResponse } from 'next/server';
 import axios from "axios";
 import { z } from "zod";
@@ -18,33 +17,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
   }
 
-  // Retrieve Brevo credentials from environment variables
-  const API_KEY = process.env.BREVO_API_KEY;
+  // Retrieve SendGrid API key from environment variables
+  const API_KEY = process.env.SENDGRID_API_KEY;
 
-  // Construct Brevo API request URL
-  const url = 'https://api.brevo.com/v3/contacts';
+  // Construct SendGrid API request URL for adding/updating contacts
+  const url = 'https://api.sendgrid.com/v3/marketing/contacts';
 
-  // Prepare request data
+  // Prepare request data - SendGrid expects contacts in this format
   const data = {
-    email: emailValidation.data,
-    emailBlacklisted: false,
-    updateEnabled: true
+    contacts: [{
+      email: emailValidation.data,
+    }]
   };
 
-  // Set request headers
+  // Set request headers for SendGrid
   const options = {
     headers: {
       "Content-Type": "application/json",
-      "api-key": API_KEY,
+      "Authorization": `Bearer ${API_KEY}`,
     },
   };
 
-  // Send POST request to Brevo API
   try {
-    const response = await axios.post(url, data, options);
+    // Send PUT request to SendGrid API (PUT is used for upsert operations)
+    const response = await axios.put(url, data, options);
     
-    // Brevo returns 201 for new contacts and 204 for updated contacts
-    if ([201, 204].includes(response.status)) {
+    // Check if the contact was successfully added/updated
+    if (response.status === 202) {
       return NextResponse.json({ 
         message: "Awesome! You have successfully subscribed!" 
       }, { status: 201 });
@@ -53,19 +52,19 @@ export async function POST(request: Request) {
     if (axios.isAxiosError(error)) {
       console.error(
         `${error.response?.status}`,
-        `${error.response?.data.message}`,
+        JSON.stringify(error.response?.data, null, 2)
       );
 
-      // Handle duplicate contact case
-      if (error.response?.data.message?.includes("Contact already exist")) {
+      // Handle rate limiting
+      if (error.response?.status === 429) {
         return NextResponse.json({
-          error: "Uh oh, it looks like this email's already subscribed 🧐"
-        }, { status: 400 });
+          error: "Too many requests. Please try again later."
+        }, { status: 429 });
       }
     }
 
     return NextResponse.json({
-      error: "Oops! There was an error subscribing you to the newsletter. Please email me at ogbonnakell@gmail.com and I'll add you to the list."
+      error: "Oops! There was an error subscribing you to the newsletter. Please try again later."
     }, { status: 500 });
   }
 }
