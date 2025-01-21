@@ -257,9 +257,20 @@ const teamData: TeamType[] = [
   },
   // {
   //   id: 19,
-  //   name: "Efren Melchor III",
+  //   name: "Mark Rivera",
   //   designation: "Sales and Marketing Data Coordinator", // Updated from CSV
-  //   image: "/images/team/Melchor_Efren III.png",
+  //   image: "/images/team/Rivera_Mark.png",
+  //   skills: ["Marketing Data Analysis", "Email Campaign Management", "Lead Management & Prospecting"],
+  //   description: "Committed to continuous learning and delivering top-notch service with enthusiasm for new opportunities.",
+  //   facebookLink: "/#",
+  //   twitterLink: "/#",
+  //   instagramLink: "/#",
+  // },
+  // {
+  //   id: 20,
+  //   name: "Gary Vinson",
+  //   designation: "Sales and Marketing Data Coordinator", // Updated from CSV
+  //   image: "/images/team/Vinson_Gary.png",
   //   skills: ["Marketing Data Analysis", "Email Campaign Management", "Lead Management & Prospecting"],
   //   description: "Committed to continuous learning and delivering top-notch service with enthusiasm for new opportunities.",
   //   facebookLink: "/#",
