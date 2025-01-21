@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import EmailMarketingGuide from "./EmailMarketing";
 
 interface Resource {
   title: string;
@@ -63,30 +64,30 @@ const ResourcesGrid = () => {
           {resources.map((resource, index) => (
             <Card
               key={index}
-              className="overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
+              className="flex flex-col overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
             >
-              <div className="relative aspect-[4/3] w-full p-4">
-                <div className="relative h-full w-full rounded-[2rem] overflow-hidden">
-                  <img
-                    src={resource.imageUrl}
-                    alt={resource.title}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </div>
+              <div className="relative aspect-[4/3] w-full">
+                <img
+                  src={resource.imageUrl}
+                  alt={resource.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               </div>
-              <CardContent className="p-6">
-                <h3 className="mb-3 text-xl font-serif font-semibold text-center leading-tight text-gray-800">
-                  {resource.title}
-                </h3>
-                <p className="text-gray-600 text-center font-light leading-relaxed">
-                  {resource.description}
-                </p>
-              </CardContent>
-              <CardFooter className="px-6 pb-6">
-                <Button className="w-full rounded-lg bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                  Learn More
-                </Button>
-              </CardFooter>
+              <div className="flex h-full flex-col">
+                <CardContent className="flex-1 p-6">
+                  <CardTitle className="mb-3 text-xl leading-tight">
+                    {resource.title}
+                  </CardTitle>
+                  <p className="text-gray-600">
+                    {resource.description}
+                  </p>
+                </CardContent>
+                <CardFooter className="px-6 pb-6">
+                  <Button className="w-full rounded-lg bg-yellow-400 text-gray-900 hover:bg-yellow-500">
+                    Learn more
+                  </Button>
+                </CardFooter>
+              </div>
             </Card>
           ))}
         </div>
@@ -141,6 +142,7 @@ const ResourcesGrid = () => {
             </Button>
           </CardFooter>
         </Card>
+        <EmailMarketingGuide />
       </div>
     </div>
   );
