@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { PhoneCall } from "lucide-react";
 import Link from 'next/link';
@@ -35,9 +35,19 @@ const BookNow: React.FC<AdCardProps> = ({
   blogTitle,
   currentUrl
 }) => {
+  const [url, setUrl] = useState('');
+  const [pageTitle, setPageTitle] = useState('');
   const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const shareUrl = currentUrl || (typeof window !== 'undefined' ? window.location.href : '');
-  const shareTitle = blogTitle || title || "Save 78% on Hiring Costs with a Virtual Assistant";
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUrl(currentUrl || window.location.href);
+      setPageTitle(blogTitle || document.title || title);
+    }
+  }, [currentUrl, blogTitle, title]);
+
+  const shareUrl = url || '';
+  const shareTitle = pageTitle || "Save 78% on Hiring Costs with a Virtual Assistant";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -81,7 +91,7 @@ const BookNow: React.FC<AdCardProps> = ({
         <div className="pt-8 mt-8 border-t border-gray-200">
           <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
           <div className="flex justify-center space-x-4">
-            <FacebookShareButton url={shareUrl} title={shareTitle}>
+            <FacebookShareButton url={shareUrl} quote={shareTitle}>
               <FacebookIcon size={40} round />
             </FacebookShareButton>
 
@@ -92,7 +102,6 @@ const BookNow: React.FC<AdCardProps> = ({
             <TwitterShareButton url={shareUrl} title={shareTitle}>
               <TwitterIcon size={40} round />
             </TwitterShareButton>
-
 
             <EmailShareButton url={shareUrl} subject={shareTitle}>
               <EmailIcon size={40} round />
