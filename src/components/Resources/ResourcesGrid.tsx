@@ -13,25 +13,27 @@ import { Label } from "@/components/ui/label";
 interface Resource {
   title: string;
   description: string;
+  descriptionClassName?: string;
   imageUrl: string;
 }
 
 const resources: Resource[] = [
   {
-    title: "Unlock the Secrets of Better Email Marketing Campaigns",
-    description:
-      "Discover the key metrics every business owner must track to ensure email marketing success.",
+    title: "Why Email Metrics Matter",
+    description: "A Business Owner's Guide to Tracking Campaign Performance",
+    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/1.png",
   },
   {
-    title: "Free Guide: How to Choose the Right Logistics Partner",
-    description: "Avoid costly mistakes and streamline your supply chain.",
+    title: "What Is Email Marketing",
+    description: "The Business Owner's Guide to Getting Started",
+    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/2.png",
   },
   {
-    title: "Free Checklist: How Virtual Assistants Can Transform Your Business",
-    description:
-      "Delegate smarter and free up your time for growth-focused activities.",
+    title: "The Complete Guide to Choosing the Right Delivery Partner",
+    description: "This comprehensive guide will help you navigate the complex process of selecting the right delivery partner for your business",
+    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/3.png",
   },
 ];
@@ -51,8 +53,8 @@ const ResourcesGrid = () => {
               className="dark:hidden"
             />
           </div>
-          <h1 className="mb-4 text-3xl font-bold text-gray-900">
-            Welcome to our free guides and resources.
+          <h1 className="mb-4 text-3xl font-bold text-gray-700 tracking-wide">
+              Welcome to our free guides and resources.
           </h1>
         </div>
 
@@ -63,24 +65,26 @@ const ResourcesGrid = () => {
               key={index}
               className="overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
             >
-              <div className="relative aspect-[4/3] w-full">
-                <img
-                  src={resource.imageUrl}
-                  alt={resource.title}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
+              <div className="relative aspect-[4/3] w-full p-4">
+                <div className="relative h-full w-full rounded-[2rem] overflow-hidden">
+                  <img
+                    src={resource.imageUrl}
+                    alt={resource.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
               </div>
               <CardContent className="p-6">
-                <CardTitle className="mb-3 text-xl leading-tight">
+                <h3 className="mb-3 text-xl font-serif font-semibold text-center leading-tight text-gray-800">
                   {resource.title}
-                </CardTitle>
-                <p className="text-gray-600">
+                </h3>
+                <p className="text-gray-600 text-center font-light leading-relaxed">
                   {resource.description}
                 </p>
               </CardContent>
               <CardFooter className="px-6 pb-6">
                 <Button className="w-full rounded-lg bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                  Download Now
+                  Learn More
                 </Button>
               </CardFooter>
             </Card>
