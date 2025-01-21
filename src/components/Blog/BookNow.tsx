@@ -91,7 +91,7 @@ const BookNow: React.FC<AdCardProps> = ({
         <div className="pt-8 mt-8 border-t border-gray-200">
           <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
           <div className="flex justify-center space-x-4">
-            <FacebookShareButton url={shareUrl} quote={shareTitle}>
+            <FacebookShareButton url={shareUrl} title={shareTitle}>
               <FacebookIcon size={40} round />
             </FacebookShareButton>
 
