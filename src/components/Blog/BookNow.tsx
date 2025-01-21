@@ -9,12 +9,10 @@ import {
   FacebookShareButton,
   LinkedinShareButton,
   TwitterShareButton,
-  WhatsappShareButton,
   EmailShareButton,
   FacebookIcon,
   LinkedinIcon,
   TwitterIcon,
-  WhatsappIcon,
   EmailIcon,
 } from 'react-share';
 
@@ -24,6 +22,8 @@ interface AdCardProps {
   ctaText: string;
   ctaLink: string;
   logoSrc?: string;
+  blogTitle?: string;
+  currentUrl?: string;
 }
 
 const BookNow: React.FC<AdCardProps> = ({
@@ -31,11 +31,13 @@ const BookNow: React.FC<AdCardProps> = ({
   subtitle,
   ctaText,
   ctaLink = '/booking-page',
-  logoSrc = '/images/logo/logo-white.png'
+  logoSrc = '/images/logo/logo-white.png',
+  blogTitle,
+  currentUrl
 }) => {
   const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const shareTitle = "Save 78% on Hiring Costs with a Virtual Assistant";
+  const shareUrl = currentUrl || (typeof window !== 'undefined' ? window.location.href : '');
+  const shareTitle = blogTitle || title || "Save 78% on Hiring Costs with a Virtual Assistant";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -77,7 +79,7 @@ const BookNow: React.FC<AdCardProps> = ({
 
         {/* Social Share Section */}
         <div className="pt-8 mt-8 border-t border-gray-200">
-          <h3 className="text-gray-600 mb-4 text-lg italic">Share this offer</h3>
+          <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
           <div className="flex justify-center space-x-4">
             <FacebookShareButton url={shareUrl} title={shareTitle}>
               <FacebookIcon size={40} round />
