@@ -55,7 +55,7 @@ const ResourcesGrid = () => {
             />
           </div>
           <h1 className="mb-4 text-3xl font-bold text-gray-700 tracking-wide">
-              Welcome to our free guides and resources.
+            Welcome to our free guides and resources.
           </h1>
         </div>
 
@@ -64,7 +64,7 @@ const ResourcesGrid = () => {
           {resources.map((resource, index) => (
             <Card
               key={index}
-              className="flex flex-col overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
+              className="flex flex-col overflow-hidden rounded-none bg-white transition-shadow hover:shadow-lg"
             >
               <div className="relative aspect-[4/3] w-full">
                 <img
@@ -83,7 +83,7 @@ const ResourcesGrid = () => {
                   </p>
                 </CardContent>
                 <CardFooter className="px-6 pb-6">
-                  <Button className="w-full rounded-lg bg-yellow-400 text-gray-900 hover:bg-yellow-500">
+                  <Button className="w-full rounded-none bg-yellow-400 text-gray-900 hover:bg-yellow-500">
                     Learn more
                   </Button>
                 </CardFooter>
@@ -93,7 +93,7 @@ const ResourcesGrid = () => {
         </div>
 
         {/* Newsletter Signup */}
-        <Card className="mx-auto max-w-2xl rounded-xl">
+        <Card className="mx-auto max-w-2xl rounded-none">
           <CardHeader>
             <CardTitle className="text-center">
               Newsletter Alert and Discounts
@@ -106,7 +106,7 @@ const ResourcesGrid = () => {
                 <Input
                   id="firstName"
                   placeholder="First name"
-                  className="rounded-lg"
+                  className="rounded-none"
                 />
               </div>
               <div className="space-y-2">
@@ -114,7 +114,7 @@ const ResourcesGrid = () => {
                 <Input
                   id="lastName"
                   placeholder="Last name"
-                  className="rounded-lg"
+                  className="rounded-none"
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
@@ -123,7 +123,7 @@ const ResourcesGrid = () => {
                   id="email"
                   type="email"
                   placeholder="Email address"
-                  className="rounded-lg"
+                  className="rounded-none"
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
@@ -131,13 +131,13 @@ const ResourcesGrid = () => {
                 <Input
                   id="industry"
                   placeholder="Your industry"
-                  className="rounded-lg"
+                  className="rounded-none"
                 />
               </div>
             </form>
           </CardContent>
           <CardFooter>
-            <Button className="w-full rounded-lg bg-gray-900 text-white hover:bg-gray-800">
+            <Button className="w-full rounded-none bg-gray-900 text-white hover:bg-gray-800">
               Subscribe Now
             </Button>
           </CardFooter>
