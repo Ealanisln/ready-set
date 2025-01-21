@@ -86,7 +86,7 @@ const HeroHeader: React.FC = () => {
                   variants: animations.scaleIn
                 } as HTMLMotionProps<"div">)}
               >
-                <AppointmentDialog calendarUrl="https://calendar.google.com/calendar/appointments/AcZssZ1jHb5jHQLYMdGkYHDE1Joqi0ADTQ_QVVx1HcA=?gv=true&embedded=true" />
+                <AppointmentDialog calendarUrl="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true" />
               </motion.div>
             </motion.div>
 
