@@ -50,7 +50,7 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
          {/* Fecha del post */}
       <span className="text-sm text-gray-600 dark:text-gray-400">
         {post._updatedAt ? 
-        new Date(post._updatedAt).toLocaleDateString('es-ES', {
+        new Date(post._updatedAt).toLocaleDateString('en-EN', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
