@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ interface Resource {
   description: string;
   descriptionClassName?: string;
   imageUrl: string;
+  url: string; // Nueva propiedad para la URL
 }
 
 const resources: Resource[] = [
@@ -24,18 +26,21 @@ const resources: Resource[] = [
     description: "A Business Owner's Guide to Tracking Campaign Performance",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/1.png",
+    url: "/resources/email-metrics", // Agrega la URL correspondiente
   },
   {
     title: "What Is Email Marketing",
     description: "The Business Owner's Guide to Getting Started",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/2.png",
+    url: "/resources/email-marketing-guide", // Agrega la URL correspondiente
   },
   {
     title: "The Complete Guide to Choosing the Right Delivery Partner",
     description: "This comprehensive guide will help you navigate the complex process of selecting the right delivery partner for your business",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/3.png",
+    url: "/resources/delivery-partner-guide", // Agrega la URL correspondiente
   },
 ];
 
@@ -83,9 +88,11 @@ const ResourcesGrid = () => {
                   </p>
                 </CardContent>
                 <CardFooter className="px-6 pb-6">
-                  <Button className="w-full rounded-none bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                    Learn more
-                  </Button>
+                  <Link href={resource.url} className="w-full">
+                    <Button className="w-full rounded-none bg-yellow-400 text-gray-900 hover:bg-yellow-500">
+                      Learn more
+                    </Button>
+                  </Link>
                 </CardFooter>
               </div>
             </Card>
