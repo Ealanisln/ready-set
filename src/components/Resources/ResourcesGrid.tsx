@@ -26,7 +26,7 @@ const resources: Resource[] = [
     description: "A Business Owner's Guide to Tracking Campaign Performance",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/1.png",
-    url: "/resources/email-metrics", // Agrega la URL correspondiente
+    url: "/components/resources/email-metrics-landing", // Agrega la URL correspondiente
   },
   {
     title: "What Is Email Marketing",

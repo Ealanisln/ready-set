@@ -33,22 +33,30 @@ const EmailMarketingGuide = () => {
                   <li>• When to Gather and Report Email Metrics</li>
                 </ul>
               </div>
+
+              <p className="text-gray-600">
+                This free guide is your roadmap for crafting a winning email strategy—but for monitoring, forecasting, and other menial tasks, delegate it to us!
+              </p>
+              
+              <p className="text-gray-800 font-semibold">
+                Download your free Email Metrics Template report now to get started.
+              </p>
+
+              <p className="text-gray-800">
+                Ready for more hands-on support? <span className="font-semibold">Book a Consultation</span> Today and let our experts handle the heavy lifting so you can focus on what you do best.
+              </p>
             </div>
 
             <div className="space-y-6">
               <Card className="bg-yellow-400 p-6 rounded-lg">
                 <img 
-                  src="/api/placeholder/400/300"
+                  src="/images/resources/4.png"
                   alt="Business people reviewing metrics"
                   className="w-full rounded-lg mb-4"
                 />
                 <h2 className="text-2xl font-bold text-center mb-2">Why Email Metrics Matter</h2>
                 <p className="text-center text-sm">A Business Owner's Guide to Tracking Campaign Performance</p>
               </Card>
-
-              <p className="text-gray-600">
-                This free guide is your roadmap for crafting a winning email strategy—but for monitoring, forecasting, and other menial tasks, delegate it to us!
-              </p>
 
               <div className="space-y-4">
                 <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
@@ -90,7 +98,7 @@ const EmailMarketingGuide = () => {
             <div className="space-y-6">
               <Card className="bg-yellow-400 p-6 rounded-lg">
                 <img 
-                  src="/api/placeholder/400/300"
+                  src="/images/resources/2.png"
                   alt="Person working on email marketing"
                   className="w-full rounded-lg mb-4"
                 />
