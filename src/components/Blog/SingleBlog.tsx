@@ -55,7 +55,7 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
         month: 'long',
         day: 'numeric'
       })
-      : 'Fecha no disponible'
+      : 'Date not available'
     }
     </span>
    {/* Botón Read More */}

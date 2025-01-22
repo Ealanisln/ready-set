@@ -12,7 +12,7 @@ export interface SimpleBlogCard {
   title: string;
   slug?: {
     current: string;
-    smallDescription?: string;
+    smallDescription?: string | null;
     _type: string;
     _createdAt: string;
   };
@@ -22,6 +22,7 @@ export interface SimpleBlogCard {
 export interface FullPost {
   seo: SeoType | null;
   currentSlug: string;
+  _updaAt: string;
   title: string;
   body: Block[];
   mainImage: {
@@ -29,6 +30,7 @@ export interface FullPost {
     asset: {
       _ref: string;
       _type: "reference";
+      smallDescription?: string | null;
     };
   };
 }
