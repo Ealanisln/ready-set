@@ -51,7 +51,6 @@ const SHEET_COLUMNS: SheetColumnsType = {
     "Counties",
     "Additional Comments",
     "Pickup Address",
-    "Notes",
     "Created At",
   ],
   SECTIONS: {
@@ -131,26 +130,25 @@ const normalizeValue = (value: any): string => {
 export class FormSubmissionService {
   static async createSubmission(data: {
     formType: FormType;
-    userId?: string;
     formData: DeliveryFormData;
   }) {
     if (!data.formType) {
       throw new Error("Form type is required");
     }
-  
+
     const formTypeMap: Record<string, FormSubmissionType> = {
       food: FormSubmissionType.food,
       flower: FormSubmissionType.flower,
       bakery: FormSubmissionType.bakery,
       specialty: FormSubmissionType.specialty,
     };
-  
+
     try {
       console.log(
         "Processing submission with data:",
-        JSON.stringify(data, null, 2)
+        JSON.stringify(data, null, 2),
       );
-  
+
       // Extract base fields and specifications
       const {
         companyName,
@@ -163,18 +161,18 @@ export class FormSubmissionService {
         pickupAddress,
         ...specifications
       } = data.formData;
-  
+
       const submission = await prisma.formSubmission.create({
         data: {
           formType: formTypeMap[data.formType.toLowerCase()],
-          userId: data.userId,
           companyName: normalizeValue(companyName),
           contactName: normalizeValue(contactName),
           email: normalizeValue(email),
           phone: normalizeValue(phone),
           website: normalizeValue(website),
           counties: Array.isArray(counties) ? counties : [],
-          frequency: "frequency" in specifications ? specifications.frequency : "N/A",
+          frequency:
+            "frequency" in specifications ? specifications.frequency : "N/A",
           pickupAddress: pickupAddress || {
             street: "",
             city: "",
@@ -183,10 +181,9 @@ export class FormSubmissionService {
           },
           additionalComments: normalizeValue(additionalComments),
           specifications: JSON.stringify(specifications),
-          notes: "",
         },
       });
-  
+
       console.log("Created submission:", {
         id: submission.id,
         formType: submission.formType,
@@ -195,9 +192,9 @@ export class FormSubmissionService {
             ? JSON.parse(submission.specifications)
             : submission.specifications,
       });
-  
+
       await this.syncToGoogleSheets(submission);
-  
+
       return submission;
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -293,105 +290,107 @@ export class FormSubmissionService {
 
   private static getFormSpecificValues(
     formType: FormSectionKey,
-    specifications: any
+    specifications: any,
   ): string[] {
     const section = SHEET_COLUMNS.SECTIONS[formType];
     if (!section) {
       console.warn(`Unknown form type: ${formType}`);
       return [];
     }
-  
+
     // Remove the nested specifications level if it exists
     const specs = specifications.specifications || specifications;
-  
+
     // Map column names to their corresponding field names in camelCase
     const columnMappings: Record<FormSectionKey, Record<string, string>> = {
       FOOD: {
-        'Service Type': 'serviceType',
-        'Delivery Radius': 'deliveryRadius',
-        'Delivery Times': 'deliveryTimes',
-        'Order Headcount': 'orderHeadcount',
-        'Total Staff': 'totalStaff',
-        'Expected Deliveries': 'expectedDeliveries',
-        'Frequency': 'frequency',
-        'Drivers Needed': 'driversNeeded',
-        'Partnered Services': 'partneredServices',
-        'Multiple Locations': 'multipleLocations'
+        "Service Type": "serviceType",
+        "Delivery Radius": "deliveryRadius",
+        "Delivery Times": "deliveryTimes",
+        "Order Headcount": "orderHeadcount",
+        "Total Staff": "totalStaff",
+        "Expected Deliveries": "expectedDeliveries",
+        Frequency: "frequency",
+        "Drivers Needed": "driversNeeded",
+        "Partnered Services": "partneredServices",
+        "Multiple Locations": "multipleLocations",
       },
       SPECIALTY: {
-        'Service Type': 'serviceType',
-        'Delivery Radius': 'deliveryRadius',
-        'Delivery Types': 'deliveryTypes',
-        'Fragile Package': 'fragilePackage',
-        'Package Description': 'packageDescription',
-        'Delivery Frequency': 'deliveryFrequency',
-        'Supply Pickup Frequency': 'supplyPickupFrequency',
-        'Frequency': 'frequency',
-        'Drivers Needed': 'driversNeeded'
+        "Service Type": "serviceType",
+        "Delivery Radius": "deliveryRadius",
+        "Delivery Types": "deliveryTypes",
+        "Fragile Package": "fragilePackage",
+        "Package Description": "packageDescription",
+        "Delivery Frequency": "deliveryFrequency",
+        "Supply Pickup Frequency": "supplyPickupFrequency",
+        Frequency: "frequency",
+        "Drivers Needed": "driversNeeded",
       },
       FLOWER: {
-        'Service Type': 'serviceType',
-        'Delivery Radius': 'deliveryRadius',
-        'Delivery Types': 'deliveryTypes',
-        'Brokerage Services': 'brokerageServices',
-        'Delivery Frequency': 'deliveryFrequency',
-        'Supply Pickup Frequency': 'supplyPickupFrequency',
-        'Frequency': 'frequency',
-        'Drivers Needed': 'driversNeeded'
+        "Service Type": "serviceType",
+        "Delivery Radius": "deliveryRadius",
+        "Delivery Types": "deliveryTypes",
+        "Brokerage Services": "brokerageServices",
+        "Delivery Frequency": "deliveryFrequency",
+        "Supply Pickup Frequency": "supplyPickupFrequency",
+        Frequency: "frequency",
+        "Drivers Needed": "driversNeeded",
       },
       BAKERY: {
-        'Service Type': 'serviceType',
-        'Delivery Radius': 'deliveryRadius',
-        'Delivery Types': 'deliveryTypes',
-        'Partner Services': 'partnerServices',
-        'Routing App': 'routingApp',
-        'Delivery Frequency': 'deliveryFrequency',
-        'Supply Pickup Frequency': 'supplyPickupFrequency',
-        'Frequency': 'frequency',
-        'Drivers Needed': 'driversNeeded'
-      }
+        "Service Type": "serviceType",
+        "Delivery Radius": "deliveryRadius",
+        "Delivery Types": "deliveryTypes",
+        "Partner Services": "partnerServices",
+        "Routing App": "routingApp",
+        "Delivery Frequency": "deliveryFrequency",
+        "Supply Pickup Frequency": "supplyPickupFrequency",
+        Frequency: "frequency",
+        "Drivers Needed": "driversNeeded",
+      },
     };
-  
+
     return section.columns.map((column) => {
       const formMapping = columnMappings[formType];
       if (!formMapping) {
         console.warn(`No mapping found for form type: ${formType}`);
-        return 'N/A';
+        return "N/A";
       }
-      
+
       const fieldName = formMapping[column];
       if (!fieldName) {
-        console.warn(`No mapping found for column: ${column} in form type: ${formType}`);
-        return 'N/A';
+        console.warn(
+          `No mapping found for column: ${column} in form type: ${formType}`,
+        );
+        return "N/A";
       }
-  
+
       const value = specs[fieldName];
       return normalizeValue(value);
     });
   }
-  
+
   private static async syncToGoogleSheets(submission: any) {
     try {
       const formType = submission.formType.toUpperCase() as FormSectionKey;
       const section = SHEET_COLUMNS.SECTIONS[formType];
-  
+
       if (!section) {
         throw new Error(`Unknown form type: ${formType}`);
       }
-  
+
       let specifications = submission.specifications;
       // Parse specifications if it's a string
-      if (typeof specifications === 'string') {
+      if (typeof specifications === "string") {
         specifications = JSON.parse(specifications);
       }
-  
+
       console.log("Processing specifications:", specifications);
-  
+
       const address = submission.pickupAddress;
       const formattedAddress = address
         ? `${address.street}, ${address.city}, ${address.state} ${address.zip}`
-        : 'N/A';
-  
+        : "N/A";
+
       const commonValues = [
         submission.id,
         submission.formType,
@@ -405,39 +404,41 @@ export class FormSubmissionService {
           : "N/A",
         normalizeValue(submission.additionalComments),
         formattedAddress,
-        normalizeValue(submission.notes),
         submission.createdAt.toISOString(),
       ];
-  
-      const formSpecificValues = this.getFormSpecificValues(formType, specifications);
-  
+
+      const formSpecificValues = this.getFormSpecificValues(
+        formType,
+        specifications,
+      );
+
       console.log("Form specific values:", {
         formType,
         values: formSpecificValues,
         columns: section.columns,
       });
-  
+
       const values = [[...commonValues, ...formSpecificValues]];
-  
+
       console.log("Writing to sheet:", {
         sheetName: section.sheetName,
         headers: [...SHEET_COLUMNS.COMMON, ...section.columns],
         values: values[0],
       });
-  
+
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEETS_SHEET_ID,
         range: `${section.sheetName}!A2`,
         valueInputOption: "USER_ENTERED",
         requestBody: { values },
       });
-  
+
       console.log("Successfully synced to sheets:", {
         submissionId: submission.id,
         formType,
         sheetName: section.sheetName,
       });
-  
+
       await prisma.formSubmission.update({
         where: { id: submission.id },
         data: { syncedToSheets: true },
@@ -447,5 +448,4 @@ export class FormSubmissionService {
       throw error;
     }
   }
-  
 }
