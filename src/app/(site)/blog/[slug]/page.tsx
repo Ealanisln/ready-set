@@ -33,7 +33,6 @@ async function getPost(slug: string): Promise<PostDocument | null> {
 
 export async function generateMetadata(
   { params }: { params: Props["params"] },
-  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -44,7 +43,7 @@ export async function generateMetadata(
     };
   }
 
-  const { seo, title, mainImage } = post;
+  const { title, mainImage, body, seo, _updatedAt } = post;
 
   const ogImage = seo?.openGraph?.image
     ? urlFor(seo.openGraph.image).url()
@@ -159,7 +158,7 @@ export default async function BlogPost({
     notFound();
   }
 
-  const { title, mainImage, body, seo } = post;
+  const { title, mainImage, body, seo, _updatedAt } = post;
   const seoSlug = `/blog/${slug}`;
 
   return (

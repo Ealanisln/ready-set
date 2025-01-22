@@ -70,7 +70,7 @@ export interface SeoType {
 export interface PostDocument {
   _type: "post";
   _id: string;
-  _createdAt: string;
+  _updatedAt: string;
   title: string;
   slug: {
     current: string;

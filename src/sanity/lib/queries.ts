@@ -105,7 +105,7 @@ export const postQuery = groq`
     "slug": slug.current,
     mainImage,
     smallDescription,
-    _updatedAt,
+    _updatedAt, 
     body,
     seo{
       ${seoFields}
