@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import type { Metadata, ResolvingMetadata } from "next";
 import CustomNextSeo from "@/components/Blog/CustomSeo";
 import type { PostDocument } from "@/sanity/schemaTypes/seo";
+import BookNow from "@/components/Blog/BookNow";
 
 export const revalidate = 30;
 
@@ -193,6 +194,7 @@ export default async function BlogPost({
                   />
                 </div>
               )}
+              <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
             </div>
           </div>
         </div>
