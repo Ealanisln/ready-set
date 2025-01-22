@@ -93,6 +93,14 @@ const EmailMarketingGuide = () => {
                   <li>• Email Authentication Essentials</li>
                 </ul>
               </div>
+
+              <p className="text-gray-600">
+                This guide offers clear steps to understand email marketing, grow your audience, and build meaningful connections with your customers. Use it to get started today.
+              </p>
+
+              <p className="text-gray-600">
+                Ready for more hands-on support? <span className="font-bold">Book a Consultation</span> Today and let our experts handle the heavy lifting so you can focus on what you do best.
+              </p>
             </div>
 
             <div className="space-y-6">
@@ -105,10 +113,6 @@ const EmailMarketingGuide = () => {
                 <h2 className="text-2xl font-bold text-center mb-2">What Is Email Marketing</h2>
                 <p className="text-center text-sm">The Business Owner's Guide to Getting Started</p>
               </Card>
-
-              <p className="text-gray-600">
-                This guide offers clear steps to understand email marketing, grow your audience, and build meaningful connections with your customers. Use it to get started today.
-              </p>
 
               <div className="space-y-4">
                 <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
