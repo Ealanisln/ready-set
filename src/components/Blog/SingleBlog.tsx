@@ -43,25 +43,28 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
           </div>
           <div className="p-4 flex-grow">
             <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
-              {post.smallDescription}
+              
             </p>
           </div>
           <div className="px-4 pb-4 mt-auto flex justify-between items-center">
-            {/* Fecha del post */}
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {new Date(post._createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-            {/* Botón Read More */}
-            <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-              <Link href={`/${basePath}/${post.slug?.current}`} className="block">
-                Read More
-              </Link>
-            </div>
-          </div>
+         {/* Fecha del post */}
+      <span className="text-sm text-gray-600 dark:text-gray-400">
+        {post._updatedAt ? 
+        new Date(post._updatedAt).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      : 'Fecha no disponible'
+    }
+    </span>
+   {/* Botón Read More */}
+   <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
+    <Link href={`/${basePath}/${post.slug?.current}`} className="block">
+      Read More
+    </Link>
+       </div>
+      </div>
         </div>
       ))}
     </div>

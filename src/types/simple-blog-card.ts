@@ -7,12 +7,12 @@ interface MainImage {
 }
 
 export interface SimpleBlogCard {
-  smallDescription?: string;
   _id: string;
   _updatedAt: string;
   title: string;
   slug?: {
     current: string;
+    smallDescription?: string;
     _type: string;
     _createdAt: string;
   };
