@@ -10,6 +10,7 @@ import {
   FoodFormData,
   SpecialtyFormData,
 } from "../types";
+import toast from "react-hot-toast";
 
 interface APISubmissionData {
   formType: FormType;
@@ -67,6 +68,10 @@ export const FormManager = () => {
   };
 
   const handleSubmit = async (formData: DeliveryFormData) => {
+    const loadingToast = toast.loading('Submitting your request...', {
+      duration: Infinity // Keep showing until we dismiss it
+    });
+
     try {
       const baseSubmission: APISubmissionData = {
         formType: formData.formType,
@@ -76,10 +81,10 @@ export const FormManager = () => {
           email: formData.email,
           phone: formData.phone,
           website: formData.website,
-          counties: formData.counties, // Changed from selectedCounties to counties
-          additionalComments: formData.additionalComments, // Changed from data.additionalComments
+          counties: formData.counties,
+          additionalComments: formData.additionalComments,
           pickupAddress: {
-            street: formData.pickupAddress.street, // Updated to use pickupAddress structure
+            street: formData.pickupAddress.street,
             city: formData.pickupAddress.city,
             state: formData.pickupAddress.state,
             zip: formData.pickupAddress.zip,
@@ -155,14 +160,26 @@ export const FormManager = () => {
         body: JSON.stringify(baseSubmission),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        throw new Error(result.error || "Failed to submit form");
       }
+
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success('Your request has been submitted successfully!', {
+        duration: 5000 // Show success message for 5 seconds
+      });
 
       closeForm();
     } catch (error) {
+      // Dismiss loading toast and show error
+      toast.dismiss(loadingToast);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit form. Please try again.', {
+        duration: 5000
+      });
       console.error("Error submitting form:", error);
-      // Handle error (show error message to user)
     }
   };
 

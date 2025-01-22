@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { FormSubmissionService } from '@/lib/form-submissions';
+import { EmailService } from '@/lib/email-service';
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +41,13 @@ export async function POST(req: Request) {
     const submission = await FormSubmissionService.createSubmission({
       formType: body.formType,
       formData: body.formData,
+    });
+
+     // Send email notification
+     await EmailService.sendFormSubmissionNotification({
+      formType: body.formType,
+      formData: body.formData,
+      submissionId: submission.id
     });
 
     // Log successful submission
