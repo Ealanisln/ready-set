@@ -11,6 +11,8 @@ interface PostsProps {
 }
 
 const SingleBlog = ({ data, basePath }: PostsProps) => {
+  console.log('Post data:', data);
+  console.log('Post data:', data);
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl mx-auto">
       {data.map((post) => (
@@ -44,12 +46,20 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
               {post.smallDescription}
             </p>
           </div>
-          <div className="px-4 pb-4 mt-auto">
+          <div className="px-4 pb-4 mt-auto flex justify-between items-center">
+            {/* Fecha del post */}
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {new Date(post._createdAt).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </span>
+            {/* Botón Read More */}
             <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-              {/* {post._updatedAt.substring(0, 10)} */}
               <Link href={`/${basePath}/${post.slug?.current}`} className="block">
                 Read More
-            </Link>
+              </Link>
             </div>
           </div>
         </div>

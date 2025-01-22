@@ -14,6 +14,7 @@ export interface SimpleBlogCard {
   slug?: {
     current: string;
     _type: string;
+    _createdAt: string;
   };
   mainImage?: MainImage;
 }
