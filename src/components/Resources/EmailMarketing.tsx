@@ -7,10 +7,10 @@ const EmailMarketingGuide = () => {
       <div className="max-w-6xl mx-auto space-y-12">
         {/* First Section */}
         <section className="bg-white rounded-lg shadow-lg p-8">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold text-gray-800">Why Email Metrics Matter</h1>
-              <h2 className="text-xl text-gray-600">A Business Owner's Guide to Tracking Campaign Performance</h2>
+  <div className="grid md:grid-cols-2 gap-8">
+    <div className="space-y-6">
+      <h1 className="text-4xl font-bold text-gray-800 text-wrap-balance">Why Email Metrics Matter</h1>
+      <h2 className="text-xl text-gray-600">A Business Owner's Guide to Tracking Campaign Performance</h2>
               
               <p className="text-gray-600">
                 Are you sending email after email without seeing the results you want? You're not alone. Too many business owners rely on guesswork and 'gut feelings' when it comes to their email campaigns—only to be left wondering why open rates are low, conversions are stalled, and unsubscribe rates keep climbing.
@@ -48,15 +48,17 @@ const EmailMarketingGuide = () => {
             </div>
 
             <div className="space-y-6">
-              <Card className="bg-yellow-400 p-6 rounded-lg">
-                <img 
-                  src="/images/resources/4.png"
-                  alt="Business people reviewing metrics"
-                  className="w-full rounded-lg mb-4"
-                />
-                <h2 className="text-2xl font-bold text-center mb-2">Why Email Metrics Matter</h2>
-                <p className="text-center text-sm">A Business Owner's Guide to Tracking Campaign Performance</p>
-              </Card>
+            <Card className="bg-yellow-400 p-6 rounded-lg">
+            <img src="/images/resources/4.png" alt="Business people reviewing metrics" 
+            className="w-full rounded-lg mb-4"/>
+            <h2 className="text-2xl font-bold text-center mb-2">
+              Why Email Metrics
+             <div className="mt-1">Matter</div>
+             </h2>
+             <div className="w-32 h-px bg-black mx-auto my-4"></div>
+             <p className="text-center text-sm">A Business Owner's Guide to Tracking</p>
+             <div className="text-center text-sm">Campaign Performance</div>
+            </Card>
 
               <div className="space-y-4">
                 <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
@@ -111,7 +113,7 @@ const EmailMarketingGuide = () => {
                   className="w-full rounded-lg mb-4"
                 />
                 <h2 className="text-2xl font-bold text-center mb-2">What Is Email Marketing</h2>
-                <p className="text-center text-sm">The Business Owner's Guide to Getting Started</p>
+                <p className="text-center text-sm">A Business Owner's Guide to Tracking Campaign Perforrmance</p>
               </Card>
 
               <div className="space-y-4">
