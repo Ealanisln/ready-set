@@ -17,15 +17,15 @@ const EmailMarketingGuide = () => {
               </p>
 
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-800">How This Guide Helps You</h3>
+              <h3 className="text-xl font-semibold text-gray-800">How This Guide Helps You</h3>
                 <p className="text-gray-600">
                   This comprehensive guide takes the mystery out of email marketing metrics, showing you exactly what to track and why it matters. Discover how to optimize your campaigns step by step—from pinpointing subject lines that boost open rates, to refining your message so you attract the right audience and grow your bottom line.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-800">What You Will Get</h3>
-                <ul className="space-y-2 text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-800">What You Will Get</h4>
+                <ul className="space-y-4 text-gray-600">
                   <li>• What Happens When You Ignore Your Email Metrics</li>
                   <li>• Key Email Reporting Metrics You Should Know</li>
                   <li>• Email Campaign Performance Checklist</li>
@@ -60,6 +60,13 @@ const EmailMarketingGuide = () => {
              <div className="text-center text-sm">Campaign Performance</div>
             </Card>
 
+            <div className="flex flex-col items-center mt-4">
+           <img src="/images/logo/new-logo-ready-set.png" alt="Company logo" className="w-24 h-auto mb-2" />
+           <div className="bg-black text-white px-4 py-0 rounded-lg">
+            <p className="text-sm tracking-wider">READYSETLLC.COM</p>
+            </div>
+            </div>
+
               <div className="space-y-4">
                 <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
                   Download Now
@@ -90,7 +97,7 @@ const EmailMarketingGuide = () => {
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-gray-800">What You Will Learn</h3>
-                <ul className="space-y-2 text-gray-600">
+                <ul className="space-y-4 text-gray-600">
                   <li>• What Is Email Marketing?</li>
                   <li>• The Pros and Cons of Email Marketing</li>
                   <li>• Types of Email Marketing Campaigns</li>
