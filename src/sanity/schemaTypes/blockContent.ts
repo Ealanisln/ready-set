@@ -1,5 +1,26 @@
-// src/sanity/schemaTypes/blockContent.ts
 import { defineType, defineArrayMember } from "sanity";
+
+// Separate configuration objects for better organization
+const blockStyles = [
+  { title: "Normal", value: "normal" },
+  { title: "H1", value: "h1" },
+  { title: "H2", value: "h2" },
+  { title: "H3", value: "h3" },
+  { title: "H4", value: "h4" },
+  { title: "Quote", value: "blockquote" },
+];
+
+const listTypes = [
+  { title: "Bullet", value: "bullet" },
+  { title: "Number", value: "number" },
+];
+
+const decoratorMarks = [
+  { title: "Strong", value: "strong" },
+  { title: "Emphasis", value: "em" },
+  { title: "Code", value: "code" },
+  { title: "Underline", value: "underline" },
+];
 
 export default defineType({
   title: "Block Content",
@@ -9,25 +30,10 @@ export default defineType({
     defineArrayMember({
       title: "Block",
       type: "block",
-      styles: [
-        { title: "Normal", value: "normal" },
-        { title: "H1", value: "h1" },
-        { title: "H2", value: "h2" },
-        { title: "H3", value: "h3" },
-        { title: "H4", value: "h4" },
-        { title: "Quote", value: "blockquote" },
-      ],
-      lists: [
-        { title: "Bullet", value: "bullet" },
-        { title: "Number", value: "number" }, // Added numbered list support
-      ],
+      styles: blockStyles,
+      lists: listTypes,
       marks: {
-        decorators: [
-          { title: "Strong", value: "strong" },
-          { title: "Emphasis", value: "em" },
-          { title: "Code", value: "code" }, // Added code support
-          { title: "Underline", value: "underline" }, // Added underline support
-        ],
+        decorators: decoratorMarks,
         annotations: [
           {
             title: "URL",

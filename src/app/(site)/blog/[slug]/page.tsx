@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import type { Metadata, ResolvingMetadata } from "next";
 import CustomNextSeo from "@/components/Blog/CustomSeo";
 import type { PostDocument } from "@/sanity/schemaTypes/seo";
+import React from "react";
 
 export const revalidate = 30;
 
@@ -94,6 +95,10 @@ const portableTextComponents: PortableTextComponents = {
     number: ({ children }) => (
       <ol className="ml-8 list-decimal space-y-2">{children}</ol>
     ),
+  },
+  listItem: {
+    bullet: ({ children }) => <li className="mb-4">{children}</li>,
+    number: ({ children }) => <li className="mb-4">{children}</li>,
   },
   block: {
     normal: ({ children }) => (
