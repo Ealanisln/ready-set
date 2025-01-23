@@ -131,6 +131,13 @@ const EmailMarketingGuide = () => {
              <div className="text-center text-sm">Getting Started</div>
             </Card>
 
+            <div className="flex flex-col items-center mt-4">
+           <img src="/images/logo/new-logo-ready-set.png" alt="Company logo" className="w-24 h-auto mb-2" />
+           <div className="bg-black text-white px-4 py-0 rounded-lg">
+            <p className="text-sm tracking-wider">READYSETLLC.COM</p>
+            </div>
+            </div>
+
               <div className="space-y-4">
                 <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
                   Download Now
