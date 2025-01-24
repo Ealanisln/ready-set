@@ -5,13 +5,8 @@ import { useForm } from "react-hook-form";
 import { ChevronDown } from "lucide-react";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import { toast } from "@/components/ui/use-toast";
-
-interface Address {
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-}
+import type { UploadThingFile } from "@/hooks/use-upload-file";
+import FileUpload from "./FileUploadHandler";
 
 interface FormData {
   role: string;
@@ -19,7 +14,12 @@ interface FormData {
   lastName: string;
   email: string;
   phone: string;
-  address: Address;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
   education: string;
   workExperience: string;
   skills: string[];
@@ -30,14 +30,41 @@ interface FormData {
   vehicleRegistration?: FileList | null;
 }
 
+interface SubmissionData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  position: string;
+  addressStreet: string;
+  addressCity: string;
+  addressState: string;
+  addressZip: string;
+  education: string;
+  workExperience: string;
+  skills: string[];
+  coverLetter: string;
+  resumeUrl: string | null;
+  driversLicenseUrl: string | null;
+  insuranceUrl: string | null;
+  vehicleRegUrl: string | null;
+}
+
+interface JobApplicationResponse {
+  id: string;
+  // Add other response fields as needed
+}
+
 const positions = [
   {
     title: "Driver for Catering Deliveries",
-    description: "Join our team and help us deliver exceptional dining experiences to our clients.",
+    description:
+      "Join our team and help us deliver exceptional dining experiences to our clients.",
   },
   {
     title: "Virtual Assistant",
-    description: "Help businesses achieve sustainable growth and success across the US.",
+    description:
+      "Help businesses achieve sustainable growth and success across the US.",
   },
   {
     title: "Other Positions",
@@ -47,6 +74,10 @@ const positions = [
 
 const JobApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Record<string, UploadThingFile[]>
+  >({});
+
   const {
     register,
     handleSubmit,
@@ -78,67 +109,43 @@ const JobApplicationForm = () => {
 
   const selectedRole = watch("role");
   const isDriverRole = selectedRole === "Driver for Catering Deliveries";
+  const tempEntityId = `temp_${Date.now()}`;
 
-  // Initialize upload hooks for different document types
   const resumeUpload = useUploadFile("fileUploader", {
     category: "resume",
     entityType: "job_application",
-    entityId: "temp",
-    maxFileCount: 1,
-    allowedFileTypes: [".pdf", ".doc", ".docx"]
+    entityId: tempEntityId,
+    allowedFileTypes: [".pdf", ".doc", ".docx"],
   });
 
   const licenseUpload = useUploadFile("fileUploader", {
     category: "license",
     entityType: "job_application",
-    entityId: "temp",
-    maxFileCount: 1,
-    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"]
+    entityId: tempEntityId,
+    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
   });
 
   const insuranceUpload = useUploadFile("fileUploader", {
     category: "insurance",
     entityType: "job_application",
-    entityId: "temp",
-    maxFileCount: 1,
-    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"]
+    entityId: tempEntityId,
+    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
   });
 
   const registrationUpload = useUploadFile("fileUploader", {
     category: "registration",
     entityType: "job_application",
-    entityId: "temp",
-    maxFileCount: 1,
-    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"]
+    entityId: tempEntityId,
+    allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
   });
 
-  const handleFileUpload = async (
-    files: FileList | null, 
-    uploader: ReturnType<typeof useUploadFile>,
-    fieldName: string
-  ) => {
-    if (!files?.length) return null;
-    
-    try {
-      const uploadResult = await uploader.onUpload(Array.from(files));
-      if (!uploadResult?.length) {
-        throw new Error(`No upload result for ${fieldName}`);
-      }
-      
-      return {
-        fileUrl: uploadResult[0].url,
-        fileId: uploadResult[0].key
-      };
-    } catch (error) {
-      console.error(`Error uploading ${fieldName}:`, error);
-      toast({
-        title: "Upload Error",
-        description: `Failed to upload ${fieldName}. Please try again.`,
-        variant: "destructive",
-      });
-      return null;
-    }
-  };
+  const handleUploadComplete =
+    (fieldName: string) => (files: UploadThingFile[]) => {
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [fieldName]: files,
+      }));
+    };
 
   const renderError = (
     error: { message?: string } | undefined,
@@ -152,50 +159,23 @@ const JobApplicationForm = () => {
   const onSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
-      // Upload files first
-      const resumeData = await handleFileUpload(
-        formData.resume ?? null,
-        resumeUpload,
-        "resume"
-      );
+      // Destructure address and role from formData
+      const { address, role, ...otherData } = formData;
 
-      // Only upload driver documents if applying for driver position
-      let licenseData = null;
-      let insuranceData = null;
-      let registrationData = null;
-
-      if (isDriverRole) {
-        licenseData = await handleFileUpload(
-          formData.driversLicense ?? null,
-          licenseUpload,
-          "driver's license"
-        );
-        insuranceData = await handleFileUpload(
-          formData.insurance ?? null,
-          insuranceUpload,
-          "insurance"
-        );
-        registrationData = await handleFileUpload(
-          formData.vehicleRegistration ?? null,
-          registrationUpload,
-          "vehicle registration"
-        );
-      }
-
-      // Prepare submission data
-      const submissionData = {
-        ...formData,
-        resumeUrl: resumeData?.fileUrl,
-        resumeFileId: resumeData?.fileId,
-        driversLicenseUrl: licenseData?.fileUrl,
-        driversLicenseFileId: licenseData?.fileId,
-        insuranceUrl: insuranceData?.fileUrl,
-        insuranceFileId: insuranceData?.fileId,
-        vehicleRegUrl: registrationData?.fileUrl,
-        vehicleRegFileId: registrationData?.fileId,
+      // Construct submission data with flattened address fields
+      const submissionData: SubmissionData = {
+        ...otherData,
+        position: role,
+        addressStreet: address?.street || "",
+        addressCity: address?.city || "",
+        addressState: address?.state || "",
+        addressZip: address?.zip || "",
+        resumeUrl: uploadedFiles.resume?.[0]?.url || null,
+        driversLicenseUrl: uploadedFiles.driversLicense?.[0]?.url || null,
+        insuranceUrl: uploadedFiles.insurance?.[0]?.url || null,
+        vehicleRegUrl: uploadedFiles.vehicleRegistration?.[0]?.url || null,
       };
 
-      // Submit to API
       const response = await fetch("/api/job-applications", {
         method: "POST",
         headers: {
@@ -205,29 +185,59 @@ const JobApplicationForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit application");
+        throw new Error(`Failed to submit application: ${response.statusText}`);
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as JobApplicationResponse;
 
-      // Update entity IDs for uploaded files
-      await Promise.all([
-        resumeData && resumeUpload.updateEntityId(result.id),
-        licenseData && licenseUpload.updateEntityId(result.id),
-        insuranceData && insuranceUpload.updateEntityId(result.id),
-        registrationData && registrationUpload.updateEntityId(result.id),
-      ].filter(Boolean));
+      // Update entity IDs for all uploaded files
+      const fileUpdates = Object.entries(uploadedFiles)
+        .filter(([_, files]) => files?.[0])
+        .map(([field, files]) => {
+          const uploader = getUploaderForField(field);
+          if (!uploader) return null;
+
+          return uploader.updateEntityId(result.id).catch((error) => {
+            console.error(`Failed to update entity ID for ${field}:`, error);
+            throw error;
+          });
+        });
+
+      await Promise.all(fileUpdates.filter(Boolean));
 
       toast({
         title: "Success",
         description: "Your application has been submitted successfully!",
       });
-
     } catch (error) {
       console.error("Submission error:", error);
+
+      // Attempt to clean up uploaded files on error
+      try {
+        await Promise.all(
+          Object.entries(uploadedFiles).map(async ([_, files]) => {
+            const file = files?.[0];
+            if (file?.key) {
+              await fetch("/api/uploadthing/delete", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ fileId: file.key }),
+              });
+            }
+          }),
+        );
+      } catch (cleanupError) {
+        console.error("Failed to clean up files:", cleanupError);
+      }
+
       toast({
         title: "Error",
-        description: "Failed to submit application. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to submit application. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -235,11 +245,20 @@ const JobApplicationForm = () => {
     }
   };
 
+  // Helper function to get the appropriate uploader for each field
+  const getUploaderForField = (field: string) => {
+    const uploaders: Record<string, ReturnType<typeof useUploadFile>> = {
+      resume: resumeUpload,
+      driversLicense: licenseUpload,
+      insurance: insuranceUpload,
+      vehicleRegistration: registrationUpload,
+    };
+    return uploaders[field];
+  };
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="mx-auto max-w-2xl">
         <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-          {/* Header */}
           <div className="bg-gradient-to-r from-yellow-400 to-amber-400 p-6">
             <h1 className="text-2xl font-bold text-white">
               Ready Set Career Application
@@ -249,9 +268,7 @@ const JobApplicationForm = () => {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6">
-            {/* Position Selection */}
             <div className="space-y-4">
               <label className="block text-sm font-medium text-gray-700">
                 Select Position *
@@ -277,7 +294,6 @@ const JobApplicationForm = () => {
               {renderError(errors.role)}
             </div>
 
-            {/* Personal Information */}
             <div className="grid grid-cols-1 gap-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -359,7 +375,6 @@ const JobApplicationForm = () => {
                 {renderError(errors.phone)}
               </div>
 
-              {/* Address Fields */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Address *
@@ -368,7 +383,9 @@ const JobApplicationForm = () => {
                   type="text"
                   placeholder="Street Address"
                   className={`block w-full rounded-md border ${
-                    errors.address?.street ? "border-red-500" : "border-gray-300"
+                    errors.address?.street
+                      ? "border-red-500"
+                      : "border-gray-300"
                   } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
                   {...register("address.street", {
                     required: "Street address is required",
@@ -382,7 +399,9 @@ const JobApplicationForm = () => {
                       type="text"
                       placeholder="City"
                       className={`block w-full rounded-md border ${
-                        errors.address?.city ? "border-red-500" : "border-gray-300"
+                        errors.address?.city
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
                       {...register("address.city", {
                         required: "City is required",
@@ -395,7 +414,9 @@ const JobApplicationForm = () => {
                       type="text"
                       placeholder="State"
                       className={`block w-full rounded-md border ${
-                        errors.address?.state ? "border-red-500" : "border-gray-300"
+                        errors.address?.state
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
                       {...register("address.state", {
                         required: "State is required",
@@ -415,7 +436,7 @@ const JobApplicationForm = () => {
                     required: "ZIP code is required",
                     pattern: {
                       value: /^\d{5}(-\d{4})?$/,
-                      message:"Invalid ZIP code format",
+                      message: "Invalid ZIP code format",
                     },
                   })}
                 />
@@ -423,99 +444,70 @@ const JobApplicationForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Resume *
-                </label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className={`mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 
-                    file:bg-yellow-400 file:px-4 file:py-2 file:text-white hover:file:bg-yellow-500
-                    ${resumeUpload.isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={resumeUpload.isUploading}
-                  {...register("resume", {
-                    required: "Resume is required"
-                  })}
+                <FileUpload
+                  name="resume"
+                  label="Resume"
+                  register={register}
+                  required
+                  error={errors.resume}
+                  uploadConfig={{
+                    category: "resume",
+                    entityType: "job_application",
+                    entityId: tempEntityId,
+                    allowedFileTypes: [".pdf", ".doc", ".docx"],
+                  }}
+                  onUploadComplete={handleUploadComplete("resume")}
                 />
-                {resumeUpload.isUploading && (
-                  <div className="mt-2 text-sm text-gray-500">
-                    Uploading... {resumeUpload.progresses.progress}%
-                  </div>
-                )}
-                {renderError(errors.resume)}
               </div>
 
-              {/* Driver-specific documents */}
               {isDriverRole && (
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Driver's License *
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className={`mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 
-                        file:bg-yellow-400 file:px-4 file:py-2 file:text-white hover:file:bg-yellow-500
-                        ${licenseUpload.isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={licenseUpload.isUploading}
-                      {...register("driversLicense", {
-                        required: isDriverRole ? "Driver's license is required" : false,
-                      })}
-                    />
-                    {licenseUpload.isUploading && (
-                      <div className="mt-2 text-sm text-gray-500">
-                        Uploading... {licenseUpload.progresses.progress}%
-                      </div>
-                    )}
-                    {renderError(errors.driversLicense)}
-                  </div>
+                  <FileUpload
+                    name="driversLicense"
+                    label="Driver's License"
+                    register={register}
+                    required
+                    error={errors.driversLicense}
+                    uploadConfig={{
+                      category: "license",
+                      entityType: "job_application",
+                      entityId: tempEntityId,
+                      allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
+                    }}
+                    onUploadComplete={handleUploadComplete("driversLicense")}
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Insurance Document *
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className={`mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 
-                        file:bg-yellow-400 file:px-4 file:py-2 file:text-white hover:file:bg-yellow-500
-                        ${insuranceUpload.isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={insuranceUpload.isUploading}
-                      {...register("insurance", {
-                        required: isDriverRole ? "Insurance document is required" : false,
-                      })}
-                    />
-                    {insuranceUpload.isUploading && (
-                      <div className="mt-2 text-sm text-gray-500">
-                        Uploading... {insuranceUpload.progresses.progress}%
-                      </div>
-                    )}
-                    {renderError(errors.insurance)}
-                  </div>
+                  <FileUpload
+                    name="insurance"
+                    label="Insurance Document"
+                    register={register}
+                    required
+                    error={errors.insurance}
+                    uploadConfig={{
+                      category: "insurance",
+                      entityType: "job_application",
+                      entityId: tempEntityId,
+                      allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
+                    }}
+                    onUploadComplete={handleUploadComplete("insurance")}
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Vehicle Registration *
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className={`mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 
-                        file:bg-yellow-400 file:px-4 file:py-2 file:text-white hover:file:bg-yellow-500
-                        ${registrationUpload.isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={registrationUpload.isUploading}
-                      {...register("vehicleRegistration", {
-                        required: isDriverRole ? "Vehicle registration is required" : false,
-                      })}
-                    />
-                    {registrationUpload.isUploading && (
-                      <div className="mt-2 text-sm text-gray-500">
-                        Uploading... {registrationUpload.progresses.progress}%
-                      </div>
+                  <FileUpload
+                    name="vehicleRegistration"
+                    label="Vehicle Registration"
+                    register={register}
+                    required
+                    error={errors.vehicleRegistration}
+                    uploadConfig={{
+                      category: "registration",
+                      entityType: "job_application",
+                      entityId: tempEntityId,
+                      allowedFileTypes: [".pdf", ".jpg", ".jpeg", ".png"],
+                    }}
+                    onUploadComplete={handleUploadComplete(
+                      "vehicleRegistration",
                     )}
-                    {renderError(errors.vehicleRegistration)}
-                  </div>
+                  />
                 </div>
               )}
 
@@ -548,7 +540,8 @@ const JobApplicationForm = () => {
                     required: "Education information is required",
                     minLength: {
                       value: 10,
-                      message: "Please provide more detail about your education",
+                      message:
+                        "Please provide more detail about your education",
                     },
                   })}
                 />
@@ -569,14 +562,14 @@ const JobApplicationForm = () => {
                     required: "Work experience is required",
                     minLength: {
                       value: 20,
-                      message: "Please provide more detail about your work experience",
+                      message:
+                        "Please provide more detail about your work experience",
                     },
                   })}
                 />
                 {renderError(errors.workExperience)}
               </div>
 
-              {/* Skills Section */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Main Skills *
@@ -586,7 +579,9 @@ const JobApplicationForm = () => {
                     <input
                       type="text"
                       className={`block w-full rounded-md border ${
-                        errors.skills?.[index] ? "border-red-500" : "border-gray-300"
+                        errors.skills?.[index]
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
                       placeholder={`Skill ${index + 1} (e.g., ${
                         index === 0
@@ -613,14 +608,10 @@ const JobApplicationForm = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-md bg-gradient-to-r from-yellow-400 to-amber-400 px-4 py-3 
-                text-white transition-colors duration-200 hover:from-yellow-500 hover:to-amber-500 
-                focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 
-                disabled:opacity-50"
+              className="w-full rounded-md bg-gradient-to-r from-yellow-400 to-amber-400 px-4 py-3 text-white transition-colors duration-200 hover:from-yellow-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50"
             >
               {isSubmitting ? "Submitting..." : "Submit Application"}
             </button>
