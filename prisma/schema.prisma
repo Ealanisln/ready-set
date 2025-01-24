@@ -54,7 +54,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
-  JobApplication        JobApplication[]
+  job_applications      job_application[]
 }
 
 model on_demand {
@@ -229,34 +229,36 @@ model file_upload {
   onDemandId        BigInt?
   entityType        String
   entityId          String
-  category          String?
+  category          String?           // Useful for distinguishing between resume, license, etc.
+  // Relations
   cateringRequest   catering_request? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
   onDemand          on_demand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
   user              user?             @relation(fields: [userId], references: [id])
-  JobApplication    JobApplication?   @relation(fields: [jobApplicationId], references: [id])
+  job_application   job_application?  @relation(fields: [jobApplicationId], references: [id])
   jobApplicationId  String?
 
   @@index([entityType, entityId])
 }
 
-model JobApplication {
+
+model job_application {
   id        String  @id @default(cuid())
   firstName String
   lastName  String
   email     String
   phone     String?
-  position  String
+  position  String  // Changed from 'role' to match schema
 
-  // Address fields
+  // Address fields - structured to match API's address object
   addressStreet String
   addressCity   String
   addressState  String
   addressZip    String
 
-  // Education and Experience
+  // Professional Information
   education      String
   workExperience String
-  skills         String[] // Array to store the 3 required skills
+  skills         String[]    // Array to store skills
   coverLetter    String?
 
   // Document URLs
@@ -265,15 +267,15 @@ model JobApplication {
   insuranceUrl      String?
   vehicleRegUrl     String?
 
-  // Status tracking
+  // Status and timestamps
   status    application_status @default(pending)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   // Relations
   fileUploads file_upload[]
-  userId      String? // Link to user if application is approved
-  user        user?         @relation(fields: [userId], references: [id])
+  userId      String?        // Optional link to user
+  user        user?          @relation(fields: [userId], references: [id])
 
   @@index([email])
   @@index([position])
