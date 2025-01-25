@@ -1,7 +1,8 @@
 // src/app/api/uploadthing/core.ts
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { handleUploadComplete } from '@/server/upload';
+import { handleUploadComplete } from "@/server/upload";
+import type { UploadMetadata, UploadResult } from "@/types/upload";
 
 const f = createUploadthing();
 
@@ -16,113 +17,118 @@ const getHeaderSafe = (headers: Headers, key: string): string | null => {
 };
 
 // Helper to log the upload process
-const logUploadDetails = (stage: string, details: Record<string, any>) => {
+const logUploadDetails = (
+  stage: string,
+  details: Record<string, any>,
+): void => {
   console.log(`\n=== ${stage} ===`);
   console.log(JSON.stringify(details, null, 2));
-  console.log('================\n');
+  console.log("================\n");
 };
 
-// Define metadata type
-type UploadMetadata = {
-  userId: string;
-  category: string;
-  entityType: string;
-  entityId: string;
-  orderNumber?: string;
+// Check if userId is required for this type of upload
+const requiresUserId = (entityType: string, category: string): boolean => {
+  // Add any categories or entity types that don't require userId
+  const anonymousTypes = ["public", "anonymous", "job_application"];
+  const anonymousCategories = [
+    "public_files",
+    "resume",
+    "license",
+    "insurance",
+    "registration",
+  ];
+
+  return (
+    !anonymousTypes.includes(entityType) &&
+    !anonymousCategories.includes(category)
+  );
 };
 
 export const ourFileRouter = {
   fileUploader: f({
     image: { maxFileSize: "4MB" },
-    pdf: { maxFileSize: "4MB" }
+    pdf: { maxFileSize: "4MB" },
   })
-    .middleware(async ({ req, files }) => {
+    .middleware(async ({ req, files }): Promise<UploadMetadata> => {
       try {
-        // Log incoming request with headers
+        // Log headers for debugging
         const headers = Object.fromEntries(req.headers.entries());
-        logUploadDetails('Upload Request Headers', headers);
-        
-        logUploadDetails('Upload Request', {
-          contentType: getHeaderSafe(req.headers, 'content-type'),
-          category: getHeaderSafe(req.headers, 'x-category'),
-          entityType: getHeaderSafe(req.headers, 'x-entity-type'),
-          entityId: getHeaderSafe(req.headers, 'x-entity-id'),
-          orderNumber: getHeaderSafe(req.headers, 'x-order-number'),
-          files: files.map(f => ({
-            name: f.name,
-            size: f.size,
-            type: f.type
-          }))
-        });
+        logUploadDetails("Upload Request Headers", headers);
 
-        const { getServerAuth } = await import('@/server/auth');
-        const user = await getServerAuth(req);
-        
-        if (!user) {
-          throw new UploadThingError("Unauthorized");
+        // Extract metadata from headers
+        const category =
+          getHeaderSafe(req.headers, "x-category") || "uncategorized";
+        const entityType =
+          getHeaderSafe(req.headers, "x-entity-type") || "user";
+        const userId = getHeaderSafe(req.headers, "x-user-id");
+        const entityId = getHeaderSafe(req.headers, "x-entity-id");
+
+        // Check if this upload requires userId
+        if (requiresUserId(entityType, category)) {
+          if (!userId) {
+            throw new UploadThingError(
+              "UserId is required for this upload type",
+            );
+          }
         }
 
-        // Extract metadata from headers with more detailed logging
-        const category = getHeaderSafe(req.headers, "x-category");
-        const entityType = getHeaderSafe(req.headers, "x-entity-type");
-        const entityId = getHeaderSafe(req.headers, "x-entity-id");
-        const orderNumber = getHeaderSafe(req.headers, "x-order-number");
-
-        console.log('Extracted header values:', { 
-          category, 
-          entityType, 
-          entityId,
-          orderNumber 
-        });
-
+        // Construct metadata
         const metadata: UploadMetadata = {
-          userId: user.id,
-          category: category || 'uncategorized',
-          entityType: entityType || 'user',
-          entityId: entityId || user.id,
-          orderNumber: orderNumber || undefined
+          userId: userId || "anonymous", // Provide a default value for non-authenticated uploads
+          category,
+          entityType,
+          entityId: entityId || `temp_${Date.now()}`,
+          orderNumber:
+            getHeaderSafe(req.headers, "x-order-number") || undefined,
         };
 
-        logUploadDetails('Middleware Metadata', metadata);
+        logUploadDetails("Upload Request", {
+          metadata,
+          files: files.map((f) => ({
+            name: f.name,
+            size: f.size,
+            type: f.type,
+          })),
+        });
 
         return metadata;
       } catch (error) {
-        console.error('Middleware Error:', error);
+        console.error("Middleware Error:", error);
         throw error;
       }
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ metadata, file }): Promise<UploadResult> => {
       try {
-        logUploadDetails('Pre-Upload Complete', {
+        logUploadDetails("Pre-Upload Complete", {
           file: {
             name: file.name,
             size: file.size,
             type: file.type,
-            url: file.url
+            url: file.url,
           },
-          metadata
+          metadata,
         });
 
-        // Handle the upload completion
-        const result = await handleUploadComplete({ 
-          metadata: metadata as UploadMetadata, 
-          file 
+        const result = await handleUploadComplete({
+          metadata: metadata as UploadMetadata,
+          file: {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url: file.url,
+          },
         });
 
-        logUploadDetails('Post-Upload Complete', {
-          result,
-          userId: metadata.userId,
-          fileUrl: file.url
-        });
+        logUploadDetails("Post-Upload Complete", result);
 
         return {
           ...result,
-          uploadedBy: metadata.userId
+          category: result.category || "uncategorized",
         };
       } catch (error) {
-        console.error('Upload Complete Error:', error);
+        console.error("Upload Complete Error:", error);
         throw new UploadThingError(
-          error instanceof Error ? error.message : 'Failed to process upload'
+          error instanceof Error ? error.message : "Failed to process upload",
         );
       }
     }),
