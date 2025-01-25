@@ -11,7 +11,6 @@ interface PostsProps {
 }
 
 const SingleBlog = ({ data, basePath }: PostsProps) => {
-  console.log('Post data:', data);
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl mx-auto">
       {data.map((post) => (
