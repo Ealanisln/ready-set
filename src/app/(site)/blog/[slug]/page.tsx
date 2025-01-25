@@ -12,6 +12,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import CustomNextSeo from "@/components/Blog/CustomSeo";
 import type { PostDocument } from "@/sanity/schemaTypes/seo";
 import React from "react";
+import { format } from 'date-fns';
 
 export const revalidate = 30;
 
@@ -165,6 +166,9 @@ export default async function BlogPost({
   const { title, mainImage, body, seo, _updatedAt } = post;
   const seoSlug = `/blog/${slug}`;
 
+  const formattedDate = format(new Date(_updatedAt), 'MMMM d, yyyy');
+
+
   return (
     <div>
       <div key="seo">
@@ -177,6 +181,10 @@ export default async function BlogPost({
               <h1 className="mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight">
                 {title}
               </h1>
+               {/* Add the date display */}
+               <div className="mb-8 text-base text-gray-600 dark:text-gray-400">
+                {formattedDate}
+              </div>
 
               {mainImage && (
                 <Image
