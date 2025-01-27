@@ -1,10 +1,6 @@
-// src/scripts/backup-db.ts
-
 import { exec } from 'child_process';
 import { join } from 'path';
 import { mkdir, readdir, stat, unlink, readFile } from 'fs/promises';
-
-// Load environment variables from .env file
 import { config } from 'dotenv';
 config();
 
@@ -21,29 +17,54 @@ const execAsync = (command: string): Promise<{ stdout: string; stderr: string }>
   });
 };
 
+// Clean database URL for psql compatibility
+function cleanDatabaseUrl(databaseUrl: string): string {
+  const url = new URL(databaseUrl);
+  
+  // Remove pgbouncer parameter if present
+  url.searchParams.delete('pgbouncer');
+  
+  // Keep essential parameters
+  const essentialParams = ['sslmode', 'connect_timeout'];
+  const cleanParams = new URLSearchParams();
+  
+  essentialParams.forEach(param => {
+    if (url.searchParams.has(param)) {
+      cleanParams.append(param, url.searchParams.get(param)!);
+    }
+  });
+  
+  // Reconstruct clean URL
+  const cleanUrl = new URL(url.toString());
+  cleanUrl.search = cleanParams.toString();
+  
+  return cleanUrl.toString();
+}
+
 async function getDatabaseStats() {
-  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const databaseUrl = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
   if (!databaseUrl) {
     throw new Error('Database URL not found in environment variables');
   }
 
-  const url = new URL(databaseUrl);
+  const cleanUrl = cleanDatabaseUrl(databaseUrl);
+  const url = new URL(cleanUrl);
   process.env.PGPASSWORD = url.password;
 
   try {
     // Get table count
     const { stdout: tableCount } = await execAsync(`
-      psql "${databaseUrl}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
+      psql "${cleanUrl}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"
     `);
 
     // Get total database size
     const { stdout: dbSize } = await execAsync(`
-      psql "${databaseUrl}" -t -c "SELECT pg_size_pretty(pg_database_size(current_database()));"
+      psql "${cleanUrl}" -t -c "SELECT pg_size_pretty(pg_database_size(current_database()));"
     `);
 
     // Get table sizes
     const { stdout: tableSizes } = await execAsync(`
-      psql "${databaseUrl}" -t -c "
+      psql "${cleanUrl}" -t -c "
         SELECT table_name, pg_size_pretty(pg_total_relation_size(quote_ident(table_name)))
         FROM information_schema.tables
         WHERE table_schema = 'public'
@@ -87,12 +108,14 @@ async function backupDatabase() {
     
     console.log('\n📦 Creating database backup...');
     
-    const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    const databaseUrl = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
     if (!databaseUrl) {
-      throw new Error('Neither DATABASE_URL nor POSTGRES_URL environment variable is set');
+      throw new Error('Neither POSTGRES_PRISMA_URL nor POSTGRES_URL environment variable is set');
     }
 
-    const url = new URL(databaseUrl);
+    const cleanUrl = cleanDatabaseUrl(databaseUrl);
+    const url = new URL(cleanUrl);
+    
     const command = [
       'pg_dump',
       `-h ${url.hostname}`,
@@ -102,7 +125,7 @@ async function backupDatabase() {
       `-f "${filepath}"`,
       '--format=p',
       '--no-owner',
-      '--verbose'  // Added verbose flag
+      '--verbose'
     ].filter(Boolean).join(' ');
 
     process.env.PGPASSWORD = url.password;
@@ -129,7 +152,7 @@ async function backupDatabase() {
       console.warn(`⚠️  Warning: Number of tables in backup (${tableCount}) differs from database (${dbStats.tableCount})`);
     }
 
-    if (stats.size < 1000) { // Less than 1KB
+    if (stats.size < 1000) {
       console.warn('⚠️  Warning: Backup file seems unusually small. Please verify its contents.');
     }
 
@@ -141,7 +164,6 @@ async function backupDatabase() {
 
 async function rotateBackups() {
   try {
-    // Get all backup files
     const files = await readdir(BACKUP_DIR);
     const backupFiles = files
       .filter(file => file.endsWith('.sql'))
@@ -151,11 +173,9 @@ async function rotateBackups() {
         created: (await stat(join(BACKUP_DIR, file))).birthtimeMs
       }));
 
-    // Sort backups by creation time (newest first)
     const backups = await Promise.all(backupFiles);
     backups.sort((a, b) => b.created - a.created);
 
-    // Remove old backups
     for (const backup of backups.slice(MAX_BACKUPS)) {
       console.log(`🗑️ Removing old backup: ${backup.name}`);
       await unlink(backup.path);
@@ -165,10 +185,8 @@ async function rotateBackups() {
   }
 }
 
-// Export the function for use as a module
 export { backupDatabase };
 
-// Run backup if file is being run directly
 if (process.argv[1] === import.meta.url.substring(7)) {
   backupDatabase();
 }
