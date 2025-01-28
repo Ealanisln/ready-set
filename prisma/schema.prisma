@@ -53,6 +53,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
+  LeadCapture           LeadCapture[]
 }
 
 model on_demand {
@@ -254,6 +255,20 @@ model FormSubmission {
   @@index([createdAt])
   @@index([formType])
   @@index([syncedToSheets])
+}
+
+model LeadCapture {
+  id                      String   @id @default(cuid())
+  firstName               String
+  lastName                String
+  email                   String   @unique
+  industry                String
+  subscribedToMailingList Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  // Optional relation if needed
+  userId                  String?
+  user                    user?    @relation(fields: [userId], references: [id])
 }
 
 enum driver_status {
