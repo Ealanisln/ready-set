@@ -156,9 +156,6 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
-      dotenv-cli:
-        specifier: ^8.0.0
-        version: 8.0.0
       embla-carousel-autoplay:
         specifier: ^8.5.1
         version: 8.5.1(embla-carousel@8.5.1)
@@ -343,6 +340,9 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
+      dotenv-cli:
+        specifier: ^8.0.0
+        version: 8.0.0
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
