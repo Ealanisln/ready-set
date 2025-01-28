@@ -12,7 +12,7 @@ sgMail.setApiKey(process.env.SEND_API_KEY || '');
 export const sendEmail = async (data: EmailPayload) => {
   const msg = {
     to: data.to,
-    from: process.env.EMAIL_FROM || 'emmanuel@alanis.dev', // Use a verified sender email
+    from: process.env.EMAIL_FROM || 'solutions@readysetllc.com', // Use a verified sender email
     subject: data.subject,
     html: data.html,
   };

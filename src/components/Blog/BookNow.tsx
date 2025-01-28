@@ -1,8 +1,20 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { PhoneCall } from "lucide-react";
 import Link from 'next/link';
 import AppointmentDialog from '../VirtualAssistant/Appointment';
+import {
+  FacebookShareButton,
+  LinkedinShareButton,
+  TwitterShareButton,
+  EmailShareButton,
+  FacebookIcon,
+  LinkedinIcon,
+  TwitterIcon,
+  EmailIcon,
+} from 'react-share';
 
 interface AdCardProps {
   title: string;
@@ -10,6 +22,8 @@ interface AdCardProps {
   ctaText: string;
   ctaLink: string;
   logoSrc?: string;
+  blogTitle?: string;
+  currentUrl?: string;
 }
 
 const BookNow: React.FC<AdCardProps> = ({
@@ -17,9 +31,23 @@ const BookNow: React.FC<AdCardProps> = ({
   subtitle,
   ctaText,
   ctaLink = '/booking-page',
-  logoSrc = '/images/logo/logo-white.png'
+  logoSrc = '/images/logo/logo-white.png',
+  blogTitle,
+  currentUrl
 }) => {
+  const [url, setUrl] = useState('');
+  const [pageTitle, setPageTitle] = useState('');
   const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUrl(currentUrl || window.location.href);
+      setPageTitle(blogTitle || document.title || title);
+    }
+  }, [currentUrl, blogTitle, title]);
+
+  const shareUrl = url || '';
+  const shareTitle = pageTitle || "Save 78% on Hiring Costs with a Virtual Assistant";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -46,7 +74,7 @@ const BookNow: React.FC<AdCardProps> = ({
           </p>
         </div>
 
-        {/* AppointmentDialog en lugar del CTA Button anterior */}
+        {/* AppointmentDialog */}
         <div className="flex justify-center">
           <AppointmentDialog
             buttonText="Book Now"
@@ -63,40 +91,25 @@ const BookNow: React.FC<AdCardProps> = ({
         <div className="pt-8 mt-8 border-t border-gray-200">
           <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
           <div className="flex justify-center space-x-4">
-            <SocialIcon href="#" network="facebook" />
-            <SocialIcon href="#" network="instagram" />
-            <SocialIcon href="#" network="linkedin" />
-            <SocialIcon href="#" network="tumblr" />
-            <SocialIcon href="#" network="link" />
+            <FacebookShareButton url={shareUrl} title={shareTitle}>
+              <FacebookIcon size={40} round />
+            </FacebookShareButton>
+
+            <LinkedinShareButton url={shareUrl} title={shareTitle}>
+              <LinkedinIcon size={40} round />
+            </LinkedinShareButton>
+
+            <TwitterShareButton url={shareUrl} title={shareTitle}>
+              <TwitterIcon size={40} round />
+            </TwitterShareButton>
+
+            <EmailShareButton url={shareUrl} subject={shareTitle}>
+              <EmailIcon size={40} round />
+            </EmailShareButton>
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-// Social Icon Component
-interface SocialIconProps {
-  href: string;
-  network: 'facebook' | 'instagram' | 'linkedin' | 'tumblr' | 'link';
-}
-
-const SocialIcon: React.FC<SocialIconProps> = ({ href, network }) => {
-  return (
-    <Link 
-      href={href}
-      className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
-    >
-      <span className="sr-only">Share on {network}</span>
-      <div className="w-5 h-5 text-gray-600">
-        {/* You can replace these with actual icons */}
-        {network === 'link' && (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-        )}
-      </div>
-    </Link>
   );
 };
 
