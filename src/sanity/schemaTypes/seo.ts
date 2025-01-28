@@ -70,10 +70,12 @@ export interface SeoType {
 export interface PostDocument {
   _type: "post";
   _id: string;
+  _updatedAt: string;
   title: string;
   slug: {
     current: string;
   };
+  smallDescription?: string;
   mainImage?: {
     _type: "image";
     asset: {
