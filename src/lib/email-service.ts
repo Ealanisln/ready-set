@@ -69,8 +69,8 @@ export class EmailService {
     `;
 
     const msg = {
-      to: process.env.NOTIFICATION_EMAIL!, // Set this in your .env
-      from: process.env.SENDGRID_FROM_EMAIL!, // Set this in your .env
+      to: process.env.NOTIFICATION_RECIPIENT || 'info@ready-set.co', // Add this line
+      from: 'Ready Set Website <updates@updates.readysetllc.com>',
       subject: `New ${formType} Delivery Quote Request - ${companyName}`,
       html: htmlContent,
       text: htmlContent.replace(/<[^>]*>/g, ""), // Strip HTML for plain text version

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "next dev",
+    "dev": "dotenv -e .env.local -- next dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -21,7 +21,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
     "test:watch": "jest --watch",
     "studio": "dotenv -e .env.local -- npx prisma studio",
-    "setup-sheets": "tsx src/scripts/setup-sheets.ts"
+    "db:generate": "dotenv -e .env.local -- npx prisma generate"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -80,10 +80,13 @@
     "@vercel/speed-insights": "^1.1.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "debug": "^4.4.0",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0",
     "embla-carousel-autoplay": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.15.0",
@@ -129,7 +132,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@prisma/client": "6.2.1",
+    "@prisma/client": "6.3.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -148,7 +151,6 @@
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
-    "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-next": "15.1.1",
@@ -156,7 +158,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
-    "prisma": "6.2.1",
+    "prisma": "6.3.0",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",

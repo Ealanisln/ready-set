@@ -154,35 +154,29 @@ export const FormManager = () => {
 
       const response = await fetch("/api/form-submissions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(baseSubmission),
       });
-
+  
       const result = await response.json();
-
+  
       if (!response.ok) {
-        throw new Error(result.error || "Failed to submit form");
+        console.error('Server response error:', result);
+        throw new Error(result.error || `HTTP error! status: ${response.status}`);
       }
-
-      // Dismiss loading toast and show success
+  
       toast.dismiss(loadingToast);
-      toast.success('Your request has been submitted successfully!', {
-        duration: 5000 // Show success message for 5 seconds
-      });
-
+      toast.success('Request submitted successfully!', { duration: 5000 });
       closeForm();
+  
     } catch (error) {
-      // Dismiss loading toast and show error
       toast.dismiss(loadingToast);
-      toast.error(error instanceof Error ? error.message : 'Failed to submit form. Please try again.', {
-        duration: 5000
-      });
-      console.error("Error submitting form:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Submission failed';
+      toast.error(errorMessage, { duration: 5000 });
+      console.error("Submission error details:", error);
     }
   };
-
+  
   return {
     openForm,
     closeForm,

@@ -237,23 +237,23 @@ model file_upload {
 }
 
 model FormSubmission {
-  id          String             @id @default(cuid())
-  formType    FormSubmissionType
-  userId      String?
-  companyName String?
-  contactName String?
-  email       String?
-  phone       String?
-  website     String?
+  id                 String             @id @default(cuid())
+  formType           FormSubmissionType
+  userId             String?
+  companyName        String?
+  contactName        String?
+  email              String?
+  phone              String?
+  website            String?
   counties           String[]
   frequency          String?
   pickupAddress      Json?
   specifications     Json?
   notes              String?
   additionalComments String?
-  syncedToSheets     Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  syncedToSheets     Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   // Relations
   user user? @relation(fields: [userId], references: [id])

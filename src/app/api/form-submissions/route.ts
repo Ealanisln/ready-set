@@ -8,62 +8,72 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    // Validate required fields
-    if (!body.formType) {
+    // Add validation for nested fields
+    if (!body.formData?.companyName?.trim()) {
       return NextResponse.json(
-        { error: 'Form type is required' },
+        { error: 'Company name is required' },
         { status: 400 }
       );
     }
 
-    if (!body.formData) {
+    if (!body.formData?.email?.trim()) {
       return NextResponse.json(
-        { error: 'Form data is required' },
+        { error: 'Email is required' },
         { status: 400 }
       );
     }
 
-    // Validate form type
+    // More specific form type validation
     const validFormTypes = ['food', 'flower', 'bakery', 'specialty'];
-    if (!validFormTypes.includes(body.formType.toLowerCase())) {
+    const formType = body.formType?.toLowerCase();
+    if (!formType || !validFormTypes.includes(formType)) {
       return NextResponse.json(
-        { error: 'Invalid form type' },
+        { error: `Invalid form type. Valid types are: ${validFormTypes.join(', ')}` },
         { status: 400 }
       );
     }
 
-    // Log incoming request
-    console.log('Received form submission:', {
-      formType: body.formType,
-      formData: body.formData,
-    });
+    if (!body.formData?.pickupAddress?.street?.trim()) {
+      return NextResponse.json(
+        { error: 'Street address is required' },
+        { status: 400 }
+      );
+    }
     
+    if (!body.formData?.counties?.length) {
+      return NextResponse.json(
+        { error: 'At least one county must be selected' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Attempting to create submission...');
     const submission = await FormSubmissionService.createSubmission({
-      formType: body.formType,
+      formType,
       formData: body.formData,
     });
 
-     // Send email notification
-     await EmailService.sendFormSubmissionNotification({
-      formType: body.formType,
-      formData: body.formData,
-      submissionId: submission.id
-    });
-
-    // Log successful submission
-    console.log('Form submission successful:', {
-      id: submission.id,
-      formType: submission.formType,
-    });
+    console.log(`Submission created with ID: ${submission.id}`);
+    
+    try {
+      console.log('Attempting to send notification email...');
+      await EmailService.sendFormSubmissionNotification({
+        formType,
+        formData: body.formData,
+        submissionId: submission.id
+      });
+    } catch (emailError) {
+      console.error('Email sending failed (non-critical):', emailError);
+      // Continue even if email fails
+    }
 
     return NextResponse.json({ 
       success: true, 
       data: submission 
     });
+
   } catch (error) {
-    console.error('Error in form submission endpoint:', error);
-    
-    // Return more specific error message if available
+    console.error('Detailed submission error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to submit form';
     
     return NextResponse.json(
