@@ -1,7 +1,7 @@
 // src/app/api/form-submissions/route.ts
 
 import { NextResponse } from 'next/server';
-import { FormSubmissionService } from '@/lib/form-submissions';
+import { form_submissionService } from '@/lib/form-submissions';
 import { EmailService } from '@/lib/email-service';
 
 export async function POST(req: Request) {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     console.log('Attempting to create submission...');
-    const submission = await FormSubmissionService.createSubmission({
+    const submission = await form_submissionService.createSubmission({
       formType,
       formData: body.formData,
     });
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     
     try {
       console.log('Attempting to send notification email...');
-      await EmailService.sendFormSubmissionNotification({
+      await EmailService.sendform_submissionNotification({
         formType,
         formData: body.formData,
         submissionId: submission.id
