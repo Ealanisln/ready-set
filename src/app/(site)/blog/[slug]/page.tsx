@@ -13,6 +13,7 @@ import CustomNextSeo from "@/components/Blog/CustomSeo";
 import type { PostDocument } from "@/sanity/schemaTypes/seo";
 import React from "react";
 import { format } from 'date-fns';
+import BookNow from "@/components/Blog/BookNow";
 
 export const revalidate = 30;
 
@@ -208,6 +209,7 @@ export default async function BlogPost({
             </div>
           </div>
         </div>
+        <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
       </article>
     </div>
   );
