@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import EmailMarketingGuide from "./EmailMarketing";
+import NewsletterForm from "./NewsLetterForm";
 
 interface Resource {
   title: string;
@@ -98,58 +99,7 @@ const ResourcesGrid = () => {
             </Card>
           ))}
         </div>
-
-        {/* Newsletter Signup */}
-        <Card className="mx-auto max-w-2xl rounded-none">
-          <CardHeader>
-            <CardTitle className="text-center">
-              Newsletter Alert and Discounts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="First name"
-                  className="rounded-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Last name"
-                  className="rounded-none"
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email address"
-                  className="rounded-none"
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="industry">Industry</Label>
-                <Input
-                  id="industry"
-                  placeholder="Your industry"
-                  className="rounded-none"
-                />
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full rounded-none bg-gray-900 text-white hover:bg-gray-800">
-              Subscribe Now
-            </Button>
-          </CardFooter>
-        </Card>
-        <EmailMarketingGuide />
+        <NewsletterForm />
       </div>
     </div>
   );
