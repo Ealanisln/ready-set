@@ -162,10 +162,10 @@ const EmailMarketingGuide = () => {
           </p>
 
           <p className="text-gray-600">
-            This comprehensive resource helps businesses navigate the critical process of selecting the right delivery partner in today's evolving e-commerce landscape.
+            This comprehensive resource helps businesses navigate the critical process of selecting the right delivery partner in today's evolving e-commerce landscape. The guide is particularly valuable because:
           </p>
 
-          <h2 className="text-xl font-semibold text-gray-800">The guide provides detailed frameworks for evaluating potential partners across four key areas:</h2>
+          <p className="text-gray-600">1. The guide provides detailed frameworks for evaluating potential partners across four key areas:</p>
           <ul className="space-y-4 text-gray-600">
             <li>• Cost structure analysis (both direct and indirect costs)</li>
             <li>• Customer experience optimization</li>
@@ -174,7 +174,7 @@ const EmailMarketingGuide = () => {
           </ul>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-gray-800">It includes practical implementation tools such as:</h3>
+            <p className="text-gray-600">2. It includes practical implementation tools such as:</p>
             <ul className="space-y-4 text-gray-600">
               <li>• Step-by-step checklists</li>
               <li>• Industry-specific considerations for specialized deliveries</li>
@@ -184,7 +184,7 @@ const EmailMarketingGuide = () => {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-gray-800">This resource will help your business succeed by:</h3>
+            <p className="font-bold text-gray-600">This resource will help your business succeed by:</p>
             <ul className="space-y-4 text-gray-600">
               <li>• Avoiding common pitfalls in delivery partner selection</li>
               <li>• Ensuring comprehensive evaluation of potential partners</li>
@@ -194,8 +194,15 @@ const EmailMarketingGuide = () => {
             </ul>
           </div>
 
+          <div className="space-y-4">
+          <p className="font-bold">
+           Download your Free Delivery Partner Selection Guide{" "}
+      <span className="text-gray-600 font-normal">to get more insights!</span>
+        </p>
+         </div>  
+
           <p className="text-gray-600">
-            If you found this guide helpful, share it with your network or schedule a consultation call with us. Ready to take the next step in optimizing your delivery operations? <span className="font-bold">Contact Ready Set Group</span> now!
+            If you found this guide helpful, share it with your network or schedule a consultation call with us. Ready to take the next step in optimizing your delivery operations? Contact <span className="text-blue-500 font-bold underline">Ready Set Group</span> now!
           </p>
         </div>
 
