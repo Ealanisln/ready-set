@@ -4,46 +4,45 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model user {
-  id                    String       @id @default(cuid())
+  id                    String             @id @default(cuid())
   guid                  String?
   name                  String?
-  email                 String?      @unique
+  email                 String?            @unique
   emailVerified         DateTime?
   image                 String?
   password              String?
-  passwordResetToken    String?      @unique
+  passwordResetToken    String?            @unique
   passwordResetTokenExp DateTime?
-  type                  users_type   @default(vendor)
-  company_name          String?      @db.VarChar(191)
-  contact_name          String?      @db.VarChar(191)
-  contact_number        String?      @db.VarChar(191)
-  website               String?      @db.VarChar(191)
-  street1               String?      @db.VarChar(191)
-  street2               String?      @db.VarChar(191)
-  city                  String?      @db.VarChar(191)
-  state                 String?      @db.VarChar(191)
-  zip                   String?      @db.VarChar(191)
-  location_number       String?      @db.VarChar(191)
-  parking_loading       String?      @db.VarChar(191)
+  type                  users_type         @default(vendor)
+  company_name          String?            @db.VarChar(191)
+  contact_name          String?            @db.VarChar(191)
+  contact_number        String?            @db.VarChar(191)
+  website               String?            @db.VarChar(191)
+  street1               String?            @db.VarChar(191)
+  street2               String?            @db.VarChar(191)
+  city                  String?            @db.VarChar(191)
+  state                 String?            @db.VarChar(191)
+  zip                   String?            @db.VarChar(191)
+  location_number       String?            @db.VarChar(191)
+  parking_loading       String?            @db.VarChar(191)
   counties              String?
   time_needed           String?
   catering_brokerage    String?
   frequency             String?
   provide               String?
-  head_count            String?      @db.VarChar(191)
-  status                users_status @default(pending)
+  head_count            String?            @db.VarChar(191)
+  status                users_status       @default(pending)
   side_notes            String?
   confirmation_code     String?
-  remember_token        String?      @db.VarChar(100)
-  created_at            DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
-  isTemporaryPassword   Boolean      @default(false)
-
-  // Relations
+  remember_token        String?            @db.VarChar(100)
+  created_at            DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime           @default(now()) @db.Timestamptz(6)
+  isTemporaryPassword   Boolean            @default(false)
+  FormSubmission        FormSubmission[]
   accounts              account[]
   createdAddresses      address[]
   catering_requests     catering_request[]
@@ -53,7 +52,6 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
-  form_submission       form_submission[]
 }
 
 model on_demand {
@@ -81,36 +79,32 @@ model on_demand {
   height              String?                @db.VarChar(191)
   weight              String?                @db.VarChar(191)
   created_at          DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  updated_at          DateTime               @default(now()) @db.Timestamptz(6)
   delivery_address_id String
   driver_status       driver_status?
-
-  // Relations
-  address          address       @relation("PickupAddress", fields: [address_id], references: [id])
-  delivery_address address       @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
-  user             user          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  dispatch         dispatch[]
-  fileUploads      file_upload[]
+  dispatch            dispatch[]
+  fileUploads         file_upload[]
+  address             address                @relation("PickupAddress", fields: [address_id], references: [id])
+  delivery_address    address                @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
+  user                user                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model address {
-  id             String   @id @default(cuid())
-  county         String?
-  street1        String
-  street2        String?
-  city           String
-  state          String
-  zip            String
-  createdAt      DateTime @default(now())
-  createdBy      String?
-  isRestaurant   Boolean  @default(false)
-  isShared       Boolean  @default(false)
-  locationNumber String?
-  parkingLoading String?
-  updatedAt      DateTime @updatedAt
-  name           String?
-
-  // Relations
+  id                String             @id @default(cuid())
+  county            String?
+  street1           String
+  street2           String?
+  city              String
+  state             String
+  zip               String
+  createdAt         DateTime           @default(now())
+  createdBy         String?
+  isRestaurant      Boolean            @default(false)
+  isShared          Boolean            @default(false)
+  locationNumber    String?
+  parkingLoading    String?
+  updatedAt         DateTime           @updatedAt
+  name              String?
   creator           user?              @relation(fields: [createdBy], references: [id])
   pickupRequests    catering_request[] @relation("PickupAddress")
   deliveryRequests  catering_request[] @relation("DeliveryAddress")
@@ -191,7 +185,7 @@ model catering_request {
   order_total         Decimal?                    @default(0.00) @db.Decimal(10, 2)
   tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
   created_at          DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
+  updated_at          DateTime                    @default(now()) @db.Timestamptz(6)
   delivery_address_id String
   driver_status       driver_status?
   address             address                     @relation("PickupAddress", fields: [address_id], references: [id])
@@ -236,30 +230,28 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
-model form_submission {
-  id                 String               @id @default(cuid())
-  formType           form_submission_type
+model FormSubmission {
+  id                 String             @id
+  formType           FormSubmissionType
   userId             String?
   companyName        String?
   contactName        String?
   email              String?
   phone              String?
-  website            String?
   counties           String[]
   frequency          String?
   pickupAddress      Json?
   specifications     Json?
   notes              String?
+  syncedToSheets     Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime
   additionalComments String?
-  syncedToSheets     Boolean              @default(false)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  website            String?
+  user               user?              @relation(fields: [userId], references: [id])
 
-  // Relations
-  user user? @relation(fields: [userId], references: [id])
-
-  @@index([formType])
   @@index([createdAt])
+  @@index([formType])
   @@index([syncedToSheets])
 }
 
@@ -311,7 +303,7 @@ enum users_type {
   super_admin
 }
 
-enum form_submission_type {
+enum FormSubmissionType {
   food
   flower
   bakery

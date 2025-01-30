@@ -9,7 +9,7 @@ import {
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 export class EmailService {
-  static async sendform_submissionNotification(data: {
+  static async sendFormSubmissionNotification(data: {
     formType: FormType;
     formData: DeliveryFormData;
     submissionId: string;

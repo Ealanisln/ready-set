@@ -8,13 +8,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "backup": "tsx src/scripts/backup-db.ts",
+    "backup": "dotenv -e .env.production tsx src/scripts/backup-db.ts",
     "db:sync": "tsx scripts/db-sync.ts",
     "db:reset": "npx prisma migrate reset",
     "db:seed": "npx prisma db seed",
     "db:review": "npx prisma studio",
     "db:full-sync": "tsx scripts/db-full-sync.ts",
-    "db:backup": "tsx scripts/backup-db.ts",
+    "db:backup:local": "dotenv -e .env.local tsx src/scripts/backup-db.ts",
+    "db:backup:prod": "dotenv -e .env.production tsx src/scripts/backup-db.ts",
     "db:restore": "tsx scripts/restore-db.ts",
     "db": "tsx src/scripts/db-tasks.ts",
     "db:prod": "cross-env NODE_ENV=production tsx src/scripts/db-tasks.ts",
@@ -35,9 +36,6 @@
   "trustedDependencies": [
     "@testing-library/react"
   ],
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@faker-js/faker": "^9.3.0",

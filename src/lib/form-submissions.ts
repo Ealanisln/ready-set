@@ -6,7 +6,7 @@ import {
   FormType,
 } from "@/components/Logistics/QuoteRequest/types";
 
-enum form_submissionType {
+enum FormSubmissionType {
   food = "food",
   flower = "flower",
   bakery = "bakery",
@@ -23,7 +23,7 @@ const normalizeValue = (value: any): string => {
   return String(value);
 };
 
-export class form_submissionService {
+export class FormSubmissionService {
   static async createSubmission(data: {
     formType: FormType;
     formData: DeliveryFormData;
@@ -32,11 +32,11 @@ export class form_submissionService {
       throw new Error("Form type is required");
     }
 
-    const formTypeMap: Record<string, form_submissionType> = {
-      food: form_submissionType.food,
-      flower: form_submissionType.flower,
-      bakery: form_submissionType.bakery,
-      specialty: form_submissionType.specialty,
+    const formTypeMap: Record<string, FormSubmissionType> = {
+      food: FormSubmissionType.food,
+      flower: FormSubmissionType.flower,
+      bakery: FormSubmissionType.bakery,
+      specialty: FormSubmissionType.specialty,
     };
 
     try {
