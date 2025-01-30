@@ -1,10 +1,12 @@
-import { UseFormRegister } from "react-hook-form";
+import { FieldError, FieldErrors, UseFormRegister } from "react-hook-form";
+import { FoodFormData } from "../../types";
 
-interface RegisterProps {
+interface CountiesSelectionProps {
   register: UseFormRegister<any>;
+  errors?: FieldErrors<FoodFormData>;  // Changed from error?: FieldError
 }
 
-export const CountiesSelection = ({ register }: RegisterProps) => {
+export const CountiesSelection = ({ register, errors }: CountiesSelectionProps) => {
   const californiaCounties = [
     "Alameda",
     "Marin",
@@ -30,7 +32,7 @@ export const CountiesSelection = ({ register }: RegisterProps) => {
                 <input 
                   type="checkbox" 
                   value={county}
-                  {...register('selectedCounties')} 
+                  {...register('counties')}
                 />
                 <span>{county}</span>
               </label>
@@ -45,7 +47,7 @@ export const CountiesSelection = ({ register }: RegisterProps) => {
                 <input 
                   type="checkbox" 
                   value={county}
-                  {...register('selectedCounties')} 
+                  {...register('counties')}
                 />
                 <span>{county}</span>
               </label>
@@ -53,6 +55,11 @@ export const CountiesSelection = ({ register }: RegisterProps) => {
           </div>
         </div>
       </div>
+      {errors?.counties && (
+        <p className="text-sm text-red-500">
+          {errors.counties.message}
+        </p>
+      )}
     </div>
   );
 };

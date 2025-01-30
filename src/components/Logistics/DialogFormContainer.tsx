@@ -14,7 +14,12 @@ import {
 import {
   DialogFormProps,
   FormType,
+  DeliveryFormData,
 } from "@/components/Logistics/QuoteRequest/types";
+
+interface ExtendedDialogFormProps extends DialogFormProps {
+  onSubmit: (formData: DeliveryFormData) => Promise<void>;
+}
 
 const getFormTitle = (type: FormType) => {
   switch (type) {
@@ -50,17 +55,18 @@ const DialogFormContainer = ({
   isOpen,
   onClose,
   formType,
-}: DialogFormProps) => {
+  onSubmit,
+}: ExtendedDialogFormProps) => {
   const renderForm = () => {
     switch (formType) {
       case "food":
-        return <FoodDeliveryForm />;
+        return <FoodDeliveryForm onSubmit={onSubmit} />;
       case "flower":
-        return <FlowerDeliveryForm />;
+        return <FlowerDeliveryForm onSubmit={onSubmit} />;
       case "bakery":
-        return <BakeGoodsDeliveryForm />;
+        return <BakeGoodsDeliveryForm onSubmit={onSubmit} />;
       case "specialty":
-        return <SpecialtyDeliveryForm />;
+        return <SpecialtyDeliveryForm onSubmit={onSubmit} />;
       default:
         return null;
     }
@@ -77,9 +83,7 @@ const DialogFormContainer = ({
             {getFormDescription(formType)}
           </DialogDescription>
         </DialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto px-1">
-          {renderForm()}
-        </div>
+        <div className="max-h-[60vh] overflow-y-auto px-1">{renderForm()}</div>
       </DialogContent>
     </Dialog>
   );

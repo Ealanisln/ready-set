@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model user {
@@ -41,7 +40,7 @@ model user {
   confirmation_code     String?
   remember_token        String?            @db.VarChar(100)
   created_at            DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  updated_at            DateTime           @default(now()) @db.Timestamptz(6)
   isTemporaryPassword   Boolean            @default(false)
   FormSubmission        FormSubmission[]
   accounts              account[]
@@ -81,7 +80,7 @@ model on_demand {
   height              String?                @db.VarChar(191)
   weight              String?                @db.VarChar(191)
   created_at          DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  updated_at          DateTime               @default(now()) @db.Timestamptz(6)
   delivery_address_id String
   driver_status       driver_status?
   dispatch            dispatch[]
@@ -187,7 +186,7 @@ model catering_request {
   order_total         Decimal?                    @default(0.00) @db.Decimal(10, 2)
   tip                 Decimal?                    @default(0.00) @db.Decimal(10, 2)
   created_at          DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime                    @default(now()) @updatedAt @db.Timestamptz(6)
+  updated_at          DateTime                    @default(now()) @db.Timestamptz(6)
   delivery_address_id String
   driver_status       driver_status?
   address             address                     @relation("PickupAddress", fields: [address_id], references: [id])
@@ -233,7 +232,7 @@ model file_upload {
 }
 
 model FormSubmission {
-  id                 String             @id
+  id                 String             @id @default(uuid())
   formType           FormSubmissionType
   userId             String?
   companyName        String?
@@ -243,11 +242,11 @@ model FormSubmission {
   counties           String[]
   frequency          String?
   pickupAddress      Json?
-  specifications     Json?
+  specifications     String?
   notes              String?
   syncedToSheets     Boolean            @default(false)
   createdAt          DateTime           @default(now())
-  updatedAt          DateTime
+  updatedAt          DateTime           @updatedAt
   additionalComments String?
   website            String?
   user               user?              @relation(fields: [userId], references: [id])
@@ -255,20 +254,6 @@ model FormSubmission {
   @@index([createdAt])
   @@index([formType])
   @@index([syncedToSheets])
-}
-
-model LeadCapture {
-  id                      String   @id @default(cuid())
-  firstName               String
-  lastName                String
-  email                   String   @unique
-  industry                String
-  subscribedToMailingList Boolean  @default(false)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  // Optional relation if needed
-  userId                  String?
-  user                    user?    @relation(fields: [userId], references: [id])
 }
 
 enum driver_status {

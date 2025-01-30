@@ -1,6 +1,6 @@
 "use client";
 
-import { FormType } from './QuoteRequest/types';
+import { FormType } from "./QuoteRequest/types";
 
 interface Partner {
   name: string;
@@ -17,35 +17,49 @@ interface FoodServicesProps {
 }
 
 const formatDescription = (text: string) => {
-  return text.replace(
-    /At (Ready Set),/,
-    'At <strong>$1</strong>,'
-  ).split(/<strong>|<\/strong>/).map((part, index) => 
-    index % 2 === 1 ? <strong key={index} className="font-bold">{part}</strong> : part
-  );
+  return text
+    .replace(/At (Ready Set),/, "At <strong>$1</strong>,")
+    .split(/<strong>|<\/strong>/)
+    .map((part, index) =>
+      index % 2 === 1 ? (
+        <strong key={index} className="font-bold">
+          {part}
+        </strong>
+      ) : (
+        part
+      ),
+    );
 };
 
 const formatFinalNote = (text: string) => {
-  return text.replace(
-    /(Ready Set) is/,
-    '<strong>$1</strong> is'
-  ).split(/<strong>|<\/strong>/).map((part, index) => 
-    index % 2 === 1 ? <strong key={index} className="font-bold">{part}</strong> : part
-  );
+  return text
+    .replace(/(Ready Set) is/, "<strong>$1</strong> is")
+    .split(/<strong>|<\/strong>/)
+    .map((part, index) =>
+      index % 2 === 1 ? (
+        <strong key={index} className="font-bold">
+          {part}
+        </strong>
+      ) : (
+        part
+      ),
+    );
 };
 
 const formatPartnerName = (name: string) => {
   const terms = [
-    'Foodee',
-    'Destino',
-    'Guerilla Catering SF',
-    'Conviva',
-    'Korean Bobcha'
+    "Foodee",
+    "Destino",
+    "Guerilla Catering SF",
+    "Conviva",
+    "Korean Bobcha",
   ];
-  
-  return terms.includes(name) ? 
-    <strong className="font-bold">{name}</strong> : 
-    name;
+
+  return terms.includes(name) ? (
+    <strong className="font-bold">{name}</strong>
+  ) : (
+    name
+  );
 };
 
 const FoodServices: React.FC<FoodServicesProps> = ({
@@ -68,45 +82,58 @@ const FoodServices: React.FC<FoodServicesProps> = ({
       onRequestQuote("food");
     }
   };
-  
+
   return (
     <div className="w-full" id="food-services">
       {/* Title Section - Outside the yellow box */}
-      <div className="mx-auto max-w-7xl px-8 md:px-16 mb-8">
-        <h1 className="text-5xl font-bold text-gray-800 text-center mb-4">{title}</h1>
-        <p className="text-gray-700 italic text-center max-w-3xl mx-auto">
+      <div className="mx-auto mb-8 max-w-7xl px-8 md:px-16">
+        <h1 className="mb-4 text-center text-5xl font-bold text-gray-800">
+          {title}
+        </h1>
+        <p className="mx-auto max-w-3xl text-center italic text-gray-700">
           {subtitle}
         </p>
       </div>
 
       {/* Main Content - Yellow Box */}
       <div className="w-full bg-amber-300">
-        <div className="mx-auto max-w-7xl px-8 md:px-16 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="mx-auto max-w-7xl px-8 py-12 md:px-16">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
             {/* Left Column - Text Content */}
             <div className="space-y-8">
               <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-white">Food Deliveries</h2>
-                <p className="text-gray-700">{formatDescription(description)}</p>
+                <h2 className="text-4xl font-bold text-white">
+                  Food Deliveries
+                </h2>
+                <p className="text-gray-700">
+                  {formatDescription(description)}
+                </p>
                 <p className="text-gray-700">{longDescription}</p>
 
                 <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-800">Our Food Delivery Partners</h3>
-                  <p className="text-gray-700">We're proud to collaborate with some of the top names in the industry:</p>
-                  <ul className="list-disc list-inside space-y-1">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Our Food Delivery Partners
+                  </h3>
+                  <p className="text-gray-700">
+                    We're proud to collaborate with some of the top names in the
+                    industry:
+                  </p>
+                  <ul className="list-inside list-disc space-y-1">
                     {partners.map((partner, index) => (
-                      <li key={index} className="text-gray-700 italic">
+                      <li key={index} className="italic text-gray-700">
                         {formatPartnerName(partner.name)}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <p className="text-gray-700 italic">{formatFinalNote(finalNote)}</p>
+                <p className="italic text-gray-700">
+                  {formatFinalNote(finalNote)}
+                </p>
 
-                <button 
+                <button
                   onClick={handleQuoteRequest}
-                  className="bg-white px-6 py-3 rounded-md font-bold text-gray-800 hover:bg-gray-100 transition-colors"
+                  className="rounded-md bg-white px-6 py-3 font-bold text-gray-800 transition-colors hover:bg-gray-100"
                 >
                   Request a Quote
                 </button>
@@ -115,20 +142,24 @@ const FoodServices: React.FC<FoodServicesProps> = ({
 
             {/* Right Column - Image */}
             <div className="w-full px-4 md:px-6 lg:px-8">
-            <div className="relative w-full mt-8 md:mt-12 lg:mt-20">
-            <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
-           <div className="rounded-3xl overflow-hidden w-full h-full">
-           <picture>
-            <source srcSet="/images/logistics/foodpic.webp" type="image/webp" />
-            <img 
-            src="/images/logistics/foodpic.png" 
-            alt="Food delivery containers with various meals" 
-            className="w-full h-full object-cover object-center"/>
-          </picture>
-          </div>
-          </div>
-          </div>
-          </div>
+              <div className="relative mt-8 w-full md:mt-12 lg:mt-20">
+                <div className="aspect-w-16 aspect-h-9 md:aspect-h-10 lg:aspect-h-7">
+                  <div className="h-full w-full overflow-hidden rounded-3xl">
+                    <picture>
+                      <source
+                        srcSet="/images/logistics/foodpic.webp"
+                        type="image/webp"
+                      />
+                      <img
+                        src="/images/logistics/foodpic.png"
+                        alt="Food delivery containers with various meals"
+                        className="h-full w-full object-cover object-center"
+                      />
+                    </picture>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
