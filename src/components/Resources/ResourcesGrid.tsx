@@ -12,6 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import EmailMarketingGuide from "./EmailMarketing";
 import NewsletterForm from "./NewsLetterForm";
+import EmailMetricsMatter from "./EmailMetricsMatter";
+import GuideChoosePartner from "./GuideChoosePartner";
+import DeliveryLogistics from "./DeliveryLogistics";
+import EmailTesting from "./EmailTesting";
 
 interface Resource {
   title: string;
@@ -27,7 +31,7 @@ const resources: Resource[] = [
     description: "A Business Owner's Guide to Tracking Campaign Performance",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/1.png",
-    url: "/components/resources/email-metrics-landing", // Agrega la URL correspondiente
+    url: "email-metrics-matter", // Agrega la URL correspondiente
   },
   {
     title: "What Is Email Marketing",
@@ -100,6 +104,11 @@ const ResourcesGrid = () => {
           ))}
         </div>
         <NewsletterForm />
+        <EmailMetricsMatter />
+        <EmailMarketingGuide />
+        <GuideChoosePartner />
+        <DeliveryLogistics />
+        <EmailTesting />
       </div>
     </div>
   );
