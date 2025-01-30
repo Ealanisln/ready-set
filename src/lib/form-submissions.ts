@@ -5,6 +5,7 @@ import {
   DeliveryFormData,
   FormType,
 } from "@/components/Logistics/QuoteRequest/types";
+import { v4 as uuidv4 } from "uuid";
 
 enum FormSubmissionType {
   food = "food",
@@ -58,8 +59,13 @@ export class FormSubmissionService {
         ...specifications
       } = data.formData;
 
-      const submission = await prisma.form_submission.create({
+      const submission = await prisma.formSubmission.create({
         data: {
+          // Add required fields
+          id: uuidv4(), // or your ID generation logic
+          updatedAt: new Date(),
+
+          // Your existing fields
           formType: formTypeMap[data.formType.toLowerCase()],
           companyName: normalizeValue(companyName),
           contactName: normalizeValue(contactName),
@@ -76,6 +82,8 @@ export class FormSubmissionService {
             zip: "",
           },
           additionalComments: normalizeValue(additionalComments),
+
+          // Fix specifications type
           specifications: JSON.stringify(specifications),
         },
       });
