@@ -42,7 +42,6 @@ model user {
   created_at            DateTime           @default(now()) @db.Timestamptz(6)
   updated_at            DateTime           @default(now()) @db.Timestamptz(6)
   isTemporaryPassword   Boolean            @default(false)
-  FormSubmission        FormSubmission[]
   accounts              account[]
   createdAddresses      address[]
   catering_requests     catering_request[]
@@ -230,31 +229,6 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
-model FormSubmission {
-  id                 String             @id @default(uuid())
-  formType           FormSubmissionType
-  userId             String?
-  companyName        String?
-  contactName        String?
-  email              String?
-  phone              String?
-  counties           String[]
-  frequency          String?
-  pickupAddress      Json?
-  specifications     String?
-  notes              String?
-  syncedToSheets     Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  additionalComments String?
-  website            String?
-  user               user?              @relation(fields: [userId], references: [id])
-
-  @@index([createdAt])
-  @@index([formType])
-  @@index([syncedToSheets])
-}
-
 enum driver_status {
   arrived_at_vendor
   en_route_to_client
@@ -301,11 +275,4 @@ enum users_type {
   admin
   helpdesk
   super_admin
-}
-
-enum FormSubmissionType {
-  food
-  flower
-  bakery
-  specialty
 }
