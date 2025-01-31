@@ -9,6 +9,7 @@ interface FormData {
   lastName: string;
   email: string;
   industry: string;
+  newsletterConsent: boolean; // Added newsletter consent field
 }
 
 export default function NewsletterForm() {
@@ -125,6 +126,20 @@ export default function NewsletterForm() {
                   <span className="text-red-500 text-sm">{errors.industry.message}</span>
                 )}
               </div>
+            </div>
+
+            {/* Campo: Newsletter Consent */}
+            <div className="mt-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  {...register("newsletterConsent")}
+                  className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  I agree to receive newsletters and promotional emails.
+                </span>
+              </label>
             </div>
 
             {/* Botón de envío */}
