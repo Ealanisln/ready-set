@@ -20,8 +20,27 @@ export default function NewsletterForm() {
   } = useForm<FormData>();
 
   // Función que se ejecuta al enviar el formulario
-  const onSubmit = (data: FormData) => {
-    console.log('Form submitted:', JSON.stringify(data, null, 2));
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      console.log('Success:', result);
+      alert('Form submitted successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('There was an error submitting the form.');
+    }
   };
 
   return (

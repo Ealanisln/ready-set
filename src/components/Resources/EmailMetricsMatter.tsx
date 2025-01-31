@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 }
 const EmailMetricsMatter = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="pt-32 min-h-screen p-6">
       <div className="mx-auto max-w-6xl space-y-12">
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">

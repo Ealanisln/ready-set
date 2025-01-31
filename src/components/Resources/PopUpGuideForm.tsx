@@ -31,20 +31,30 @@ export default function PopupGuideForm() {
 
   // Función para manejar el envío del formulario
   const onSubmit = async (data: FormData) => {
-    console.log('Iniciando envío del formulario...');
     console.log('Datos del formulario:', data);
 
     try {
-      // Aquí enviarías los datos a tu API
-      console.log('Form submitted:', data);
-      console.log('Limpiando formulario y cerrando diálogo...');
+      // Enviar los datos al endpoint /api/leads
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar los datos');
+      }
+
+      const result = await response.json();
+      console.log('Respuesta del servidor:', result);
 
       // Restablecer el formulario y cerrar el diálogo
       reset();
       setOpen(false);
-      console.log('Envío completado exitosamente');
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error:', error);
     }
   };
 
