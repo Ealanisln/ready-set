@@ -42,7 +42,7 @@ model user {
   created_at            DateTime           @default(now()) @db.Timestamptz(6)
   updated_at            DateTime           @default(now()) @db.Timestamptz(6)
   isTemporaryPassword   Boolean            @default(false)
-  FormSubmission        FormSubmission[]
+  form_submission       form_submission[]
   accounts              account[]
   createdAddresses      address[]
   catering_requests     catering_request[]
@@ -230,9 +230,9 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
-model FormSubmission {
-  id                 String             @id @default(uuid())
-  formType           FormSubmissionType
+model form_submission {
+  id                 String               @id @default(uuid())
+  formType           form_submission_type
   userId             String?
   companyName        String?
   contactName        String?
@@ -243,16 +243,27 @@ model FormSubmission {
   pickupAddress      Json?
   specifications     String?
   notes              String?
-  syncedToSheets     Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  syncedToSheets     Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   additionalComments String?
   website            String?
-  user               user?              @relation(fields: [userId], references: [id])
+  user               user?                @relation(fields: [userId], references: [id])
 
   @@index([createdAt])
   @@index([formType])
   @@index([syncedToSheets])
+}
+
+model lead_capture {
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  industry          String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  newsletterConsent Boolean  @default(false)
 }
 
 enum driver_status {
@@ -303,7 +314,7 @@ enum users_type {
   super_admin
 }
 
-enum FormSubmissionType {
+enum form_submission_type {
   food
   flower
   bakery
