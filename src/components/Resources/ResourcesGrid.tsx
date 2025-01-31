@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import NewsletterForm from "./NewsLetterForm";
 import EmailMetricsMatter from "./EmailMetricsMatter";
 import { generateSlug } from "@/lib/create-slug";
+import PopupGuideForm from "./PopUpGuideForm";
 
 interface Resource {
   title: string;
@@ -99,6 +100,7 @@ const ResourcesGrid = () => {
           ))}
         </div>
         <NewsletterForm />
+        <PopupGuideForm />
       </div>
     </div>
   );

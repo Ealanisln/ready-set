@@ -56,11 +56,19 @@ export default function PopupGuideForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    console.log('Iniciando envío del formulario...');
+  console.log('Estado actual del formulario:', {
+    datos: formData,
+    tieneErrores: Object.keys(errors).length > 0,
+    erroresActuales: errors
+  });
     
     if (validateForm()) {
       try {
         // Here you would typically send the data to your API
         console.log('Form submitted:', formData);
+        console.log('Limpiando formulario y cerrando diálogo...');
         // Reset form and close dialog after successful submission
         setFormData({
           firstName: '',
@@ -70,9 +78,12 @@ export default function PopupGuideForm() {
           newsletterConsent: false,
         });
         setOpen(false);
+        console.log('Envío completado exitosamente')
       } catch (error) {
         console.error('Error submitting form:', error);
       }
+    } else {
+      console.log('Formulario no válido. Errores encontrados:', errors);
     }
   };
 
