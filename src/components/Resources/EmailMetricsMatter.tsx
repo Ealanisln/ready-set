@@ -10,7 +10,7 @@ const EmailMetricsMatter = () => {
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
-              <h1 className="text-wrap-balance text-4xl font-bold text-gray-800">
+            <h1 className="text-wrap-balance text-4xl font-bold text-gray-800">
                 Why Email Metrics Matter
               </h1>
               <h2 className="text-xl text-gray-600">
