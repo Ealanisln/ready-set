@@ -1,23 +1,42 @@
-import { notFound } from "next/navigation";
-import EmailMetricsMatter from "@/components/Resources/EmailMetricsMatter";
+import { notFound } from 'next/navigation';
+import { resources } from '@/data/resources';
+import { generateSlug } from '@/lib/create-slug';
 
-const resources = [
-  {
-    title: "Why Email Metrics Matter",
-    slug: "email-metrics-matter", // Coincide con `url` en tu array
-    component: EmailMetricsMatter,
-  },
-  // Puedes agregar más recursos aquí...
-];
+interface PageProps {
+  params: Promise<{ // Wrap in Promise
+    slug: string;
+  }>;
+}
 
-export default function ResourcePage({ params }: { params: { slug: string } }) {
-  // Buscar el recurso basado en el slug de la URL
-  const resource = resources.find((r) => r.slug === params.slug);
+export default async function ResourcePage({ params }: PageProps) { // Make async
+  const resolvedParams = await params; // Resolve the Promise
+  const resource = resources.find(
+    (r) => generateSlug(r.title) === resolvedParams.slug
+  );
 
-  // Si no se encuentra, mostrar una página 404
-  if (!resource) return notFound();
+  if (!resource) notFound();
 
-  // Renderizar el componente correspondiente
-  const ResourceComponent = resource.component;
-  return <ResourceComponent />;
+  return (
+    <div className="min-h-screen py-12">
+      <div className="container mx-auto px-4">
+        <h1 className="text-4xl font-bold mb-6">{resource.title}</h1>
+        <div className="prose max-w-none">
+          {resource.content}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const resolvedParams = await params;
+  return {
+    title: `Resource: ${resolvedParams.slug}`,
+  };
+}
+
+export async function generateStaticParams() {
+  return resources.map((resource) => ({
+    slug: generateSlug(resource.title),
+  }));
 }

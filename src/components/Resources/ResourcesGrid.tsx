@@ -16,13 +16,13 @@ import EmailMetricsMatter from "./EmailMetricsMatter";
 import GuideChoosePartner from "./GuideChoosePartner";
 import DeliveryLogistics from "./DeliveryLogistics";
 import EmailTesting from "./EmailTesting";
+import { generateSlug } from "@/lib/create-slug";
 
 interface Resource {
   title: string;
   description: string;
   descriptionClassName?: string;
   imageUrl: string;
-  url: string; // Nueva propiedad para la URL
 }
 
 const resources: Resource[] = [
@@ -31,21 +31,19 @@ const resources: Resource[] = [
     description: "A Business Owner's Guide to Tracking Campaign Performance",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/1.png",
-    url: "email-metrics-matter", // Agrega la URL correspondiente
   },
   {
     title: "What Is Email Marketing",
     description: "The Business Owner's Guide to Getting Started",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/2.png",
-    url: "/resources/email-marketing-guide", // Agrega la URL correspondiente
   },
   {
     title: "The Complete Guide to Choosing the Right Delivery Partner",
-    description: "This comprehensive guide will help you navigate the complex process of selecting the right delivery partner for your business",
+    description:
+      "This comprehensive guide will help you navigate the complex process of selecting the right delivery partner for your business",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/3.png",
-    url: "/resources/delivery-partner-guide", // Agrega la URL correspondiente
   },
 ];
 
@@ -64,7 +62,7 @@ const ResourcesGrid = () => {
               className="dark:hidden"
             />
           </div>
-          <h1 className="mb-4 text-3xl font-bold text-gray-700 tracking-wide">
+          <h1 className="mb-4 text-3xl font-bold tracking-wide text-gray-700">
             Welcome to our free guides and resources.
           </h1>
         </div>
@@ -88,12 +86,13 @@ const ResourcesGrid = () => {
                   <CardTitle className="mb-3 text-xl leading-tight">
                     {resource.title}
                   </CardTitle>
-                  <p className="text-gray-600">
-                    {resource.description}
-                  </p>
+                  <p className="text-gray-600">{resource.description}</p>
                 </CardContent>
                 <CardFooter className="px-6 pb-6">
-                  <Link href={resource.url} className="w-full">
+                  <Link
+                    href={`/free-resources/${generateSlug(resource.title)}`}
+                    className="w-full"
+                  >
                     <Button className="w-full rounded-none bg-yellow-400 text-gray-900 hover:bg-yellow-500">
                       Learn more
                     </Button>
@@ -103,12 +102,6 @@ const ResourcesGrid = () => {
             </Card>
           ))}
         </div>
-        <NewsletterForm />
-        <EmailMetricsMatter />
-        <EmailMarketingGuide />
-        <GuideChoosePartner />
-        <DeliveryLogistics />
-        <EmailTesting />
       </div>
     </div>
   );
