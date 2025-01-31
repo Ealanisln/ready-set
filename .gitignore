@@ -42,6 +42,9 @@ next-env.d.ts
 backups/*
 !backups/.gitkeep
 *.sql
+migrations/*
+!migrations/.gitkeep
+
 
 # Environment Variables
 .env.local
