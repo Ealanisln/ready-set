@@ -41,26 +41,47 @@ const BookNow: React.FC<AdCardProps> = ({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Verifica si currentUrl está definida, de lo contrario usa window.location.href
-      const currentUrlToUse = currentUrl || window.location.href;
+      // Verificar el entorno
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      console.log('Environment:', process.env.NODE_ENV);
+      
+      // Construir la URL base según el entorno
+      const baseUrl = isDevelopment ? 'http://localhost:3000' : window.location.origin;
+      console.log('Base URL:', baseUrl);
+
+      // Obtener la ruta actual
+      const path = window.location.pathname;
+      console.log('Current path:', path);
+
+      // Construir la URL completa
+      const currentUrlToUse = currentUrl || `${baseUrl}${path}`;
+      console.log('Final URL to use:', currentUrlToUse);
       setUrl(currentUrlToUse);
 
-      // Verifica si blogTitle está definido, de lo contrario usa document.title o title
+      // Manejar el título
       const pageTitleToUse = blogTitle || document.title || title;
+      console.log('Page title to use:', pageTitleToUse);
       setPageTitle(pageTitleToUse);
 
-      // Depuración: Verifica los valores obtenidos
-      console.log("currentUrlToUse:", currentUrlToUse);
-      console.log("pageTitleToUse:", pageTitleToUse);
+      // Debug de props
+      console.log('Props received:', {
+        title,
+        subtitle,
+        ctaText,
+        ctaLink,
+        logoSrc,
+        blogTitle,
+        currentUrl
+      });
     }
   }, [currentUrl, blogTitle, title]);
 
   const shareUrl = url || '';
   const shareTitle = pageTitle || "Save 78% on Hiring Costs with a Virtual Assistant";
 
-  // Depuración: Verifica los valores finales de shareUrl y shareTitle
-  console.log("shareUrl:", shareUrl);
-  console.log("shareTitle:", shareTitle);
+  // Debug final de valores de compartir
+  console.log("Final share URL:", shareUrl);
+  console.log("Final share title:", shareTitle);
 
   return (
     <>
@@ -114,9 +135,9 @@ const BookNow: React.FC<AdCardProps> = ({
           <div className="pt-8 mt-8 border-t border-gray-200">
             <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
             <div className="flex justify-center space-x-4">
-            <FacebookShareButton url={shareUrl} title={shareTitle}>
-            <FacebookIcon size={40} round />
-            </FacebookShareButton>
+              <FacebookShareButton url={shareUrl} title={shareTitle}>
+                <FacebookIcon size={40} round />
+              </FacebookShareButton>
 
               <LinkedinShareButton url={shareUrl} title={shareTitle}>
                 <LinkedinIcon size={40} round />
