@@ -14,6 +14,7 @@ import type { PostDocument } from "@/sanity/schemaTypes/seo";
 import React from "react";
 import { format } from 'date-fns';
 import BookNow from "@/components/Blog/BookNow";
+import Share from "@/components/Blog/Share";
 
 export const revalidate = 30;
 
@@ -209,7 +210,9 @@ export default async function BlogPost({
             </div>
           </div>
         </div>
-        <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
+        <Share post={post} />
+
+        {/* <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} /> */}
       </article>
     </div>
   );
