@@ -51,6 +51,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
+  LeadCapture           LeadCapture[]
 }
 
 model on_demand {
@@ -263,6 +264,18 @@ enum FormSubmissionType {
   flower
   bakery
   specialty
+}
+
+model LeadCapture {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  name      String?
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum driver_status {
