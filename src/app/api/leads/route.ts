@@ -20,13 +20,13 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const validatedData = FormSchema.parse(data);
 
-    const lead = await prisma.leadCapture.create({
+    const lead = await prisma.lead_capture.create({
       data: {
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
+        first_name: validatedData.firstName,
+        last_name: validatedData.lastName,
         email: validatedData.email,
         industry: validatedData.industry,
-        newsletterConsent: validatedData.newsletterConsent
+        newsletter_consent: validatedData.newsletterConsent
       }
     });
 

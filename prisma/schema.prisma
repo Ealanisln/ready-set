@@ -247,6 +247,17 @@ model form_submission {
   @@map("form_submissions")
 }
 
+model lead_capture {
+  id                 String   @id @default(cuid())
+  first_name         String
+  last_name          String
+  email              String
+  industry           String
+  newsletter_consent Boolean
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+}
+
 enum FormSubmissionType {
   food
   flower
