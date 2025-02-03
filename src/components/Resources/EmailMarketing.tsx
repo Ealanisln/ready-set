@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 
 const EmailMarketingGuide = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="pt-32 min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-12">
          {/* Second Section */}
         <section className="bg-white rounded-lg shadow-lg p-8">

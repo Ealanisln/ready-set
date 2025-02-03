@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   Dialog,
   DialogContent,
@@ -19,60 +20,41 @@ interface FormData {
 
 export default function PopupGuideForm() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    industry: '',
-    newsletterConsent: false,
-  });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  // Inicializar React Hook Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>();
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+  // Función para manejar el envío del formulario
+  const onSubmit = async (data: FormData) => {
+    console.log('Datos del formulario:', data);
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
+    try {
+      // Enviar los datos al endpoint /api/leads
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-
-    if (!formData.industry.trim()) {
-      newErrors.industry = 'Industry is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      try {
-        // Here you would typically send the data to your API
-        console.log('Form submitted:', formData);
-        // Reset form and close dialog after successful submission
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          industry: '',
-          newsletterConsent: false,
-        });
-        setOpen(false);
-      } catch (error) {
-        console.error('Error submitting form:', error);
+      if (!response.ok) {
+        throw new Error('Error al enviar los datos');
       }
+
+      const result = await response.json();
+      console.log('Respuesta del servidor:', result);
+
+      // Restablecer el formulario y cerrar el diálogo
+      reset();
+      setOpen(false);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -97,7 +79,7 @@ export default function PopupGuideForm() {
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label 
               htmlFor="firstName" 
@@ -108,14 +90,13 @@ export default function PopupGuideForm() {
             <input
               type="text"
               id="firstName"
-              value={formData.firstName}
-              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+              {...register("firstName", { required: "First name is required" })}
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.firstName ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.firstName && (
-              <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
             )}
           </div>
 
@@ -129,14 +110,13 @@ export default function PopupGuideForm() {
             <input
               type="text"
               id="lastName"
-              value={formData.lastName}
-              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+              {...register("lastName", { required: "Last name is required" })}
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.lastName ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.lastName && (
-              <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>
             )}
           </div>
 
@@ -150,14 +130,19 @@ export default function PopupGuideForm() {
             <input
               type="email"
               id="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "Please enter a valid email",
+                },
+              })}
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.email ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
 
@@ -171,14 +156,13 @@ export default function PopupGuideForm() {
             <input
               type="text"
               id="industry"
-              value={formData.industry}
-              onChange={(e) => setFormData({...formData, industry: e.target.value})}
+              {...register("industry", { required: "Industry is required" })}
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.industry ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.industry && (
-              <p className="text-red-500 text-sm mt-1">{errors.industry}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.industry.message}</p>
             )}
           </div>
 
@@ -186,8 +170,7 @@ export default function PopupGuideForm() {
             <input
               type="checkbox"
               id="newsletterConsent"
-              checked={formData.newsletterConsent}
-              onChange={(e) => setFormData({...formData, newsletterConsent: e.target.checked})}
+              {...register("newsletterConsent")}
               className="mt-1"
             />
             <label 

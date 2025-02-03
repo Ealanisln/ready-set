@@ -1,26 +1,47 @@
 "use client";
 
-import { useState, FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 
+// Definimos la interfaz para los datos del formulario
 interface FormData {
   firstName: string;
   lastName: string;
   email: string;
   industry: string;
+  newsletterConsent: boolean; // Added newsletter consent field
 }
 
 export default function NewsletterForm() {
-  const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    industry: ''
-  });
+  // Usamos useForm para manejar el formulario
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
+  // Función que se ejecuta al enviar el formulario
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      console.log('Success:', result);
+      alert('Form submitted successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('There was an error submitting the form.');
+    }
   };
 
   return (
@@ -32,9 +53,11 @@ export default function NewsletterForm() {
               Newsletter Alert and Discounts
             </h2>
           </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Formulario con React Hook Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Campo: First Name */}
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
                   First name
@@ -42,12 +65,15 @@ export default function NewsletterForm() {
                 <input
                   type="text"
                   id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  {...register("firstName", { required: "First name is required" })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.firstName && (
+                  <span className="text-red-500 text-sm">{errors.firstName.message}</span>
+                )}
               </div>
-              
+
+              {/* Campo: Email Address */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
@@ -55,12 +81,21 @@ export default function NewsletterForm() {
                 <input
                   type="email"
                   id="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.email && (
+                  <span className="text-red-500 text-sm">{errors.email.message}</span>
+                )}
               </div>
-              
+
+              {/* Campo: Last Name */}
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
                   Last Name
@@ -68,12 +103,15 @@ export default function NewsletterForm() {
                 <input
                   type="text"
                   id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  {...register("lastName", { required: "Last name is required" })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.lastName && (
+                  <span className="text-red-500 text-sm">{errors.lastName.message}</span>
+                )}
               </div>
-              
+
+              {/* Campo: Industry */}
               <div>
                 <label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-1">
                   Industry
@@ -81,13 +119,30 @@ export default function NewsletterForm() {
                 <input
                   type="text"
                   id="industry"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                  {...register("industry", { required: "Industry is required" })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.industry && (
+                  <span className="text-red-500 text-sm">{errors.industry.message}</span>
+                )}
               </div>
             </div>
 
+            {/* Campo: Newsletter Consent */}
+            <div className="mt-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  {...register("newsletterConsent")}
+                  className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  I agree to receive newsletters and promotional emails.
+                </span>
+              </label>
+            </div>
+
+            {/* Botón de envío */}
             <button
               type="submit"
               className="mt-6 w-full bg-gray-800 text-white py-2 px-4 rounded-full hover:bg-gray-700 transition-colors"
@@ -96,7 +151,8 @@ export default function NewsletterForm() {
             </button>
           </form>
         </div>
-        
+
+        {/* Sección de redes sociales */}
         <div className="w-full md:w-1/3 flex flex-col items-center">
   <img src="/images/logo/logo-white.png" 
        alt="Penguin Logo" 
@@ -196,5 +252,4 @@ export default function NewsletterForm() {
         </div>
          </div>
         );
-    }       
-
+    }

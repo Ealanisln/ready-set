@@ -5,12 +5,12 @@ import { Card } from "@/components/ui/card";
 }
 const EmailMetricsMatter = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="pt-32 min-h-screen p-6">
       <div className="mx-auto max-w-6xl space-y-12">
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
-              <h1 className="text-wrap-balance text-4xl font-bold text-gray-800">
+            <h1 className="text-wrap-balance text-4xl font-bold text-gray-800">
                 Why Email Metrics Matter
               </h1>
               <h2 className="text-xl text-gray-600">

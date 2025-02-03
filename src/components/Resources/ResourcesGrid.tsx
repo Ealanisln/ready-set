@@ -10,13 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import EmailMarketingGuide from "./EmailMarketing";
 import NewsletterForm from "./NewsLetterForm";
 import EmailMetricsMatter from "./EmailMetricsMatter";
-import GuideChoosePartner from "./GuideChoosePartner";
-import DeliveryLogistics from "./DeliveryLogistics";
-import EmailTesting from "./EmailTesting";
 import { generateSlug } from "@/lib/create-slug";
+import PopupGuideForm from "./PopUpGuideForm";
 
 interface Resource {
   title: string;
@@ -102,6 +99,8 @@ const ResourcesGrid = () => {
             </Card>
           ))}
         </div>
+        <NewsletterForm />
+        <PopupGuideForm />
       </div>
     </div>
   );
