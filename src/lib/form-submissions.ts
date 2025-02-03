@@ -59,38 +59,35 @@ export class FormSubmissionService {
         ...specifications
       } = data.formData;
 
-      const submission = await prisma.formSubmission.create({
+      const submission = await prisma.form_submission.create({
         data: {
-          // Add required fields
-          id: uuidv4(), // or your ID generation logic
-          updatedAt: new Date(),
+          id: uuidv4(),
+          updated_at: new Date(), // Changed to snake_case
 
-          // Your existing fields
-          formType: formTypeMap[data.formType.toLowerCase()],
-          companyName: normalizeValue(companyName),
-          contactName: normalizeValue(contactName),
+          form_type: formTypeMap[data.formType.toLowerCase()], // Changed to snake_case
+          company_name: normalizeValue(companyName), // Changed to snake_case
+          contact_name: normalizeValue(contactName), // Changed to snake_case
           email: normalizeValue(email),
           phone: normalizeValue(phone),
           website: normalizeValue(website),
           counties: Array.isArray(counties) ? counties : [],
           frequency:
             "frequency" in specifications ? specifications.frequency : "N/A",
-          pickupAddress: pickupAddress || {
+          pickup_address: pickupAddress || {
+            // Changed to snake_case
             street: "",
             city: "",
             state: "",
             zip: "",
           },
-          additionalComments: normalizeValue(additionalComments),
-
-          // Fix specifications type
+          additional_comments: normalizeValue(additionalComments), // Changed to snake_case
           specifications: JSON.stringify(specifications),
         },
       });
 
       console.log("Created submission:", {
         id: submission.id,
-        formType: submission.formType,
+        form_type: submission.form_type, // Changed to snake_case
         specifications:
           typeof submission.specifications === "string"
             ? JSON.parse(submission.specifications)
