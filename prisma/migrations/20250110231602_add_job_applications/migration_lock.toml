@@ -1,0 +1,3 @@
+# Migration details
+migration_name = "add_job_applications"
+datasource = "db"
