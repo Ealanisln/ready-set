@@ -15,6 +15,7 @@ import {
   TwitterIcon,
   EmailIcon,
 } from 'react-share';
+import Share from './Share';
 
 interface AdCardProps {
   title: string;
@@ -85,15 +86,6 @@ const BookNow: React.FC<AdCardProps> = ({
 
   return (
     <>
-      {/* Open Graph Tags para Facebook */}
-      <Head>
-        <meta property="og:title" content={shareTitle} />
-        <meta property="og:description" content={subtitle || "Save More. Gain Time. Book a Call Today."} />
-        <meta property="og:image" content={logoSrc} />
-        <meta property="og:url" content={shareUrl} />
-        <meta property="og:type" content="article" />
-      </Head>
-
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
           {/* Logo */}
@@ -132,7 +124,8 @@ const BookNow: React.FC<AdCardProps> = ({
           </div>
 
           {/* Social Share Section */}
-          <div className="pt-8 mt-8 border-t border-gray-200">
+
+          {/* <div className="pt-8 mt-8 border-t border-gray-200">
             <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
             <div className="flex justify-center space-x-4">
               <FacebookShareButton url={shareUrl} title={shareTitle}>
@@ -151,7 +144,7 @@ const BookNow: React.FC<AdCardProps> = ({
                 <EmailIcon size={40} round />
               </EmailShareButton>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </>
