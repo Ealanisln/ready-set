@@ -230,21 +230,34 @@ model file_upload {
 }
 
 model form_submission {
-  id                 String               @id @default(uuid())
-  updated_at         DateTime             @updatedAt @map("updatedAt")
-  form_type          FormSubmissionType   @map("formType")
-  company_name       String               @map("companyName")
-  contact_name       String               @map("contactName")
-  email              String
-  phone              String
-  website            String
-  counties           Json
-  frequency          String
-  pickup_address     Json                 @map("pickupAddress")
-  additional_comments String              @map("additionalComments")
-  specifications     String
+  id                  String             @id @default(uuid())
+  updated_at          DateTime           @updatedAt @map("updatedAt")
+  form_type           FormSubmissionType @map("formType")
+  company_name        String             @map("companyName")
+  contact_name        String             @map("contactName")
+  email               String
+  phone               String
+  website             String
+  counties            Json
+  frequency           String
+  pickup_address      Json               @map("pickupAddress")
+  additional_comments String             @map("additionalComments")
+  specifications      String
 
   @@map("form_submissions")
+}
+
+model lead_capture {
+  id                 Int      @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  email              String   @unique
+  industry           String
+  newsletter_consent Boolean  @default(false)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("lead_capture")
 }
 
 enum FormSubmissionType {
@@ -253,7 +266,6 @@ enum FormSubmissionType {
   bakery
   specialty
 }
-
 
 enum driver_status {
   arrived_at_vendor

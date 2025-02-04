@@ -1,34 +1,61 @@
-"use client"
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const LeadCaptureForm = () => {
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  industry: string;
+  newsletterConsent: boolean;
+}
+
+interface LeadCaptureFormProps {
+  onSuccess?: () => void;
+}
+
+export const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({ onSuccess }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
+  const [error, setError] = useState<string | null>(null);
+  
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     email: "",
     industry: "",
-    newsletter: false,
+    newsletterConsent: false,
   });
 
-  interface FormData {
-    firstName: string;
-    lastName: string;
-    email: string;
-    industry: string;
-    newsletter: boolean;
-  }
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    // Here you would typically handle the form submission to your backend
-    console.log("Form submitted:", formData);
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      setIsSubmitted(true);
+      onSuccess?.(); // Call the success callback to trigger download
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit form');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,13 +85,12 @@ const LeadCaptureForm = () => {
             Thank you for signing up!
           </CardTitle>
           <p className="text-lg text-gray-600">
-            Your free guide is on its way to your email.
+            Your guide is downloading now...
           </p>
         </CardHeader>
         <CardContent>
           <p className="mt-4 text-center text-gray-500">
-            Note: Kindly check your inbox for an email from us, and if it isn't
-            there, please check your spam or junk folder.
+            We've also sent a copy to your email. If you don't see it, please check your spam folder.
           </p>
         </CardContent>
       </Card>
@@ -90,6 +116,11 @@ const LeadCaptureForm = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="mb-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
@@ -135,14 +166,14 @@ const LeadCaptureForm = () => {
             </div>
             <div className="flex items-start space-x-2">
               <Checkbox
-                id="newsletter"
-                checked={formData.newsletter}
+                id="newsletterConsent"
+                checked={formData.newsletterConsent}
                 onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, newsletter: !!checked }))
+                  setFormData((prev) => ({ ...prev, newsletterConsent: !!checked }))
                 }
               />
               <label
-                htmlFor="newsletter"
+                htmlFor="newsletterConsent"
                 className="text-sm leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I agree to receive newsletters, updates, and promotional emails
@@ -150,8 +181,12 @@ const LeadCaptureForm = () => {
               </label>
             </div>
           </div>
-          <Button type="submit" className="w-full">
-            Submit Now
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Download Guide'}
           </Button>
         </form>
       </CardContent>
