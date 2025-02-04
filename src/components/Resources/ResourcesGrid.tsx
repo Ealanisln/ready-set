@@ -42,6 +42,20 @@ const resources: Resource[] = [
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/3.png",
   },
+  {
+    title: "Addresing Key Issues in Delivery Logistics",
+    description: "A Practical Guide",
+    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
+    imageUrl: "/images/resources/5.png",
+  },
+  {
+    title: "Email A/B Testing Made Simple",
+    description:
+      "A Guide for Business Owners",
+    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
+    imageUrl: "/images/resources/6.png",
+  },
+
 ];
 
 const ResourcesGrid = () => {
@@ -100,7 +114,6 @@ const ResourcesGrid = () => {
           ))}
         </div>
         <NewsletterForm />
-        <PopupGuideForm />
       </div>
     </div>
   );
