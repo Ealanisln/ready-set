@@ -229,31 +229,6 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
-model form_submission {
-  id                 String               @id @default(uuid())
-  updated_at         DateTime             @updatedAt @map("updatedAt")
-  form_type          FormSubmissionType   @map("formType")
-  company_name       String               @map("companyName")
-  contact_name       String               @map("contactName")
-  email              String
-  phone              String
-  website            String
-  counties           Json
-  frequency          String
-  pickup_address     Json                 @map("pickupAddress")
-  additional_comments String              @map("additionalComments")
-  specifications     String
-
-  @@map("form_submissions")
-}
-
-enum FormSubmissionType {
-  food
-  flower
-  bakery
-  specialty
-}
-
 enum driver_status {
   arrived_at_vendor
   en_route_to_client

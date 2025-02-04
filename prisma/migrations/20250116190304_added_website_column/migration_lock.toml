@@ -1,3 +1,0 @@
-# Migration details
-migration_name = "added_website_column"
-datasource = "db"
