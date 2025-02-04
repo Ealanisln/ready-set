@@ -34,7 +34,7 @@ export const resources: Resource[] = [
     },
 
     {
-      title: "Addresing Key Issues in Delivery Logistics",
+      title: "Addressing Key Issues in Delivery Logistics",
       description: "A Practical Guide",
       imageUrl: "/images/resources/3.png",
       content: <DeliveryLogistics />,
