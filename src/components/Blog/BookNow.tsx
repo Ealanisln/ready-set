@@ -3,19 +3,24 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { PhoneCall } from "lucide-react";
-import Head from 'next/head';
+import Link from 'next/link';
 import AppointmentDialog from '../VirtualAssistant/Appointment';
 import {
   FacebookShareButton,
   LinkedinShareButton,
   TwitterShareButton,
   EmailShareButton,
+  WhatsappShareButton,
+  TelegramShareButton,
+  FacebookMessengerShareButton,
   FacebookIcon,
   LinkedinIcon,
-  TwitterIcon,
+  XIcon,
   EmailIcon,
+  WhatsappIcon,
+  TelegramIcon,
+  FacebookMessengerIcon,
 } from 'react-share';
-import Share from './Share';
 
 interface AdCardProps {
   title: string;
@@ -42,112 +47,87 @@ const BookNow: React.FC<AdCardProps> = ({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Verificar el entorno
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      console.log('Environment:', process.env.NODE_ENV);
-      
-      // Construir la URL base según el entorno
-      const baseUrl = isDevelopment ? 'http://localhost:3000' : window.location.origin;
-      console.log('Base URL:', baseUrl);
-
-      // Obtener la ruta actual
-      const path = window.location.pathname;
-      console.log('Current path:', path);
-
-      // Construir la URL completa
-      const currentUrlToUse = currentUrl || `${baseUrl}${path}`;
-      console.log('Final URL to use:', currentUrlToUse);
-      setUrl(currentUrlToUse);
-
-      // Manejar el título
-      const pageTitleToUse = blogTitle || document.title || title;
-      console.log('Page title to use:', pageTitleToUse);
-      setPageTitle(pageTitleToUse);
-
-      // Debug de props
-      console.log('Props received:', {
-        title,
-        subtitle,
-        ctaText,
-        ctaLink,
-        logoSrc,
-        blogTitle,
-        currentUrl
-      });
+      setUrl(currentUrl || window.location.href);
+      setPageTitle(blogTitle || document.title || title);
     }
   }, [currentUrl, blogTitle, title]);
 
   const shareUrl = url || '';
   const shareTitle = pageTitle || "Save 78% on Hiring Costs with a Virtual Assistant";
 
-  // Debug final de valores de compartir
-  console.log("Final share URL:", shareUrl);
-  console.log("Final share title:", shareTitle);
-
   return (
-    <>
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
-          {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="relative w-32 h-16">
-              <Image
-                src={logoSrc}
-                alt="Company logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-800">
-              Save 78% on Hiring Costs with a Virtual Assistant.
-            </h2>
-            <p className="text-gray-600 font-bold">
-              Save More. Gain Time. Book a Call Today.
-            </p>
-          </div>
-
-          {/* AppointmentDialog */}
-          <div className="flex justify-center">
-            <AppointmentDialog
-              buttonText="Book Now"
-              buttonIcon={<PhoneCall size={20} />}
-              buttonVariant="amber"
-              buttonClassName="font-bold"
-              dialogTitle="Schedule Your Free Consultation"
-              dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
-              calendarUrl={calendarUrl}
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="relative w-32 h-16">
+            <Image
+              src={logoSrc}
+              alt="Company logo"
+              fill
+              className="object-contain"
             />
           </div>
+        </div>
 
-          {/* Social Share Section */}
+        {/* Content */}
+        <div className="space-y-4">
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-800">
+            Save 78% on Hiring Costs with a Virtual Assistant.
+          </h2>
+          <p className="text-gray-600 font-bold">
+            Save More. Gain Time. Book a Call Today.
+          </p>
+        </div>
 
-          {/* <div className="pt-8 mt-8 border-t border-gray-200">
-            <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
-            <div className="flex justify-center space-x-4">
-              <FacebookShareButton url={shareUrl} title={shareTitle}>
-                <FacebookIcon size={40} round />
-              </FacebookShareButton>
+        {/* AppointmentDialog */}
+        <div className="flex justify-center">
+          <AppointmentDialog
+            buttonText="Book Now"
+            buttonIcon={<PhoneCall size={20} />}
+            buttonVariant="amber"
+            buttonClassName="font-bold"
+            dialogTitle="Schedule Your Free Consultation"
+            dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
+            calendarUrl={calendarUrl}
+          />
+        </div>
 
-              <LinkedinShareButton url={shareUrl} title={shareTitle}>
-                <LinkedinIcon size={40} round />
-              </LinkedinShareButton>
+        {/* Social Share Section */}
+        <div className="pt-8 mt-8 border-t border-gray-200">
+          <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
+          <div className="flex justify-center space-x-4">
+            <TwitterShareButton url={shareUrl} title={shareTitle}>
+              <XIcon size={32} round />
+            </TwitterShareButton>
 
-              <TwitterShareButton url={shareUrl} title={shareTitle}>
-                <TwitterIcon size={40} round />
-              </TwitterShareButton>
+            <FacebookShareButton url={shareUrl}>
+              <FacebookIcon size={32} round />
+            </FacebookShareButton>
 
-              <EmailShareButton url={shareUrl} subject={shareTitle}>
-                <EmailIcon size={40} round />
-              </EmailShareButton>
-            </div>
-          </div> */}
+            <FacebookMessengerShareButton url={shareUrl} appId="521270401588372">
+              <FacebookMessengerIcon size={32} round />
+            </FacebookMessengerShareButton>
+
+            <TelegramShareButton url={shareUrl} title={shareTitle}>
+              <TelegramIcon size={32} round />
+            </TelegramShareButton>
+
+            <WhatsappShareButton url={shareUrl} title={shareTitle} separator=":: ">
+              <WhatsappIcon size={32} round />
+            </WhatsappShareButton>
+
+            <EmailShareButton url={shareUrl} subject={shareTitle} body="Mira este articulo, me pareció interesante:">
+              <EmailIcon size={32} round />
+            </EmailShareButton>
+
+            <LinkedinShareButton url={shareUrl}>
+              <LinkedinIcon size={32} round />
+            </LinkedinShareButton>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

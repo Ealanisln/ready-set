@@ -210,9 +210,9 @@ export default async function BlogPost({
             </div>
           </div>
         </div>
-        <Share post={post} />
+        {/* <Share post={post} /> */}
 
-        {/* <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} /> */}
+        <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
       </article>
     </div>
   );
