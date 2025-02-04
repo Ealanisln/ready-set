@@ -18,7 +18,7 @@ const EmailMarketingGuide = () => {
     
     try {
       // Trigger the file download
-      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMlLRJPx8FIxYK8ng65t7CE2fGLMXaOy1oNZB');
+      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLqQpOUEDnRDmNThVvWg8M1eG9sx2Iaju357C4');
       const blob = await response.blob();
       
       // Create a download link

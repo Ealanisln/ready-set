@@ -19,7 +19,7 @@ const EmailTesting = () => {
     
     try {
       // Trigger the file download
-      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMlLRJPx8FIxYK8ng65t7CE2fGLMXaOy1oNZB');
+      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWL3EWLKS9QDeglwpv940XiY6aBOu5CScU7EqVk');
       const blob = await response.blob();
       
       // Create a download link

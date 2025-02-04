@@ -19,7 +19,7 @@ const GuideChoosePartner = () => {
     
     try {
       // Trigger the file download
-      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMlLRJPx8FIxYK8ng65t7CE2fGLMXaOy1oNZB');
+      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLBKaCt1vzmKWLEJjpXc9POd8SYbl7otG5ACZQ');
       const blob = await response.blob();
       
       // Create a download link
