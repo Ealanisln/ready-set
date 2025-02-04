@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import NewsletterForm from "./NewsLetterForm";
 import EmailMetricsMatter from "./EmailMetricsMatter";
 import { generateSlug } from "@/lib/create-slug";
-import PopupGuideForm from "./PopUpGuideForm";
 
 interface Resource {
   title: string;
@@ -43,7 +42,7 @@ const resources: Resource[] = [
     imageUrl: "/images/resources/3.png",
   },
   {
-    title: "Addresing Key Issues in Delivery Logistics",
+    title: "Addressing Key Issues in Delivery Logistics",
     description: "A Practical Guide",
     descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
     imageUrl: "/images/resources/5.png",

@@ -1,8 +1,43 @@
-import React from 'react';
-import { Card } from '@/components/ui/card';
+"use client"
+
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { LeadCaptureForm } from "./DownloadPopup";
 
 {/* Fifth Section */}
 const EmailTesting = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleDownloadSuccess = async () => {
+    // Close the dialog
+    setIsDialogOpen(false);
+    
+    try {
+      // Trigger the file download
+      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMlLRJPx8FIxYK8ng65t7CE2fGLMXaOy1oNZB');
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'email-metrics-guide.pdf';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+  
   return (
     <div className="pt-32 min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-12">
@@ -71,22 +106,27 @@ const EmailTesting = () => {
         </div>
 
         <div className="space-y-4">
-          <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
-            Download Now
-          </button>
-          <button className="w-full bg-yellow-400 text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors">
-            Schedule a Call Today
-          </button>
-        </div>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
+                      Download Now
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-lg">
+                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
+                  </DialogContent>
+                </Dialog>
+                <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
+                  Book a Consultation Today
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-        </div>
-      </section>
     </div>
-    </div>
-
-    );
-        };
-
+  );
+};
 
 
 export default EmailTesting;
