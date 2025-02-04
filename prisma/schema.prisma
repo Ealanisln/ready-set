@@ -51,7 +51,7 @@ model user {
   on_demands            on_demand[]
   sessions              session[]
   savedAddresses        userAddress[]
-  LeadCapture           LeadCapture[]
+
 }
 
 model on_demand {
