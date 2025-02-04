@@ -1,3 +1,0 @@
-# Migration details
-migration_name = "add_additional_comments"
-datasource = "db"
