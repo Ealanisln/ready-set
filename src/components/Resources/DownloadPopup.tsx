@@ -71,15 +71,11 @@ export const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({ onSuccess }) =
       <Card className="mx-auto w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-6 w-32">
-            <svg
-              className="w-full"
-              viewBox="0 0 100 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M20 30L40 10L60 30" fill="black" />
-              <circle cx="80" cy="20" r="5" fill="gold" />
-            </svg>
+          <img 
+              src="/images/logo/new-logo-ready-set.png"
+              alt="Company Logo" 
+              className="w-full h-auto"
+            />
           </div>
           <CardTitle className="mb-2 text-3xl font-bold">
             Thank you for signing up!
@@ -101,15 +97,11 @@ export const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({ onSuccess }) =
     <Card className="mx-auto w-full max-w-lg">
       <CardHeader className="text-center">
         <div className="mx-auto mb-6 w-32">
-          <svg
-            className="w-full"
-            viewBox="0 0 100 40"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M20 30L40 10L60 30" fill="black" />
-            <circle cx="80" cy="20" r="5" fill="gold" />
-          </svg>
+        <img 
+              src="/images/logo/new-logo-ready-set.png"
+              alt="Company Logo" 
+              className="w-full h-auto"
+            />
         </div>
         <CardTitle className="text-2xl font-bold">
           Get Your Free Guide!
