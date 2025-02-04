@@ -23,31 +23,34 @@ import { usePathname } from "next/navigation";
 const Share = ({ post }: { post: PostDocument }) => {
   const pathname = usePathname();
 
-  // Definimos la URL base correcta
-  const baseUrl = "https://readysetllc.com";
+  if (!post || !post.title) {
+    return null; // o algún mensaje de error
+  }
 
-  // Construimos la URL completa
+  const baseUrl = "https://readysetllc.com";
   const shareUrl = `${baseUrl}${pathname}`;
   const title = post.title;
 
   return (
     <>
       <h3 className="text-2xl sm:text-xl font-semibold text-black text-left my-10">
-        Comparte este artículo en redes sociales:
+        Share this article
       </h3>
 
       <div className="flex space-x-4">
         <TwitterShareButton
           url={shareUrl}
           title={title}
-          className="Demo__some-network__share-button"
+          className="share-button"
+          aria-label="Compartir en Twitter"
         >
           <XIcon size={32} round />
         </TwitterShareButton>
 
         <FacebookShareButton
           url={shareUrl}
-          className="Demo__some-network__share-button"
+          className="share-button"
+          aria-label="Compartir en Facebook"
         >
           <FacebookIcon size={32} round />
         </FacebookShareButton>
@@ -55,7 +58,8 @@ const Share = ({ post }: { post: PostDocument }) => {
         <FacebookMessengerShareButton
           url={shareUrl}
           appId="521270401588372"
-          className="Demo__some-network__share-button"
+          className="share-button"
+          aria-label="Compartir en Facebook Messenger"
         >
           <FacebookMessengerIcon size={32} round />
         </FacebookMessengerShareButton>
@@ -63,7 +67,8 @@ const Share = ({ post }: { post: PostDocument }) => {
         <TelegramShareButton
           url={shareUrl}
           title={title}
-          className="Demo__some-network__share-button"
+          className="share-button"
+          aria-label="Compartir en Telegram"
         >
           <TelegramIcon size={32} round />
         </TelegramShareButton>
@@ -71,8 +76,9 @@ const Share = ({ post }: { post: PostDocument }) => {
         <WhatsappShareButton
           url={shareUrl}
           title={title}
-          separator=":: "
-          className="Demo__some-network__share-button"
+          separator=" - "
+          className="share-button"
+          aria-label="Compartir en WhatsApp"
         >
           <WhatsappIcon size={32} round />
         </WhatsappShareButton>
@@ -80,15 +86,17 @@ const Share = ({ post }: { post: PostDocument }) => {
         <EmailShareButton
           url={shareUrl}
           subject={title}
-          body="Mira este articulo, me pareció interesante:"
-          className="Demo__some-network__share-button"
+          body="Mira este artículo, me pareció interesante:"
+          className="share-button"
+          aria-label="Compartir por correo electrónico"
         >
           <EmailIcon size={32} round />
         </EmailShareButton>
 
         <LinkedinShareButton
           url={shareUrl}
-          className="Demo__some-network__share-button"
+          className="share-button"
+          aria-label="Compartir en LinkedIn"
         >
           <LinkedinIcon size={32} round />
         </LinkedinShareButton>
