@@ -1,6 +1,8 @@
 import EmailMetricsMatter from "@/components/Resources/EmailMetricsMatter";
 import EmailMarketingGuide from "@/components/Resources/EmailMarketing";
 import GuideChoosePartner from "@/components/Resources/GuideChoosePartner";
+import DeliveryLogistics from "@/components/Resources/DeliveryLogistics";
+import EmailTesting from "@/components/Resources/EmailTesting";
 
 export interface Resource {
   title: string;
@@ -30,4 +32,18 @@ export const resources: Resource[] = [
       imageUrl: "/images/resources/3.png",
       content: <GuideChoosePartner />,
     },
+
+    {
+      title: "Addressing Key Issues in Delivery Logistics",
+      description: "A Practical Guide",
+      imageUrl: "/images/resources/3.png",
+      content: <DeliveryLogistics />,
+    },
+    {
+      title: "Email A/B Testing Made Simple",
+      description: "A Guide for Business Owners",
+        imageUrl: "/images/resources/3.png",
+        content: <EmailTesting />,
+    },
+  
 ];
