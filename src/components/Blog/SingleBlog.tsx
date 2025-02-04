@@ -3,6 +3,7 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/lib/client";
 import Link from "next/link";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
+import BookNow from "./BookNow";
 
 interface PostsProps {
   data: SimpleBlogCard[];
@@ -40,14 +41,28 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
           </div>
           <div className="p-4 flex-grow">
             <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
-              {post.smallDescription}
+              
             </p>
           </div>
-          <div className="px-4 pb-4 mt-auto">
-            <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-              {post._updatedAt.substring(0, 10)}
-            </div>
-          </div>
+          <div className="px-4 pb-4 mt-auto flex justify-between items-center">
+         {/* Fecha del post */}
+      <span className="text-sm text-gray-600 dark:text-gray-400">
+        {post._updatedAt ? 
+        new Date(post._updatedAt).toLocaleDateString('en-EN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      : 'Date not available'
+    }
+    </span>
+   {/* Botón Read More */}
+   <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
+    <Link href={`/${basePath}/${post.slug?.current}`} className="block">
+      Read More
+    </Link>
+       </div>
+      </div>
         </div>
       ))}
     </div>

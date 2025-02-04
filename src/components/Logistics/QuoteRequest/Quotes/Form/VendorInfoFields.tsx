@@ -22,7 +22,7 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Email Address"
       />
       <input
-        {...register("companyNa`me")}
+        {...register("companyName")}
         className="w-full rounded border p-2"
         placeholder="Company Name"
       />
@@ -46,25 +46,39 @@ export const VendorInfoFields = ({ register }: RegisterProps) => (
         placeholder="Phone Number"
       />
       <input
-        {...register("streetAddress")}
+        {...register("pickupAddress.street", {
+          required: "Street address is required",
+        })}
         className="w-full rounded border p-2"
         placeholder="Street Address"
       />
       <input
-        {...register("city")}
+        {...register("pickupAddress.city", { required: "City is required" })}
         className="w-full rounded border p-2"
         placeholder="City"
       />
       <input
-        {...register("state")}
+        {...register("pickupAddress.state", { required: "State is required" })}
         className="w-full rounded border p-2"
         placeholder="State"
       />
       <input
-        {...register("zipCode")}
+        {...register("pickupAddress.zip", { required: "ZIP code is required" })}
         className="w-full rounded border p-2"
-        placeholder="Zip Code"
+        placeholder="ZIP Code"
       />
+    </div>
+
+    <div className="space-y-2">
+      <h3 className="font-medium">Additional Information</h3>
+      <textarea
+        {...register("additionalComments")}
+        className="w-full rounded border p-2"
+        placeholder="Additional Comments (Optional)"
+        maxLength={1000}
+        rows={4}
+      />
+      <p className="text-sm text-gray-500">Maximum 1000 characters</p>
     </div>
   </div>
 );

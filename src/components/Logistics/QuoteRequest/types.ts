@@ -1,24 +1,10 @@
 // src/components/Logistics/QuoteRequest/types.ts
+
 import { UseFormRegister } from "react-hook-form";
 
-// Interfaces existentes
-export interface FormData {
-  [key: string]: any;
-}
+export type FormType = "food" | "flower" | "bakery" | "specialty" | null;
 
-export interface RegisterProps {
-  register: UseFormRegister<FormData>;
-}
-
-export type FormType = 'food' | 'flower' | 'bakery' | 'specialty' | null;
-
-export interface DialogFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  formType: FormType;
-}
-
-// Nuevas interfaces para los formularios específicos
+// Base form data interface
 export interface BaseFormData {
   name: string;
   email: string;
@@ -26,60 +12,65 @@ export interface BaseFormData {
   contactName: string;
   website?: string;
   phone: string;
-  streetAddress: string;
-  city: string;
-  state: string;
-  zipCode: string;
+  counties: string[];
+  additionalComments?: string; // New field
+  pickupAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
   driversNeeded: string;
   serviceType: string;
   deliveryRadius: string;
-  selectedCounties: string[]; // Made required
 }
 
+// Form-specific interfaces
 export interface BakeryFormData extends BaseFormData {
-  formType: 'bakery';
-  deliveryTypes: Array<'bakedGoods' | 'supplies'>;
+  formType: "bakery";
+  deliveryTypes: Array<"bakedGoods" | "supplies">;
   partnerServices: string;
   routingApp: string;
-  deliveryFrequency: string; // Made required
-  supplyPickupFrequency: string; // Made required
+  deliveryFrequency: string;
+  supplyPickupFrequency: string;
 }
 
 export interface FlowerFormData extends BaseFormData {
-  formType: 'flower';
-  deliveryTypes: Array<'floralArrangements' | 'floralSupplies'>;
+  formType: "flower";
+  deliveryTypes: Array<"floralArrangements" | "floralSupplies">;
   brokerageServices: string[];
   deliveryFrequency?: string;
   supplyPickupFrequency?: string;
 }
 
 export interface FoodFormData extends BaseFormData {
-  formType: 'food';
+  formType: "food";
   totalStaff: string;
   expectedDeliveries: string;
   partneredServices: string;
   multipleLocations: string;
-  deliveryTimes: Array<'breakfast' | 'lunch' | 'dinner' | 'allDay'>;
+  deliveryTimes: Array<"breakfast" | "lunch" | "dinner" | "allDay">;
   orderHeadcount: string[];
   frequency: string;
 }
 
 export interface SpecialtyFormData extends BaseFormData {
-  formType: 'specialty';
-  deliveryTypes: Array<'specialDelivery' | 'specialtyDelivery'>;
-  fragilePackage: 'yes' | 'no';
+  formType: "specialty";
+  deliveryTypes: Array<"specialDelivery" | "specialtyDelivery">;
+  fragilePackage: "yes" | "no";
   packageDescription: string;
   deliveryFrequency?: string;
   supplyPickupFrequency?: string;
 }
 
+// Type for all possible form data types
 export type DeliveryFormData = 
   | BakeryFormData 
   | FlowerFormData 
   | FoodFormData 
   | SpecialtyFormData;
 
-// También podríamos actualizar la interfaz RegisterProps para ser más específica:
+// Register props interfaces
 export interface BakeryRegisterProps {
   register: UseFormRegister<BakeryFormData>;
 }
@@ -94,4 +85,11 @@ export interface FoodRegisterProps {
 
 export interface SpecialtyRegisterProps {
   register: UseFormRegister<SpecialtyFormData>;
+}
+
+// Dialog form props
+export interface DialogFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  formType: FormType;
 }
