@@ -42,7 +42,6 @@ model user {
   created_at            DateTime           @default(now()) @db.Timestamptz(6)
   updated_at            DateTime           @default(now()) @db.Timestamptz(6)
   isTemporaryPassword   Boolean            @default(false)
-  FormSubmission        FormSubmission[]
   accounts              account[]
   createdAddresses      address[]
   catering_requests     catering_request[]
@@ -230,30 +229,31 @@ model file_upload {
   @@index([entityType, entityId])
 }
 
-model FormSubmission {
-  id                 String             @id @default(uuid())
-  formType           FormSubmissionType
-  userId             String?
-  companyName        String?
-  contactName        String?
-  email              String?
-  phone              String?
-  counties           String[]
-  frequency          String?
-  pickupAddress      Json?
-  specifications     String?
-  notes              String?
-  syncedToSheets     Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  additionalComments String?
-  website            String?
-  user               user?              @relation(fields: [userId], references: [id])
+model form_submission {
+  id                 String               @id @default(uuid())
+  updated_at         DateTime             @updatedAt @map("updatedAt")
+  form_type          FormSubmissionType   @map("formType")
+  company_name       String               @map("companyName")
+  contact_name       String               @map("contactName")
+  email              String
+  phone              String
+  website            String
+  counties           Json
+  frequency          String
+  pickup_address     Json                 @map("pickupAddress")
+  additional_comments String              @map("additionalComments")
+  specifications     String
 
-  @@index([createdAt])
-  @@index([formType])
-  @@index([syncedToSheets])
+  @@map("form_submissions")
 }
+
+enum FormSubmissionType {
+  food
+  flower
+  bakery
+  specialty
+}
+
 
 enum driver_status {
   arrived_at_vendor
@@ -301,11 +301,4 @@ enum users_type {
   admin
   helpdesk
   super_admin
-}
-
-enum FormSubmissionType {
-  food
-  flower
-  bakery
-  specialty
 }
