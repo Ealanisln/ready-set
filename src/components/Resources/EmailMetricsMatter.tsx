@@ -148,7 +148,7 @@ const EmailMetricsMatter = () => {
                 {/* AppointmentDialog */}
         <div className="flex justify-center">
           <AppointmentDialog
-            buttonText="Book Now"
+            buttonText="Book A Consultation Today"
             buttonVariant="amber"
             buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
             dialogTitle="Schedule Your Free Consultation"

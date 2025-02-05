@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
+import AppointmentDialog from '../VirtualAssistant/Appointment';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import { LeadCaptureForm } from "./DownloadPopup";
 {/* Fourth Section */}
 const DeliveryLogistics = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
   const handleDownloadSuccess = async () => {
     // Close the dialog
     setIsDialogOpen(false);
@@ -104,9 +105,17 @@ const DeliveryLogistics = () => {
                     <LeadCaptureForm onSuccess={handleDownloadSuccess} />
                   </DialogContent>
                 </Dialog>
-                <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
-                  Book a Consultation Today
-                </button>
+                {/* AppointmentDialog */}
+        <div className="flex justify-center">
+          <AppointmentDialog
+            buttonText="Book A Consultation Today"
+            buttonVariant="amber"
+            buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
+            dialogTitle="Schedule Your Free Consultation"
+            dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
+            calendarUrl={calendarUrl}
+          />
+        </div>
               </div>
             </div>
           </div>
