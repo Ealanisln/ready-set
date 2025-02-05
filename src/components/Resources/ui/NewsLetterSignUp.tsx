@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "react-day-picker";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "../ui/card";
-import { Input } from "../ui/input";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "../../ui/card";
+import { Input } from "../../ui/input";
 
 const NewsLetterSignup = () => {
     return (

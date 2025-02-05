@@ -1,8 +1,10 @@
-import EmailMetricsMatter from "@/components/Resources/EmailMetricsMatter";
-import EmailMarketingGuide from "@/components/Resources/EmailMarketing";
-import GuideChoosePartner from "@/components/Resources/GuideChoosePartner";
-import DeliveryLogistics from "@/components/Resources/DeliveryLogistics";
-import EmailTesting from "@/components/Resources/EmailTesting";
+// src/data/resources.tsx
+
+import EmailMetricsMatter from "@/components/Resources/Guides/EmailMetricsMatter";
+import EmailMarketingGuide from "@/components/Resources/Guides/EmailMarketing";
+import GuideChoosePartner from "@/components/Resources/Guides/GuideChoosePartner";
+import DeliveryLogistics from "@/components/Resources/Guides/DeliveryLogistics";
+import EmailTesting from "@/components/Resources/Guides/EmailTesting";
 
 export interface Resource {
   title: string;

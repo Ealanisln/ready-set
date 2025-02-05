@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import AppointmentDialog from "../VirtualAssistant/Appointment";
+import AppointmentDialog from "../../VirtualAssistant/Appointment";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "./DownloadPopup";
+import { LeadCaptureForm } from "../ui/DownloadPopup";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
