@@ -34,7 +34,7 @@ const NewsletterSignup = () => {
       <h3 className="mb-3 inline-block text-base text-gray-400">Subscribe to our</h3>
       <div className="mt-2.3">
         <h3 className="mb-3 inline-block text-base text-gray-400">Newsletter</h3>
-        <form onSubmit={handleSubscribe} className="flex">
+        <form onSubmit={handleSubscribe} className="flex space-x-0.5">
           <input
             type="email"
             value={email}
@@ -42,15 +42,15 @@ const NewsletterSignup = () => {
             placeholder="Enter your email"
             required
             disabled={status === "loading"}
-            className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className={`px-4 py-2 text-sm text-white rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`px-4 py-2 text-sm text-white rounded-r-md focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
               status === "loading" 
-                ? "bg-blue-400 cursor-not-allowed" 
-                : "bg-blue-600 hover:bg-blue-700"
+                ? "bg-yellow-400 cursor-not-allowed" 
+                : "bg-yellow-600 hover:bg-yellow-700"
             }`}
           >
             {status === "loading" ? "Subscribing..." : "Subscribe"}
