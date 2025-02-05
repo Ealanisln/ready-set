@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { PhoneCall } from "lucide-react";
-import Link from 'next/link';
-import AppointmentDialog from '../VirtualAssistant/Appointment';
+import Link from "next/link";
+import AppointmentDialog from "../VirtualAssistant/Appointment";
 import {
   FacebookShareButton,
   LinkedinShareButton,
@@ -20,8 +20,8 @@ import {
   WhatsappIcon,
   TelegramIcon,
   FacebookMessengerIcon,
-} from 'react-share';
-import { usePathname } from 'next/navigation';
+} from "react-share";
+import { usePathname } from "next/navigation";
 
 interface AdCardProps {
   title: string;
@@ -34,35 +34,33 @@ interface AdCardProps {
 }
 
 const BookNow: React.FC<AdCardProps> = ({
-  title,
-  subtitle,
-  ctaText,
-  logoSrc = '/images/logo/logo-white.png',
+  logoSrc = "/images/logo/logo-white.png",
   blogTitle,
-  currentUrl
+  currentUrl,
 }) => {
   const pathname = usePathname();
-  const [shareUrl, setShareUrl] = useState('');
-  const [shareTitle, setShareTitle] = useState('');
-  
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareTitle, setShareTitle] = useState("");
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://readysetllc.com";
-  const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+  const calendarUrl =
+    "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
 
   // Lógica de compartir integrada
   useEffect(() => {
     const url = currentUrl || `${baseUrl}${pathname}`;
     const title = blogTitle || document.title || "Check this article";
-    
+
     setShareUrl(url);
     setShareTitle(title);
   }, [currentUrl, blogTitle, pathname, baseUrl]);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-lg p-8 text-center space-y-6">
+    <div className="mx-auto max-w-2xl">
+      <div className="space-y-6 rounded-3xl bg-white p-8 text-center shadow-lg">
         {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-32 h-16">
+        <div className="mb-6 flex justify-center">
+          <div className="relative h-16 w-32">
             <Image
               src={logoSrc}
               alt="Company logo"
@@ -75,11 +73,11 @@ const BookNow: React.FC<AdCardProps> = ({
 
         {/* Content */}
         <div className="space-y-4">
-          <h2 className="text-3xl md:text-4xl font-semibold text-gray-800">
-          Save 78% on Hiring Costs with a Virtual Assistant.
+          <h2 className="text-3xl font-semibold text-gray-800 md:text-4xl">
+            Save 78% on Hiring Costs with a Virtual Assistant.
           </h2>
-          <p className="text-gray-600 font-bold">
-          Save More. Gain Time. Book a Call Today.
+          <p className="font-bold text-gray-600">
+            Save More. Gain Time. Book a Call Today.
           </p>
         </div>
 
@@ -96,9 +94,11 @@ const BookNow: React.FC<AdCardProps> = ({
           />
         </div>
 
-        {/* Social Share Section */}  
-        <div className="pt-8 mt-8 border-t border-gray-200">
-          <h3 className="text-gray-600 mb-4 text-lg italic">Share this article</h3>
+        {/* Social Share Section */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h3 className="mb-4 text-lg italic text-gray-600">
+            Share this article
+          </h3>
           <div className="flex justify-center space-x-4">
             <TwitterShareButton
               url={shareUrl}
@@ -108,10 +108,7 @@ const BookNow: React.FC<AdCardProps> = ({
               <XIcon size={32} round />
             </TwitterShareButton>
 
-            <FacebookShareButton
-              url={shareUrl}
-              aria-label="Share on Facebook"
-            >
+            <FacebookShareButton url={shareUrl} aria-label="Share on Facebook">
               <FacebookIcon size={32} round />
             </FacebookShareButton>
 
@@ -149,12 +146,12 @@ const BookNow: React.FC<AdCardProps> = ({
               <EmailIcon size={32} round />
             </EmailShareButton>
 
-            <LinkedinShareButton
+            {/* <LinkedinShareButton
               url={shareUrl}
               aria-label="Share on LinkedIn"
             >
               <LinkedinIcon size={32} round />
-            </LinkedinShareButton>
+            </LinkedinShareButton> */}
           </div>
         </div>
       </div>

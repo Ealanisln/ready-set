@@ -12,9 +12,8 @@ import type { Metadata, ResolvingMetadata } from "next";
 import CustomNextSeo from "@/components/Blog/CustomSeo";
 import type { PostDocument } from "@/sanity/schemaTypes/seo";
 import React from "react";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import BookNow from "@/components/Blog/BookNow";
-import Share from "@/components/Blog/Share";
 
 export const revalidate = 30;
 
@@ -34,9 +33,11 @@ async function getPost(slug: string): Promise<PostDocument | null> {
   }
 }
 
-export async function generateMetadata(
-  { params }: { params: Props["params"] },
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
 
@@ -46,7 +47,7 @@ export async function generateMetadata(
     };
   }
 
-  const { title, mainImage, body, seo, _updatedAt } = post;
+  const { title, mainImage, seo } = post;
 
   const ogImage = seo?.openGraph?.image
     ? urlFor(seo.openGraph.image).url()
@@ -156,7 +157,7 @@ const portableTextComponents: PortableTextComponents = {
 export default async function BlogPost({
   params,
 }: {
-  params: Props["params"];
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -168,52 +169,43 @@ export default async function BlogPost({
   const { title, mainImage, body, seo, _updatedAt } = post;
   const seoSlug = `/blog/${slug}`;
 
-  const formattedDate = format(new Date(_updatedAt), 'MMMM d, yyyy');
-
+  const formattedDate = format(new Date(_updatedAt), "MMMM d, yyyy");
 
   return (
-    <div>
-      <div key="seo">
-        <CustomNextSeo seo={seo ?? null} slug={seoSlug} />
-      </div>
-      <article className="pb-[120px] pt-[150px]">
-        <div className="container">
-          <div className="-mx-4 flex flex-wrap justify-center">
-            <div className="w-full px-4 lg:w-8/12">
-              <h1 className="mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight">
-                {title}
-              </h1>
-               {/* Add the date display */}
-               <div className="mb-8 text-base text-gray-600 dark:text-gray-400">
-                {formattedDate}
-              </div>
-
-              {mainImage && (
-                <Image
-                  src={urlFor(mainImage).url()}
-                  width={800}
-                  height={800}
-                  alt={title}
-                  priority
-                  className="mt-8 rounded-xl"
-                />
-              )}
-
-              {body && (
-                <div className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16">
-                  <PortableText
-                    value={body}
-                    components={portableTextComponents}
-                  />
-                </div>
-              )}
+    <article className="pb-[120px] pt-[150px]">
+      <div className="container">
+        <div className="-mx-4 flex flex-wrap justify-center">
+          <div className="w-full px-4 lg:w-8/12">
+            <h1 className="mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight">
+              {title}
+            </h1>
+            <div className="mb-8 text-base text-gray-600 dark:text-gray-400">
+              {formattedDate}
             </div>
+
+            {mainImage && (
+              <Image
+                src={urlFor(mainImage).url()}
+                width={800}
+                height={800}
+                alt={title}
+                priority
+                className="mt-8 rounded-xl"
+              />
+            )}
+
+            {body && (
+              <div className="prose prose-xl prose-blue dark:prose-invert prose-li:marker:text-primary prose-a:text-primary mt-16">
+                <PortableText
+                  value={body}
+                  components={portableTextComponents}
+                />
+              </div>
+            )}
           </div>
         </div>
-        {/* <Share post={post} /> */}
-
-        <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
-      </article>
-    </div>
+      </div>
+      <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
+    </article>
   );
 }
