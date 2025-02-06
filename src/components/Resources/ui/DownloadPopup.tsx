@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import dynamic from 'next/dynamic';
-import { generateSlug } from '@/lib/create-slug';
+import dynamic from "next/dynamic";
+import { generateSlug } from "@/lib/create-slug";
 
 // Dynamically import LeadCaptureForm
 const LeadCaptureForm = dynamic(
-  () => import('@/components/Resources/ui/LeadCaptureForm'),
-  { ssr: false }
+  () => import("@/components/Resources/ui/LeadCaptureForm"),
+  { ssr: false },
 );
 
 interface DownloadPopupProps {
@@ -20,15 +20,25 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
   isOpen,
   onClose,
   title,
-  onSuccess
+  onSuccess,
 }) => {
   const handleDownloadSuccess = () => {
-    onSuccess?.(); // For any additional success tracking
-    // Removed onClose() here ❌
+    // Delay the closing to show the success message
+    setTimeout(() => {
+      onSuccess?.();
+      onClose();
+    }, 3000);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="p-0 sm:max-w-[600px]">
         <DialogTitle className="sr-only">
           {`Download ${title}`}

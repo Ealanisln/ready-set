@@ -65,13 +65,32 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
   useEffect(() => {
     if (isSubmitted) {
       triggerDownload();
-      // Delay onSuccess to allow UI to update
+      // Delay onSuccess to allow the success message to be shown
       const timer = setTimeout(() => {
         onSuccess?.();
-      }, 1000);
+      }, 2000); // Increased timeout to give users time to see the success message
       return () => clearTimeout(timer);
     }
   }, [isSubmitted, triggerDownload, onSuccess]);
+
+  // Add a separate effect for cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      // Only reset if not in submitted state
+      if (!isSubmitted) {
+        setIsSubmitting(false);
+        setError(null);
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          industry: "",
+          newsletterConsent: false,
+          resourceSlug: resourceSlug,
+        });
+      }
+    };
+  }, [resourceSlug, isSubmitted]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,6 +120,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
 
   if (isSubmitted) {
     return (
