@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "./ui/DownloadPopup";
+import LeadCaptureForm from "./ui/DownloadPopup";
 interface GuideFeatureListProps {
 items: string[];
 }
@@ -108,7 +108,9 @@ const GuideChoosePartner = () => {
                     <DialogTitle>
                       Download Delivery Partner Selection Guide
                     </DialogTitle>
-                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
+                    <LeadCaptureForm onSuccess={handleDownloadSuccess} isOpen={false} onClose={function (): void {
+                      throw new Error("Function not implemented.");
+                    } } title={""} />
                   </DialogContent>
                 </Dialog>
                 
