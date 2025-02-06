@@ -10,8 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import NewsletterForm from "./NewsLetterForm";
-import EmailMetricsMatter from "./EmailMetricsMatter";
+import NewsletterForm from "./ui/NewsLetterForm";
+import EmailMetricsMatter from "./Guides/EmailMetricsMatter";
 import { generateSlug } from "@/lib/create-slug";
 
 interface Resource {

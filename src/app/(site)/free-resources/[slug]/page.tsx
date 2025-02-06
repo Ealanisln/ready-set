@@ -1,3 +1,5 @@
+// src/app/(site)/free-resources/[slug]/page.tsx
+
 import { notFound } from "next/navigation";
 import { resources } from "@/data/resources";
 import { generateSlug } from "@/lib/create-slug";

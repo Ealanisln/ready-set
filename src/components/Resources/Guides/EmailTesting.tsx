@@ -2,13 +2,15 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import AppointmentDialog from '../VirtualAssistant/Appointment';
+import AppointmentDialog from '../../VirtualAssistant/Appointment';
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "./DownloadPopup";
+import { LeadCaptureForm } from "../ui/DownloadPopup";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 {/* Fifth Section */}
 const EmailTesting = () => {
@@ -107,13 +109,18 @@ const EmailTesting = () => {
         </div>
 
         <div className="space-y-4">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
                       Download Now
                     </button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-lg">
+                    <VisuallyHidden>
+                      <DialogPrimitive.Title>
+                        Download Guide Form
+                      </DialogPrimitive.Title>
+                    </VisuallyHidden>
                     <LeadCaptureForm onSuccess={handleDownloadSuccess} />
                   </DialogContent>
                 </Dialog>
