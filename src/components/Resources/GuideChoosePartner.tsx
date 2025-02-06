@@ -9,9 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "./DownloadPopup";
+import { LeadCaptureForm } from "./ui/DownloadPopup";
+interface GuideFeatureListProps {
+items: string[];
+}
 
-const GuideFeatureList = ({ items }) => (
+const GuideFeatureList = ({ items }: GuideFeatureListProps) => (
   <ul className="space-y-4 text-gray-600">
     {items.map((item, index) => (
       <li key={index} className="flex items-start">
