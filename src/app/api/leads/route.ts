@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import sgMail from '@sendgrid/mail';
+import { sendDownloadEmail } from '@/app/actions/send-download-email';
 
 const prisma = new PrismaClient();
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 const FormSchema = z.object({
@@ -12,7 +14,8 @@ const FormSchema = z.object({
   lastName: z.string().min(1),
   email: z.string().email(),
   industry: z.string(),
-  newsletterConsent: z.boolean()
+  newsletterConsent: z.boolean(),
+  resourceSlug: z.string()
 });
 
 export async function POST(req: NextRequest) {
@@ -53,6 +56,12 @@ export async function POST(req: NextRequest) {
         console.error('SendGrid subscription failed');
       }
     }
+
+     await sendDownloadEmail(
+      validatedData.email,
+      validatedData.firstName,
+      validatedData.resourceSlug
+    );
 
     return NextResponse.json({ success: true, data: lead });
   } catch (error) {

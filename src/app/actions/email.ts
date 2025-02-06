@@ -37,7 +37,7 @@ const sendEmail = async (data: FormInputs) => {
 
     await sgMail.send({
       to: recipient, // Use validated recipient
-      from: "Ready Set Website <updates@updates.readysetllc.com>",
+      from: "Ready Set Website <solutions@readysetllc.com>",
       subject,
       html,
     });

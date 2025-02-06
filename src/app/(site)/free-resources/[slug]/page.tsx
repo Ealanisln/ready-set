@@ -1,12 +1,11 @@
 // src/app/(site)/free-resources/[slug]/page.tsx
 
 import { notFound } from "next/navigation";
-import { resources } from "@/data/resources";
+import { resources } from "@/components/Resources/Data/Resources";  
 import { generateSlug } from "@/lib/create-slug";
 
 interface PageProps {
   params: Promise<{
-    // Wrap in Promise
     slug: string;
   }>;
 }
@@ -20,11 +19,17 @@ export default async function ResourcePage({ params }: PageProps) {
 
   if (!resource) notFound();
 
+  if (resource.component) {
+    const Component = resource.component;
+    return <Component />;
+  }
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
-        {/* <h1 className="text-4xl font-bold mb-6">{resource.title}</h1> */}
-        <div className="prose max-w-none">{resource.content}</div>
+        <div className="prose max-w-none">
+          <h1>{resource.title}</h1>
+          <p>{resource.description}</p>
+        </div>
       </div>
     </div>
   );

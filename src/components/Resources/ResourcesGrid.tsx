@@ -1,61 +1,10 @@
-import Image from "next/image";
+// src/components/Resources/ResourcesGrid.tsx
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import NewsletterForm from "./ui/NewsLetterForm";
-import EmailMetricsMatter from "./Guides/EmailMetricsMatter";
+import { Card, CardContent, CardFooter, CardTitle } from "../ui/card";
+import Image from "next/image";
+import { Button } from "../ui/button";
 import { generateSlug } from "@/lib/create-slug";
-
-interface Resource {
-  title: string;
-  description: string;
-  descriptionClassName?: string;
-  imageUrl: string;
-}
-
-const resources: Resource[] = [
-  {
-    title: "Why Email Metrics Matter",
-    description: "A Business Owner's Guide to Tracking Campaign Performance",
-    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
-    imageUrl: "/images/resources/1.png",
-  },
-  {
-    title: "What Is Email Marketing",
-    description: "The Business Owner's Guide to Getting Started",
-    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
-    imageUrl: "/images/resources/2.png",
-  },
-  {
-    title: "The Complete Guide to Choosing the Right Delivery Partner",
-    description:
-      "This comprehensive guide will help you navigate the complex process of selecting the right delivery partner for your business",
-    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
-    imageUrl: "/images/resources/3.png",
-  },
-  {
-    title: "Addressing Key Issues in Delivery Logistics",
-    description: "A Practical Guide",
-    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
-    imageUrl: "/images/resources/5.png",
-  },
-  {
-    title: "Email A/B Testing Made Simple",
-    description:
-      "A Guide for Business Owners",
-    descriptionClassName: "mb-4 text-3xl font-bold text-gray-700 tracking-wide",
-    imageUrl: "/images/resources/6.png",
-  },
-
-];
+import { resources } from "./Data/Resources";
 
 const ResourcesGrid = () => {
   return (
@@ -112,7 +61,6 @@ const ResourcesGrid = () => {
             </Card>
           ))}
         </div>
-        <NewsletterForm />
       </div>
     </div>
   );
