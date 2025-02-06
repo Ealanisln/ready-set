@@ -1,53 +1,18 @@
+// src/components/Resources/GuideChoosePartner.tsx
+
 "use client";
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import AppointmentDialog from "../../VirtualAssistant/Appointment";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { LeadCaptureForm } from "../ui/DownloadPopup";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { DownloadPopup } from "../ui/DownloadPopup";
 
-{
-  /* Third Section */
-}
 const GuideChoosePartner = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const calendarUrl =
     "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const handleDownloadSuccess = async () => {
-    // Close the dialog
-    setIsDialogOpen(false);
 
-    try {
-      // Trigger the file download
-      const response = await fetch(
-        "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLBKaCt1vzmKWLEJjpXc9POd8SYbl7otG5ACZQ",
-      );
-      const blob = await response.blob();
-
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "email-metrics-guide.pdf";
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
+  const guideTitle = "The Complete Guide to Choosing the Right Delivery Partner";
 
   return (
     <div className="min-h-screen p-6 pt-32">
@@ -56,7 +21,7 @@ const GuideChoosePartner = () => {
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold text-gray-800">
-                The Complete Guide to Choosing the Right Delivery Partner
+                {guideTitle}
               </h2>
               <h3 className="text-xl text-gray-600">A Strategic Approach</h3>
 
@@ -78,6 +43,7 @@ const GuideChoosePartner = () => {
                 1. The guide provides detailed frameworks for evaluating
                 potential partners across four key areas:
               </p>
+
               <ul className="space-y-4 text-gray-600">
                 <li>
                   • Cost structure analysis (both direct and indirect costs)
@@ -171,21 +137,19 @@ const GuideChoosePartner = () => {
               </div>
 
               <div className="space-y-4">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
-                      Download Now
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <VisuallyHidden>
-                      <DialogPrimitive.Title>
-                        Download Guide Form
-                      </DialogPrimitive.Title>
-                    </VisuallyHidden>
-                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
-                  </DialogContent>
-                </Dialog>
+                <button
+                  onClick={() => setIsDownloadOpen(true)}
+                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                >
+                  Download Now
+                </button>
+
+                <DownloadPopup
+                  isOpen={isDownloadOpen}
+                  onClose={() => setIsDownloadOpen(false)}
+                  title={guideTitle}
+                />
+
                 {/* AppointmentDialog */}
                 <div className="flex justify-center">
                   <AppointmentDialog

@@ -1,69 +1,56 @@
-"use client"
+// src/components/Resources/EmailTesting.tsx
+
+"use client";
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import AppointmentDialog from '../../VirtualAssistant/Appointment';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { LeadCaptureForm } from "../ui/DownloadPopup";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import AppointmentDialog from "../../VirtualAssistant/Appointment";
+import { DownloadPopup } from "../ui/DownloadPopup";
 
-{/* Fifth Section */}
 const EmailTesting = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const handleDownloadSuccess = async () => {
-    // Close the dialog
-    setIsDialogOpen(false);
-    
-    try {
-      // Trigger the file download
-      const response = await fetch('https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWL3EWLKS9QDeglwpv940XiY6aBOu5CScU7EqVk');
-      const blob = await response.blob();
-      
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'email-metrics-guide.pdf';
-      document.body.appendChild(a);
-      a.click();
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-    }
-  };
-  
-  return (
-    <div className="pt-32 min-h-screen p-6">
-      <div className="max-w-6xl mx-auto space-y-12">
-      <section className="bg-white rounded-lg shadow-lg p-8">
-    <div className="grid md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <h2 className="text-4xl font-bold text-gray-800">Email A/B Testing Made Simple:</h2>
-        <h3 className="text-xl text-gray-600">A Guide for Business Owners</h3>
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const calendarUrl =
+    "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
 
-        <p className="text-gray-600">
-        If you are a business owner, small business owner, or solopreneur looking to improve your email campaigns but are not sure where to start, A/B testing is your new best friend. It is not as complicated as it sounds, and the
-        insights it provides can help you make informed decisions about what works - and what doesn't.
-        </p>
-        
-        <h2 className="text-xl font-semibold text-gray-800">How This Guide Helps You</h2>
+  const guideTitle = "Email A/B Testing Made Simple";
+
+  return (
+    <div className="min-h-screen p-6 pt-32">
+      <div className="mx-auto max-w-6xl space-y-12">
+        <section className="rounded-lg bg-white p-8 shadow-lg">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="space-y-6">
+              <h2 className="text-4xl font-bold text-gray-800">
+                {guideTitle}:
+              </h2>
+              <h3 className="text-xl text-gray-600">
+                A Guide for Business Owners
+              </h3>
+
               <p className="text-gray-600">
-               Inside this guide, you will learn what A/B testing is and how it works  - explained simply, without the jargon. You'll discover
-               key areas to test, like subject lines, CTAs, visuals, and timing, along with practical tips to run tests that lead to better open 
-               rates, clicks and conversions.
+                If you are a business owner, small business owner, or
+                solopreneur looking to improve your email campaigns but are not
+                sure where to start, A/B testing is your new best friend. It is
+                not as complicated as it sounds, and the insights it provides
+                can help you make informed decisions about what works - and what
+                doesn't.
+              </p>
+
+              <h2 className="text-xl font-semibold text-gray-800">
+                How This Guide Helps You
+              </h2>
+              <p className="text-gray-600">
+                Inside this guide, you will learn what A/B testing is and how it
+                works - explained simply, without the jargon. You'll discover
+                key areas to test, like subject lines, CTAs, visuals, and
+                timing, along with practical tips to run tests that lead to
+                better open rates, clicks and conversions.
               </p>
 
               <div className="space-y-4">
-                <h4 className="text-xl font-semibold text-gray-800">What You Will Get</h4>
+                <h4 className="text-xl font-semibold text-gray-800">
+                  What You Will Get
+                </h4>
                 <ul className="space-y-4 text-gray-600">
                   <li>• What Email A/B Testing is</li>
                   <li>• Why A/B Testing Matters</li>
@@ -77,64 +64,81 @@ const EmailTesting = () => {
               </div>
 
               <p className="text-gray-600">
-                This free guide is your roadmap for crafting a winning email strategy-but for monitoring, forecasting and other menial tasks, delegate it to us!
+                This free guide is your roadmap for crafting a winning email
+                strategy-but for monitoring, forecasting and other menial tasks,
+                delegate it to us!
               </p>
 
-        <p className="text-gray-600">
-        <strong>Download your free Email Metrics Template report now to get started.</strong>
-        </p>
+              <p className="text-gray-600">
+                <strong>
+                  Download your free Email Metrics Template report now to get
+                  started.
+                </strong>
+              </p>
 
-        <p className="text-gray-600">
-          Ready for more hands-on support? <span className="text-black-500 font-bold">Book a Consultation</span> Today and let our experts handlethe heavy lifting so you can focus on what you do best.
-        </p>
-        </div>
+              <p className="text-gray-600">
+                Ready for more hands-on support?{" "}
+                <span className="text-black-500 font-bold">
+                  Book a Consultation
+                </span>{" "}
+                Today and let our experts handle the heavy lifting so you can
+                focus on what you do best.
+              </p>
+            </div>
 
-      <div className="space-y-6">
-        <Card className="bg-yellow-400 p-6 rounded-lg">
-          <img src="/images/resources/6.png" alt="Delivery person with package" 
-            className="w-full rounded-lg mb-4"/>
-          <h2 className="text-2xl font-bold text-center mb-2">
-          Email A/B Testing
-            <div className="mt-1">Made Simple</div>
-          </h2>
-          <div className="w-32 h-px bg-black mx-auto my-4"></div>
-          <p className="text-center text-sm">A Guide for Business Owners</p>
-        </Card>
+            <div className="space-y-6">
+              <Card className="rounded-lg bg-yellow-400 p-6">
+                <img
+                  src="/images/resources/6.png"
+                  alt="Delivery person with package"
+                  className="mb-4 w-full rounded-lg"
+                />
+                <h2 className="mb-2 text-center text-2xl font-bold">
+                  Email A/B Testing
+                  <div className="mt-1">Made Simple</div>
+                </h2>
+                <div className="mx-auto my-4 h-px w-32 bg-black"></div>
+                <p className="text-center text-sm">
+                  A Guide for Business Owners
+                </p>
+              </Card>
 
-        <div className="flex flex-col items-center mt-4">
-          <img src="/images/logo/new-logo-ready-set.png" alt="Company logo" className="w-24 h-auto mb-2" />
-          <div className="bg-black text-white px-4 py-0 rounded-lg">
-            <p className="text-sm tracking-wider">READY SET GROUP, LLC</p>
-          </div>
-        </div>
+              <div className="mt-4 flex flex-col items-center">
+                <img
+                  src="/images/logo/new-logo-ready-set.png"
+                  alt="Company logo"
+                  className="mb-2 h-auto w-24"
+                />
+                <div className="rounded-lg bg-black px-4 py-0 text-white">
+                  <p className="text-sm tracking-wider">READY SET GROUP, LLC</p>
+                </div>
+              </div>
 
-        <div className="space-y-4">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
-                      Download Now
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <VisuallyHidden>
-                      <DialogPrimitive.Title>
-                        Download Guide Form
-                      </DialogPrimitive.Title>
-                    </VisuallyHidden>
-                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
-                  </DialogContent>
-                </Dialog>
+              <div className="space-y-4">
+                <button
+                  onClick={() => setIsDownloadOpen(true)}
+                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                >
+                  Download Now
+                </button>
+
+                <DownloadPopup
+                  isOpen={isDownloadOpen}
+                  onClose={() => setIsDownloadOpen(false)}
+                  title={guideTitle}
+                />
+
                 {/* AppointmentDialog */}
-        <div className="flex justify-center">
-          <AppointmentDialog
-            buttonText="Book A Consultation Today"
-            buttonVariant="amber"
-            buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
-            dialogTitle="Schedule Your Free Consultation"
-            dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
-            calendarUrl={calendarUrl}
-          />
-        </div>
+                <div className="flex justify-center">
+                  <AppointmentDialog
+                    buttonText="Book A Consultation Today"
+                    buttonVariant="amber"
+                    buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
+                    dialogTitle="Schedule Your Free Consultation"
+                    dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
+                    calendarUrl={calendarUrl}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -143,6 +147,5 @@ const EmailTesting = () => {
     </div>
   );
 };
-
 
 export default EmailTesting;

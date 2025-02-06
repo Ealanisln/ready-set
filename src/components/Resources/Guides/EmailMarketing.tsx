@@ -5,52 +5,22 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import AppointmentDialog from "../../VirtualAssistant/Appointment";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "../ui/DownloadPopup";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { DownloadPopup } from "../ui/DownloadPopup";
 
 const EmailMarketingGuide = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const calendarUrl =
     "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const handleDownloadSuccess = async () => {
-    // Close the dialog
-    setIsDialogOpen(false);
 
-    try {
-      // Trigger the file download
-      const response = await fetch(
-        "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLqQpOUEDnRDmNThVvWg8M1eG9sx2Iaju357C4",
-      );
-      const blob = await response.blob();
-
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "email-metrics-guide.pdf";
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
+  const guideTitle = "What Is Email Marketing";
 
   return (
     <div className="min-h-screen p-6 pt-32">
       <div className="mx-auto max-w-6xl space-y-12">
-        {/* Second Section */}
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
-              <h2 className="text-4xl font-bold text-gray-800">
-                What Is Email Marketing
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-800">{guideTitle}</h2>
               <h3 className="text-xl text-gray-600">
                 A Business Owner's Guide to Getting Started
               </h3>
@@ -137,21 +107,19 @@ const EmailMarketingGuide = () => {
               </div>
 
               <div className="space-y-4">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
-                      Download Now
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <VisuallyHidden>
-                      <DialogPrimitive.Title>
-                        Download Guide Form
-                      </DialogPrimitive.Title>
-                    </VisuallyHidden>
-                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
-                  </DialogContent>
-                </Dialog>
+                <button
+                  onClick={() => setIsDownloadOpen(true)}
+                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                >
+                  Download Now
+                </button>
+
+                <DownloadPopup
+                  isOpen={isDownloadOpen}
+                  onClose={() => setIsDownloadOpen(false)}
+                  title={guideTitle}
+                />
+
                 {/* AppointmentDialog */}
                 <div className="flex justify-center">
                   <AppointmentDialog

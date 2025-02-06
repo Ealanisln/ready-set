@@ -1,47 +1,19 @@
+// src/components/Resources/Guides/DeliveryLogistics.tsx
+
 "use client";
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import AppointmentDialog from "../../VirtualAssistant/Appointment";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { LeadCaptureForm } from "../ui/DownloadPopup";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DownloadPopup } from "../ui/DownloadPopup";
 
-{
-  /* Fourth Section */
-}
 const DeliveryLogistics = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const calendarUrl =
     "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  const handleDownloadSuccess = async () => {
-    // Close the dialog
-    setIsDialogOpen(false);
 
-    try {
-      // Trigger the file download
-      const response = await fetch(
-        "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWL7madjBWzjFmpPIJMsidl4WHhaDqZuYA2w5Ug",
-      );
-      const blob = await response.blob();
-
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "email-metrics-guide.pdf";
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
-
+  const guideTitle = "Addressing Key Issues in Delivery Logistics";
+    
   return (
     <div className="min-h-screen p-6 pt-32">
       <div className="mx-auto max-w-6xl space-y-12">
@@ -49,7 +21,7 @@ const DeliveryLogistics = () => {
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold text-gray-800">
-                Addressing Key Issues in Delivery Logistics
+                {guideTitle}
               </h2>
               <h3 className="text-xl text-gray-600">A Practical Guide</h3>
 
@@ -150,21 +122,19 @@ const DeliveryLogistics = () => {
               </div>
 
               <div className="space-y-4">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500">
-                      Download Now
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    <VisuallyHidden>
-                      <DialogPrimitive.Title>
-                        Download Guide Form
-                      </DialogPrimitive.Title>
-                    </VisuallyHidden>
-                    <LeadCaptureForm onSuccess={handleDownloadSuccess} />
-                  </DialogContent>
-                </Dialog>
+                <button
+                  onClick={() => setIsDownloadOpen(true)}
+                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                >
+                  Download Now
+                </button>
+
+                <DownloadPopup
+                  isOpen={isDownloadOpen}
+                  onClose={() => setIsDownloadOpen(false)}
+                  title={guideTitle}
+                />
+
                 {/* AppointmentDialog */}
                 <div className="flex justify-center">
                   <AppointmentDialog
