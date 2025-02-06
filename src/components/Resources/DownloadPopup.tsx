@@ -158,7 +158,6 @@ export const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({ onSuccess }) =
             </div>
             <div className="flex items-start space-x-2">
               <Checkbox
-                id="newsletterConsent"
                 checked={formData.newsletterConsent}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({ ...prev, newsletterConsent: !!checked }))
