@@ -47,7 +47,7 @@ const SingleTeam = ({ team }: { team: TeamType }) => {
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">{name}</DialogTitle>
           <DialogDescription className="text-base text-gray-600 dark:text-gray-400">
