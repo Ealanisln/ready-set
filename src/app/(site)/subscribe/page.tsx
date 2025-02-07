@@ -1,6 +1,6 @@
 import About from "@/components/About";
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import Newsletter from "@/components/Newsletter";
+import { Subscribe, Unsubscribe } from "@/components/Newsletter";
 import Team from "@/components/Team";
 import { Metadata } from "next";
 
@@ -14,7 +14,7 @@ const AboutPage = () => {
   return (
     <main>
       <Breadcrumb pageName="Newsletter Page" />
-      <Newsletter />
+      <Subscribe />
     </main>
   );
 };

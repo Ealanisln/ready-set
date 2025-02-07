@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import Newsletter from "@/components/Newsletter";
 import NewsletterSignup from "../Newsletter/newsLetterSignUp";
 
 const Footer = () => {
