@@ -1,7 +1,7 @@
 // src/app/(site)/free-resources/[slug]/page.tsx
 
 import { notFound } from "next/navigation";
-import { resources } from "@/components/Resources/Data/Resources";  
+import { resources } from "@/components/Resources/Data/Resources";
 import { generateSlug } from "@/lib/create-slug";
 import BackArrow from "@/components/Common/Back";
 
@@ -23,12 +23,13 @@ export default async function ResourcePage({ params }: PageProps) {
   if (resource.component) {
     const Component = resource.component;
     return (
-    <>
-    <Component />
-    <div className="container mx-auto px-4 py-4">
+      <>
+        <Component />
+        <div className="container mx-auto px-4 py-4">
           <BackArrow />
         </div>
-    </>)
+      </>
+    );
   }
   return (
     <div className="min-h-screen py-12">

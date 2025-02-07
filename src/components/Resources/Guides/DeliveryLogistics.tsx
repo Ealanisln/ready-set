@@ -13,16 +13,14 @@ const DeliveryLogistics = () => {
     "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
 
   const guideTitle = "Addressing Key Issues in Delivery Logistics";
-    
+
   return (
     <div className="min-h-screen p-6 pt-32">
       <div className="mx-auto max-w-6xl space-y-12">
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
-              <h2 className="text-4xl font-bold text-gray-800">
-                {guideTitle}
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-800">{guideTitle}</h2>
               <h3 className="text-xl text-gray-600">A Practical Guide</h3>
 
               <p className="text-gray-600">
@@ -53,10 +51,7 @@ const DeliveryLogistics = () => {
                     route optimization.
                   </li>
                   <li>
-                    •{" "}
-                    <span className="font-bold">
-                      Actionable Solutions:
-                    </span>{" "}
+                    • <span className="font-bold">Actionable Solutions:</span>{" "}
                     Learn practical strategies to overcome logistical hurdles
                     and enhance operational efficiency.
                   </li>
@@ -69,10 +64,7 @@ const DeliveryLogistics = () => {
                     overall customer experience.
                   </li>
                   <li>
-                    •{" "}
-                    <span className="font-bold">
-                      Save Time and Money:
-                    </span>{" "}
+                    • <span className="font-bold">Save Time and Money:</span>{" "}
                     Identify cost-effective methods to streamline your logistics
                     processes and boost profitability.
                   </li>
@@ -121,10 +113,10 @@ const DeliveryLogistics = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <button
                   onClick={() => setIsDownloadOpen(true)}
-                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                  className="w-full rounded-lg bg-yellow-400 px-8 py-4 text-lg font-bold text-gray-800 shadow-lg transition-colors hover:bg-yellow-500"
                 >
                   Download Now
                 </button>
@@ -140,7 +132,7 @@ const DeliveryLogistics = () => {
                   <AppointmentDialog
                     buttonText="Book A Consultation Today"
                     buttonVariant="amber"
-                    buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
+                    buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 text-base font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
                     dialogTitle="Schedule Your Free Consultation"
                     dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
                     calendarUrl={calendarUrl}

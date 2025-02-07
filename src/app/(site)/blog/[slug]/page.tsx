@@ -204,8 +204,10 @@ export default async function BlogPost({
             )}
           </div>
         </div>
+        <div className="pt-16">
+        <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
+        </div>
       </div>
-      <BookNow title={""} subtitle={""} ctaText={""} ctaLink={""} />
     </article>
   );
 }

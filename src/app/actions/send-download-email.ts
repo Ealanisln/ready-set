@@ -63,16 +63,18 @@ export const sendDownloadEmail = async (
       email: FROM_EMAIL,
       name: FROM_NAME,
     },
-    subject: `Your ${resource.title} Download`,
+    subject: `Your ${resource.title} is ready to download`,
     html: `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Your Download from Ready Set</title>
-        </head>
-        <body style="
+     <!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Guide is Ready to Download</title>
+</head>
+
+<body style="
           margin: 0;
           padding: 0;
           font-family: Arial, sans-serif;
@@ -80,46 +82,46 @@ export const sendDownloadEmail = async (
           color: #343434;
           background-color: #f4f4f4;
         ">
-          <!-- Main Container -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="
             background-color: #f4f4f4;
             padding: 20px;
           ">
-            <tr>
-              <td align="center">
-                <!-- Email Content Container -->
-                <table width="600" cellpadding="0" cellspacing="0" style="
+    <tr>
+      <td align="center">
+        <!-- Email Content Container -->
+        <table width="600" cellpadding="0" cellspacing="0" style="
                   background-color: #ffffff;
                   border-radius: 8px;
                   overflow: hidden;
                   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 ">
-                  <!-- Header with Logo -->
-                  <tr>
-                    <td align="center" style="padding: 30px 40px; background-color: #fbd113;">
-                      <img src="https://ready-set.co/images/logo/logo.png" alt="Ready Set Logo" width="150" style="display: block;">
-                    </td>
-                  </tr>
-  
-                  <!-- Main Content -->
-                  <tr>
-                    <td style="padding: 40px;">
-                      <h1 style="
+          <!-- Header with Logo -->
+          <tr>
+            <td align="center" style="padding: 30px 40px; background-color: #fbd113;">
+              <img src="https://ready-set.co/images/logo/logo.png" alt="Ready Set Logo" width="150" style="display: block;">
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <h1 style="
                         margin: 0 0 20px;
                         color: #343434;
                         font-size: 24px;
                         font-weight: bold;
-                      ">Thanks for downloading, ${firstName}!</h1>
-                      
-                      <p style="margin: 0 0 20px; font-size: 16px; color: #343434;">
-                        We're excited to share this resource with you. Click the button below to access your download:
-                      </p>
-  
-                      <!-- Download Button -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" style="padding: 20px 0;">
-                            <a href="${resource.downloadUrl}" style="
+                      ">Hi ${firstName}!</h1>
+
+              <p style="margin: 0 0 20px; font-size: 16px; color: #343434;">
+                Thank you for downloading ${resource.title} You can access your guide here:
+              </p>
+
+              <!-- Download Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 20px 0;">
+                    <a href="${resource.downloadUrl}" style="
                               display: inline-block;
                               padding: 14px 30px;
                               background-color: #fbd113;
@@ -129,19 +131,19 @@ export const sendDownloadEmail = async (
                               font-weight: bold;
                               text-align: center;
                             ">Download ${resource.title}</a>
-                          </td>
-                        </tr>
-                      </table>
-  
-                      <p style="margin: 20px 0; font-size: 16px; color: #343434;">
-                        Ready to take your strategy to the next level? Our team is here to help you implement these insights effectively.
-                      </p>
-  
-                      <!-- Consultation Button -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" style="padding: 10px 0 20px;">
-                            <a href="https://ready-set.co/contact" style="
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 20px 0; font-size: 16px; color: #343434;">
+                Looking to apply these strategies to your business? Schedule a free consultation with our team, and we’ll help you get started.
+              </p>
+
+              <!-- Consultation Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 10px 0 20px;">
+                    <a href="https://ready-set.co/contact" style="
                               display: inline-block;
                               padding: 12px 25px;
                               background-color: #facc15;
@@ -151,74 +153,76 @@ export const sendDownloadEmail = async (
                               font-weight: bold;
                               text-align: center;
                             ">Schedule a Consultation</a>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-  
-             <!-- Footer -->
-            <tr>
-              <td style="background-color: #343434; padding: 30px 40px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-             <tr>
-            <td align="center">
-          <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738910182/logo-dark_aebe9q.png" alt="Ready Set Co Logo" style="margin-bottom: 20px; max-width: 200px; height: auto;">
-          <p style="margin: 0 0 10px; color: #ffffff; font-family: Arial, sans-serif; font-size: 16px;">Follow us!</p>
-          <!-- Social Media Links -->
-          <p style="margin: 0 0 20px;">
-            <!-- Facebook -->
-            <a href="https://www.facebook.com/ReadySetCoGroup/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8290_itqctl.png" alt="Facebook" style="width: 24px; height: 24px;">
-            </a>
-            <!-- TikTok -->
-            <a href="https://www.tiktok.com/@readyset.co" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738908721/IMG_8286_e1x8ki.png" alt="TikTok" style="width: 24px; height: 24px;">
-            </a>
-            <!-- Instagram -->
-            <a href="https://www.instagram.com/readyset.co/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8283_zv84em.png" alt="Instagram" style="width: 24px; height: 24px;">
-            </a>
-            <!-- LinkedIn -->
-            <a href="http://linkedin.com/company/ready-set-group-llc/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8289_ac1l06.png" alt="LinkedIn" style="width: 24px; height: 24px;">
-            </a>
-          </p>
-                            <!-- Contact Information -->
-                            <p style="color: #FFFFFF; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; margin: 0 0 10px;"> 
-                              Ready Set Group, LLC | 166 Geary St, STE 1500 | San Francisco, CA 94108
-                            </p>
-                            
-                            <!-- Legal Text -->
-                            <p style="
+                  </td>
+                </tr>
+              </table>
+               <p style="margin: 20px 0; font-size: 16px; color: #343434;">
+                All the best, <br>
+ The Ready Set Team
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #343434; padding: 30px 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738910182/logo-dark_aebe9q.png" alt="Ready Set Co Logo" style="margin-bottom: 20px; max-width: 200px; height: auto;">
+                    <p style="margin: 0 0 10px; color: #ffffff; font-family: Arial, sans-serif; font-size: 16px;">Follow us!</p>
+                    <!-- Social Media Links -->
+                    <p style="margin: 0 0 20px;">
+                      <!-- Facebook -->
+                      <a href="https://www.facebook.com/ReadySetCoGroup/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+                        <img src="https://readysetllc.com/images/social/1.png" alt="Facebook" style="width: 24px; height: 24px;">
+                      </a>
+                      <!-- TikTok -->
+                      <a href="https://www.tiktok.com/@readyset.co" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+                        <img src="https://readysetllc.com/images/social/2.png" alt="TikTok" style="width: 24px; height: 24px;">
+                      </a>
+                      <!-- Instagram -->
+                      <a href="https://www.instagram.com/readyset.co/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+                        <img src="https://readysetllc.com/images/social/3.png" alt="Instagram" style="width: 24px; height: 24px;">
+                      </a>
+                      <!-- LinkedIn -->
+                      <a href="http://linkedin.com/company/ready-set-group-llc/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+                        <img src="https://readysetllc.com/images/social/4.png" alt="LinkedIn" style="width: 24px; height: 24px;">
+                      </a>
+                    </p>
+                    <!-- Contact Information -->
+                    <p style="color: #FFFFFF; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; margin: 0 0 10px;">
+                      Ready Set Group, LLC | 166 Geary St, STE 1500 | San Francisco, CA 94108
+                    </p>
+
+                    <!-- Legal Text -->
+                    <p style="
                               margin: 0;
                               color: #c4c2bd;
                               font-size: 12px;
                             ">
-                              This email was sent to ${userEmail}. If you did not request this download,
-                              please disregard this email.
-                            </p>
-                            
-                            <!-- Unsubscribe Link -->
-                            <p style="
+                      This email was sent to ${userEmail} by Ready Set. If you did not request this download, please disregard this message. </p>
+
+                    <!-- Unsubscribe Link -->
+                    <p style="
                               margin: 10px 0 0;
                               color: #c4c2bd;
                               font-size: 12px;
                             ">
-                              <a href="unsubscribe" style="color: #fbd113;">Unsubscribe</a> |
-                              <a href="/privacy-policy" style="color: #fbd113;">Privacy Policy</a>
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-      </html>
+                      <a href="unsubscribe" style="color: #fbd113;">Unsubscribe</a> |
+                      <a href="/privacy-policy" style="color: #fbd113;">Privacy Policy</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `,
   };
 

@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Users } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import sendEmail from "@/app/actions/email";
 
 interface MessageType {
@@ -41,7 +41,6 @@ export function TalentPoolModal() {
       "message",
     ) as HTMLTextAreaElement;
 
-    // Client-side validation
     if (!validateMessage(messageElement.value)) {
       return;
     }
@@ -64,10 +63,8 @@ export function TalentPoolModal() {
         text: "Application submitted successfully! We'll be in touch soon.",
       });
 
-      // Reset form
       formRef.current?.reset();
 
-      // Optional: close dialog after successful submission
       setTimeout(() => {
         setIsOpen(false);
         setMessage(null);
@@ -93,24 +90,24 @@ export function TalentPoolModal() {
           Join Our Talent Pool
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800">
+        <DialogHeader className="bg-white dark:bg-gray-900">
+          <DialogTitle className="text-2xl text-gray-900 dark:text-white">
             Interested? Get in touch!
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-600 dark:text-gray-300">
             Tell us about yourself and how you can contribute to our team.
           </DialogDescription>
         </DialogHeader>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 py-4 bg-white dark:bg-gray-900">
           <div>
             <Input
               type="text"
               placeholder="Your Name"
               name="name"
               required
-              className="w-full"
+              className="w-full bg-white dark:bg-gray-800"
               disabled={isLoading}
               maxLength={1000}
               onChange={(e) => {
@@ -134,17 +131,17 @@ export function TalentPoolModal() {
               placeholder="Your Email"
               name="email"
               required
-              className="w-full"
+              className="w-full bg-white dark:bg-gray-800"
               disabled={isLoading}
             />
           </div>
 
           <div>
-          <Textarea
+            <Textarea
               placeholder="Tell us about your experience and interests"
               name="message"
               required
-              className="min-h-[120px] w-full"
+              className="min-h-[120px] w-full bg-white dark:bg-gray-800"
               disabled={isLoading}
               maxLength={1000}
               onChange={(e) => {
@@ -160,7 +157,7 @@ export function TalentPoolModal() {
                 }
               }}
             />
-            <div className="mt-1 text-right text-sm text-gray-500">
+            <div className="mt-1 text-right text-sm text-gray-500 dark:text-gray-400">
               {charCount}/1000 characters
             </div>
           </div>

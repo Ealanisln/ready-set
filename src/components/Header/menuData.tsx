@@ -1,24 +1,24 @@
 import { MenuItem } from "@/types/menu";
 
 export const cateringRequestMenuItem: MenuItem = {
-  id: 10,
+  id: 20, // Changed from 10 to avoid conflict
   title: "Orders",
   newTab: false,
   submenu: [
     {
-      id: 3,
+      id: 21, // Changed from 3 to maintain hierarchy
       title: "Catering Request",
       path: "/catering-request",
       newTab: false,
     },
     {
-      id: 9,
+      id: 22, // Changed from 9 to maintain hierarchy
       title: "On-demand",
       path: "/on-demand",
       newTab: false,
     },
     {
-      id: 10,
+      id: 23, // Changed from 10 to maintain hierarchy
       title: "Order status",
       path: "/order-status",
       newTab: false,
@@ -27,21 +27,21 @@ export const cateringRequestMenuItem: MenuItem = {
 };
 
 export const adminMenuItem: MenuItem = {
-  id: 6,
+  id: 30, // Changed from 6 to avoid conflict
   title: "Admin",
   path: "/admin",
   newTab: false,
 };
 
 export const vendorMenuItem: MenuItem = {
-  id: 7,
+  id: 31, // Changed from 7 to avoid conflict
   title: "Vendor",
   path: "/vendor",
   newTab: false,
 };
 
 export const driverMenuItem: MenuItem = {
-  id: 8,
+  id: 32, // Changed from 9 to avoid conflict
   title: "Driver",
   path: "/driver",
   newTab: false,
@@ -53,26 +53,25 @@ export const rsSubsidiariesMenuItem: MenuItem = {
   newTab: false,
   submenu: [
     {
-      id: 12,
+      id: 15, // Changed from 12 to be sequential
       title: "Logistics",
       path: "/logistics",
       newTab: false,
     },
     {
-      id: 13,
+      id: 16, // Changed from 13 to be sequential
       title: "Virtual Assistant",
       path: "/va",
       newTab: false,
     },
     {
-      id: 14,
+      id: 17, // Changed from 14 to be sequential
       title: "Join Us",
       path: "/join-the-team",
       newTab: false,
     },
   ],
 };
-
 
 const menuData: MenuItem[] = [
   {
@@ -87,27 +86,33 @@ const menuData: MenuItem[] = [
     path: "/about",
     newTab: false,
   },
-  rsSubsidiariesMenuItem, // Add the new Virtual Assistant menu item
   {
-    id: 4,
+    id: 3,
+    title: "Free resources",
+    path: "/free-resources",
+    newTab: false,
+  },
+  rsSubsidiariesMenuItem,
+  {
+    id: 5,
     title: "Contact",
     path: "/contact",
     newTab: false,
   },
   {
-    id: 5,
+    id: 6,
     title: "Blog",
     path: "/blog",
     newTab: false,
   },
   {
-    id: 6,
+    id: 7,
     title: "Sign In",
     path: "/signin",
     newTab: false,
   },
   {
-    id: 7,
+    id: 8,
     title: "Sign Up",
     path: "/signup",
     newTab: false,

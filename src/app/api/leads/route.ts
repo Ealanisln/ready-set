@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
-const WEBSITE_LEADS_LIST_ID = "157b0504-833c-4cf5-ba55-4ef01ac5147a";
+const WEBSITE_LEADS_LIST_ID = process.env.SENDGRID_LIST_ID;
 
 const FormSchema = z.object({
   firstName: z.string().min(1),
@@ -27,39 +27,37 @@ export async function POST(req: NextRequest) {
     // Create lead in your database
     const lead = await prisma.lead_capture.upsert({
       where: {
-        email: validatedData.email
+        email: validatedData.email,
       },
       update: {
         first_name: validatedData.firstName,
         last_name: validatedData.lastName,
         industry: validatedData.industry,
-        newsletter_consent: validatedData.newsletterConsent
+        newsletter_consent: validatedData.newsletterConsent,
       },
       create: {
         first_name: validatedData.firstName,
         last_name: validatedData.lastName,
         email: validatedData.email,
         industry: validatedData.industry,
-        newsletter_consent: validatedData.newsletterConsent
-      }
+        newsletter_consent: validatedData.newsletterConsent,
+      },
     });
 
     if (validatedData.newsletterConsent) {
       // Structure the contact data according to SendGrid's API
       const sendgridPayload = {
-        contacts: [{
-          email: validatedData.email,
-          first_name: validatedData.firstName,
-          last_name: validatedData.lastName,
-          custom_fields: {
-            // Try these variations of the field name:
-            "industry": validatedData.industry,
-            // You might need one of these alternate formats:
-            // "Industry": validatedData.industry,
-            // "cf_industry": validatedData.industry
-          }
-        }],
-        list_ids: [WEBSITE_LEADS_LIST_ID]
+        contacts: [
+          {
+            email: validatedData.email,
+            first_name: validatedData.firstName,
+            last_name: validatedData.lastName,
+            custom_fields: {
+              industry: validatedData.industry,
+            },
+          },
+        ],
+        list_ids: [WEBSITE_LEADS_LIST_ID],
       };
 
       const response = await fetch(
@@ -71,12 +69,12 @@ export async function POST(req: NextRequest) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(sendgridPayload),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        
+
         // First, let's try to get the list of valid custom fields
         const fieldsResponse = await fetch(
           "https://api.sendgrid.com/v3/marketing/field_definitions",
@@ -85,18 +83,18 @@ export async function POST(req: NextRequest) {
               Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
-        
+
         const fieldsData = await fieldsResponse.json();
-        
-        console.error('SendGrid subscription failed:', {
+
+        console.error("SendGrid subscription failed:", {
           status: response.status,
           statusText: response.statusText,
           errors: errorData,
           listId: WEBSITE_LEADS_LIST_ID,
           payload: sendgridPayload,
-          availableFields: fieldsData // This will show us all available custom fields
+          availableFields: fieldsData, // This will show us all available custom fields
         });
       }
     }
