@@ -157,7 +157,7 @@ export const sendDownloadEmail = async (
                     </td>
                   </tr>
   
-                 <!-- Footer -->
+             <!-- Footer -->
 <tr>
   <td style="background-color: #343434; padding: 30px 40px;">
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -166,53 +166,25 @@ export const sendDownloadEmail = async (
           <!-- Social Media Links -->
           <p style="margin: 0 0 20px;">
             <!-- Facebook -->
-            <a href="https://www.facebook.com/ReadySetCoGroup/" style="
-              display: inline-block;
-              margin: 0 10px;
-              text-decoration: none;
-              width: 24px;
-              height: 24px;
-            ">
-              <img src="https://ready-set.co/images/social/facebook.png" alt="Facebook" width="24" height="24" style="display: block;">
+            <a href="https://www.facebook.com/ReadySetCoGroup/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+              <span style="color: #FFFFFF; font-size: 24px;">Facebook</span>
             </a>
             <!-- TikTok -->
-            <a href="https://www.tiktok.com/@readyset.co" style="
-              display: inline-block;
-              margin: 0 10px;
-              text-decoration: none;
-              width: 24px;
-              height: 24px;
-            ">
-              <img src="https://ready-set.co/images/social/tiktok.png" alt="TikTok" width="24" height="24" style="display: block;">
+            <a href="https://www.tiktok.com/@readyset.co" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+              <span style="color: #FFFFFF; font-size: 24px;">TikTok</span>
             </a>
             <!-- Instagram -->
-            <a href="https://www.instagram.com/readyset.co/" style="
-              display: inline-block;
-              margin: 0 10px;
-              text-decoration: none;
-              width: 24px;
-              height: 24px;
-            ">
-              <img src="https://ready-set.co/images/social/instagram.png" alt="Instagram" width="24" height="24" style="display: block;">
+            <a href="https://www.instagram.com/readyset.co/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+              <span style="color: #FFFFFF; font-size: 24px;">Instagram</span>
             </a>
             <!-- LinkedIn -->
-            <a href="http://linkedin.com/company/ready-set-group-llc/" style="
-              display: inline-block;
-              margin: 0 10px;
-              text-decoration: none;
-              width: 24px;
-              height: 24px;
-            ">
-              <img src="https://ready-set.co/images/social/linkedin.png" alt="LinkedIn" width="24" height="24" style="display: block;">
+            <a href="http://linkedin.com/company/ready-set-group-llc/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
+              <span style="color: #FFFFFF; font-size: 24px;">LinkedIn</span>
             </a>
-          </p>
-                            
+          </p>    
+
                             <!-- Contact Information -->
-                            <p style="
-                              margin: 0 0 10px;
-                              color: #c4c2bd;
-                              font-size: 14px;
-                            ">
+                            <p style="color: #FFFFFF; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; margin: 0 0 10px;"> 
                               Ready Set Group, LLC | 166 Geary St, STE 1500 | San Francisco, CA 94108
                             </p>
                             
