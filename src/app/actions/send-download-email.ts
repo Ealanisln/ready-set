@@ -158,31 +158,32 @@ export const sendDownloadEmail = async (
                   </tr>
   
              <!-- Footer -->
-<tr>
-  <td style="background-color: #343434; padding: 30px 40px;">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center">
+            <tr>
+              <td style="background-color: #343434; padding: 30px 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+             <tr>
+            <td align="center">
+          <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738910182/logo-dark_aebe9q.png" alt="Ready Set Co Logo" style="margin-bottom: 20px; max-width: 200px; height: auto;">
+          <p style="margin: 0 0 10px; color: #ffffff; font-family: Arial, sans-serif; font-size: 16px;">Follow us!</p>
           <!-- Social Media Links -->
           <p style="margin: 0 0 20px;">
             <!-- Facebook -->
             <a href="https://www.facebook.com/ReadySetCoGroup/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <span style="color: #FFFFFF; font-size: 24px;">Facebook</span>
+              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8290_itqctl.png" alt="Facebook" style="width: 24px; height: 24px;">
             </a>
             <!-- TikTok -->
             <a href="https://www.tiktok.com/@readyset.co" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <span style="color: #FFFFFF; font-size: 24px;">TikTok</span>
+              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738908721/IMG_8286_e1x8ki.png" alt="TikTok" style="width: 24px; height: 24px;">
             </a>
             <!-- Instagram -->
             <a href="https://www.instagram.com/readyset.co/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <span style="color: #FFFFFF; font-size: 24px;">Instagram</span>
+              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8283_zv84em.png" alt="Instagram" style="width: 24px; height: 24px;">
             </a>
             <!-- LinkedIn -->
             <a href="http://linkedin.com/company/ready-set-group-llc/" style="display: inline-block; margin: 0 10px; text-decoration: none;">
-              <span style="color: #FFFFFF; font-size: 24px;">LinkedIn</span>
+              <img src="https://res.cloudinary.com/dlqu2l2ia/image/upload/v1738909666/IMG_8289_ac1l06.png" alt="LinkedIn" style="width: 24px; height: 24px;">
             </a>
-          </p>    
-
+          </p>
                             <!-- Contact Information -->
                             <p style="color: #FFFFFF; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; margin: 0 0 10px;"> 
                               Ready Set Group, LLC | 166 Geary St, STE 1500 | San Francisco, CA 94108
