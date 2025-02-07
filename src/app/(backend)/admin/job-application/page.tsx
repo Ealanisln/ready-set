@@ -5,8 +5,6 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Table,
@@ -26,9 +24,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Package2, AlertCircle, UserPlus } from "lucide-react";
+import { Package2, AlertCircle, UserPlus, ArrowUpDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface JobApplication {
   id: string;
@@ -78,6 +84,9 @@ const JobApplicationsPage: React.FC = () => {
   const [limit] = useState(10);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus>("all");
   const [totalPages, setTotalPages] = useState(1);
+  const [nameSort, setNameSort] = useState<'asc' | 'desc'>('asc');
+  const [emailFilter, setEmailFilter] = useState('');
+  const [positionFilter, setPositionFilter] = useState<'all' | 'helpdesk' | 'driver'>('all');
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -86,7 +95,10 @@ const JobApplicationsPage: React.FC = () => {
       try {
         const apiUrl = `/api/applications?page=${page}&limit=${limit}${
           statusFilter !== "all" ? `&status=${statusFilter}` : ""
+        }${emailFilter ? `&email=${emailFilter}` : ""}${
+          positionFilter !== "all" ? `&position=${positionFilter}` : ""
         }`;
+        
         const response = await fetch(apiUrl);
         
         if (!response.ok) {
@@ -95,7 +107,15 @@ const JobApplicationsPage: React.FC = () => {
         
         const data = await response.json();
         const applicationsData = Array.isArray(data) ? data : data.applications || [];
-        setApplications(applicationsData);
+        
+        // Client-side sorting
+        const sortedData = [...applicationsData].sort((a, b) => {
+          return nameSort === 'asc' 
+            ? a.name.localeCompare(b.name) 
+            : b.name.localeCompare(a.name);
+        });
+
+        setApplications(sortedData);
         
         const totalCount = Array.isArray(data) 
           ? data.length 
@@ -109,7 +129,7 @@ const JobApplicationsPage: React.FC = () => {
     };
 
     fetchApplications();
-  }, [page, limit, statusFilter]);
+  }, [page, limit, statusFilter, nameSort, emailFilter, positionFilter]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -121,9 +141,19 @@ const JobApplicationsPage: React.FC = () => {
     setPage(1);
   };
 
+  const handleEmailFilter = (value: string) => {
+    setEmailFilter(value);
+    setPage(1);
+  };
+
+  const handlePositionFilter = (value: string) => {
+    setPositionFilter(value as 'all' | 'helpdesk' | 'driver');
+    setPage(1);
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Job Applications</h1>
           <p className="text-muted-foreground">
@@ -132,7 +162,7 @@ const JobApplicationsPage: React.FC = () => {
         </div>
         <Link 
           href="/create-account" 
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors w-full md:w-auto justify-center"
         >
           <UserPlus className="mr-2 h-4 w-4" />
           Create Account
@@ -146,15 +176,21 @@ const JobApplicationsPage: React.FC = () => {
             className="space-y-4"
             onValueChange={(value) => handleStatusFilter(value as ApplicationStatus)}
           >
-            <TabsList className="grid grid-cols-5 gap-4 bg-muted/50 p-1">
-              <TabsTrigger value="all" className="data-[state=active]:bg-white">
-                Name
+            <TabsList className="grid grid-cols-5 gap-2 bg-muted/50 p-1 w-full">
+              <TabsTrigger value="all" className="data-[state=active]:bg-white truncate">
+                All
               </TabsTrigger>
               <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-100 data-[state=active]:text-yellow-900">
-                Email
+                Pending
               </TabsTrigger>
               <TabsTrigger value="approved" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-900">
-                Position Type
+                Approved
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="data-[state=active]:bg-red-100 data-[state=active]:text-red-900">
+                Rejected
+              </TabsTrigger>
+              <TabsTrigger value="account_created" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 truncate">
+                Account Created
               </TabsTrigger>
             </TabsList>
 
@@ -163,20 +199,64 @@ const JobApplicationsPage: React.FC = () => {
                 <LoadingSkeleton />
               ) : error ? (
                 <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                  </div>
+                  <AlertDescription className="mt-2">
+                    {error}
+                    <Button 
+                      variant="outline" 
+                      className="ml-4 mt-2"
+                      onClick={() => window.location.reload()}
+                    >
+                      Retry
+                    </Button>
+                  </AlertDescription>
                 </Alert>
               ) : applications.length > 0 ? (
-                <div className="rounded-md border">
-                  <Table>
+                <div className="rounded-md border overflow-x-auto">
+                  <Table className="min-w-[800px]">
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Position</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Applied Date</TableHead>
+                        <TableHead className="w-[20%] min-w-[150px]">
+                          <div className="flex items-center gap-1">
+                            Name 
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-1"
+                              onClick={() => setNameSort(nameSort === 'asc' ? 'desc' : 'asc')}
+                            >
+                              <ArrowUpDown className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableHead>
+                        <TableHead className="w-[25%]">
+                          <div className="flex items-center gap-2">
+                            <span>Email</span>
+                            <Input 
+                              placeholder="Filter..." 
+                              className="h-8 max-w-[200px]"
+                              value={emailFilter}
+                              onChange={(e) => handleEmailFilter(e.target.value)}
+                            />
+                          </div>
+                        </TableHead>
+                        <TableHead className="w-[15%]">
+                          <Select onValueChange={handlePositionFilter} value={positionFilter}>
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Position Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Positions</SelectItem>
+                              <SelectItem value="helpdesk">Helpdesk</SelectItem>
+                              <SelectItem value="driver">Driver</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableHead>
+                        <TableHead className="w-[15%]">Status</TableHead>
+                        <TableHead className="w-[20%] text-right">Applied Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -185,20 +265,20 @@ const JobApplicationsPage: React.FC = () => {
                           <TableCell>
                             <Link
                               href={`/admin/applications/${application.id}`}
-                              className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                              className="font-medium text-blue-600 hover:text-blue-800 hover:underline truncate block"
                             >
                               {application.name}
                             </Link>
                           </TableCell>
-                          <TableCell>{application.email}</TableCell>
+                          <TableCell className="truncate">{application.email}</TableCell>
                           <TableCell>
                             <Badge className={getPositionStyle(application.positionType)}>
-                              {application.positionType}
+                              {application.positionType.charAt(0).toUpperCase() + application.positionType.slice(1)}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge className={getStatusStyle(application.status)}>
-                              {application.status.replace('_', ' ')}
+                              {application.status.replace('_', ' ').toUpperCase()}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -232,17 +312,19 @@ const JobApplicationsPage: React.FC = () => {
                         className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       />
                     </PaginationItem>
-                    {[...Array(totalPages)].map((_, i) => (
-                      <PaginationItem key={i}>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                      <PaginationItem key={pageNumber}>
                         <PaginationLink 
-                          onClick={() => handlePageChange(i + 1)}
-                          isActive={page === i + 1}
+                          onClick={() => handlePageChange(pageNumber)}
+                          isActive={page === pageNumber}
                           className="cursor-pointer"
                         >
-                          {i + 1}
+                          {pageNumber}
                         </PaginationLink>
                       </PaginationItem>
                     ))}
+
                     <PaginationItem>
                       <PaginationNext 
                         onClick={() => handlePageChange(page + 1)} 
