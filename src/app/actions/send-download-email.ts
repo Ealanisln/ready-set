@@ -157,25 +157,55 @@ export const sendDownloadEmail = async (
                     </td>
                   </tr>
   
-                  <!-- Footer -->
-                  <tr>
-                    <td style="background-color: #343434; padding: 30px 40px;">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center">
-                            <!-- Social Media Links -->
-                            <p style="margin: 0 0 20px;">
-                              <a href="https://twitter.com/readyset" style="
-                                display: inline-block;
-                                margin: 0 10px;
-                                text-decoration: none;
-                              "><img src="https://ready-set.co/twitter-icon.png" alt="Twitter" width="24"></a>
-                              <a href="https://linkedin.com/company/readyset" style="
-                                display: inline-block;
-                                margin: 0 10px;
-                                text-decoration: none;
-                              "><img src="https://ready-set.co/linkedin-icon.png" alt="LinkedIn" width="24"></a>
-                            </p>
+                 <!-- Footer -->
+<tr>
+  <td style="background-color: #343434; padding: 30px 40px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <!-- Social Media Links -->
+          <p style="margin: 0 0 20px;">
+            <!-- Facebook -->
+            <a href="https://www.facebook.com/ReadySetCoGroup/" style="
+              display: inline-block;
+              margin: 0 10px;
+              text-decoration: none;
+              width: 24px;
+              height: 24px;
+            ">
+              <img src="https://ready-set.co/images/social/facebook.png" alt="Facebook" width="24" height="24" style="display: block;">
+            </a>
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@readyset.co" style="
+              display: inline-block;
+              margin: 0 10px;
+              text-decoration: none;
+              width: 24px;
+              height: 24px;
+            ">
+              <img src="https://ready-set.co/images/social/tiktok.png" alt="TikTok" width="24" height="24" style="display: block;">
+            </a>
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/readyset.co/" style="
+              display: inline-block;
+              margin: 0 10px;
+              text-decoration: none;
+              width: 24px;
+              height: 24px;
+            ">
+              <img src="https://ready-set.co/images/social/instagram.png" alt="Instagram" width="24" height="24" style="display: block;">
+            </a>
+            <!-- LinkedIn -->
+            <a href="http://linkedin.com/company/ready-set-group-llc/" style="
+              display: inline-block;
+              margin: 0 10px;
+              text-decoration: none;
+              width: 24px;
+              height: 24px;
+            ">
+              <img src="https://ready-set.co/images/social/linkedin.png" alt="LinkedIn" width="24" height="24" style="display: block;">
+            </a>
+          </p>
                             
                             <!-- Contact Information -->
                             <p style="
@@ -183,7 +213,7 @@ export const sendDownloadEmail = async (
                               color: #c4c2bd;
                               font-size: 14px;
                             ">
-                              Ready Set | 123 Business Ave, Suite 100 | City, State 12345
+                              Ready Set Group, LLC | 166 Geary St, STE 1500 | San Francisco, CA 94108
                             </p>
                             
                             <!-- Legal Text -->
