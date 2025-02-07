@@ -205,8 +205,8 @@ export const sendDownloadEmail = async (
                               color: #c4c2bd;
                               font-size: 12px;
                             ">
-                              <a href="{{{unsubscribe}}}" style="color: #fbd113;">Unsubscribe</a> |
-                              <a href="https://ready-set.co/privacy" style="color: #fbd113;">Privacy Policy</a>
+                              <a href="unsubscribe" style="color: #fbd113;">Unsubscribe</a> |
+                              <a href="/privacy-policy" style="color: #fbd113;">Privacy Policy</a>
                             </p>
                           </td>
                         </tr>

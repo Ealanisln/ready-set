@@ -45,7 +45,7 @@ const DeliveryLogistics = () => {
                 <ul className="space-y-4 text-gray-600">
                   <li>
                     •{" "}
-                    <span className="font-bold text-red-500">
+                    <span className="font-bold">
                       Understand Key Challenges:
                     </span>{" "}
                     Gain insight into the most common issues faced in delivery
@@ -54,7 +54,7 @@ const DeliveryLogistics = () => {
                   </li>
                   <li>
                     •{" "}
-                    <span className="font-bold text-red-500">
+                    <span className="font-bold">
                       Actionable Solutions:
                     </span>{" "}
                     Learn practical strategies to overcome logistical hurdles
@@ -62,7 +62,7 @@ const DeliveryLogistics = () => {
                   </li>
                   <li>
                     •{" "}
-                    <span className="font-bold text-red-500">
+                    <span className="font-bold">
                       Improve Customer Satisfaction:
                     </span>{" "}
                     Implement tips to enhance delivery speed, accuracy, and
@@ -70,7 +70,7 @@ const DeliveryLogistics = () => {
                   </li>
                   <li>
                     •{" "}
-                    <span className="font-bold text-red-500">
+                    <span className="font-bold">
                       Save Time and Money:
                     </span>{" "}
                     Identify cost-effective methods to streamline your logistics
