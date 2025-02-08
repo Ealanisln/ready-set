@@ -86,23 +86,23 @@ const menuData: MenuItem[] = [
     path: "/about",
     newTab: false,
   },
-  {
-    id: 3,
-    title: "Free resources",
-    path: "/free-resources",
-    newTab: false,
-  },
   rsSubsidiariesMenuItem,
   {
-    id: 5,
+    id: 4,
     title: "Contact",
     path: "/contact",
     newTab: false,
   },
   {
-    id: 6,
+    id: 5,
     title: "Blog",
     path: "/blog",
+    newTab: false,
+  },
+  {
+    id: 6,
+    title: "Free Resources",
+    path: "/free-resources",
     newTab: false,
   },
   {
