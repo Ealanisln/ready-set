@@ -13,6 +13,7 @@ const ResourcesGrid = () => {
         {/* Header */}
         <div className="mb-12 text-center">
           <div className="flex justify-center pb-8">
+        
             <Image
               src="/images/logo/logo.png"
               alt="logo"
@@ -34,11 +35,16 @@ const ResourcesGrid = () => {
               className="flex flex-col overflow-hidden rounded-none bg-white transition-shadow hover:shadow-lg"
             >
               <div className="relative aspect-[4/3] w-full">
+              <picture>
+                <source srcSet={resource.imageUrl} type="image/webp" />
                 <img
-                  src={resource.imageUrl}
+                  src={resource.imageUrl || resource.imageFallback}
                   alt={resource.title}
+                  width={400}
+                  height={300}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
+                </picture>
               </div>
               <div className="flex h-full flex-col">
                 <CardContent className="flex-1 p-6">

@@ -83,11 +83,14 @@ const EmailMetricsMatter = () => {
 
             <div className="space-y-6">
               <Card className="rounded-lg bg-yellow-400 p-6">
+                <picture>
+                  <source srcSet="/images/resources/4.webp" type="image/webp" />
                 <img
                   src="/images/resources/4.png"
                   alt="Business people reviewing metrics"
                   className="mb-4 w-full rounded-lg"
                 />
+                </picture>
                 <h2 className="mb-2 text-center text-2xl font-bold">
                   Why Email Metrics
                   <div className="mt-1">Matter</div>
