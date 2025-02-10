@@ -18,75 +18,55 @@ const GuideVirtualAssistant = () => {
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold text-gray-800">
-                {guideTitle}
+                {guideTitle} - Your Step-by-Step Guide
               </h2>
-              <h3 className="text-xl text-gray-600">A Strategic Approach</h3>
-
+              
               <p className="text-gray-600">
-                Whether you're a busy entrepreneur or managing a growing business, 
-                this guide provides a structured approach to making an informed decision 
-                that will enhance your productivity and support your business growth objectives.
-              </p>
-
-              <p className="text-gray-600">
-                This comprehensive resource helps businesses navigate the critical process 
-                of selecting the right virtual assistant in today's dynamic work environment. 
-                The guide provides detailed frameworks for evaluation across key areas:
+                Hiring a Virtual Assistant (VA) isn't just about ticking tasks off your list—it's 
+                about finding someone who fits your business and work style. Before you start, 
+                ask yourself: What tasks do I need help with? What skills should my VA have? 
+                This guide walks you through the process of finding the right VA who can help 
+                you work smarter and free up your time.
               </p>
 
               <div className="space-y-4">
+                <h3 className="text-2xl font-bold text-gray-800">
+                  How This Guide Helps You
+                </h3>
                 <p className="text-gray-600">
-                  1. Skills and Competency Assessment:
+                  Learn how to hire the right Virtual Assistant for your business. This guide 
+                  covers how to identify tasks to delegate, find qualified VAs, evaluate 
+                  candidates, and onboard them into your workflow. You'll also learn how to 
+                  manage and measure their performance effectively.
                 </p>
-                <ul className="space-y-4 text-gray-600">
-                  <li>• Technical proficiency evaluation</li>
-                  <li>• Communication skills assessment</li>
-                  <li>• Problem-solving capabilities</li>
-                  <li>• Adaptability and learning ability</li>
-                </ul>
               </div>
 
               <div className="space-y-4">
-                <p className="text-gray-600">
-                  2. Practical Implementation Tools:
-                </p>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  What You Will Get
+                </h3>
                 <ul className="space-y-4 text-gray-600">
-                  <li>• Comprehensive interview questionnaires</li>
-                  <li>• Skills assessment templates</li>
-                  <li>• Trial period evaluation metrics</li>
-                  <li>• Performance monitoring frameworks</li>
+                  <li>• Hiring the Perfect Virtual Assistant for Your Business</li>
+                  <li>• How to Find the Right Virtual Assistant (VA)</li>
+                  <li>• Checklist: What to Look for in a VA</li>
+                  <li>• Benefits of Having a Virtual Assistant for Your Business</li>
                 </ul>
               </div>
 
-              <div className="space-y-4">
-                <p className="font-bold text-gray-600">
-                  This resource will help your business succeed by:
-                </p>
-                <ul className="space-y-4 text-gray-600">
-                  <li>• Defining clear roles and responsibilities</li>
-                  <li>• Establishing effective communication channels</li>
-                  <li>• Creating structured onboarding processes</li>
-                  <li>• Setting measurable performance indicators</li>
-                  <li>• Developing long-term growth opportunities</li>
-                </ul>
-              </div>
+              <p className="text-gray-600">
+                Hiring a VA is a smart move when you're ready to focus on the bigger picture. 
+                Let Ready Set Group LLC match you with professionals who fit your business needs.
+              </p>
 
               <div className="space-y-4">
                 <p className="font-bold">
-                  Download your Free Virtual Assistant Selection Guide{" "}
-                  <span className="font-normal text-gray-600">
-                    to get more insights!
-                  </span>
+                  Get your free guide and start delegating today.
+                </p>
+                <p className="font-bold">
+                  Want personalized support? Book a Discovery Call with Ready Set Group LLC 
+                  and let us help you find the right VA.
                 </p>
               </div>
-
-              <p className="text-gray-600">
-                Ready to optimize your business operations with a virtual assistant? Contact{" "}
-                <span className="font-bold text-blue-500 underline">
-                  Ready Set Group
-                </span>{" "}
-                now!
-              </p>
             </div>
 
             <div className="space-y-6">
@@ -99,7 +79,7 @@ const GuideVirtualAssistant = () => {
                 <h2 className="mb-2 text-center text-2xl font-bold">
                   The Complete Guide to
                   <div className="mt-1">Choosing the Right</div>
-                  <div className="mt-1">Delivery Partner</div>
+                  <div className="mt-1">Virtual Assistant</div>
                 </h2>
                 <div className="mx-auto my-4 h-px w-32 bg-black"></div>
                 <p className="text-center text-sm">A Strategic Approach</p>
@@ -130,14 +110,13 @@ const GuideVirtualAssistant = () => {
                   title={guideTitle}
                 />
 
-                {/* AppointmentDialog */}
                 <div className="flex justify-center">
                   <AppointmentDialog
-                    buttonText="Book A Consultation Today"
+                    buttonText="Book A Discovery Call"
                     buttonVariant="amber"
                     buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
-                    dialogTitle="Schedule Your Free Consultation"
-                    dialogDescription="Choose a time that works best for you to discuss how we can help you save on hiring costs."
+                    dialogTitle="Schedule Your Free Discovery Call"
+                    dialogDescription="Choose a time that works best for you to discuss how we can help you find the right Virtual Assistant."
                     calendarUrl={calendarUrl}
                   />
                 </div>

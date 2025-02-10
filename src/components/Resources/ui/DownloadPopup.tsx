@@ -46,7 +46,6 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
         <LeadCaptureForm
   resourceSlug={(() => {
     const slug = generateSlug(title);
-    console.log('DownloadPopup passing slug:', slug);
     return slug;
   })()}
   resourceTitle={title}

@@ -1,5 +1,4 @@
 export const generateSlug = (title: string) => {
-  console.log('Generating slug for title:', title);
   const slug = title
     .toLowerCase()
     .replace(/\s+/g, '-')
@@ -7,6 +6,5 @@ export const generateSlug = (title: string) => {
     .replace(/--+/g, '-')
     .replace(/^-+/, '')
     .replace(/-+$/, '');
-  console.log('Generated slug:', slug);
   return slug;
 };

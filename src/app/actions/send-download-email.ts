@@ -14,7 +14,6 @@ type Resource = (typeof resources)[number];
 const RESOURCE_MAP = resources.reduce(
   (acc: Record<ResourceSlug, Resource>, resource: Resource) => {
     const slug = generateSlug(resource.title);
-    console.log(`Creating map entry: "${resource.title}" -> "${slug}"`);
     return {
       ...acc,
       [slug]: resource,
