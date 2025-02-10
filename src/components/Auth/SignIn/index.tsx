@@ -118,7 +118,9 @@ const Signin = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginData((prev) => ({ ...prev, [name]: value }));
+    // Convert email to lowercase if the field is email
+    const processedValue = name === 'email' ? value.toLowerCase() : value;
+    setLoginData((prev) => ({ ...prev, [name]: processedValue }));
     // Clear error when user starts typing
     setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };

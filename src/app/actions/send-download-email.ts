@@ -14,6 +14,7 @@ type Resource = (typeof resources)[number];
 const RESOURCE_MAP = resources.reduce(
   (acc: Record<ResourceSlug, Resource>, resource: Resource) => {
     const slug = generateSlug(resource.title);
+    console.log(`Creating map entry: "${resource.title}" -> "${slug}"`);
     return {
       ...acc,
       [slug]: resource,
@@ -39,6 +40,10 @@ export const sendDownloadEmail = async (
   firstName: string,
   resourceSlug: ResourceSlug,
 ) => {
+  console.log('Attempting to send email for resource:', resourceSlug);
+  console.log('Available resource slugs:', Object.keys(RESOURCE_MAP));
+
+  // ... rest of the function
   // Validate inputs
   if (!userEmail || !firstName || !resourceSlug) {
     throw new Error("Missing required parameters for sending download email");
