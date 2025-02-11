@@ -69,7 +69,7 @@ export const resources: Resource[] = [
     description: "A Guide for Business Owners",
     component: StartSocialMedia, 
     imageUrl: "/images/resources/8.png",
-    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLZoGTWOLe5NJ1C427fwpkQLaiRhF9yWOVKzXr"
+    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLXw8zL4vEAT3gOqBJ4EhXmUx2tRuliKfovNI0"
   }
 
 
