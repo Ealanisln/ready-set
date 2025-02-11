@@ -228,13 +228,13 @@ export default function NewsletterForm() {
   />
   <div className="mb-6 text-center text-gray-600">
     Explore our{" "}
-    <a href="/free-resources" className="font-medium hover:text-gray-900 transition-colors">
+    <Link href="/free-resources" className="font-medium hover:text-gray-900 transition-colors">
       free guides resources
-    </a>{" "}
+    </Link>{" "}
     and{" "}
-    <a href="/blog" className="font-medium hover:text-gray-900 transition-colors">
+    <Link href="/blog" className="font-medium hover:text-gray-900 transition-colors">
       blogs
-    </a>
+    </Link>
     .
   </div>
 
