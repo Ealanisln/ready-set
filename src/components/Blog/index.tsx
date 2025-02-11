@@ -1,3 +1,5 @@
+
+
 const Blog = () => {
   return (
     <section className="pb-10 pt-20 lg:pb-20 lg:pt-[120px]">

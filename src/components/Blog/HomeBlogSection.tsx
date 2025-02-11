@@ -54,6 +54,7 @@ const HomeBlogSection = async () => {
         </div>
       </div>
     </section>
+    
   );
 };
 

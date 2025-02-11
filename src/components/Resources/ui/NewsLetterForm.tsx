@@ -221,16 +221,22 @@ export default function NewsletterForm() {
 
         {/* Sección de redes sociales */}
         <div className="flex w-full flex-col items-center justify-center pt-10 md:w-1/3">
-          <img
-            src="/images/logo/logo-white.png"
-            alt="Penguin Logo"
-            className="mb-4 h-10 object-contain"
-          />
-          <div className="mb-6 text-center text-gray-600">
-            Explore our{" "}
-            <span className="font-medium">free guides, resources,</span> and{" "}
-            <span className="font-medium">blogs</span>.
-          </div>
+  <img
+    src="/images/logo/logo-white.png"
+    alt="Penguin Logo"
+    className="mb-4 h-10 object-contain"
+  />
+  <div className="mb-6 text-center text-gray-600">
+    Explore our{" "}
+    <a href="/free-resources" className="font-medium hover:text-gray-900 transition-colors">
+      free guides resources
+    </a>{" "}
+    and{" "}
+    <a href="/blog" className="font-medium hover:text-gray-900 transition-colors">
+      blogs
+    </a>
+    .
+  </div>
 
           <div className="flex items-center justify-center gap-4">
             <Link

@@ -99,6 +99,7 @@ const Share = ({ post }: { post: PostDocument }) => {
           aria-label="Compartir en LinkedIn"
         >
           <LinkedinIcon size={32} round />
+          
         </LinkedinShareButton>
       </div>
     </>
