@@ -1,6 +1,7 @@
 // app/blog/page.tsx
 import SingleBlog from "@/components/Blog/SingleBlog";
 import Breadcrumb from "@/components/Common/Breadcrumb";
+import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
 import NewsLetterSignup from "@/components/Resources/ui/NewsLetterSignUp";
 import { client } from "@/sanity/lib/client";
 import { postPathsQuery } from "@/sanity/lib/queries";
@@ -138,6 +139,9 @@ export default async function Blog() {
         <div className="container mx-auto">
           <div className="-mx-4 flex flex-wrap justify-center sm:px-4">
             <SingleBlog data={data} basePath="blog" />
+            <div className="mt-20 w-full">
+            <NewsletterForm />
+            </div>
           </div>
         </div>
       </section>

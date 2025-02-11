@@ -14,6 +14,7 @@ import type { PostDocument } from "@/sanity/schemaTypes/seo";
 import React from "react";
 import { format } from "date-fns";
 import BookNow from "@/components/Blog/BookNow";
+import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
 
 export const revalidate = 30;
 
