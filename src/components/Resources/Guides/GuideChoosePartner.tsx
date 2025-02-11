@@ -10,7 +10,7 @@ import { DownloadPopup } from "../ui/DownloadPopup";
 const GuideChoosePartner = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const calendarUrl =
-    "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+    "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true";
 
   const guideTitle = "The Complete Guide to Choosing the Right Delivery Partner";
 

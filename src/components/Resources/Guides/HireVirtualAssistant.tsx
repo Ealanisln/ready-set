@@ -7,7 +7,8 @@ import DownloadPopup from '../ui/DownloadPopup';
 
 const GuideVirtualAssistant = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-  const calendarUrl = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+  const calendarUrl = 
+  "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
   
   const guideTitle = "How to Hire the Right Virtual Assistant";
 
