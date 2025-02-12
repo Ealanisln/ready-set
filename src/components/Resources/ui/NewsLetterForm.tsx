@@ -15,6 +15,7 @@ interface FormData {
 
 export default function NewsletterForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showSocialIcons, setShowSocialIcons] = useState(true);
 
   const {
     register,
@@ -228,7 +229,7 @@ export default function NewsletterForm() {
               .
             </div>
 
-            <div className="flex items-center justify-center gap-4">
+            <div className="hidden md:flex items-center justify-center gap-4">
               <Link
                 aria-label="Facebook"
                 href="https://www.facebook.com/"
