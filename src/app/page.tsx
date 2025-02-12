@@ -1,5 +1,6 @@
 import ScrollUp from "@/components/Common/ScrollUp";
 import Hero from "@/components/Hero/index";
+import NewsletterForm from '../components/Resources/ui/NewsLetterForm';
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -63,6 +64,7 @@ export default function Home() {
     <main>
       <ScrollUp />
       <Hero />
+      <NewsletterForm />
     </main>
   );
 }

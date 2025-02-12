@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { useState } from "react"; // Añadimos useState
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 interface FormData {
@@ -10,20 +11,19 @@ interface FormData {
   lastName: string;
   email: string;
   industry: string;
-  newsletterConsent: boolean; // Added newsletter consent field
+  newsletterConsent: boolean;
 }
 
 export default function NewsletterForm() {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Usamos useForm para manejar el formulario
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
   } = useForm<FormData>();
-  // Función que se ejecuta al enviar el formulario
+
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
@@ -42,7 +42,7 @@ export default function NewsletterForm() {
       const result = await response.json();
       console.log("Success:", result);
       toast.success("Successfully registered.");
-      reset(); // Reset the form after successful submission
+      reset();
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -50,212 +50,203 @@ export default function NewsletterForm() {
           : "An error occurred while submitting the form",
       );
     } finally {
-      setIsLoading(false); // Desactivamos el loading al terminar
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
-        <div className="w-full md:w-2/3">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-700">
-              Newsletter Alert and Discounts
-            </h2>
+    <div className="flex justify-center w-full bg-white p-8">
+    <div className="w-full max-w-lg">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-gray-700">
+          Newsletter Alert and Discounts
+        </h2>
+      </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="firstName"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    First name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    {...register("firstName", {
+                      required: "First name is required",
+                    })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.firstName && (
+                    <span className="text-sm text-red-500">
+                      {errors.firstName.message}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Invalid email address",
+                      },
+                    })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.email && (
+                    <span className="text-sm text-red-500">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="lastName"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    {...register("lastName", {
+                      required: "Last name is required",
+                    })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.lastName && (
+                    <span className="text-sm text-red-500">
+                      {errors.lastName.message}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="industry"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    Industry
+                  </label>
+                  <input
+                    type="text"
+                    id="industry"
+                    {...register("industry", {
+                      required: "Industry is required",
+                    })}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.industry && (
+                    <span className="text-sm text-red-500">
+                      {errors.industry.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    {...register("newsletterConsent")}
+                    className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    I agree to receive newsletters and promotional emails.
+                  </span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`mt-6 w-full rounded-full px-4 py-2 transition-colors ${
+                  isLoading
+                    ? "cursor-not-allowed bg-gray-400"
+                    : "bg-gray-800 hover:bg-gray-700"
+                } flex items-center justify-center text-white`}
+              >
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Subscribe Now"
+                )}
+              </button>
+            </form>
           </div>
 
-          {/* Formulario con React Hook Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Campo: First Name */}
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
-                  First name
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  {...register("firstName", {
-                    required: "First name is required",
-                  })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.firstName && (
-                  <span className="text-sm text-red-500">
-                    {errors.firstName.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Campo: Email Address */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.email && (
-                  <span className="text-sm text-red-500">
-                    {errors.email.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Campo: Last Name */}
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  {...register("lastName", {
-                    required: "Last name is required",
-                  })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.lastName && (
-                  <span className="text-sm text-red-500">
-                    {errors.lastName.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Campo: Industry */}
-              <div>
-                <label
-                  htmlFor="industry"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
-                  Industry
-                </label>
-                <input
-                  type="text"
-                  id="industry"
-                  {...register("industry", {
-                    required: "Industry is required",
-                  })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.industry && (
-                  <span className="text-sm text-red-500">
-                    {errors.industry.message}
-                  </span>
-                )}
-              </div>
+          <div className="flex w-full flex-col items-center justify-center border-l border-gray-200 pt-6 md:w-1/3 md:pt-0">
+            <img
+              src="/images/logo/logo-white.png"
+              alt="Penguin Logo"
+              className="mb-4 h-10 object-contain"
+            />
+            <div className="mb-6 text-center text-gray-600">
+              Explore our{" "}
+              <Link href="/free-resources" className="font-medium hover:text-gray-900 transition-colors">
+                free guides
+              </Link>{" "}
+              and{" "}
+              <Link href="/blog" className="font-medium hover:text-gray-900 transition-colors">
+                blogs
+              </Link>
+              .
             </div>
 
-            {/* Campo: Newsletter Consent */}
-            <div className="mt-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  {...register("newsletterConsent")}
-                  className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  I agree to receive newsletters and promotional emails.
-                </span>
-              </label>
-            </div>
-
-            {/* Botón de envío */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`mt-6 w-full rounded-full px-4 py-2 transition-colors ${
-                isLoading
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-gray-800 hover:bg-gray-700"
-              } flex items-center justify-center text-white`}
-            >
-              {isLoading ? (
-                <>
-                  <svg
-                    className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Processing...
-                </>
-              ) : (
-                "Subscribe Now"
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Sección de redes sociales */}
-        <div className="flex w-full flex-col items-center justify-center pt-10 md:w-1/3">
-  <img
-    src="/images/logo/logo-white.png"
-    alt="Penguin Logo"
-    className="mb-4 h-10 object-contain"
-  />
-  <div className="mb-6 text-center text-gray-600">
-    Explore our{" "}
-    <Link href="/free-resources" className="font-medium hover:text-gray-900 transition-colors">
-      free guides resources
-    </Link>{" "}
-    and{" "}
-    <Link href="/blog" className="font-medium hover:text-gray-900 transition-colors">
-      blogs
-    </Link>
-    .
-  </div>
-
-          <div className="flex items-center justify-center gap-4">
-            <Link
-              aria-label="Facebook"
-              href="https://www.facebook.com/ReadySetCoGroup/"
-              target="_blank"
-              className="text-gray-400 hover:text-yellow"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="fill-current"
+            <div className="flex items-center justify-center gap-4">
+              <Link
+                aria-label="Facebook"
+                href="https://www.facebook.com/"
+                target="_blank"
+                className="text-gray-400 hover:text-yellow-500"
               >
-                <path d="M16.294 8.86875H14.369H13.6815V8.18125V6.05V5.3625H14.369H15.8128C16.1909 5.3625 16.5003 5.0875 16.5003 4.675V1.03125C16.5003 0.653125 16.2253 0.34375 15.8128 0.34375H13.3034C10.5878 0.34375 8.69714 2.26875 8.69714 5.12187V8.1125V8.8H8.00964H5.67214C5.19089 8.8 4.74402 9.17812 4.74402 9.72812V12.2031C4.74402 12.6844 5.12214 13.1313 5.67214 13.1313H7.94089H8.62839V13.8188V20.7281C8.62839 21.2094 9.00652 21.6562 9.55652 21.6562H12.7878C12.994 21.6562 13.1659 21.5531 13.3034 21.4156C13.4409 21.2781 13.544 21.0375 13.544 20.8312V13.8531V13.1656H14.2659H15.8128C16.2596 13.1656 16.6034 12.8906 16.6721 12.4781V12.4438V12.4094L17.1534 10.0375C17.1878 9.79688 17.1534 9.52187 16.9471 9.24687C16.8784 9.075 16.569 8.90312 16.294 8.86875Z" />
-              </svg>
-            </Link>
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="fill-current"
+                >
+                  <path d="M16.294 8.86875H14.369H13.6815V8.18125V6.05V5.3625H14.369H15.8128C16.1909 5.3625 16.5003 5.0875 16.5003 4.675V1.03125C16.5003 0.653125 16.2253 0.34375 15.8128 0.34375H13.3034C10.5878 0.34375 8.69714 2.26875 8.69714 5.12187V8.1125V8.8H8.00964H5.67214C5.19089 8.8 4.74402 9.17812 4.74402 9.72812V12.2031C4.74402 12.6844 5.12214 13.1313 5.67214 13.1313H7.94089H8.62839V13.8188V20.7281C8.62839 21.2094 9.00652 21.6562 9.55652 21.6562H12.7878C12.994 21.6562 13.1659 21.5531 13.3034 21.4156C13.4409 21.2781 13.544 21.0375 13.544 20.8312V13.8531V13.1656H14.2659H15.8128C16.2596 13.1656 16.6034 12.8906 16.6721 12.4781V12.4438V12.4094L17.1534 10.0375C17.1878 9.79688 17.1534 9.52187 16.9471 9.24687C16.8784 9.075 16.569 8.90312 16.294 8.86875Z" />
+                </svg>
+              </Link>
             <Link
               aria-label="tiktok"
               href="https://www.tiktok.com/@readyset.co"
@@ -324,6 +315,6 @@ export default function NewsletterForm() {
           </div>
         </div>
       </div>
-    </div>
+
   );
 }
