@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -8,40 +8,28 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",  // Changed from "bundler" to "node"
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "plugins": [{"name": "next"}],
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],  // Add if you have these directories
+      "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"],
       "@styles/*": ["./src/styles/*"]
     },
-    "types": [
-      "@testing-library/jest-dom",
-      "jest",
-      "node"
-    ],
-    "allowImportingTsExtensions": true,
+    "types": ["node"],
     "baseUrl": ".",
-    "experimentalDecorators": true
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "global.d.ts",
-    "test/test.setup.ts",
-    "next.config.ts",
-    "jest.config.mjs"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

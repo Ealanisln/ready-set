@@ -176,16 +176,16 @@ export default function JoinOurTeam() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center text-center">
-        <h2 className="mb-4 text-3xl font-semibold text-gray-800">
-            Don&apos;t see your perfect role?
-          </h2>
-          <p className="mb-6 text-xl text-gray-600">
-            We&apos;re always on the lookout for great talent. Let us know how
-            you can contribute!
-          </p>
-          <TalentPoolModal />
-        </div>
+        <div className="flex flex-col items-center text-center py-16 md:py-24">
+  <h2 className="mb-6 text-3xl font-semibold text-gray-800">
+    Don&apos;t see your perfect role?
+  </h2>
+  <p className="mb-10 text-xl text-gray-600">
+    We&apos;re always on the lookout for great talent. Let us know how
+    you can contribute!
+  </p>
+  <TalentPoolModal />
+</div>
       </div>
     </div>
   );

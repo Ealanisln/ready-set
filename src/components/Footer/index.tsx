@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import Newsletter from "@/components/Newsletter";
 import NewsletterSignup from "../Newsletter/newsLetterSignUp";
 
 const Footer = () => {
@@ -111,194 +110,207 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-4 justify-between">
-          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-            <div className="mb-10 w-full"> 
-              <h4 className="mb-9 text-lg font-semibold text-white">
-                About Us
-              </h4>
-              <ul>
-                <li>
-                  <Link
-                    href="/"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/#"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/#"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Testimonial
-                  </Link>
-                </li>
-              </ul>
+          <div className="flex flex-wrap justify-between gap-4">
+            <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+              <div className="mb-10 w-full">
+                <h4 className="mb-9 text-lg font-semibold text-white">
+                  About Us
+                </h4>
+                <ul>
+                  <li>
+                    <Link
+                      href="/"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Testimonial
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-            <div className="mb-10 w-full">
-              <h4 className="mb-9 text-lg font-semibold text-white">
-                Features
-              </h4>
-              <ul>
-                <li>
-                  <Link
-                    href="/how-it-works"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    How it works
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/privacy-policy"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Privacy policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/terms-of-service"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="refund-policy"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Refund policy
-                  </Link>
-                </li>
-              </ul>
+            <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+              <div className="mb-10 w-full">
+                <h4 className="mb-9 text-lg font-semibold text-white">
+                  Features
+                </h4>
+                <ul>
+                  <li>
+                    <Link
+                      href="/how-it-works"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      How it works
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Privacy policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Terms of Service
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Refund policy
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-            <div className="mb-10 w-full">
-              <h4 className="mb-9 text-lg font-semibold text-white">
-                Our Products
-              </h4>
-              <ul>
-                <li>
-                  <Link
-                    href="/logistics"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Logistics
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/va"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Virtual Assistant
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/join-the-team"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Join the team
-                  </Link>
-                </li>
-              </ul>
+            <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+              <div className="mb-10 w-full">
+                <h4 className="mb-9 text-lg font-semibold text-white">
+                  Our Products
+                </h4>
+                <ul>
+                  <li>
+                    <Link
+                      href="/logistics"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Logistics
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/va"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Virtual Assistant
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/join-the-team"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Join the team
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-         
-          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-          <div className="mb-10 w-full">
-           <h4 className="mb-9 text-lg font-semibold text-white">
-                Useful Links
-              </h4>
-              <ul>
-                <li>
-                  <Link
-                    href="/#"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/blog"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/#"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    Support
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200">
-                  </Link>
-                </li>
-              </ul>
+
+            <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+              <div className="mb-10 w-full">
+                <h4 className="mb-9 text-lg font-semibold text-white">
+                  Useful Links
+                </h4>
+                <ul>
+                  <li>
+                    <Link
+                      href="/free-resources"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Free Resources
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/blog"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      Support
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
+                    ></Link>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
-          <div className="mb-10 w-full">
-           <h4 className="mb-9 text-lg font-semibold text-white">
-              Updates
-              </h4>
-              <div className="space-y-4">
-                <NewsletterSignup />
+            <div className="w-full sm:w-1/2 md:w-1/2 lg:w-3/12 xl:w-2/12">
+              <div className="mb-10 w-full">
+                <h4 className="mb-9 text-lg font-semibold text-white">
+                  Updates
+                </h4>
+                <div className="space-y-4">
+                  <NewsletterSignup />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="w-full mt-8 border-t border-gray-700 pt-8">
-  <div className="flex justify-center">
-    <address className="text-center text-gray-400 not-italic">
-    <strong>Ready Set Group, LLC<br /> </strong>
-    166 Geary St<br />
-    STE 1500 #1937<br />
-    San Francisco, CA 94108<br />
-    </address>
-  </div>
-</div>
+        <div className="mt-8 w-full border-t border-gray-700 pt-8">
+          <div className="flex justify-center">
+            <address className="text-center not-italic text-gray-400">
+              <strong>
+                Ready Set Group, LLC
+                <br />{" "}
+              </strong>
+              166 Geary St
+              <br />
+              STE 1500 #1937
+              <br />
+              San Francisco, CA 94108
+              <br />
+            </address>
+          </div>
         </div>
-      
+      </div>
 
       <div className="mt-12 border-t border-gray-700 border-opacity-40 py-8 lg:mt-[60px]">
         <div className="container">

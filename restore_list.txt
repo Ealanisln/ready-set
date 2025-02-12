@@ -1,0 +1,112 @@
+;
+; Archive created at 2025-01-31 08:09:04 PST
+;     dbname: verceldb
+;     TOC Entries: 101
+;     Compression: gzip
+;     Dump Version: 1.15-0
+;     Format: CUSTOM
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 16.6
+;     Dumped by pg_dump version: 16.6 (Homebrew)
+;
+;
+; Selected TOC Entries:
+;
+5; 2615 204800 SCHEMA - public default
+3522; 0 0 COMMENT - SCHEMA public default
+873; 1247 207057 TYPE public FormSubmissionType default
+876; 1247 207066 TYPE public catering_requests_need_host default
+879; 1247 207072 TYPE public catering_requests_status default
+882; 1247 207082 TYPE public driver_status default
+864; 1247 207021 TYPE public form_submission_type default
+885; 1247 207094 TYPE public on_demand_status default
+888; 1247 207104 TYPE public on_demand_vehicle_type default
+855; 1247 204870 TYPE public users_status default
+858; 1247 204878 TYPE public users_type default
+218; 1259 207111 TABLE public FormSubmission default
+217; 1259 207038 TABLE public LeadCapture default
+; 219; 1259 207118 TABLE public _prisma_migrations default
+220; 1259 207125 TABLE public account default
+221; 1259 207130 TABLE public address default
+222; 1259 207138 TABLE public catering_request default
+223; 1259 207149 SEQUENCE public catering_request_id_seq default
+3523; 0 0 SEQUENCE OWNED BY public catering_request_id_seq default
+224; 1259 207150 TABLE public dispatch default
+225; 1259 207157 TABLE public file_upload default
+216; 1259 207029 TABLE public form_submission default
+226; 1259 207163 TABLE public on_demand default
+227; 1259 207174 SEQUENCE public on_demand_id_seq default
+3524; 0 0 SEQUENCE OWNED BY public on_demand_id_seq default
+228; 1259 207175 TABLE public session default
+215; 1259 204889 TABLE public user default
+229; 1259 207180 TABLE public userAddress default
+230; 1259 207187 TABLE public verification_token default
+3274; 2604 207192 DEFAULT public catering_request id default
+3284; 2604 207193 DEFAULT public on_demand id default
+3503; 0 207111 TABLE DATA public FormSubmission default
+3502; 0 207038 TABLE DATA public LeadCapture default
+; 3504; 0 207118 TABLE DATA public _prisma_migrations default
+3505; 0 207125 TABLE DATA public account default
+3506; 0 207130 TABLE DATA public address default
+3507; 0 207138 TABLE DATA public catering_request default
+3509; 0 207150 TABLE DATA public dispatch default
+3510; 0 207157 TABLE DATA public file_upload default
+3501; 0 207029 TABLE DATA public form_submission default
+3511; 0 207163 TABLE DATA public on_demand default
+3513; 0 207175 TABLE DATA public session default
+3500; 0 204889 TABLE DATA public user default
+3514; 0 207180 TABLE DATA public userAddress default
+3515; 0 207187 TABLE DATA public verification_token default
+3525; 0 0 SEQUENCE SET public catering_request_id_seq default
+3526; 0 0 SEQUENCE SET public on_demand_id_seq default
+3307; 2606 207195 CONSTRAINT public FormSubmission FormSubmission_pkey default
+3303; 2606 207046 CONSTRAINT public LeadCapture LeadCapture_pkey default
+; 3310; 2606 207197 CONSTRAINT public _prisma_migrations _prisma_migrations_pkey default
+3312; 2606 207199 CONSTRAINT public account account_pkey default
+3315; 2606 207201 CONSTRAINT public address address_pkey default
+3318; 2606 207203 CONSTRAINT public catering_request catering_request_pkey default
+3320; 2606 207205 CONSTRAINT public dispatch dispatch_pkey default
+3323; 2606 207207 CONSTRAINT public file_upload file_upload_pkey default
+3300; 2606 207037 CONSTRAINT public form_submission form_submission_pkey default
+3326; 2606 207209 CONSTRAINT public on_demand on_demand_pkey default
+3328; 2606 207211 CONSTRAINT public session session_pkey default
+3331; 2606 207213 CONSTRAINT public userAddress userAddress_pkey default
+3296; 2606 204899 CONSTRAINT public user user_pkey default
+3335; 2606 207215 CONSTRAINT public verification_token verification_token_pkey default
+3304; 1259 207216 INDEX public FormSubmission_createdAt_idx default
+3305; 1259 207217 INDEX public FormSubmission_formType_idx default
+3308; 1259 207218 INDEX public FormSubmission_syncedToSheets_idx default
+3313; 1259 207219 INDEX public account_provider_providerAccountId_key default
+3316; 1259 207220 INDEX public catering_request_order_number_key default
+3321; 1259 207221 INDEX public file_upload_entityType_entityId_idx default
+3297; 1259 207047 INDEX public form_submission_createdAt_idx default
+3298; 1259 207048 INDEX public form_submission_formType_idx default
+3301; 1259 207049 INDEX public form_submission_syncedToSheets_idx default
+3324; 1259 207222 INDEX public on_demand_order_number_key default
+3329; 1259 207223 INDEX public session_sessionToken_key default
+3332; 1259 207224 INDEX public userAddress_userId_addressId_key default
+3293; 1259 207225 INDEX public user_email_key default
+3294; 1259 207226 INDEX public user_passwordResetToken_key default
+3333; 1259 207227 INDEX public verification_token_identifier_token_key default
+3336; 1259 207228 INDEX public verification_token_token_key default
+3338; 2606 207229 FK CONSTRAINT public FormSubmission FormSubmission_userId_fkey default
+3339; 2606 207234 FK CONSTRAINT public account account_userId_fkey default
+3340; 2606 207239 FK CONSTRAINT public address address_createdBy_fkey default
+3341; 2606 207244 FK CONSTRAINT public catering_request catering_request_address_id_fkey default
+3342; 2606 207249 FK CONSTRAINT public catering_request catering_request_delivery_address_id_fkey default
+3343; 2606 207254 FK CONSTRAINT public catering_request catering_request_user_id_fkey default
+3344; 2606 207259 FK CONSTRAINT public dispatch dispatch_cateringRequestId_fkey default
+3345; 2606 207264 FK CONSTRAINT public dispatch dispatch_driverId_fkey default
+3346; 2606 207269 FK CONSTRAINT public dispatch dispatch_on_demandId_fkey default
+3347; 2606 207274 FK CONSTRAINT public dispatch dispatch_userId_fkey default
+3348; 2606 207279 FK CONSTRAINT public file_upload file_upload_cateringRequestId_fkey default
+3349; 2606 207284 FK CONSTRAINT public file_upload file_upload_onDemandId_fkey default
+3350; 2606 207289 FK CONSTRAINT public file_upload file_upload_userId_fkey default
+3337; 2606 207050 FK CONSTRAINT public form_submission form_submission_userId_fkey default
+3351; 2606 207294 FK CONSTRAINT public on_demand on_demand_address_id_fkey default
+3352; 2606 207299 FK CONSTRAINT public on_demand on_demand_delivery_address_id_fkey default
+3353; 2606 207304 FK CONSTRAINT public on_demand on_demand_user_id_fkey default
+3354; 2606 207309 FK CONSTRAINT public session session_userId_fkey default
+3355; 2606 207314 FK CONSTRAINT public userAddress userAddress_addressId_fkey default
+3356; 2606 207319 FK CONSTRAINT public userAddress userAddress_userId_fkey default

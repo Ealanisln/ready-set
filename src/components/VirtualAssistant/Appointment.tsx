@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { forwardRef } from 'react';
+import { forwardRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,20 +16,26 @@ interface ButtonProps {
   onClick?: () => void;
   icon?: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'black' | 'black-small' | 'amber' | 'gray';
+  variant?: "default" | "black" | "black-small" | "amber" | "gray";
 }
 
-export const CustomButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  ({ href, children, onClick, icon, className = "", variant = 'default' }, ref) => {
+export const CustomButton = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonProps
+>(
+  (
+    { href, children, onClick, icon, className = "", variant = "default" },
+    ref,
+  ) => {
     const getVariantClasses = () => {
       switch (variant) {
-        case 'black':
+        case "black":
           return "bg-black text-white hover:bg-gray-800 py-5 px-8 text-lg";
-        case 'black-small':
+        case "black-small":
           return "bg-black text-white hover:bg-gray-800 py-3 px-6 text-base";
-        case 'amber':
+        case "amber":
           return "bg-amber-400 text-black hover:bg-amber-500 py-4 px-8";
-        case 'gray':
+        case "gray":
           return "bg-gray-900 text-white hover:bg-gray-800 py-4 px-10 tracking-wide uppercase text-lg";
         default:
           return "bg-amber-400 text-black hover:bg-amber-500 md:px-10 md:py-5 md:text-lg px-8 py-4 text-base";
@@ -55,32 +61,36 @@ export const CustomButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
 
     if (href) {
       return (
-        <Link href={href} className={buttonClass} ref={ref as React.Ref<HTMLAnchorElement>}>
+        <Link
+          href={href}
+          className={buttonClass}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+        >
           {content}
         </Link>
       );
     }
 
     return (
-      <button 
-        className={buttonClass} 
-        onClick={onClick} 
+      <button
+        className={buttonClass}
+        onClick={onClick}
         ref={ref as React.Ref<HTMLButtonElement>}
       >
         {content}
       </button>
     );
-  }
+  },
 );
 
 // Add display name
-CustomButton.displayName = 'CustomButton';
+CustomButton.displayName = "CustomButton";
 
 interface AppointmentDialogProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   buttonClassName?: string;
-  buttonVariant?: 'default' | 'black' | 'black-small' | 'amber' | 'gray';
+  buttonVariant?: "default" | "black" | "black-small" | "amber" | "gray";
   dialogTitle?: string;
   dialogDescription?: string;
   calendarUrl: string;
@@ -91,7 +101,7 @@ const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
   buttonText = "Book a Discovery call",
   buttonIcon = <PhoneCall size={16} />,
   buttonClassName = "",
-  buttonVariant = 'default',
+  buttonVariant = "default",
   dialogTitle = "Schedule an Appointment",
   dialogDescription = "Choose a convenient time for your appointment.",
   calendarUrl,
@@ -101,8 +111,8 @@ const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
     <Dialog>
       <DialogTrigger asChild>
         {customButton || (
-          <CustomButton 
-            icon={buttonIcon} 
+          <CustomButton
+            icon={buttonIcon}
             className={buttonClassName}
             variant={buttonVariant}
           >
@@ -110,12 +120,12 @@ const AppointmentDialog: React.FC<AppointmentDialogProps> = ({
           </CustomButton>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] mt-16 mb-8">
-        <DialogHeader>
+      <DialogContent className="mb-8 mt-16 border bg-white shadow-lg sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%]">
+        <DialogHeader className="bg-white">
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
-        <div className="h-[70vh] min-h-[400px] w-full">
+        <div className="h-[70vh] min-h-[400px] w-full bg-white">
           <iframe
             src={calendarUrl}
             width="100%"

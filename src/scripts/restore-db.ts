@@ -1,7 +1,7 @@
 // src/scripts/restore-db.ts
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
 
@@ -36,6 +36,36 @@ async function executeSQL(databaseUrl: string, command: string): Promise<string>
     console.error('SQL Error:', error);
     throw error;
   }
+}
+
+async function checkPostgresConnection(): Promise<boolean> {
+  try {
+    await execAsync('docker compose exec db pg_isready -U postgres');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function processBackupFile(backupPath: string): Promise<string> {
+  console.log('📝 Processing backup file...');
+  const content = readFileSync(backupPath, 'utf-8');
+  
+  // Create a temporary file with processed content
+  const tempFile = path.join(process.cwd(), 'temp-backup.sql');
+  
+  const processedContent = content
+    .replace(/^SET neon\..+$/gm, '') // Remove Neon-specific settings
+    .replace(/OWNER TO neon_superuser;/g, 'OWNER TO postgres;') // Change owner references
+    .replace(/OWNER TO "neon_superuser"/g, 'OWNER TO postgres') // Change owner references (alternate form)
+    .replace(/^COMMENT ON EXTENSION.+$/gm, '') // Remove extension comments
+    .replace(/^REVOKE ALL ON SCHEMA/gm, '--REVOKE ALL ON SCHEMA') // Comment out REVOKE statements
+    .replace(/^REVOKE USAGE ON SCHEMA/gm, '--REVOKE USAGE ON SCHEMA') // Comment out REVOKE statements
+    .replace(/^GRANT ALL ON SCHEMA/gm, '--GRANT ALL ON SCHEMA') // Comment out GRANT statements
+    .replace(/^ALTER DEFAULT PRIVILEGES FOR ROLE/gm, '--ALTER DEFAULT PRIVILEGES FOR ROLE'); // Comment out ALTER DEFAULT PRIVILEGES
+
+  writeFileSync(tempFile, processedContent);
+  return tempFile;
 }
 
 async function restoreDatabase() {
@@ -94,7 +124,7 @@ async function restoreDatabase() {
 
     if (copyStatements) {
       const tempFile = path.join(process.cwd(), 'temp_copy_statements.sql');
-      require('fs').writeFileSync(tempFile, copyStatements);
+      writeFileSync(tempFile, copyStatements);
       
       try {
         await execAsync(`psql "${databaseUrl}" < "${tempFile}"`);

@@ -1,3 +1,5 @@
+// src/sanity/schemaTypes/category.ts
+
 import {defineField, defineType} from 'sanity'
 
 export default defineType({

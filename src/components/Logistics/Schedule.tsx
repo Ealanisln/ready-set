@@ -34,17 +34,17 @@ const ScheduleDialog: React.FC<AppointmentDialogProps> = ({
           </button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] mt-16 mb-8">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] mt-16 mb-8 bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800">
+        <DialogHeader className="bg-white dark:bg-gray-900">
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
-        <div className="h-[70vh] min-h-[400px] w-full">
+        <div className="h-[70vh] min-h-[400px] w-full bg-white dark:bg-gray-900">
           <iframe
             src={calendarUrl}
             width="100%"
             height="100%"
-            className="border-0"
+            className="border-0 bg-white dark:bg-gray-900"
           ></iframe>
         </div>
       </DialogContent>
