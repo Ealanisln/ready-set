@@ -55,10 +55,10 @@ export default function NewsletterForm() {
   };
 
   return (
-    <div className="flex justify-center w-full bg-white p-8">
-    <div className="w-full max-w-lg">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-700">
+    <div className="flex flex-col md:flex-row items-center justify-center w-full bg-white p-4 sm:p-6 md:p-8 gap-8">
+      <div className="w-full max-w-[90%] sm:max-w-lg md:w-1/2">
+      <div className="mb-4 smb-6">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">
           Newsletter Alert and Discounts
         </h2>
       </div>
