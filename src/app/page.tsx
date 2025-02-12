@@ -57,6 +57,7 @@ export const metadata: Metadata = {
   },
   category: "Business Services",
   classification: "Logistics and Professional Services",
+
 };
 
 export default function Home() {
