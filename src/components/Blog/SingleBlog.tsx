@@ -4,6 +4,7 @@ import { urlFor } from "@/sanity/lib/client";
 import Link from "next/link";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
 import BookNow from "./BookNow";
+import NewsLetterSignup from "../Resources/ui/NewsLetterSignUp";
 
 interface PostsProps {
   data: SimpleBlogCard[];
@@ -61,6 +62,7 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
     <Link href={`/${basePath}/${post.slug?.current}`} className="block">
       Read More
     </Link>
+
        </div>
       </div>
         </div>
