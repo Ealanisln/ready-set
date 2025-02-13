@@ -1,17 +1,25 @@
-// src/app/api/check-password-change/route.ts
-
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (error || !user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  // Assuming you store temporary password status in user metadata or a profiles table
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_temporary_password")
+    .eq("id", user.id)
+    .single();
+
   return NextResponse.json({
-    needsPasswordChange: session.user.isTemporaryPassword,
+    needsPasswordChange: profile?.is_temporary_password ?? false,
   });
 }
