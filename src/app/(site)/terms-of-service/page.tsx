@@ -1,83 +1,85 @@
-// app/terms-of-delivery/page.tsx
+// app/terms-of-service/page.tsx
 import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Terms of Delivery | Company Name',
-  description: 'Learn about the terms and conditions that apply to our food delivery services.',
+  title: 'Terms of Service | Ready Set Group',
+  description: 'Learn about the terms and conditions that apply to Ready Set Group services.',
 }
 
-export default function TermsOfDelivery() {
+export default function TermsOfService() {
   return (
     <div className="max-w-4xl mx-auto px-4 pt-40 pb-10">
       <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
       
-      <section className="mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
+      <div className="text-sm text-gray-600 mb-8">
+        Effective Date: December 4, 2024
+      </div>
+
+      <section className="mb-8">
         <p className="mb-4">
-          Welcome to Ready Set. These Terms of Service outline the conditions under which we provide 
-          our food delivery services to you. By using our services, you agree to these terms.
+          Welcome to Ready Set Group, LLC ("we," "us," "our"). By accessing or using our website [https://readysetllc.com/] (the "Site") 
+          or any of our services (the "Services"), you agree to be bound by these Terms of Service ("Terms") and our Privacy Notice. 
+          Please read these Terms carefully before using our Site or Services.
         </p>
       </section>
 
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Delivery Areas</h2>
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Acceptance of Terms</h2>
         <p className="mb-4">
-          Our delivery services are available within specific areas. Please check if your location 
-          is within our delivery radius before placing an order.
+          By accessing or using our Site or Services, you agree to comply with and be bound by these Terms, including any future modifications. 
+          If you do not agree with these Terms, you must not use the Site or Services.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Changes to Terms</h2>
+        <p className="mb-4">
+          We reserve the right to update or modify these Terms at any time. Any changes will be posted on this page, and the "Effective Date" 
+          at the top of these Terms will be updated accordingly. We encourage you to review these Terms periodically for any updates. 
+          Your continued use of the Site or Services after the posting of changes constitutes your acceptance of such changes.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Use of the Site and Services</h2>
+        <p className="mb-4">
+          You agree to use the Site and Services in accordance with applicable laws and regulations. You may not use the Site or Services 
+          for any unlawful or prohibited activities, including but not limited to:
         </p>
         <ul className="list-disc pl-6 mb-4">
-          <li>We deliver to most urban areas within the city limits.</li>
-          <li>Delivery to remote or rural areas may incur additional charges.</li>
-          <li>Delivery times may vary depending on your location.</li>
+          <li className="mb-2">Violating any applicable local, state, national, or international law.</li>
+          <li className="mb-2">Transmitting harmful, offensive, or illegal content.</li>
+          <li className="mb-2">Engaging in any conduct that disrupts or interferes with the functionality of the Site or Services.</li>
         </ul>
       </section>
 
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Delivery Fees</h2>
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Account Registration</h2>
         <p className="mb-4">
-          Delivery fees are calculated based on the distance from the restaurant to your delivery 
-          address. The following applies:
-        </p>
-        <ul className="list-disc pl-6 mb-4">
-          <li>Standard delivery fees apply within the primary delivery zone.</li>
-          <li>Additional fees may apply for deliveries outside the primary zone.</li>
-          <li>Promotional offers may waive delivery fees under certain conditions.</li>
-        </ul>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Delivery Times</h2>
-        <p className="mb-4">
-          We strive to deliver your order within the estimated time frame provided at checkout. 
-          However, delivery times may vary due to factors such as:
-        </p>
-        <ul className="list-disc pl-6 mb-4">
-          <li>Traffic conditions</li>
-          <li>Weather conditions</li>
-          <li>Restaurant preparation times</li>
-        </ul>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Order Cancellations</h2>
-        <p className="mb-4">
-          You may cancel your order before it has been prepared by the restaurant. Once the order 
-          is in preparation, cancellations may not be possible. Refunds will be processed according 
-          to our refund policy.
+          To access certain features of our Services, you may need to create an account. You agree to provide accurate, current, and complete 
+          information during the registration process. You are responsible for maintaining the confidentiality of your account credentials 
+          and for all activities that occur under your account.
         </p>
       </section>
 
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Contact Us</h2>
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
         <p className="mb-4">
-          If you have any questions about our Terms of Delivery, please contact us at:{' '}
-          <a href="info@ready-set.co" 
-             className="text-blue-600 hover:text-blue-800 underline">
+          If you have any questions or concerns regarding these Terms of Service, please contact us at:
+        </p>
+        <div className="pl-4 border-l-4 border-gray-200">
+          <p>Ready Set Group, LLC</p>
+          <p>166 Geary St. STE 1500 #1937</p>
+          <p>San Francisco, CA 94108</p>
+          <p>(415) 226-6872</p>
+          <a href="mailto:info@ready-set.co" className="text-blue-600 hover:text-blue-800">
             info@ready-set.co
           </a>
-        </p>
+        </div>
       </section>
+
+      {/* Additional sections for Intellectual Property, Third-Party Links, etc. can be added following the same pattern */}
     </div>
   )
 }
