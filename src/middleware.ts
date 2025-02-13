@@ -1,65 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+// Protected routes that require authentication
+const PROTECTED_ROUTES = ['/admin', '/addresses'];
+
 export async function middleware(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const { pathname } = request.nextUrl;
     const baseUrl = new URL(request.url).origin;
 
-    // Let public routes pass through
-    if (!token) {
-      // Only protect specific routes that require authentication
-      if (
-        request.nextUrl.pathname.startsWith('/admin') ||
-        request.nextUrl.pathname.startsWith('/addresses')
-      ) {
+    // First check if route needs protection before getting token
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+      pathname.startsWith(route)
+    );
+
+    // Only get token if necessary
+    if (isProtectedRoute) {
+      const token = await getToken({ 
+        req: request, 
+        secret: process.env.NEXTAUTH_SECRET 
+      });
+      
+      if (!token) {
         return NextResponse.redirect(new URL('/signin', baseUrl));
       }
-      return NextResponse.next();
-    }
 
-    // Handle temporary password redirect
-    if (token.isTemporaryPassword === true) {
-      if (request.nextUrl.pathname === '/change-password') {
-        return NextResponse.next();
+      // Handle temporary password
+      if (token.isTemporaryPassword === true) {
+        if (pathname === '/change-password') {
+          return NextResponse.next();
+        }
+        return NextResponse.redirect(new URL('/change-password', baseUrl));
       }
-      return NextResponse.redirect(new URL('/change-password', baseUrl));
-    }
 
-    const hasAllowedRole = (allowedRoles: string[]) => 
-      token.type && allowedRoles.includes(token.type as string);
+      // Admin routes protection
+      if (pathname.startsWith('/admin')) {
+        const hasAllowedRole = token.type && 
+          ['admin', 'super_admin'].includes(token.type as string);
+        
+        if (!hasAllowedRole) {
+          const typeRoutes: Record<string, string> = {
+            driver: '/driver',
+            helpdesk: '/helpdesk',
+            vendor: '/vendor',
+            client: '/client'
+          };
+          const redirectPath = typeRoutes[token.type as string] || '/';
+          return NextResponse.redirect(new URL(redirectPath, baseUrl));
+        }
+      }
+    }
 
     // Handle landing page redirect for authenticated users
-    if (request.nextUrl.pathname === '/') {
-      const typeRoutes: Record<string, string> = {
-        admin: '/admin',
-        super_admin: '/admin',
-        driver: '/driver',
-        helpdesk: '/helpdesk',
-        vendor: '/vendor',
-        client: '/client'
-      };
+    if (pathname === '/') {
+      const token = await getToken({ 
+        req: request, 
+        secret: process.env.NEXTAUTH_SECRET 
+      });
       
-      const userType = token.type as string;
-      if (userType in typeRoutes) {
-        return NextResponse.redirect(new URL(typeRoutes[userType], baseUrl));
-      }
-    }
-
-    // Admin routes protection
-    if (request.nextUrl.pathname.startsWith('/admin')) {
-      if (!hasAllowedRole(['admin', 'super_admin'])) {
-        // Redirect non-admin users to their respective dashboards
+      // Only redirect if token exists
+      if (token?.type) {
         const typeRoutes: Record<string, string> = {
           driver: '/driver',
           helpdesk: '/helpdesk',
           vendor: '/vendor',
-          client: '/client'
+          client: '/client',
+          admin: '/admin',
+          super_admin: '/admin'
         };
-        const userType = token.type as string;
-        const redirectPath = typeRoutes[userType] || '/';
-        return NextResponse.redirect(new URL(redirectPath, baseUrl));
+        if (token.type in typeRoutes) {
+          return NextResponse.redirect(new URL(typeRoutes[token.type], baseUrl));
+        }
       }
+      
+      return NextResponse.next(); // Allow public access to homepage
     }
 
     return NextResponse.next();
@@ -69,18 +83,10 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-export const config = { 
+export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
     '/admin/:path*',
-    '/addresses/:path*'
+    '/addresses/:path*',
+    '/' // Only include root for homepage redirects
   ]
 };
