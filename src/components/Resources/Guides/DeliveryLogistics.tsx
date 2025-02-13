@@ -88,19 +88,24 @@ const DeliveryLogistics = () => {
             </div>
 
             <div className="space-y-6">
-              <Card className="rounded-lg bg-yellow-400 p-6">
-                <img
-                  src="/images/resources/5.png"
-                  alt="Delivery person with package"
-                  className="mb-4 w-full rounded-lg"
-                />
-                <h2 className="mb-2 text-center text-2xl font-bold">
-                  Addressing Key Issues
-                  <div className="mt-1">in Delivery Logistics</div>
-                </h2>
-                <div className="mx-auto my-4 h-px w-32 bg-black"></div>
-                <p className="text-center text-sm">A Practical Guide</p>
-              </Card>
+            <Card className="rounded-lg bg-yellow-400 p-6">
+            <img
+            src="/images/resources/5.webp"
+          onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.onerror = null; // Prevent infinite loop
+              img.src = "/images/resources/5.png"; // Fallback PNG
+            }}
+            alt="Delivery person with package"
+            className="mb-4 w-full rounded-lg"
+          />
+          <h2 className="mb-2 text-center text-2xl font-bold">
+            Addressing Key Issues
+            <div className="mt-1">in Delivery Logistics</div>
+          </h2>
+          <div className="mx-auto my-4 h-px w-32 bg-black"></div>
+          <p className="text-center text-sm">A Practical Guide</p>
+        </Card>
 
               <div className="mt-4 flex flex-col items-center">
                 <img

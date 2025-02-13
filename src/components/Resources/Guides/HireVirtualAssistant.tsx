@@ -73,8 +73,13 @@ const GuideVirtualAssistant = () => {
             <div className="space-y-6">
               <Card className="rounded-lg bg-yellow-400 p-6">
                 <img
-                  src="/images/resources/7.png"
-                  alt="Business woman thinking"
+                  src="/images/resources/7.webp"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.onerror = null; // Prevent infinite loop
+                    img.src = "/images/resources/7.png"; // Fallback PNG
+                    }}
+                  alt="Business woman working on a computer"
                   className="mb-4 w-full rounded-lg"
                 />
                 <h2 className="mb-2 text-center text-2xl font-bold">

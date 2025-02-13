@@ -67,8 +67,8 @@ export const resources: Resource[] = [
     title: "How to Hire the Right Virtual Assistant",
     description: "Your Step-by-Step Guide to Finding the Perfect VA",
     component: HireVirtualAssistant, 
-    imageUrl: "/images/resources/7.png",
-    imageFallback: "/images/resources/6.png",
+    imageUrl: "/images/resources/7.webp",
+    imageFallback: "/images/resources/7.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLZoGTWOLe5NJ1C427fwpkQLaiRhF9yWOVKzXr"
   },
 
@@ -76,7 +76,7 @@ export const resources: Resource[] = [
     title: "How to Start Social Media Marketing Made Simple",
     description: "A Guide for Business Owners",
     component: StartSocialMedia, 
-    imageUrl: "/images/resources/8.png",
+    imageUrl: "/images/resources/8.webp",
     imageFallback: "/images/resources/8.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLXw8zL4vEAT3gOqBJ4EhXmUx2tRuliKfovNI0"
   }

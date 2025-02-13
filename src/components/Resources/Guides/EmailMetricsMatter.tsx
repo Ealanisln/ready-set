@@ -81,26 +81,26 @@ const EmailMetricsMatter = () => {
               </p>
             </div>
 
-            <div className="space-y-6">
-              <Card className="rounded-lg bg-yellow-400 p-6">
-                <picture>
-                  <source srcSet="/images/resources/4.webp" type="image/webp" />
-                <img
-                  src="/images/resources/4.png"
-                  alt="Business people reviewing metrics"
-                  className="mb-4 w-full rounded-lg"
-                />
-                </picture>
-                <h2 className="mb-2 text-center text-2xl font-bold">
-                  Why Email Metrics
-                  <div className="mt-1">Matter</div>
-                </h2>
-                <div className="mx-auto my-4 h-px w-32 bg-black"></div>
-                <p className="text-center text-sm">
-                  A Business Owner's Guide to Tracking
-                </p>
-                <div className="text-center text-sm">Campaign Performance</div>
-              </Card>
+                  <div className="space-y-6">
+                    <Card className="rounded-lg bg-yellow-400 p-6">
+                      <img
+                        src="/images/resources/4.webp"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.onerror = null; // Prevent infinite loop
+                          img.src = "/images/resources/4.png"; // Fallback PNG
+                        }}
+                        alt="Two women hunging each other"
+                        className="mb-4 w-full rounded-lg"
+                      />
+                      <h2 className="mb-2 text-center text-2xl font-bold">
+                        Why Email Metrics
+                        <div className="mt-1">Matter</div>
+                      </h2>
+                      <div className="mx-auto my-4 h-px w-32 bg-black"></div>
+                      <p className="text-center text-sm">A Business Owner's Guide to Tracking</p>
+                      <p className="text-center text-sm">Campaign Performance</p>
+                    </Card>
 
               <div className="mt-4 flex flex-col items-center">
                 <img
