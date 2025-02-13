@@ -68,6 +68,7 @@
     "@sanity/image-url": "^1.1.0",
     "@sanity/types": "^3.71.2",
     "@sanity/vision": "^3.71.2",
+    "@sendgrid/client": "^8.1.4",
     "@sendgrid/mail": "^8.1.4",
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.4.0",
