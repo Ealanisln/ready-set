@@ -22,35 +22,39 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
   title,
   onSuccess,
 }) => {
+  const isClosing = React.useRef(false);
+
   const handleDownloadSuccess = () => {
-    // Delay the closing to show the success message
+    if (isClosing.current) return;
     setTimeout(() => {
       onSuccess?.();
       onClose();
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        isClosing.current = false;
+      }, 100);
     }, 3000);
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isClosing.current) {
           onClose();
         }
       }}
     >
       <DialogContent className="p-0 sm:max-w-[600px]">
-        <DialogTitle className="sr-only">
-          {`Download ${title}`}
-        </DialogTitle>
+        <DialogTitle className="sr-only">{`Download ${title}`}</DialogTitle>
         <LeadCaptureForm
-  resourceSlug={(() => {
-    const slug = generateSlug(title);
-    return slug;
-  })()}
-  resourceTitle={title}
-  onSuccess={handleDownloadSuccess}
-/>
+          resourceSlug={(() => {
+            const slug = generateSlug(title);
+            return slug;
+          })()}
+          resourceTitle={title}
+          onSuccess={handleDownloadSuccess}
+        />
       </DialogContent>
     </Dialog>
   );
