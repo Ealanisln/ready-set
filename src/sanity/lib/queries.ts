@@ -129,3 +129,51 @@ export async function getPostWithSEO(slug: string) {
 export async function getAllPosts() {
   return await client.fetch(postsQuery);
 }
+
+export const guideQuery = groq`
+  *[_type == "guide" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    subtitle,
+    "slug": slug.current,
+    introduction,
+    sections,
+    "coverImage": coverImage.asset->,
+    calendarUrl,
+    ctaText,
+    consultationCta,
+    "category": category->{
+      title,
+      "slug": slug.current
+    },
+    seo{
+      ${seoFields}
+    }
+  }
+`;
+
+export const categoryGuidesQuery = groq`
+  *[_type == "category" && slug.current == $slug][0]{
+    title,
+    description,
+    "guides": *[_type == "guide" && references(^._id)]{
+      title,
+      subtitle,
+      "slug": slug.current,
+      "coverImage": coverImage.asset->,
+      seo{
+        ${seoFields}
+      }
+    }
+  }
+`;
+
+export const allCategoriesQuery = groq`
+  *[_type == "category"]{
+    title,
+    "slug": slug.current,
+    description,
+    "guideCount": count(*[_type == "guide" && references(^._id)])
+  }
+`;

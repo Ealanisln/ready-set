@@ -4,11 +4,13 @@ import EmailMarketingGuide from "../Guides/EmailMarketing";
 import EmailMetricsMatter from "../Guides/EmailMetricsMatter";
 import EmailTesting from "../Guides/EmailTesting";
 import GuideChoosePartner from "../Guides/GuideChoosePartner";
+import HireVirtualAssistant from "../Guides/HireVirtualAssistant";
+import StartSocialMedia from "../Guides/StartSocialMedia";
 
 export interface Resource {
   title: string;
   description: string;
-  component?: React.ComponentType; // Add this line
+  component?: React.ComponentType; 
   imageUrl: string;
   imageFallback : string;
   downloadUrl?: string;
@@ -61,4 +63,21 @@ export const resources: Resource[] = [
     downloadUrl:
       "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWL3EWLKS9QDeglwpv940XiY6aBOu5CScU7EqVk",
   },
+  {
+    title: "How to Hire the Right Virtual Assistant",
+    description: "Your Step-by-Step Guide to Finding the Perfect VA",
+    component: HireVirtualAssistant, 
+    imageUrl: "/images/resources/7.png",
+    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLZoGTWOLe5NJ1C427fwpkQLaiRhF9yWOVKzXr"
+  },
+
+  {
+    title: "How to Start Social Media Marketing Made Simple",
+    description: "A Guide for Business Owners",
+    component: StartSocialMedia, 
+    imageUrl: "/images/resources/8.png",
+    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLXw8zL4vEAT3gOqBJ4EhXmUx2tRuliKfovNI0"
+  }
+
+
 ];

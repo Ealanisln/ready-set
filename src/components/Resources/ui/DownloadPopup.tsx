@@ -44,10 +44,13 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
           {`Download ${title}`}
         </DialogTitle>
         <LeadCaptureForm
-          resourceSlug={generateSlug(title)}
-          resourceTitle={title}
-          onSuccess={handleDownloadSuccess}
-        />
+  resourceSlug={(() => {
+    const slug = generateSlug(title);
+    return slug;
+  })()}
+  resourceTitle={title}
+  onSuccess={handleDownloadSuccess}
+/>
       </DialogContent>
     </Dialog>
   );

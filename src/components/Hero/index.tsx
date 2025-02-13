@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Truck, Headphones, Users, LucideIcon } from "lucide-react";
 import { motion, MotionProps } from "framer-motion";
+import NewsletterForm from "../Resources/ui/NewsLetterForm";
 
 // Type definitions
 interface ButtonLinkProps {

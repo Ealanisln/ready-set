@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import NewsLetterSignup from "../Resources/ui/NewsLetterSignUp";
 
 const PopularArticle = (props: {
   image: string;

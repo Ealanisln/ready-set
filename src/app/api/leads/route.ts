@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
           errors: errorData,
           listId: WEBSITE_LEADS_LIST_ID,
           payload: sendgridPayload,
-          availableFields: fieldsData, // This will show us all available custom fields
+          availableFields: fieldsData, 
         });
       }
     }

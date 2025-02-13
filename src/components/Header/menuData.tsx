@@ -86,6 +86,7 @@ const menuData: MenuItem[] = [
     path: "/about",
     newTab: false,
   },
+  
   rsSubsidiariesMenuItem,
   {
     id: 4,
@@ -101,7 +102,7 @@ const menuData: MenuItem[] = [
   },
   {
     id: 6,
-    title: "Free Resources",
+    title: "Resources",
     path: "/free-resources",
     newTab: false,
   },
