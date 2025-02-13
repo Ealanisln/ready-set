@@ -68,6 +68,7 @@ export const resources: Resource[] = [
     description: "Your Step-by-Step Guide to Finding the Perfect VA",
     component: HireVirtualAssistant, 
     imageUrl: "/images/resources/7.png",
+    imageFallback: "/images/resources/6.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLZoGTWOLe5NJ1C427fwpkQLaiRhF9yWOVKzXr"
   },
 
@@ -76,6 +77,7 @@ export const resources: Resource[] = [
     description: "A Guide for Business Owners",
     component: StartSocialMedia, 
     imageUrl: "/images/resources/8.png",
+    imageFallback: "/images/resources/8.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLXw8zL4vEAT3gOqBJ4EhXmUx2tRuliKfovNI0"
   }
 
