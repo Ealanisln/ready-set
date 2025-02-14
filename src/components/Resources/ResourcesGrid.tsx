@@ -22,7 +22,7 @@ const ResourcesGrid = () => {
             />
           </div>
           <h1 className="mb-4 text-3xl font-bold tracking-wide text-gray-700">
-            Welcome to our free guides and resources.
+            Welcome to Our Free Guides and Resources.
           </h1>
         </div>
 

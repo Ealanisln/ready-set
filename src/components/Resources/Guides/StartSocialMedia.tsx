@@ -5,12 +5,12 @@ import { Card } from '@/components/ui/card';
 import AppointmentDialog from '@/components/VirtualAssistant/Appointment';
 import DownloadPopup from '../ui/DownloadPopup';
 
-const GuideVirtualAssistant = () => {
+const StartSocialMedia = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const calendarUrl = 
   "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
   
-  const guideTitle = "How to Hire the Right Virtual Assistant";
+  const guideTitle = "How to Start Social Media Marketing Made Simple";
 
   return (
     <div className="min-h-screen p-6 pt-32">
@@ -23,49 +23,43 @@ const GuideVirtualAssistant = () => {
               </h2>
               
               <p className="text-gray-600">
-                Hiring a Virtual Assistant (VA) isn't just about ticking tasks off your list—it's 
-                about finding someone who fits your business and work style. Before you start, 
-                ask yourself: What tasks do I need help with? What skills should my VA have? 
-                This guide walks you through the process of finding the right VA who can help 
-                you work smarter and free up your time.
-              </p>
+              If you're a business owner, small business operator, or solopreneur struggling to maintain a consistent social media presence, 
+              this social media marketing guide is for you. You might feel overwhelmed by content creation, unsure of which platforms to focus on, or frustrated by low engagement. 
+              Social media doesn't have to be complicated—with the right approach, you can turn followers into loyal customers.
+              Inside this guide, you'll learn how to build a results-driven social media strategy. 
+              You'll discover how to identify the best platforms for your business, create content that engages and converts, and use social media marketing metrics to refine your approach. 
+              Additionally, you'll learn how to leverage Virtual Assistants to stay consistent without the stress.
 
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-800">
-                  How This Guide Helps You
-                </h3>
-                <p className="text-gray-600">
-                  Learn how to hire the right Virtual Assistant for your business. This guide 
-                  covers how to identify tasks to delegate, find qualified VAs, evaluate 
-                  candidates, and onboard them into your workflow. You'll also learn how to 
-                  manage and measure their performance effectively.
-                </p>
-              </div>
+              </p>
 
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold text-gray-800">
                   What You Will Get
                 </h3>
                 <ul className="space-y-4 text-gray-600">
-                  <li>• Hiring the Perfect Virtual Assistant for Your Business</li>
-                  <li>• How to Find the Right Virtual Assistant (VA)</li>
-                  <li>• Checklist: What to Look for in a VA</li>
-                  <li>• Benefits of Having a Virtual Assistant for Your Business</li>
+                  <li>• What Social Media Marketing Is </li>
+                  <li>• Why Social Media Matters </li>
+                  <li>• How to Get Started </li>
+                  <li>• Key Elements of a Social Media Strategy</li>
+                  <li>• Common Mistakes to Avoid </li>
+                  <li>• Social Media Metrics to Track </li>
+                  <li>• How Virtual Assistants Can Help </li>
                 </ul>
               </div>
 
               <p className="text-gray-600">
-                Hiring a VA is a smart move when you're ready to focus on the bigger picture. 
-                Let Ready Set Group LLC match you with professionals who fit your business needs.
+              This free guide provides a step-by-step roadmap to streamline your social media efforts, 
+              so you can focus on growing your business.
               </p>
 
               <div className="space-y-4">
                 <p className="font-bold">
-                  Get your free guide and start delegating today.
+                Download your free Social Media Strategy Checklist now to get started.
                 </p>
-                <p className="font-bold">
-                  Want personalized support? Book a Discovery Call with Ready Set Group LLC 
-                  and let us help you find the right VA.
+                <p className="text-gray-600">
+                Ready for more support? {" "}
+                <span className="font-bold"> Book a Consultation </span>{" "} with Ready Set Group LLC today to see how our Virtual Assistant 
+                services can simplify your social media management, giving you more time to focus on what you do best.
                 </p>
               </div>
             </div>
@@ -73,17 +67,16 @@ const GuideVirtualAssistant = () => {
             <div className="space-y-6">
               <Card className="rounded-lg bg-yellow-400 p-6">
                 <img
-                  src="/images/resources/7.png"
+                  src="/images/resources/8.png"
                   alt="Business woman thinking"
                   className="mb-4 w-full rounded-lg"
                 />
                 <h2 className="mb-2 text-center text-2xl font-bold">
-                  The Complete Guide to
-                  <div className="mt-1">Choosing the Right</div>
-                  <div className="mt-1">Virtual Assistant</div>
+                  How To Start Social
+                  <div className="mt-1">Media Marketing</div>
                 </h2>
                 <div className="mx-auto my-4 h-px w-32 bg-black"></div>
-                <p className="text-center text-sm">A Strategic Approach</p>
+                <p className="text-center text-sm">A Business Owner's Guide</p>
               </Card>
 
               <div className="mt-4 flex flex-col items-center">
@@ -130,4 +123,4 @@ const GuideVirtualAssistant = () => {
   );
 };
 
-export default GuideVirtualAssistant;
+export default StartSocialMedia;

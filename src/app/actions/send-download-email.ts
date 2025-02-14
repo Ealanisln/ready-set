@@ -24,7 +24,7 @@ const RESOURCE_MAP = resources.reduce(
 
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = "solutions@readysetllc.com";
-const FROM_NAME = "Ready Set Website";
+const FROM_NAME = "Ready Set";
 
 if (!SENDGRID_API_KEY) {
   throw new Error(
@@ -39,8 +39,6 @@ export const sendDownloadEmail = async (
   firstName: string,
   resourceSlug: ResourceSlug,
 ) => {
-  console.log('Attempting to send email for resource:', resourceSlug);
-  console.log('Available resource slugs:', Object.keys(RESOURCE_MAP));
 
   // ... rest of the function
   // Validate inputs
@@ -67,7 +65,7 @@ export const sendDownloadEmail = async (
       email: FROM_EMAIL,
       name: FROM_NAME,
     },
-    subject: `Your ${resource.title} is ready to download`,
+    subject: `Your guide is ready to download`,
     html: `
      <!DOCTYPE html>
 <html>
@@ -76,6 +74,19 @@ export const sendDownloadEmail = async (
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Guide is Ready to Download</title>
+  <style>
+    .preheader { 
+      display: none !important;
+      visibility: hidden;
+      opacity: 0;
+      color: transparent;
+      height: 0;
+      width: 0;
+      max-height: 0;
+      max-width: 0;
+      mso-hide: all;
+    }
+  </style>
 </head>
 
 <body style="
@@ -86,6 +97,10 @@ export const sendDownloadEmail = async (
           color: #343434;
           background-color: #f4f4f4;
         ">
+  <!-- Preheader text -->
+  <div class="preheader" style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
+    You can access your free guide from this email at anytime
+  </div>
   <!-- Main Container -->
   <table width="100%" cellpadding="0" cellspacing="0" style="
             background-color: #f4f4f4;
@@ -140,7 +155,7 @@ export const sendDownloadEmail = async (
               </table>
 
               <p style="margin: 20px 0; font-size: 16px; color: #343434;">
-                Looking to apply these strategies to your business? Schedule a free consultation with our team, and we’ll help you get started.
+                Looking to apply these strategies to your business? Schedule a free consultation with our team, and we'll help you get started.
               </p>
 
               <!-- Consultation Button -->
@@ -162,7 +177,7 @@ export const sendDownloadEmail = async (
               </table>
                <p style="margin: 20px 0; font-size: 16px; color: #343434;">
                 All the best, <br>
- The Ready Set Team
+                The Ready Set Team
               </p>
             </td>
           </tr>
