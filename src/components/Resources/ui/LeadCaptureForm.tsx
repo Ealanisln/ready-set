@@ -217,7 +217,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
               required
             />
             <div className="flex items-start space-x-2 pt-2">
-              <Checkbox
+              {/* <Checkbox
                 id="newsletterConsent"
                 checked={formData.newsletterConsent}
                 onCheckedChange={(checked) =>
@@ -226,13 +226,18 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                     newsletterConsent: !!checked,
                   }))
                 }
-              />
-              <label
+              /> */}
+            <label
                 htmlFor="newsletterConsent"
                 className="text-xs leading-tight text-gray-600"
               >
-                I agree to receive newsletters, updates, and promotional emails
-                from Ready Set. I can unsubscribe at any time.
+                We respect your privacy. Ready Set uses your information to send you updates,
+                relevant content, and promotional offers. You can unsubscribe from these
+                communications at any time. For more details, please review our{" "}
+                <a href="/privacy-policy" className="text-blue-600 hover:underline">
+                  Privacy Policy
+                </a>
+                .
               </label>
             </div>
           </div>
