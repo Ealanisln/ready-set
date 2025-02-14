@@ -168,7 +168,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      href="/#"
+                      href="/privacy-policy"
                       className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                     >
                       Privacy policy
@@ -176,7 +176,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      href="/#"
+                      href="/terms-of-service"
                       className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                     >
                       Terms of Service
@@ -184,7 +184,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      href="/#"
+                      href="/refund-policy"
                       className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                     >
                       Refund policy

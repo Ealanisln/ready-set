@@ -17,7 +17,9 @@ const DeliveryNetwork = () => {
       <div className="mx-auto max-w-6xl space-y-12">
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
+            {/* Left column content */}
             <div className="space-y-6">
+              {/* ... Previous left column content remains the same ... */}
               <h2 className="text-4xl font-bold text-gray-800">
                 {guideTitle} Network
               </h2>
@@ -69,7 +71,7 @@ const DeliveryNetwork = () => {
                     Future Trends in Delivery & Logistics
                     </li>
                 </ul>
-                </div>
+              </div>
 
               <p className="text-gray-600">
                 This guide matters because it provides both strategic overview and tactical guidance for building 
@@ -97,52 +99,58 @@ const DeliveryNetwork = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
-              {/* Logo at the top */}
-              <div className="flex justify-center mb-6">
+            {/* Right column with image and buttons */}
+            <div className="flex flex-col items-center">
+              {/* Logo at the top with more space */}
+              <div className="mb-12">
                 <img
                   src="/images/logo/new-logo-ready-set.png"
                   alt="Company logo"
-                  className="h-auto w-24"
+                  className="h-auto w-32"
                 />
               </div>
 
-              {/* Main image without card wrapper */}
-              <img
-                src="/images/resources/9.webp"
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  img.onerror = null;
-                  img.src = "/images/resources/9.png";
-                }}
-                alt="A loading machine carrying boxes"
-                className="w-full rounded-lg"
-              />
+              {/* Container for image with white background and shadow */}
+              <div className="w-full space-y-16">
+                <div className="rounded-3xl bg-white p-4 shadow-xl">
+                  <div className="overflow-hidden rounded-2xl">
+                    <img
+                      src="/images/resources/9.webp"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        img.onerror = null;
+                        img.src = "/images/resources/9.png";
+                      }}
+                      alt="A loading machine carrying boxes"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
 
-              <div className="space-y-4 mt-6">
-                <button
-                  onClick={() => setIsDownloadOpen(true)}
-                  className="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
-                >
-                  Download Now
-                </button>
+                {/* Buttons with increased spacing */}
+                <div className="flex flex-col gap-4 pt-8">
+                  <button
+                    onClick={() => setIsDownloadOpen(true)}
+                    className="w-full rounded-full bg-yellow-400 py-4 text-xl font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+                  >
+                    Download Now
+                  </button>
+
+                  <AppointmentDialog
+                    buttonText="Schedule a Call Today"
+                    buttonVariant="amber"
+                    buttonClassName="w-full rounded-full bg-yellow-400 py-4 text-xl font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
+                    dialogTitle="Schedule Your Free Discovery Call"
+                    dialogDescription="Choose a time that works best for you to discuss how we can help you find the right Virtual Assistant."
+                    calendarUrl={calendarUrl}
+                  />
+                </div>
 
                 <DownloadPopup
                   isOpen={isDownloadOpen}
                   onClose={() => setIsDownloadOpen(false)}
                   title={guideTitle}
                 />
-
-                <div className="flex justify-center">
-                  <AppointmentDialog
-                    buttonText="Book A Discovery Call"
-                    buttonVariant="amber"
-                    buttonClassName="w-full rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500 flex justify-center items-center"
-                    dialogTitle="Schedule Your Free Discovery Call"
-                    dialogDescription="Choose a time that works best for you to discuss how we can help you find the right Virtual Assistant."
-                    calendarUrl={calendarUrl}
-                  />
-                </div>
               </div>
             </div>
           </div>
