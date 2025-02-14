@@ -77,15 +77,19 @@ const DeliveryLogistics = () => {
               </p>
 
               <p className="text-gray-600">
-                If you found this guide helpful, share it with your network or
-                schedule a consultation call with us. Ready to take the next
-                step in optimizing your delivery operations? Contact{" "}
-                <span className="font-bold text-blue-500 underline">
-                  Ready Set Group
-                </span>{" "}
-                now!
-              </p>
-            </div>
+              If you found this guide helpful, share it with your network or
+               schedule a consultation call with us. Ready to take the next
+              step in optimizing your delivery operations? Contact{" "}
+             <a 
+                href="/logistics"
+                rel="noopener noreferrer"
+                className="font-bold text-blue-500 underline hover:text-blue-700"
+  >
+                 Ready Set Group
+               </a>{" "}
+                 now!
+                </p>
+                </div>
 
             <div className="space-y-6">
             <Card className="rounded-lg bg-yellow-400 p-6">

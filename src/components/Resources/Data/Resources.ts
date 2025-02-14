@@ -1,5 +1,6 @@
 // src/components/Resources/data/resources.ts
 import DeliveryLogistics from "../Guides/DeliveryLogistics";
+import DeliveryNetwork from "../Guides/DeliveryNetwork";
 import EmailMarketingGuide from "../Guides/EmailMarketing";
 import EmailMetricsMatter from "../Guides/EmailMetricsMatter";
 import EmailTesting from "../Guides/EmailTesting";
@@ -79,6 +80,15 @@ export const resources: Resource[] = [
     imageUrl: "/images/resources/8.webp",
     imageFallback: "/images/resources/8.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLXw8zL4vEAT3gOqBJ4EhXmUx2tRuliKfovNI0"
+  },
+
+  {
+    title: "Building a Reliable Delivery Network",
+    description: "Key Considerations for Business Owners",
+    component: DeliveryNetwork, 
+    imageUrl: "/images/resources/9.webp",
+    imageFallback: "/images/resources/9.png",
+    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMiIOL08FIxYK8ng65t7CE2fGLMXaOy1oNZBT"
   }
 
 
