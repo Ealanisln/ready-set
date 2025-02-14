@@ -1,81 +1,82 @@
+// src/middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// Protected routes that require authentication
+// Type definitions
+type UserType = typeof USER_TYPES[keyof typeof USER_TYPES];
+
+interface CustomToken {
+  type?: UserType;
+  isTemporaryPassword?: boolean;
+}
+
+// Constants
+const USER_TYPES = {
+  ADMIN: 'admin',
+  SUPER_ADMIN: 'super_admin',
+  DRIVER: 'driver',
+  HELPDESK: 'helpdesk',
+  VENDOR: 'vendor',
+  CLIENT: 'client'
+} as const;
+
+const TYPE_ROUTES: Record<UserType, string> = {
+  [USER_TYPES.ADMIN]: '/admin',
+  [USER_TYPES.SUPER_ADMIN]: '/admin',
+  [USER_TYPES.DRIVER]: '/driver',
+  [USER_TYPES.HELPDESK]: '/helpdesk',
+  [USER_TYPES.VENDOR]: '/vendor',
+  [USER_TYPES.CLIENT]: '/client'
+};
+
 const PROTECTED_ROUTES = ['/admin', '/addresses'];
 
 export async function middleware(request: NextRequest) {
   try {
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET 
+    }) as CustomToken | null;
+    
     const { pathname } = request.nextUrl;
     const baseUrl = new URL(request.url).origin;
 
-    // First check if route needs protection before getting token
-    const isProtectedRoute = PROTECTED_ROUTES.some(route => 
-      pathname.startsWith(route)
-    );
-
-    // Only get token if necessary
-    if (isProtectedRoute) {
-      const token = await getToken({ 
-        req: request, 
-        secret: process.env.NEXTAUTH_SECRET 
-      });
-      
-      if (!token) {
+    // Handle non-authenticated users
+    if (!token) {
+      if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
         return NextResponse.redirect(new URL('/signin', baseUrl));
       }
+      return NextResponse.next();
+    }
 
-      // Handle temporary password
-      if (token.isTemporaryPassword === true) {
-        if (pathname === '/change-password') {
-          return NextResponse.next();
-        }
-        return NextResponse.redirect(new URL('/change-password', baseUrl));
+    // Handle temporary password
+    if (token.isTemporaryPassword === true) {
+      if (pathname === '/change-password') {
+        return NextResponse.next();
       }
-
-      // Admin routes protection
-      if (pathname.startsWith('/admin')) {
-        const hasAllowedRole = token.type && 
-          ['admin', 'super_admin'].includes(token.type as string);
-        
-        if (!hasAllowedRole) {
-          const typeRoutes: Record<string, string> = {
-            driver: '/driver',
-            helpdesk: '/helpdesk',
-            vendor: '/vendor',
-            client: '/client'
-          };
-          const redirectPath = typeRoutes[token.type as string] || '/';
-          return NextResponse.redirect(new URL(redirectPath, baseUrl));
-        }
-      }
+      return NextResponse.redirect(new URL('/change-password', baseUrl));
     }
 
     // Handle landing page redirect for authenticated users
     if (pathname === '/') {
-      const token = await getToken({ 
-        req: request, 
-        secret: process.env.NEXTAUTH_SECRET 
-      });
-      
-      // Only redirect if token exists
-      if (token?.type) {
-        const typeRoutes: Record<string, string> = {
-          driver: '/driver',
-          helpdesk: '/helpdesk',
-          vendor: '/vendor',
-          client: '/client',
-          admin: '/admin',
-          super_admin: '/admin'
-        };
-        if (token.type in typeRoutes) {
-          return NextResponse.redirect(new URL(typeRoutes[token.type], baseUrl));
-        }
+      if (token.type && token.type in TYPE_ROUTES) {
+        return NextResponse.redirect(new URL(TYPE_ROUTES[token.type], baseUrl));
       }
-      
-      return NextResponse.next(); // Allow public access to homepage
     }
 
+    // Admin routes protection
+    if (pathname.startsWith('/admin')) {
+      const allowedRoles: UserType[] = [USER_TYPES.ADMIN, USER_TYPES.SUPER_ADMIN];
+      const hasAllowedRole = token.type && allowedRoles.includes(token.type);
+      
+      
+      if (!hasAllowedRole) {
+        const redirectPath = token.type ? TYPE_ROUTES[token.type] : '/';
+        return NextResponse.redirect(new URL(redirectPath, baseUrl));
+      }
+    }
+
+    // Allow access to all other routes
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
@@ -85,8 +86,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
     '/admin/:path*',
-    '/addresses/:path*',
-    '/' // Only include root for homepage redirects
+    '/addresses/:path*'
   ]
 };
