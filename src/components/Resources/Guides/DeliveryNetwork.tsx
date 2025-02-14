@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import AppointmentDialog from '@/components/VirtualAssistant/Appointment';
 import DownloadPopup from '../ui/DownloadPopup';
 
@@ -36,18 +37,39 @@ const DeliveryNetwork = () => {
 
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold text-gray-800">
-                  What You Will Get
+                    What You Will Get
                 </h3>
                 <ul className="space-y-4 text-gray-600">
-                  <li>• Why a Reliable Delivery Network Matters</li>
-                  <li>• Key Components of an Efficient Delivery System</li>
-                  <li>• Steps to Build & Optimize Your Network</li>
-                  <li>• Cost Considerations & ROI Benefits</li>
-                  <li>• Common Mistakes to Avoid</li>
-                  <li>• Best Practices for Long-Term Success</li>
-                  <li>• Future Trends in Delivery & Logistics</li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Why a Reliable Delivery Network Matters
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Key Components of an Efficient Delivery System
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Steps to Build & Optimize Your Network
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Cost Considerations & ROI Benefits
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Common Mistakes to Avoid
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Best Practices for Long-Term Success
+                    </li>
+                    <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    Future Trends in Delivery & Logistics
+                    </li>
                 </ul>
-              </div>
+                </div>
 
               <p className="text-gray-600">
                 This guide matters because it provides both strategic overview and tactical guidance for building 
