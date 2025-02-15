@@ -2,17 +2,13 @@ import React from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import dynamic from "next/dynamic";
 import { generateSlug } from "@/lib/create-slug";
-
-// Dynamically import LeadCaptureForm
-const LeadCaptureForm = dynamic(
-  () => import("@/components/Resources/ui/LeadCaptureForm"),
-  { ssr: false },
-);
+import LeadCaptureForm from "./LeadCaptureForm";
 
 interface DownloadPopupProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  downloadUrl: string;
   onSuccess?: () => void;
 }
 
@@ -20,12 +16,16 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
   isOpen,
   onClose,
   title,
+  downloadUrl,
   onSuccess,
 }) => {
   const isClosing = React.useRef(false);
 
   const handleDownloadSuccess = () => {
     if (isClosing.current) return;
+    // Trigger the download
+    window.open(downloadUrl, '_blank');
+    
     setTimeout(() => {
       onSuccess?.();
       onClose();
@@ -54,10 +54,9 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
           })()}
           resourceTitle={title}
           onSuccess={handleDownloadSuccess}
+          downloadUrl={downloadUrl}
         />
       </DialogContent>
     </Dialog>
   );
 };
-
-export default DownloadPopup;

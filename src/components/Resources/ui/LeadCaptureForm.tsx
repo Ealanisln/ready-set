@@ -16,9 +16,10 @@ interface FormData {
 }
 
 interface LeadCaptureFormProps {
-  onSuccess?: () => void;
   resourceSlug: string;
-  resourceTitle?: string;
+  resourceTitle: string;
+  onSuccess?: () => void;
+  downloadUrl: string;
 }
 
 const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
