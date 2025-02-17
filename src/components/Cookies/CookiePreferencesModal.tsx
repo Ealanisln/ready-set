@@ -47,12 +47,12 @@ const CookiePreferencesModal: React.FC<CookiePreferencesModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800">
         <DialogHeader>
-          <DialogTitle>Cookie Preferences</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Cookie Preferences</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4">
             <div>
               <h4 className="font-medium">Necessary Cookies</h4>
               <p className="text-sm text-gray-500">Required for the website to function</p>
@@ -63,7 +63,7 @@ const CookiePreferencesModal: React.FC<CookiePreferencesModalProps> = ({
               onCheckedChange={() => {}}
             />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4">
             <div>
               <h4 className="font-medium">Analytics Cookies</h4>
               <p className="text-sm text-gray-500">Help us improve our website</p>
@@ -75,7 +75,7 @@ const CookiePreferencesModal: React.FC<CookiePreferencesModalProps> = ({
               }
             />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4">
             <div>
               <h4 className="font-medium">Marketing Cookies</h4>
               <p className="text-sm text-gray-500">Used for targeted advertising</p>
@@ -87,7 +87,7 @@ const CookiePreferencesModal: React.FC<CookiePreferencesModalProps> = ({
               }
             />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between space-x-4">
             <div>
               <h4 className="font-medium">Personalization Cookies</h4>
               <p className="text-sm text-gray-500">Remember your preferences</p>
@@ -99,11 +99,11 @@ const CookiePreferencesModal: React.FC<CookiePreferencesModalProps> = ({
               }
             />
           </div>
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
