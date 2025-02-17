@@ -10,7 +10,7 @@ const DeliveryNetwork = () => {
   const calendarUrl = 
   "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
   
-  const guideTitle = "Building a Reliable Delivery";
+  const guideTitle = "Building a Reliable Delivery Network";
 
   return (
     <div className="min-h-screen p-6 pt-32">
