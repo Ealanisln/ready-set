@@ -21,7 +21,7 @@ const FormSchema = z.object({
   email: z.string().email(),
   industry: z.string(),
   newsletterConsent: z.boolean(),
-  resourceSlug: z.string(),
+  resourceSlug: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
         const request: ClientRequest = {
           url: `/v3/marketing/contacts`,
-          method: 'PUT' as const, // Type assertion to literal 'PUT'
+          method: 'PUT' as const,
           body: sendgridData,
         };
 
@@ -88,11 +88,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await sendDownloadEmail(
-      validatedData.email,
-      validatedData.firstName,
-      validatedData.resourceSlug,
-    );
+    // Only send download email if resourceSlug exists
+    if (validatedData.resourceSlug) {
+      await sendDownloadEmail(
+        validatedData.email,
+        validatedData.firstName,
+        validatedData.resourceSlug // Now TypeScript knows resourceSlug is defined in this block
+      );
+    }
 
     return NextResponse.json({ success: true, data: lead });
   } catch (error) {

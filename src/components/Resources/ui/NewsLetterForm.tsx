@@ -11,6 +11,7 @@ interface FormData {
   email: string;
   industry: string;
   newsletterConsent: boolean;
+  resourceSlug?: string; 
 }
 
 export default function NewsletterForm() {
