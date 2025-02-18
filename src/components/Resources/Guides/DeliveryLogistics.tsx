@@ -77,30 +77,39 @@ const DeliveryLogistics = () => {
               </p>
 
               <p className="text-gray-600">
-                If you found this guide helpful, share it with your network or
-                schedule a consultation call with us. Ready to take the next
-                step in optimizing your delivery operations? Contact{" "}
-                <span className="font-bold text-blue-500 underline">
-                  Ready Set Group
-                </span>{" "}
-                now!
-              </p>
-            </div>
+              If you found this guide helpful, share it with your network or
+               schedule a consultation call with us. Ready to take the next
+              step in optimizing your delivery operations? Contact{" "}
+             <a 
+                href="/logistics"
+                rel="noopener noreferrer"
+                className="font-bold text-blue-500 underline hover:text-blue-700"
+  >
+                 Ready Set Group
+               </a>{" "}
+                 now!
+                </p>
+                </div>
 
             <div className="space-y-6">
-              <Card className="rounded-lg bg-yellow-400 p-6">
-                <img
-                  src="/images/resources/5.png"
-                  alt="Delivery person with package"
-                  className="mb-4 w-full rounded-lg"
-                />
-                <h2 className="mb-2 text-center text-2xl font-bold">
-                  Addressing Key Issues
-                  <div className="mt-1">in Delivery Logistics</div>
-                </h2>
-                <div className="mx-auto my-4 h-px w-32 bg-black"></div>
-                <p className="text-center text-sm">A Practical Guide</p>
-              </Card>
+            <Card className="rounded-lg bg-yellow-400 p-6">
+            <img
+            src="/images/resources/5.webp"
+          onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.onerror = null; // Prevent infinite loop
+              img.src = "/images/resources/5.png"; // Fallback PNG
+            }}
+            alt="Delivery person with package"
+            className="mb-4 w-full rounded-lg"
+          />
+          <h2 className="mb-2 text-center text-2xl font-bold">
+            Addressing Key Issues
+            <div className="mt-1">in Delivery Logistics</div>
+          </h2>
+          <div className="mx-auto my-4 h-px w-32 bg-black"></div>
+          <p className="text-center text-sm">A Practical Guide</p>
+        </Card>
 
               <div className="mt-4 flex flex-col items-center">
                 <img
