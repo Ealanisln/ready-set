@@ -238,7 +238,8 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                 className="text-xs leading-tight text-gray-600"
               >
                 We respect your privacy. Ready Set uses your information to send you updates,
-                relevant content, and promotional offers. You can unsubscribe from these
+                relevant content, and promotional offers. You can {" "} <a href="/unsubscribe" 
+                className="text-blue-600 hover:underline">unsubscribe </a>  from these
                 communications at any time. For more details, please review our{" "}
                 <a href="/privacy-policy" className="text-blue-600 hover:underline">
                   Privacy Policy
