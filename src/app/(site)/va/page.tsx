@@ -1,17 +1,14 @@
+import ConsultationBanner from "@/components/PopUpBanner/Consultation";
 import HeroHeader from "@/components/VirtualAssistant";
 import DiscoveryCallSection from "@/components/VirtualAssistant/DiscoveryCall";
 import DiscoveryBanner from "@/components/VirtualAssistant/DiscoveryCallBanner";
 import OverwhelmSection from "@/components/VirtualAssistant/FeatureCard";
-
-import Features from "@/components/VirtualAssistant/Features";
-import Pricing from "@/components/VirtualAssistant/Pricing";
 import BusinessScaleSection from "@/components/VirtualAssistant/VaOptimizationCta";
 import VirtualAssistantProjects from "@/components/VirtualAssistant/VAProjects";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "Virtual Assistant Services | Ready Set",
+  title: "Virtual Assistant Services | Ready Set",
   description:
     "Transform your business operations with Ready Set's comprehensive virtual assistant solutions. Beyond just VA staffing, we optimize processes, implement technology, and create scalable systems to help you save 20+ hours weekly and achieve true work-life balance.",
   keywords: [
@@ -79,9 +76,10 @@ export const metadata: Metadata = {
   },
 };
 
-const AboutPage = () => {
+const VirtualAssistantPage = () => {
   return (
     <main>
+      <ConsultationBanner />
       {/* <ReadySetVirtualAssistantPage /> */}
       <HeroHeader />
       {/* <FeatureCarousel /> */}
@@ -96,4 +94,4 @@ const AboutPage = () => {
   );
 };
 
-export default AboutPage;
+export default VirtualAssistantPage;
