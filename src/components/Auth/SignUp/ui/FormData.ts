@@ -33,6 +33,7 @@ export const CATERING_BROKERAGE: readonly Option[] = [
   { label: "Ez Cater", value: "Ez Cater" },
   { label: "Grubhub", value: "Grubhub" },
   { label: "Cater Cow", value: "Cater Cow" },
+  { label: "Cater2me", value: "Cater2me" },
   { label: "Zero Cater", value: "Zero Cater" },
   { label: "Platterz", value: "Platterz" },
   { label: "Direct Delivery", value: "Direct Delivery" },
