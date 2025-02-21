@@ -204,15 +204,25 @@ const CateringRequestForm: React.FC = () => {
   };
 
   const onSubmit = async (data: ExtendedCateringFormData) => {
+    console.log("Starting catering form submission:", { 
+      formData: { ...data, attachments: data.attachments?.length } 
+    });
+  
     if (!session?.user?.id) {
-      console.error("User not authenticated");
+      console.error("User not authenticated", { userId: session?.user?.id });
       return;
     }
-
+  
     setIsSubmitting(true);
     setErrorMessage(null);
-
+  
     try {
+      console.log("Preparing order payload", {
+        orderType: "catering",
+        tipAmount: data.tip ? parseFloat(data.tip) : undefined,
+        attachmentCount: data.attachments?.length
+      });
+  
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,37 +237,63 @@ const CateringRequestForm: React.FC = () => {
           })),
         }),
       });
-
+  
+      console.log("Order API response received", { 
+        status: response.status,
+        ok: response.ok 
+      });
+  
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Order API error response:", { 
+          status: response.status, 
+          errorData 
+        });
         throw new Error(
           errorData.message || "Failed to submit catering request",
         );
       }
-
+  
       const order = await response.json();
-
+      console.log("Order created successfully", { 
+        orderId: order.id,
+        hasAttachments: uploadedFiles.length > 0 
+      });
+  
       // Update file associations
       if (uploadedFiles.length > 0) {
         try {
+          console.log("Updating file associations", { 
+            orderId: order.id,
+            fileCount: uploadedFiles.length 
+          });
           await updateEntityId(order.id.toString());
+          console.log("File associations updated successfully");
         } catch (updateError) {
-          console.error("Error updating file associations:", updateError);
+          console.error("Error updating file associations:", {
+            error: updateError,
+            orderId: order.id,
+            fileCount: uploadedFiles.length
+          });
           // Continue with form submission even if file update fails
         }
       }
-
+  
       setUploadedFileKeys([]);
       reset();
+      console.log("Form reset and submission completed successfully");
       toast.success("Catering request submitted successfully!");
     } catch (error) {
-      console.error("Submission error:", error);
+      console.error("Submission error:", {
+        error,
+        formData: { ...data, attachments: data.attachments?.length }
+      });
       toast.error("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
+      console.log("Form submission process completed");
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
