@@ -104,7 +104,12 @@ const DeliveryNetwork = () => {
               {/* Logo at the top with more space */}
               <div className="mb-12">
                 <img
-                  src="/images/logo/new-logo-ready-set.png"
+                  src="/images/logo/new-logo-ready-set.webp"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.onerror = null;
+                    img.src = "/images/logo/new-logo-ready-set.png";
+                  }}
                   alt="Company logo"
                   className="h-auto w-32"
                 />

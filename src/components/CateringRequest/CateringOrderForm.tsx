@@ -277,6 +277,7 @@ const CombinedOrderForm: React.FC = () => {
               <option value="Ez Cater">Ez Cater</option>
               <option value="Grubhub">Grubhub</option>
               <option value="Cater Cow">Cater Cow</option>
+              <option value="Cater2me">Cater2me</option>
               <option value="Zero Cater">Zero Cater</option>
               <option value="Platterz">Platterz</option>
               <option value="Direct Delivery">Direct Delivery</option>

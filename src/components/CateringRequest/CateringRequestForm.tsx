@@ -40,6 +40,7 @@ const BROKERAGE_OPTIONS = [
   { value: "Ez Cater", label: "Ez Cater" },
   { value: "Grubhub", label: "Grubhub" },
   { value: "Cater Cow", label: "Cater Cow" },
+  { value: "Cater2me", label: "Cater2me" },
   { value: "Zero Cater", label: "Zero Cater" },
   { value: "Platterz", label: "Platterz" },
   { value: "Direct Delivery", label: "Direct Delivery" },
