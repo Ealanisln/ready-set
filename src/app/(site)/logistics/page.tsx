@@ -9,6 +9,7 @@ import FlowerDeliveryPage from "@/components/Logistics/FlowerDelivery";
 import SpecialtyDelivery from "@/components/Logistics/SpecialtyDelivery";
 import BakeryDeliverySection from "@/components/Logistics/BakeryDelivery";
 import { ClientFormWrapper } from "@/components/Logistics/QuoteRequest/ClientFormWrapper";
+import PromoPopup from "@/components/PopUpBanner/PromoPopup";
 
 export const metadata: Metadata = {
   title: "Premium Catering Logistics Services | Ready Set Group LLC",
@@ -52,6 +53,7 @@ export default function LogisticsPage() {
   return (
     <>
     <ClientFormWrapper>
+      <PromoPopup />
       <LogisticsHero />
       <WhyChoose />
       <ImageCarousel />
