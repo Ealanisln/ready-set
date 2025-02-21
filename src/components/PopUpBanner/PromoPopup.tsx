@@ -153,11 +153,11 @@ const ClientSidePromoPopup = () => {
                         >
                           <AppointmentDialog
                             buttonText="BOOK A CALL"
-                            buttonClassName="inline rounded-lg bg-[#CCCCCC] py-4 px-8 text-xl font-semibold text-[#333333] hover:bg-[#BBBBBB] flex items-center justify-center gap-2"
+                            buttonClassName="w-full bg-gray-300 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-400 sm:text-base"
                             dialogTitle="Schedule Your Free Consultation"
                             dialogDescription="Book your consultation and receive 10 free VA hours!"
                             calendarUrl={calendarUrl}
-                            buttonVariant="black"
+                            buttonVariant="default"
                           />
                         </motion.div>
                       </div>
