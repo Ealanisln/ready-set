@@ -1,20 +1,17 @@
 import React from "react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import type { Session } from "next-auth";
+import { createClient } from '@/utils/supabase/client';
 import { ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from 'next/navigation';
 
-interface MobileMenuProps {
-  navbarOpen: boolean;
-  menuData: MenuItem[];
-  openIndex: number;
-  handleSubmenu: (index: number) => void;
-  closeNavbarOnNavigate: () => void;
-  navbarToggleHandler: () => void;
-  session: Session | null;
-  pathUrl: string;
-  getTextColorClasses: () => string;
+// Types
+type UserType = "client" | "admin" | "super_admin" | "vendor" | "driver" | undefined;
+
+interface User {
+  id: string;
+  name?: string;
+  type?: UserType;
 }
 
 interface MenuItem {
@@ -23,6 +20,18 @@ interface MenuItem {
   path?: string;
   newTab?: boolean;
   submenu?: MenuItem[];
+}
+
+interface MobileMenuProps {
+  navbarOpen: boolean;
+  menuData: MenuItem[];
+  openIndex: number;
+  handleSubmenu: (index: number) => void;
+  closeNavbarOnNavigate: () => void;
+  navbarToggleHandler: () => void;
+  user: User | null;
+  pathUrl: string;
+  getTextColorClasses: () => string;
 }
 
 const DesktopMenu: React.FC<{
@@ -120,7 +129,7 @@ const MobileMenuOverlay: React.FC<{
   handleSubmenu: (index: number) => void;
   closeNavbarOnNavigate: () => void;
   navbarToggleHandler: () => void;
-  session: Session | null;
+  user: User | null;
   pathUrl: string;
 }> = ({
   navbarOpen,
@@ -129,9 +138,26 @@ const MobileMenuOverlay: React.FC<{
   handleSubmenu,
   closeNavbarOnNavigate,
   navbarToggleHandler,
-  session,
+  user,
   pathUrl
 }) => {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleSignOutClick = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error.message);
+        return;
+      }
+      router.push('/');
+      navbarToggleHandler();
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
+  };
+
   if (!menuData) return null;
 
   return (
@@ -267,7 +293,7 @@ const MobileMenuOverlay: React.FC<{
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                {!session?.user ? (
+                {!user ? (
                   <div className="space-y-3">
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Link
@@ -291,10 +317,7 @@ const MobileMenuOverlay: React.FC<{
                 ) : (
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <button
-                      onClick={() => {
-                        signOut({ callbackUrl: "/", redirect: true });
-                        navbarToggleHandler();
-                      }}
+                      onClick={handleSignOutClick}
                       className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
                     >
                       Sign Out
@@ -317,7 +340,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   handleSubmenu,
   closeNavbarOnNavigate,
   navbarToggleHandler,
-  session,
+  user,
   pathUrl,
   getTextColorClasses
 }) => {
@@ -337,7 +360,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         handleSubmenu={handleSubmenu}
         closeNavbarOnNavigate={closeNavbarOnNavigate}
         navbarToggleHandler={navbarToggleHandler}
-        session={session}
+        user={user}
         pathUrl={pathUrl}
       />
     </>

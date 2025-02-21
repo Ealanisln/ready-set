@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { createClient } from '@/utils/supabase/client';
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { Session } from "next-auth";
+import { usePathname, useRouter } from "next/navigation";
 import menuData, {
   cateringRequestMenuItem,
   adminMenuItem,
@@ -15,13 +14,7 @@ import menuData, {
 import MobileMenu from "./MobileMenu";
 
 // Types
-type UserType =
-  | "client"
-  | "admin"
-  | "super_admin"
-  | "vendor"
-  | "driver"
-  | undefined;
+type UserType = "client" | "admin" | "super_admin" | "vendor" | "driver" | undefined;
 
 interface MenuItem {
   id: string | number;
@@ -29,6 +22,12 @@ interface MenuItem {
   path?: string;
   newTab?: boolean;
   submenu?: MenuItem[];
+}
+
+interface User {
+  id: string;
+  name?: string;
+  type?: UserType;
 }
 
 interface LogoProps {
@@ -42,49 +41,48 @@ interface LogoProps {
 }
 
 interface AuthButtonsProps {
-  session: Session | null;
+  user: User | null;
   pathUrl: string;
   sticky: boolean;
   isVirtualAssistantPage: boolean;
   isHomePage: boolean;
+  onSignOut: () => Promise<void>;
 }
 
-// Components
+// Logo Component
 const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualAssistantPage }) => {
   if (isVirtualAssistantPage) {
     return (
       <Link
-      href="/"
-      className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}
-    >
-      {sticky ? (
-        // Dark version for light background (when sticky)
-        <picture>
-          <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
-          <Image
-            src="/images/virtual/logo-headset.png"
-            alt="Virtual Assistant Logo"
-            width={180}
-            height={40}
-            className="header-logo w-full"
-            priority
-          />
-        </picture>
-      ) : (
-        // White version for dark background (when not sticky)
-        <picture>
-          <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
-          <Image
-            src="/images/virtual/logo-headset-dark.png"
-            alt="Virtual Assistant Logo"
-            width={180}
-            height={40}
-            className="header-logo w-full"
-            priority
-          />
-        </picture>
-      )}
-    </Link>
+        href="/"
+        className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}
+      >
+        {sticky ? (
+          <picture>
+            <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
+            <Image
+              src="/images/virtual/logo-headset.png"
+              alt="Virtual Assistant Logo"
+              width={180}
+              height={40}
+              className="header-logo w-full"
+              priority
+            />
+          </picture>
+        ) : (
+          <picture>
+            <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
+            <Image
+              src="/images/virtual/logo-headset-dark.png"
+              alt="Virtual Assistant Logo"
+              width={180}
+              height={40}
+              className="header-logo w-full"
+              priority
+            />
+          </picture>
+        )}
+      </Link>
     );
   }
 
@@ -132,17 +130,19 @@ const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualA
   );
 };
 
+// Auth Buttons Component
 const AuthButtons: React.FC<AuthButtonsProps> = ({
-  session,
+  user,
   pathUrl,
   sticky,
   isVirtualAssistantPage,
   isHomePage,
+  onSignOut,
 }) => {
-  if (session?.user) {
+  if (user) {
     return (
       <>
-        <Link href={`/user/${session.user.id}`}>
+        <Link href={`/user/${user.id}`}>
           <p
             className={`loginBtn hidden px-7 py-3 font-medium lg:block ${
               sticky
@@ -152,19 +152,19 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
                   : "text-dark dark:text-white"
             }`}
           >
-            {session.user.name}
+            {user.name}
           </p>
         </Link>
         {isVirtualAssistantPage || isHomePage ? (
           <button
-            onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+            onClick={onSignOut}
             className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white md:block"
           >
             Sign Out
           </button>
         ) : (
           <button
-            onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+            onClick={onSignOut}
             className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark md:block"
           >
             Sign Out
@@ -178,7 +178,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
     <>
       {pathUrl !== "/" || isVirtualAssistantPage ? (
         <div className="flex items-center gap-3">
-           <Link
+          <Link
             href="/signin"
             className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
               ${sticky 
@@ -200,7 +200,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
         </div>
       ) : (
         <>
-       <Link
+          <Link
             href="/signin"
             className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
               ${sticky 
@@ -227,15 +227,78 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
   );
 };
 
+// Main Header Component
 const Header: React.FC = () => {
-  const { data: session } = useSession();
+  const supabase = createClient();
+  const router = useRouter();
   const pathUrl = usePathname();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
   const [openIndex, setOpenIndex] = useState(-1);
+  const [user, setUser] = useState<User | null>(null);
 
   const isVirtualAssistantPage = pathUrl === "/va";
   const isHomePage = pathUrl === "/";
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error fetching user:', error.message);
+        return;
+      }
+      if (supabaseUser) {
+        // Fetch additional user data from your profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, type')
+          .eq('id', supabaseUser.id)
+          .single();
+
+        setUser({
+          id: supabaseUser.id,
+          name: profile?.name || supabaseUser.email?.split('@')[0],
+          type: profile?.type as UserType,
+        });
+      } else {
+        setUser(null);
+      }
+    };
+
+    getUser();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, type')
+          .eq('id', session.user.id)
+          .single();
+
+        setUser({
+          id: session.user.id,
+          name: profile?.name || session.user.email?.split('@')[0],
+          type: profile?.type as UserType,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error.message);
+    } else {
+      router.push('/');
+    }
+  };
 
   // Utility functions
   const getTextColorClasses = () => {
@@ -269,12 +332,6 @@ const Header: React.FC = () => {
     return "bg-dark dark:bg-white";
   };
 
-  // Enhanced close handler that closes both navbar and submenus
-  const closeAllMenus = () => {
-    setNavbarOpen(false);
-    setOpenIndex(-1);
-  };
-
   // Event handlers
   const navbarToggleHandler = () => setNavbarOpen((prev) => !prev);
   const closeNavbarOnNavigate = () => setNavbarOpen(false);
@@ -285,7 +342,6 @@ const Header: React.FC = () => {
     setSticky(window.scrollY >= 80);
   };
 
-  // Add pathUrl to dependency array to trigger menu close on route change
   useEffect(() => {
     closeAllMenus();
   }, [pathUrl]);
@@ -295,8 +351,14 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleStickyNavbar);
   }, []);
 
+  // Close all menus
+  const closeAllMenus = () => {
+    setNavbarOpen(false);
+    setOpenIndex(-1);
+  };
+
   // Menu data processing
-  const userType = session?.user?.type as UserType;
+  const userType = user?.type as UserType;
   const updatedMenuData: MenuItem[] = [
     ...menuData.filter(
       (item) => item.title !== "Sign In" && item.title !== "Sign Up",
@@ -338,7 +400,7 @@ const Header: React.FC = () => {
               handleSubmenu={handleSubmenu}
               closeNavbarOnNavigate={closeNavbarOnNavigate}
               navbarToggleHandler={navbarToggleHandler}
-              session={session}
+              user={user}
               pathUrl={pathUrl}
               getTextColorClasses={getTextColorClasses}
             />
@@ -371,11 +433,12 @@ const Header: React.FC = () => {
             {/* Desktop controls */}
             <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
               <AuthButtons
-                session={session}
+                user={user}
                 pathUrl={pathUrl}
                 sticky={sticky}
                 isVirtualAssistantPage={isVirtualAssistantPage}
                 isHomePage={isHomePage}
+                onSignOut={handleSignOut}
               />
             </div>
           </div>
