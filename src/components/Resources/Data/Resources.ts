@@ -6,6 +6,7 @@ import EmailMetricsMatter from "../Guides/EmailMetricsMatter";
 import EmailTesting from "../Guides/EmailTesting";
 import GuideChoosePartner from "../Guides/GuideChoosePartner";
 import HireVirtualAssistant from "../Guides/HireVirtualAssistant";
+import SocialMediaStrategy from "../Guides/SocialMediaStrategy";
 import StartSocialMedia from "../Guides/StartSocialMedia";
 
 export interface Resource {
@@ -89,6 +90,15 @@ export const resources: Resource[] = [
     imageUrl: "/images/resources/9.webp",
     imageFallback: "/images/resources/9.png",
     downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLMiIOL08FIxYK8ng65t7CE2fGLMXaOy1oNZBT"
+  },
+
+  {
+    title: "Social Media Strategy Guide & Template",
+    description: "Sample Social Media Strategy Template",
+    component: SocialMediaStrategy, 
+    imageUrl: "/images/resources/10.webp",
+    imageFallback: "/images/resources/10.png",
+    downloadUrl: "https://jdjlkt28jx.ufs.sh/f/Bane1rvzmKWLEWHvfb1m92lJkdutFZLH7OcxqPiVKgnprT1A"
   }
 
 
