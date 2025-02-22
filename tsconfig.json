@@ -20,7 +20,11 @@
       "@lib/*": ["./src/lib/*"],
       "@styles/*": ["./src/styles/*"]
     },
-    "types": ["node"],
+    "types": ["node", "google.maps"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
     "baseUrl": ".",
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true
@@ -29,7 +33,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/types/**/*.d.ts"  // Add this line
   ],
   "exclude": ["node_modules"]
 }

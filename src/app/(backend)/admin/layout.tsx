@@ -1,7 +1,6 @@
+// src/app/(backend)/admin/layout.tsx
 import { NavBar } from "@/components/Dashboard";
-// import { SidebarProvider } from "@/components/ui/sidebar";
-// import { AppSidebar } from "@/components/Dashboard/Sidebar/app-sidebar";
-// import { SidebarTrigger } from "@/components/ui/sidebar";
+import { GoogleMapsScript } from "@/components/Maps/GoogleMapsScript";
 
 export default function AdminLayout({
   children,
@@ -10,10 +9,13 @@ export default function AdminLayout({
 }) {
   return (
     <>
-      <NavBar />
-      <main className="admin-content">
-        {children}
-      </main>
+      <GoogleMapsScript />
+      <div className="min-h-screen bg-gray-50">
+        <NavBar />
+        <main className="admin-content container mx-auto px-4 py-6">
+          {children}
+        </main>
+      </div>
     </>
   );
 }

@@ -39,6 +39,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@faker-js/faker": "^9.3.0",
+    "@googlemaps/js-api-loader": "^1.16.8",
     "@hookform/resolvers": "^3.9.1",
     "@next/third-parties": "15.1.1",
     "@portabletext/react": "^3.2.0",
@@ -139,6 +140,7 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/google.maps": "^3.58.1",
     "@types/jest": "^29.5.14",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.12.0",
