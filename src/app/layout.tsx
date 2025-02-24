@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
-// import { VercelToolbar } from "@vercel/toolbar/next";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
 
@@ -28,7 +27,6 @@ export default function RootLayout({
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ClientLayout>{children}</ClientLayout>
         </ErrorBoundary>
-
         {/* {process.env.NODE_ENV === "development" && <VercelToolbar />} */}
         <Analytics />
         <CookieConsentBanner
