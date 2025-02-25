@@ -2,27 +2,35 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 import { deleteUserFiles } from "@/app/actions/delete-user-files";
 
-// Helper function to check admin authorization
+// Helper function to check authorization
 async function checkAuthorization(requestedUserId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  
   // Allow access if the user is requesting their own profile
-  if (session.user.id === requestedUserId) {
+  if (user.id === requestedUserId) {
     return null;
   }
-
+  
+  // Get the user's type from your database
+  // Note: Supabase auth doesn't store user type by default, so we need to fetch it
+  const userData = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { type: true }
+  });
+  
   // Allow access if the user is an admin or super_admin
-  if (session.user.type === "admin" || session.user.type === "super_admin") {
+  if (userData?.type === "admin" || userData?.type === "super_admin") {
     return null;
   }
-
+  
   // Deny access for all other cases
   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
@@ -33,7 +41,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
   const { userId } = params;
   const authResponse = await checkAuthorization(userId);
   if (authResponse) return authResponse;
-
+  
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -61,11 +69,11 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
         status: true,
       },
     });
-
+    
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-
+    
     // Process the user data to match the component's expectations
     const processedUser = {
       ...user,
@@ -77,7 +85,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
         : [],
       provisions: user.provide ? user.provide.split(", ") : [],
     };
-
+    
     return NextResponse.json(processedUser);
   } catch (error: unknown) {
     console.error("Error fetching user:", error);
@@ -96,33 +104,35 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
 export async function PUT(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
   const params = await props.params;
   const { userId } = params;
-
   const authResponse = await checkAuthorization(userId);
   if (authResponse) return authResponse;
-
+  
   try {
     const data = await request.json();
-
     let processedData: any = { ...data };
-
+    
     // Map fields to match Prisma schema
     if (processedData.countiesServed) {
       processedData.counties = processedData.countiesServed.join(", ");
       delete processedData.countiesServed;
     }
+    
     if (processedData.timeNeeded) {
       processedData.time_needed = processedData.timeNeeded.join(", ");
       delete processedData.timeNeeded;
     }
+    
     if (processedData.cateringBrokerage) {
       processedData.catering_brokerage =
         processedData.cateringBrokerage.join(", ");
       delete processedData.cateringBrokerage;
     }
+    
     if (processedData.provisions) {
       processedData.provide = processedData.provisions.join(", ");
       delete processedData.provisions;
     }
+    
     if (processedData.displayName) {
       if (processedData.type === "vendor") {
         processedData.name = processedData.displayName;
@@ -136,7 +146,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
       }
       delete processedData.displayName;
     }
-
+    
     // Remove any fields that are not in the Prisma schema
     const allowedFields = [
       "name",
@@ -161,12 +171,13 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
       "head_count",
       "status",
     ];
+    
     Object.keys(processedData).forEach((key) => {
       if (!allowedFields.includes(key)) {
         delete processedData[key];
       }
     });
-
+    
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
@@ -174,7 +185,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
         updated_at: new Date(),
       },
     });
-
+    
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {
     console.error("Error updating user:", error);
@@ -196,25 +207,35 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
 // DELETE: Delete a user by ID
 export async function DELETE(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
   const params = await props.params;
-  const session = await getServerSession(authOptions);
-  if (
-    !session ||
-    (session.user.type !== "admin" && session.user.type !== "super_admin")
-  ) {
+  const { userId } = params;
+  
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { userId } = params;
+  
+  // Get the user's type from your database
+  const userData = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { type: true }
+  });
+  
+  if (userData?.type !== "admin" && userData?.type !== "super_admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  
   try {
     // First, delete all files associated with the user
     const filesDeletionResult = await deleteUserFiles(userId);
     console.log("Files deletion result:", filesDeletionResult);
-
+    
     // Then, delete the user
     await prisma.user.delete({
       where: { id: userId },
     });
-
+    
     return NextResponse.json({
       message: "User and associated files deleted",
       filesDeletionResult,

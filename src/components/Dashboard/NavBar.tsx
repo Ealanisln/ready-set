@@ -35,11 +35,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { signOut } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const closeSheet = () => setIsOpen(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast.error("Error signing out: " + error.message);
+        return;
+      }
+      
+      toast.success("Successfully signed out");
+      router.push("/");
+      router.refresh(); // Refresh to update auth state across the app
+    } catch (err) {
+      console.error("Sign out error:", err);
+      toast.error("An unexpected error occurred while signing out");
+    }
+  };
 
   return (
     <div>
@@ -243,7 +265,7 @@ const NavBar = () => {
               </Link>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/', redirect:true })}>
+              <DropdownMenuItem onClick={handleSignOut}>
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>

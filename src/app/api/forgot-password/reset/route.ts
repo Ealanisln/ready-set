@@ -1,3 +1,5 @@
+// src/app/api/forgot-password/reset/route.ts
+
 import { prisma } from "@/utils/prismaDB";
 import { NextResponse } from "next/server";
 import crypto from "crypto";

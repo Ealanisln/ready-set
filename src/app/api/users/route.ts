@@ -1,18 +1,31 @@
+//src/app/api/users/route.ts
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 
 // GET: Fetch all users
 export async function GET() {
   try {
-    // Check if the user is authenticated and authorized
-    const session = await getServerSession(authOptions);
-    if (
-      !session ||
-      (session.user.type !== "admin" && session.user.type !== "super_admin")
-    ) {
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get the user's type from your database
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { type: true }
+    });
+
+    // Check if user is admin or super_admin
+    if (userData?.type !== "admin" && userData?.type !== "super_admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const users = await prisma.user.findMany({
@@ -69,10 +82,25 @@ export async function GET() {
 // POST: Create a new user
 export async function POST(request: Request) {
   try {
-    // Check if the user is authenticated and authorized
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.type !== "admin") {
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get the user's type from your database
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { type: true }
+    });
+
+    // Check if user is admin
+    if (userData?.type !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const data = await request.json();

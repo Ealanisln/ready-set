@@ -1,5 +1,3 @@
-// src/app/(site)/user/[id]/page.tsx This code its working
-
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
@@ -21,11 +19,11 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
 import { PasswordChange } from "@/components/Dashboard/AdminView/PasswordChange";
-import { useSession } from "next-auth/react";
-import { useUploadFile } from "@/hooks/use-upload-file";
+import { createClient } from "@/utils/supabase/client"; // Import Supabase client
 import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
+import { useUploadFile } from "@/hooks/use-upload-file";
 
 interface User {
   id: string;
@@ -65,9 +63,22 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
 
-  const { data: session } = useSession();
-  const userId = session?.user?.id;
+  // Get the current user session using Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/sign-in');
+        return;
+      }
+      setUser(user);
+    };
+
+    getUser();
+  }, [router, supabase]);
 
   // Update the useUploadFileHook to handle the proper return type
   const useUploadFileHook = (category: string) => {
@@ -77,7 +88,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       isUploading,
     } = useUploadFile("fileUploader", {
       defaultUploadedFiles: [],
-      userId: userId ?? "",
+      userId: user?.id ?? "",
       maxFileCount: 1,
       maxFileSize: 3 * 1024 * 1024,
       allowedFileTypes: [
@@ -138,6 +149,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // Make sure we have the authenticated user before fetching user details
+        if (!user) return;
+
         const response = await fetch(`/api/users/${params.id}`);
         if (!response.ok) {
           if (response.status === 401) {
@@ -180,7 +194,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     };
 
     fetchUser();
-  }, [params.id, setValue]);
+  }, [params.id, setValue, user]);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
@@ -313,9 +327,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                     </CardHeader>
                     <CardContent>
                       <div className="py-2">
-                        {userId ? (
+                        {user ? (
                           <UserFilesDisplay
-                            userId={userId}
+                            userId={user.id}
                             refreshTrigger={refreshTrigger}
                           />
                         ) : (

@@ -1,7 +1,6 @@
 // src/app/api/orders/[order_number]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma } from "@prisma/client";
 
@@ -59,9 +58,14 @@ function serializeOrder(data: any): any {
 export async function GET(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user?.id) {
+    // Check if user is authenticated
+    if (!user || !user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -140,9 +144,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
 export async function PATCH(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user?.id) {
+    // Check if user is authenticated
+    if (!user || !user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 

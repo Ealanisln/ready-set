@@ -1,46 +1,48 @@
+// src/components/Auth/ForgotPassword/index.tsx
 "use client";
+
 import React from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
 import Loader from "@/components/Common/Loader";
 import Link from "next/link";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/client";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loader, setLoader] = useState(false);
+  const supabase = createClient();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email) {
       toast.error("Please enter your email address.");
-
       return;
     }
 
     setLoader(true);
 
     try {
-      const res = await axios.post("/api/forgot-password/reset", {
-        email: email.toLowerCase(),
-      });
+      // Use Supabase's resetPasswordForEmail instead of custom API
+      const { data, error } = await supabase.auth.resetPasswordForEmail(
+        email.toLowerCase(),
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      );
 
-      if (res.status === 404) {
-        toast.error("User not found.");
-        return;
-      }
-
-      if (res.status === 200) {
-        toast.success(res.data);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Password reset instructions sent to your email");
         setEmail("");
       }
-
-      setEmail("");
-      setLoader(false);
     } catch (error: any) {
-      toast.error(error?.response.data);
+      toast.error("An error occurred. Please try again later.");
+      console.error("Password reset error:", error);
+    } finally {
       setLoader(false);
     }
   };
