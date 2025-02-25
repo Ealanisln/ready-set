@@ -13,10 +13,19 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-// Updated metadata with your logo path
+// Metadatos mejorados para Open Graph y redes sociales
 export const metadata: Metadata = {
   title: 'Ready Set Virtual Assistant Services | Beyond Traditional VA Support',
   description: 'Expert Virtual Assistants, Ready When You Are.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/images/logo/new-logo-ready-set.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/images/logo/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: 'Ready Set Virtual Assistant Services | Beyond Traditional VA Support',
     description: 'Expert Virtual Assistants, Ready When You Are.',
@@ -24,10 +33,11 @@ export const metadata: Metadata = {
     siteName: 'Ready Set LLC',
     images: [
       {
-        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png', // Your logo path
+        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
         width: 1200,
         height: 630,
-        alt: 'Ready Set LLC Logo',
+        alt: 'Ready Set LLC Logo - Penguin',
+        type: 'image/png',
       },
     ],
     locale: 'en_US',
@@ -37,8 +47,37 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Ready Set Virtual Assistant Services',
     description: 'Expert Virtual Assistants, Ready When You Are.',
-    images: ['/images/logo/new-logo-ready-set.png'], // Your logo path
+    creator: '@ReadySetLLC',
+    images: [
+      {
+        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
+        alt: 'Ready Set LLC Penguin Logo',
+        width: 1200,
+        height: 630,
+      }
+    ],
   },
+  // Metadatos adicionales para otras plataformas
+  other: {
+    'fb:app_id': '', // Si tienes un ID de aplicación de Facebook
+    'og:image:secure_url': 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
+  },
+  applicationName: 'Ready Set LLC',
+  appleWebApp: {
+    title: 'Ready Set LLC',
+    statusBarStyle: 'black-translucent',
+  },
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
+  keywords: 'virtual assistant, VA services, Ready Set LLC, administrative support, professional VA',
 };
 
 export default function RootLayout({
@@ -52,6 +91,10 @@ export default function RootLayout({
       className={`!scroll-smooth ${montserrat.className}`}
       lang="en"
     >
+      <head>
+        {/* Etiquetas adicionales de verificación de Pinterest si las necesitas */}
+        <meta name="p:domain_verify" content="" />
+      </head>
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ClientLayout>{children}</ClientLayout>
