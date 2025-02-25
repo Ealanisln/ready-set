@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: 'Ready Set LLC',
     images: [
       {
-        url: '/images/logo/new-logo-ready-set.png', // Your logo path
+        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png', // Your logo path
         width: 1200,
         height: 630,
         alt: 'Ready Set LLC Logo',
