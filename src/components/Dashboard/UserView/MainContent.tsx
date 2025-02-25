@@ -267,7 +267,10 @@ export const MainContent: React.FC<MainContentProps> = ({
                             Status
                           </th>
                           <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">
-                            Actions
+                          Created At
+                          </th>
+                          <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">
+                         Actions
                           </th>
                         </tr>
                       </thead>
@@ -311,6 +314,15 @@ export const MainContent: React.FC<MainContentProps> = ({
                               </span>
                             </td>
                             <td className="p-4">
+                             {user.created_at ? (
+                              <div className="text-sm">
+                                {new Date(user.created_at).toISOString().replace('T', ' ').slice(0, 23)}
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground text-sm">N/A</div>
+                            )}
+                          </td>
+                          <td className="p-4">
                               <Button
                                 variant="ghost"
                                 size="sm"
