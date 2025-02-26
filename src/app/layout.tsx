@@ -6,12 +6,19 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
-import { Metadata } from 'next';
+import { Metadata, Viewport } from 'next';
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
 });
+
+// Exportación separada para el viewport
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 // Metadatos mejorados para Open Graph y redes sociales
 export const metadata: Metadata = {
@@ -72,11 +79,7 @@ export const metadata: Metadata = {
     email: true,
     address: true,
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
+  // Se eliminó la propiedad viewport de aquí
   keywords: 'virtual assistant, VA services, Ready Set LLC, administrative support, professional VA',
 };
 
