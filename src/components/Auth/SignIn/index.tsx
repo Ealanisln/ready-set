@@ -1,22 +1,16 @@
-// src/components/Auth/SignIn/index.tsx
-
 "use client";
 
-import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Loader from "@/components/Common/Loader";
+import { login, signup } from '@/app/actions/login';
 
-const Signin = () => {
-  const router = useRouter();
-
+const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: string } }) => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
-    checkboxToggle: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -53,69 +47,6 @@ const Signin = () => {
     return isValid;
   };
 
-  const getErrorMessage = (error: string) => {
-    const errorMessages: { [key: string]: string } = {
-      CredentialsSignin: "Invalid email or password. Please try again.",
-      AccessDenied: "You don't have permission to access this resource.",
-      EmailNotVerified: "Please verify your email before signing in.",
-      AccountLocked: "Your account has been locked. Please contact support.",
-      TooManyAttempts: "Too many failed attempts. Please try again later.",
-      Default: "An unexpected error occurred. Please try again.",
-    };
-
-    return errorMessages[error] || errorMessages["Default"];
-  };
-
-  const loginUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        ...loginData,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        console.error("SignIn error:", result.error);
-        const errorMessage = getErrorMessage(result.error);
-        toast.error(errorMessage);
-        setErrors((prev) => ({ ...prev, general: errorMessage }));
-        return;
-      }
-
-      if (result?.ok) {
-        toast.success("Welcome back! Sign in successful.");
-
-        // Get the session to check if the password is temporary
-        const session = await getSession();
-
-        if (session?.user.isTemporaryPassword) {
-          // Using toast() instead of toast.info()
-          toast("Please change your temporary password to continue.", {
-            icon: "🔑", // Optional: adds an icon to make it look like an info message
-            duration: 4000,
-          });
-          router.push("/change-password");
-        } else {
-          router.push("/");
-        }
-      }
-    } catch (err) {
-      console.error("Detailed error:", err);
-      const errorMessage =
-        "Unable to connect to the server. Please check your internet connection and try again.";
-      toast.error(errorMessage);
-      setErrors((prev) => ({ ...prev, general: errorMessage }));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     // Convert email to lowercase if the field is email
@@ -124,6 +55,14 @@ const Signin = () => {
     // Clear error when user starts typing
     setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };
+
+  // Display error from URL params if present
+  // We need to use useEffect for initialization
+  useEffect(() => {
+    if (searchParams?.error) {
+      setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
+    }
+  }, [searchParams]);
 
   return (
     <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-20">
@@ -153,21 +92,19 @@ const Signin = () => {
                 </Link>
               </div>
 
-              {/* <SocialSignIn /> */}
+              {searchParams?.message && (
+                <div className="p-3 mb-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                  {searchParams.message}
+                </div>
+              )}
 
-              {/* <span className="z-1 relative my-8 block text-center">
-                <span className="-z-1 absolute left-0 top-1/2 block h-px w-full bg-stroke dark:bg-dark-3"></span>
-                <span className="text-body-secondary relative z-10 inline-block bg-white px-3 text-base dark:bg-dark-2">
-                  OR
-                </span>
-              </span> */}
+              {errors.general && (
+                <div className="p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {errors.general}
+                </div>
+              )}
 
-              {/* <SwitchOption
-                isPassword={isPassword}
-                setIsPassword={setIsPassword}
-              /> */}
-
-              <form onSubmit={loginUser} noValidate>
+              <form noValidate>
                 <div className="mb-[22px]">
                   <input
                     type="email"
@@ -204,17 +141,11 @@ const Signin = () => {
                   )}
                 </div>
 
-                {errors.general && (
-                  <div className="mb-4">
-                    <p className="text-sm text-red-500">{errors.general}</p>
-                  </div>
-                )}
-
-                <div className="mb-9">
+                <div className="flex space-x-4 mb-9">
                   <button
-                    type="submit"
+                    formAction={login}
                     disabled={loading}
-                    className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="flex-1 cursor-pointer rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {loading ? (
                       <>
@@ -225,6 +156,14 @@ const Signin = () => {
                       "Sign In"
                     )}
                   </button>
+                  
+                  <button
+                    formAction={signup}
+                    disabled={loading}
+                    className="flex-1 cursor-pointer rounded-md border border-gray-300 bg-transparent px-5 py-3 text-base text-dark transition duration-300 ease-in-out hover:bg-gray-100 dark:text-white dark:border-dark-3 dark:hover:bg-dark-2/80 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    Sign Up
+                  </button>
                 </div>
               </form>
 
@@ -232,14 +171,13 @@ const Signin = () => {
                 href="/forgot-password"
                 className="mb-2 inline-block text-base text-dark hover:text-primary dark:text-white dark:hover:text-primary"
               >
-                Forget Password?
+                Forgot Password?
               </Link>
-              <p className="text-body-secondary text-base">
-                Not a member yet?{" "}
-                <Link href="/signup" className="text-primary hover:underline">
-                  Sign Up
-                </Link>
-              </p>
+
+              {/* Migration notice - can be removed after migration is complete */}
+              <div className="mt-6 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm">
+                <p><strong>Important:</strong> If you're a returning user from our previous system and can't log in, please use the "Forgot password" link to reset your password.</p>
+              </div>
 
               <div>
                 <span className="absolute right-1 top-1">
