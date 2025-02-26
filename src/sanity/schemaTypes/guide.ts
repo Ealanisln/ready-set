@@ -157,11 +157,18 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'downloadUrl',
-      title: 'Guide Download URL',
-      type: 'url',
-      description: 'URL where the guide PDF or document can be downloaded',
-      validation: Rule => Rule.required()
+      name: 'downloadableFiles',
+      title: 'Downloadable Files',
+      type: 'array',
+      of: [
+        {
+          type: 'file',
+          options: {
+            accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip'
+          }
+        }
+      ],
+      description: 'Upload PDFs and other documents for this guide'
     }),
     defineField({
       name: 'ctaText',
