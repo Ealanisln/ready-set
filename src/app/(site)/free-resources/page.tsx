@@ -1,6 +1,7 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import ResourcesGrid from "@/components/Resources/ResourcesGrid";
 import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
+import Testimonials from "@/components/Testimonials";
 import { Separator } from "@/components/ui/separator";
 
 const FreeResourcesPage = () => {
@@ -11,6 +12,7 @@ const FreeResourcesPage = () => {
           <ResourcesGrid />
           <Separator className="my-8 bg-gray-200" /> 
           <NewsletterForm />
+          <Testimonials />
         </div>
       </div>
     </div>
