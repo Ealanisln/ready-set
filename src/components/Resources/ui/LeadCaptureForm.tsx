@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { resources } from "@/components/Resources/Data/Resources";
 import { generateSlug } from "@/lib/create-slug";
 
@@ -36,7 +35,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
     lastName: "",
     email: "",
     industry: "",
-    newsletterConsent: false,
+    newsletterConsent: true,
     resourceSlug: resourceSlug,
   });
 
@@ -86,7 +85,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
           lastName: "",
           email: "",
           industry: "",
-          newsletterConsent: false,
+          newsletterConsent: true,
           resourceSlug: resourceSlug,
         });
       }
@@ -106,19 +105,26 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
         },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
+    
+      // Añadir estos logs
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      // Si la respuesta no es JSON, podemos verla como texto
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        const textResponse = await response.text();
+        console.log('Error response text:', textResponse);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+    
+      const data = await response.json();
+      console.log('Response from server:', data);
+      
       setIsSubmitted(true);
     } catch (err) {
+      console.error('Detailed error:', err);
       setError(err instanceof Error ? err.message : "Failed to submit form");
       setIsSubmitted(false);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -218,7 +224,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
               required
             />
             <div className="flex items-start space-x-2 pt-2">
-              <Checkbox
+              {/* <Checkbox
                 id="newsletterConsent"
                 checked={formData.newsletterConsent}
                 onCheckedChange={(checked) =>
@@ -227,13 +233,19 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                     newsletterConsent: !!checked,
                   }))
                 }
-              />
-              <label
+              /> */}
+            <label
                 htmlFor="newsletterConsent"
                 className="text-xs leading-tight text-gray-600"
               >
-                I agree to receive newsletters, updates, and promotional emails
-                from Ready Set. I can unsubscribe at any time.
+                We respect your privacy. Ready Set uses your information to send you updates,
+                relevant content, and promotional offers. You can {" "} <a href="/unsubscribe" 
+                className="text-blue-600 hover:underline">unsubscribe </a>  from these
+                communications at any time. For more details, please review our{" "}
+                <a href="/privacy-policy" className="text-blue-600 hover:underline">
+                  Privacy Policy
+                </a>
+                .
               </label>
             </div>
           </div>

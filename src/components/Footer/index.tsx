@@ -176,7 +176,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      href="terms-of-service"
+                      href="/terms-of-service"
                       className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                     >
                       Terms of Service

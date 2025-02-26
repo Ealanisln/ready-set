@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const validatedData = FormSchema.parse(data);
 
+    // Store lead in database
     const lead = await prisma.lead_capture.upsert({
       where: {
         email: validatedData.email,
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Handle SendGrid subscription
     if (validatedData.newsletterConsent) {
       try {
         const sendgridData = {
@@ -78,9 +80,10 @@ export async function POST(req: NextRequest) {
             email: validatedData.email,
           });
         } else {
-          throw new Error(`Unexpected status code: ${response.statusCode}`);
+          console.error('SendGrid unexpected status:', response.statusCode);
         }
       } catch (error) {
+        // Log the error but don't throw it
         console.error('SendGrid subscription error:', {
           error,
           email: validatedData.email,
@@ -88,16 +91,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Only send download email if resourceSlug exists
+    // Handle resource download email
     if (validatedData.resourceSlug) {
-      await sendDownloadEmail(
-        validatedData.email,
-        validatedData.firstName,
-        validatedData.resourceSlug // Now TypeScript knows resourceSlug is defined in this block
-      );
+      try {
+        await sendDownloadEmail(
+          validatedData.email,
+          validatedData.firstName,
+          validatedData.resourceSlug
+        );
+      } catch (error) {
+        // Log the error but don't throw it
+        console.error('Download email failed:', { error });
+      }
     }
 
+    // Return success even if SendGrid operations fail
     return NextResponse.json({ success: true, data: lead });
+    
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error processing lead:", error.message);

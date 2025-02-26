@@ -67,8 +67,13 @@ const StartSocialMedia = () => {
             <div className="space-y-6">
               <Card className="rounded-lg bg-yellow-400 p-6">
                 <img
-                  src="/images/resources/8.png"
-                  alt="Business woman thinking"
+                  src="/images/resources/8.webp"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.onerror = null; // Prevent infinite loop
+                    img.src = "/images/resources/8.png"; // Fallback PNG
+                    }}
+                  alt="A woman sitting and just about to start a speech"
                   className="mb-4 w-full rounded-lg"
                 />
                 <h2 className="mb-2 text-center text-2xl font-bold">
@@ -80,15 +85,20 @@ const StartSocialMedia = () => {
               </Card>
 
               <div className="mt-4 flex flex-col items-center">
-                <img
-                  src="/images/logo/new-logo-ready-set.png"
+                  <img
+                  src="/images/logo/new-logo-ready-set.webp"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.onerror = null; // Prevent infinite loop
+                    img.src = "/images/logo/new-logo-ready-set.png"; // Fallback PNG
+                  }}
                   alt="Company logo"
                   className="mb-2 h-auto w-24"
                 />
                 <div className="rounded-lg bg-black px-4 py-0 text-white">
-                  <p className="text-sm tracking-wider">READYSETLLC.COM</p>
+                  <p className="text-sm tracking-wider">READY SET GROUP, LLC</p>
                 </div>
-              </div>
+                </div>
 
               <div className="space-y-4">
                 <button

@@ -75,9 +75,8 @@
     "@types/node-cron": "^3.0.11",
     "@types/react-virtualized": "^9.22.0",
     "@uploadthing/react": "^7.1.5",
-    "@vercel/analytics": "^1.4.1",
+    "@vercel/analytics": "^1.5.0",
     "@vercel/postgres": "^0.10.0",
-    "@vercel/speed-insights": "^1.1.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0",
@@ -133,6 +132,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.1.6",
+    "@octokit/request": "8.4.1",
     "@prisma/client": "6.3.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -165,10 +165,12 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@octokit/request": "8.4.1",
+    "@octokit/core": ">=5.2.1",
+    "@octokit/graphql": ">=7.1.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   },
   "resolutions": {
