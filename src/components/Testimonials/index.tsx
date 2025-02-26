@@ -11,16 +11,16 @@ interface ExtendedTestimonial extends Testimonial {
 const testimonialData: ExtendedTestimonial[] = [
   {
     id: 1,
-    name: "Wendy S.",
-    designation: "TheHRLady",
-    content: "As a small business owner, my team of virtual assistants makes me feel like I have an onsite team behind me. One of their tasks is to transform my powerpoint presentations into professional, polished files. Their turnaround times are incredibly quick, efficient, and effective; they handle tasks with remarkable speed and precision. They staff has been invaluable to my business and my sanity.",
+    name: "Wendy Sellers",
+    designation: "",
+    content: "As a small business owner, my team of virtual assistants makes me feel like I have an entire team behind me. One of their tasks is to transform my PowerPoint presentations into professional, polished files that consistently impress me and my clients. Quick, efficient, and effective, they handle tasks with remarkable speed and precision. Their support has been invaluable to my business and my sanity!.",
     image: "/images/testimonials/author-01.png",
     star: 5,
     category: "client",
   },
   {
     id: 2,
-    name: "Cris & Ray",
+    name: "Dennis Ngai",
     designation: "Owner of Bloom",
     content: "Ready Set has streamlined our delivery system. Orders are always on time, and our customers are thrilled.",
     image: "/images/testimonials/author-02.png",
