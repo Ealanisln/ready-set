@@ -97,6 +97,7 @@ export async function middleware(request: NextRequest) {
   }
 }
 
+// Remove the 'as const' assertion
 export const config = {
   matcher: [
     '/',
@@ -105,4 +106,4 @@ export const config = {
     '/change-password',
     '/signin'
   ]
-} as const;
+};

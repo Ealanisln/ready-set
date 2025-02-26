@@ -1,3 +1,4 @@
+// src/components/Resources/ui/LeadCaptureForm.tsx
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -105,29 +106,28 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
         },
         body: JSON.stringify(formData),
       });
-    
+
       // Añadir estos logs
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
       // Si la respuesta no es JSON, podemos verla como texto
       if (!response.ok) {
         const textResponse = await response.text();
-        console.log('Error response text:', textResponse);
+        console.log("Error response text:", textResponse);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-    
+
       const data = await response.json();
-      console.log('Response from server:', data);
-      
+      console.log("Response from server:", data);
+
       setIsSubmitted(true);
     } catch (err) {
-      console.error('Detailed error:', err);
+      console.error("Detailed error:", err);
       setError(err instanceof Error ? err.message : "Failed to submit form");
       setIsSubmitted(false);
     }
   };
-
 
   if (isSubmitted) {
     return (
@@ -234,15 +234,24 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                   }))
                 }
               /> */}
-            <label
+              <label
                 htmlFor="newsletterConsent"
                 className="text-xs leading-tight text-gray-600"
               >
-                We respect your privacy. Ready Set uses your information to send you updates,
-                relevant content, and promotional offers. You can {" "} <a href="/unsubscribe" 
-                className="text-blue-600 hover:underline">unsubscribe </a>  from these
-                communications at any time. For more details, please review our{" "}
-                <a href="/privacy-policy" className="text-blue-600 hover:underline">
+                We respect your privacy. Ready Set uses your information to send
+                you updates, relevant content, and promotional offers. You can{" "}
+                <a
+                  href="/unsubscribe"
+                  className="text-blue-600 hover:underline"
+                >
+                  unsubscribe{" "}
+                </a>{" "}
+                from these communications at any time. For more details, please
+                review our{" "}
+                <a
+                  href="/privacy-policy"
+                  className="text-blue-600 hover:underline"
+                >
                   Privacy Policy
                 </a>
                 .

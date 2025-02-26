@@ -1,8 +1,9 @@
-import React from "react";
+// src/components/Resources/ui/DownloadPopup.tsx
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import dynamic from "next/dynamic";
 import { generateSlug } from "@/lib/create-slug";
 import LeadCaptureForm from "./LeadCaptureForm";
+import { useRef } from "react";
 
 interface DownloadPopupProps {
   isOpen: boolean;
@@ -19,13 +20,13 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
   downloadUrl,
   onSuccess,
 }) => {
-  const isClosing = React.useRef(false);
+  const isClosing = useRef(false);
 
   const handleDownloadSuccess = () => {
     if (isClosing.current) return;
     // Trigger the download
-    window.open(downloadUrl, '_blank');
-    
+    window.open(downloadUrl, "_blank");
+
     setTimeout(() => {
       onSuccess?.();
       onClose();
@@ -45,13 +46,10 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
         }
       }}
     >
-      <DialogContent className="p-0 sm:max-w-[600px]">
-        <DialogTitle className="sr-only">{`Download ${title}`}</DialogTitle>
+      <DialogContent>
+        <DialogTitle>{`Download ${title}`}</DialogTitle>
         <LeadCaptureForm
-          resourceSlug={(() => {
-            const slug = generateSlug(title);
-            return slug;
-          })()}
+          resourceSlug={generateSlug(title)}
           resourceTitle={title}
           onSuccess={handleDownloadSuccess}
           downloadUrl={downloadUrl}
@@ -60,3 +58,5 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
     </Dialog>
   );
 };
+
+export default DownloadPopup;

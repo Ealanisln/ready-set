@@ -39,7 +39,7 @@ export default async function Guides() {
       <section className="pb-10 pt-20 lg:pb-20 lg:pt-[120px]">
         <div className="container mx-auto">
           <div className="-mx-4 flex flex-wrap justify-center sm:px-4">
-            <GuideGrid guides={data} basePath="guides" />
+            {/* <GuideGrid guides={data} basePath="guides" /> */}
             <div className="mt-20 w-full">
               <NewsletterForm />
             </div>

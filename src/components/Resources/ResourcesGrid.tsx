@@ -1,46 +1,61 @@
-// components/Guides/GuideGrid.tsx
-import Link from "next/link";
-import Image from "next/image";
-import { urlForImage } from "@/sanity/lib/image";
-import { GuideCard } from "@/types/guide";
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-interface GuideGridProps {
-  guides: GuideCard[];
+// Update this interface to match your Sanity data structure
+interface Guide {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  slug: string; // From Sanity, this should already be the slug string
+  coverImage?: {
+    url: string;
+  };
+  category?: {
+    title: string;
+    slug: string;
+  };
+}
+
+interface ResourcesGridProps {
+  guides: Guide[];
   basePath: string;
 }
 
-export default function GuideGrid({ guides, basePath }: GuideGridProps) {
+const ResourcesGrid = ({ guides, basePath }: ResourcesGridProps) => {
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       {guides.map((guide) => (
-        <Link
+        <Link 
+          href={`/${basePath}/${guide.slug}`} 
           key={guide._id}
-          href={`/${basePath}/${guide.slug.current}`}
-          className="group overflow-hidden rounded-lg shadow-lg transition-all hover:shadow-xl"
+          className="group rounded-lg border border-gray-200 p-4 transition-all hover:shadow-md"
         >
-          {guide.coverImage && (
-            <div className="relative h-48 w-full">
+          {guide.coverImage?.url && (
+            <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
               <Image
-                src={urlForImage(guide.coverImage)}
+                src={guide.coverImage.url}
                 alt={guide.title}
                 fill
                 className="object-cover transition-transform group-hover:scale-105"
               />
             </div>
           )}
-          <div className="p-6">
-            {guide.category && (
-              <span className="mb-2 inline-block text-sm font-medium text-blue-600">
+          <h3 className="mb-2 text-xl font-semibold">{guide.title}</h3>
+          {guide.subtitle && (
+            <p className="text-gray-700">{guide.subtitle}</p>
+          )}
+          {guide.category && (
+            <div className="mt-3">
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800">
                 {guide.category.title}
               </span>
-            )}
-            <h3 className="mb-2 text-xl font-bold">{guide.title}</h3>
-            {guide.subtitle && (
-              <p className="text-gray-600">{guide.subtitle}</p>
-            )}
-          </div>
+            </div>
+          )}
         </Link>
       ))}
     </div>
   );
-}
+};
+
+export default ResourcesGrid;

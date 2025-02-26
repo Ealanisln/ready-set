@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import AppointmentDialog from '@/components/VirtualAssistant/Appointment';
-import DownloadPopup from '../ui/DownloadPopup';
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
+import AppointmentDialog from "@/components/VirtualAssistant/Appointment";
+import { DownloadPopup } from "../ui/DownloadPopup";
 
 const GuideVirtualAssistant = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
-  const calendarUrl = 
-  "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
-  
+  const calendarUrl =
+    "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+
   const guideTitle = "How to Hire the Right Virtual Assistant";
 
   return (
@@ -21,13 +21,14 @@ const GuideVirtualAssistant = () => {
               <h2 className="text-4xl font-bold text-gray-800">
                 {guideTitle} - Your Step-by-Step Guide
               </h2>
-              
+
               <p className="text-gray-600">
-                Hiring a Virtual Assistant (VA) isn't just about ticking tasks off your list—it's 
-                about finding someone who fits your business and work style. Before you start, 
-                ask yourself: What tasks do I need help with? What skills should my VA have? 
-                This guide walks you through the process of finding the right VA who can help 
-                you work smarter and free up your time.
+                Hiring a Virtual Assistant (VA) isn't just about ticking tasks
+                off your list—it's about finding someone who fits your business
+                and work style. Before you start, ask yourself: What tasks do I
+                need help with? What skills should my VA have? This guide walks
+                you through the process of finding the right VA who can help you
+                work smarter and free up your time.
               </p>
 
               <div className="space-y-4">
@@ -35,10 +36,11 @@ const GuideVirtualAssistant = () => {
                   How This Guide Helps You
                 </h3>
                 <p className="text-gray-600">
-                  Learn how to hire the right Virtual Assistant for your business. This guide 
-                  covers how to identify tasks to delegate, find qualified VAs, evaluate 
-                  candidates, and onboard them into your workflow. You'll also learn how to 
-                  manage and measure their performance effectively.
+                  Learn how to hire the right Virtual Assistant for your
+                  business. This guide covers how to identify tasks to delegate,
+                  find qualified VAs, evaluate candidates, and onboard them into
+                  your workflow. You'll also learn how to manage and measure
+                  their performance effectively.
                 </p>
               </div>
 
@@ -47,16 +49,21 @@ const GuideVirtualAssistant = () => {
                   What You Will Get
                 </h3>
                 <ul className="space-y-4 text-gray-600">
-                  <li>• Hiring the Perfect Virtual Assistant for Your Business</li>
+                  <li>
+                    • Hiring the Perfect Virtual Assistant for Your Business
+                  </li>
                   <li>• How to Find the Right Virtual Assistant (VA)</li>
                   <li>• Checklist: What to Look for in a VA</li>
-                  <li>• Benefits of Having a Virtual Assistant for Your Business</li>
+                  <li>
+                    • Benefits of Having a Virtual Assistant for Your Business
+                  </li>
                 </ul>
               </div>
 
               <p className="text-gray-600">
-                Hiring a VA is a smart move when you're ready to focus on the bigger picture. 
-                Let Ready Set Group LLC match you with professionals who fit your business needs.
+                Hiring a VA is a smart move when you're ready to focus on the
+                bigger picture. Let Ready Set Group LLC match you with
+                professionals who fit your business needs.
               </p>
 
               <div className="space-y-4">
@@ -64,8 +71,8 @@ const GuideVirtualAssistant = () => {
                   Get your free guide and start delegating today.
                 </p>
                 <p className="font-bold">
-                  Want personalized support? Book a Discovery Call with Ready Set Group LLC 
-                  and let us help you find the right VA.
+                  Want personalized support? Book a Discovery Call with Ready
+                  Set Group LLC and let us help you find the right VA.
                 </p>
               </div>
             </div>
@@ -78,7 +85,7 @@ const GuideVirtualAssistant = () => {
                     const img = e.target as HTMLImageElement;
                     img.onerror = null; // Prevent infinite loop
                     img.src = "/images/resources/7.png"; // Fallback PNG
-                    }}
+                  }}
                   alt="Business woman working on a computer"
                   className="mb-4 w-full rounded-lg"
                 />
@@ -92,7 +99,7 @@ const GuideVirtualAssistant = () => {
               </Card>
 
               <div className="mt-4 flex flex-col items-center">
-                  <img
+                <img
                   src="/images/logo/new-logo-ready-set.webp"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;
@@ -105,7 +112,7 @@ const GuideVirtualAssistant = () => {
                 <div className="rounded-lg bg-black px-4 py-0 text-white">
                   <p className="text-sm tracking-wider">READY SET GROUP, LLC</p>
                 </div>
-                </div>
+              </div>
 
               <div className="space-y-4">
                 <button
@@ -119,6 +126,7 @@ const GuideVirtualAssistant = () => {
                   isOpen={isDownloadOpen}
                   onClose={() => setIsDownloadOpen(false)}
                   title={guideTitle}
+                  downloadUrl={`/downloads/how-to-hire-the-right-virtual-assistant.pdf`} // Adjust this path to where your PDF is actually stored
                 />
 
                 <div className="flex justify-center">

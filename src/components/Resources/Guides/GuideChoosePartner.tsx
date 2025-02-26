@@ -12,7 +12,8 @@ const GuideChoosePartner = () => {
   const calendarUrl =
     "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true";
 
-  const guideTitle = "The Complete Guide to Choosing the Right Delivery Partner";
+  const guideTitle =
+    "The Complete Guide to Choosing the Right Delivery Partner";
 
   return (
     <div className="min-h-screen p-6 pt-32">
@@ -20,9 +21,7 @@ const GuideChoosePartner = () => {
         <section className="rounded-lg bg-white p-8 shadow-lg">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
-              <h2 className="text-4xl font-bold text-gray-800">
-                {guideTitle}
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-800">{guideTitle}</h2>
               <h3 className="text-xl text-gray-600">A Strategic Approach</h3>
 
               <p className="text-gray-600">
@@ -99,19 +98,19 @@ const GuideChoosePartner = () => {
               </div>
 
               <p className="text-gray-600">
-              If you found this guide helpful, share it with your network or
-               schedule a consultation call with us. Ready to take the next
-              step in optimizing your delivery operations? Contact{" "}
-             <a 
-                href="/logistics"
-                rel="noopener noreferrer"
-                className="font-bold text-blue-500 underline hover:text-blue-700"
-  >
-                 Ready Set Group
-               </a>{" "}
-                 now!
-                </p>
-                </div>
+                If you found this guide helpful, share it with your network or
+                schedule a consultation call with us. Ready to take the next
+                step in optimizing your delivery operations? Contact{" "}
+                <a
+                  href="/logistics"
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-500 underline hover:text-blue-700"
+                >
+                  Ready Set Group
+                </a>{" "}
+                now!
+              </p>
+            </div>
 
             <div className="space-y-6">
               <Card className="rounded-lg bg-yellow-400 p-6">
@@ -121,7 +120,7 @@ const GuideChoosePartner = () => {
                     const img = e.target as HTMLImageElement;
                     img.onerror = null; // Prevent infinite loop
                     img.src = "/images/resources/3.png"; // Fallback PNG
-                    }}
+                  }}
                   alt="A person handing a bag to another person"
                   className="mb-4 w-full rounded-lg"
                 />
@@ -135,7 +134,7 @@ const GuideChoosePartner = () => {
               </Card>
 
               <div className="mt-4 flex flex-col items-center">
-                  <img
+                <img
                   src="/images/logo/new-logo-ready-set.webp"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;
@@ -148,7 +147,7 @@ const GuideChoosePartner = () => {
                 <div className="rounded-lg bg-black px-4 py-0 text-white">
                   <p className="text-sm tracking-wider">READY SET GROUP, LLC</p>
                 </div>
-                </div>
+              </div>
 
               <div className="space-y-4">
                 <button
@@ -162,6 +161,7 @@ const GuideChoosePartner = () => {
                   isOpen={isDownloadOpen}
                   onClose={() => setIsDownloadOpen(false)}
                   title={guideTitle}
+                  downloadUrl="/path/to/your/guide.pdf" // Add this line with the actual path to your download
                 />
 
                 {/* AppointmentDialog */}
@@ -181,7 +181,6 @@ const GuideChoosePartner = () => {
         </section>
       </div>
     </div>
-
   );
 };
 
