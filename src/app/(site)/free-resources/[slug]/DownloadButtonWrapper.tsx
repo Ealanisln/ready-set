@@ -32,12 +32,12 @@ export function DownloadButtonWrapper({
   
   return (
     <div className="mt-6 text-center">
-      <button
-        onClick={() => setIsDownloadOpen(true)}
-        className="inline-block px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg transition duration-200"
-      >
-        Download Guide
-      </button>
+    <button
+      onClick={() => setIsDownloadOpen(true)}
+      className="w-[270px] rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-yellow-500"
+    >
+      Download Guide
+    </button>
       
       <DownloadPopup
         isOpen={isDownloadOpen}

@@ -7,7 +7,7 @@ import { getGuides } from "@/sanity/lib/queries"; // Import your data fetching f
 import Image from "next/image";
 
 const FreeResourcesPage = async () => {
-  const learnMore = await getGuides(); // Fetch guides from Sanity or your data source
+  const guides = await getGuides(); // Fetch guides from Sanity or your data source
 
   return (
     <div className="container mx-auto px-4 py-16 pt-36">
@@ -29,7 +29,7 @@ const FreeResourcesPage = async () => {
       
       <div className="-mx-4 flex flex-wrap items-center">
         <div className="w-full px-4">
-          <ResourcesGrid guides={learnMore} basePath="free-resources" />
+          <ResourcesGrid guides={guides} basePath="free-resources" />
           <Separator className="my-8 bg-gray-200" />
           <NewsletterForm />
         </div>
