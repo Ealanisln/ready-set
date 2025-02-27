@@ -46,12 +46,12 @@ const ResourcesGrid = ({ guides, basePath }: ResourcesGridProps) => {
             <p className="text-gray-700">{guide.subtitle}</p>
           )}
           {guide.category && (
-            <div className="mt-3">
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800">
-                {guide.category.title}
-              </span>
-            </div>
-          )}
+  <div className="mt-3">
+    <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm text-gray-800">
+      Learn More
+    </span>
+  </div>
+)}
         </Link>
       ))}
     </div>
