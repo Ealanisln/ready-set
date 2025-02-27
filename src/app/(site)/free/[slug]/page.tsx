@@ -17,7 +17,6 @@ const guideQuery = `*[_type == "guide" && slug.current == $slug][0] {
   introduction,
   mainContent,
   listSections,
-  conclusion,
   callToAction,
   coverImage,
   calendarUrl,

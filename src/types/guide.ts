@@ -57,7 +57,6 @@ export interface GuideDocument {
   introduction: PortableTextBlock[];
   mainContent?: MainContentSection[];
   listSections?: ListSection[];
-  conclusion?: PortableTextBlock[];
   callToAction?: string;
   coverImage: Image;
   calendarUrl: string;

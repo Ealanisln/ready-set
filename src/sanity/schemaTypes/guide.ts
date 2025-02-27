@@ -131,12 +131,6 @@ export default defineType({
       }]
     }),
     defineField({
-      name: 'conclusion',
-      title: 'Conclusion Paragraphs',
-      type: 'array',
-      of: [{type: 'block'}]
-    }),
-    defineField({
       name: 'callToAction',
       title: 'Call to Action',
       type: 'text'

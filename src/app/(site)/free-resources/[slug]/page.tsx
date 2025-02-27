@@ -32,7 +32,6 @@ const guideQuery = `*[_type == "guide" && slug.current == $slug][0]{
   coverImage,
   mainContent,
   listSections,
-  conclusion,
   callToAction,
   calendarUrl,
   consultationCta,
@@ -65,7 +64,6 @@ interface GuideDocument {
       content: string;
     }>;
   }>;
-  conclusion?: PortableTextBlock[];
   callToAction?: string;
   calendarUrl?: string;
   consultationCta?: string;
@@ -256,20 +254,6 @@ export default async function GuidePage({
                         )}
                       </div>
                     ))}
-                  </div>
-                )}
-                
-                {/* Conclusion */}
-                {guide.conclusion && (
-                  <div className="space-y-3 mt-8">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      Conclusion
-                    </h2>
-                    <div className="text-gray-600">
-                      <div dangerouslySetInnerHTML={{ 
-                        __html: renderPortableText(guide.conclusion)
-                      }} />
-                    </div>
                   </div>
                 )}
                 
