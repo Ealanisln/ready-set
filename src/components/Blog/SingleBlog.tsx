@@ -112,7 +112,7 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
 
      {/* Información y controles de paginación */}
       {totalPages > 1 && (
-  <div className="mt-8 flex flex-col items-center">
+  <div className="mt-20 mb-12 flex flex-col items-center">
     <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
       Showing {start} to {end} of {total} blogs
     </div>
