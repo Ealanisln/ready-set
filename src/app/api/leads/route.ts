@@ -22,6 +22,7 @@ const FormSchema = z.object({
   industry: z.string(),
   newsletterConsent: z.boolean(),
   resourceSlug: z.string().optional(),
+  resourceUrl: z.string().optional(), // Add resource URL
 });
 
 export async function POST(req: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const validatedData = FormSchema.parse(data);
 
-    // Store lead in database
+    // Store lead in database (only the fields that exist in the model)
     const lead = await prisma.lead_capture.upsert({
       where: {
         email: validatedData.email,
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
         last_name: validatedData.lastName,
         industry: validatedData.industry,
         newsletter_consent: validatedData.newsletterConsent,
+        // Remove the fields that don't exist in the database schema
       },
       create: {
         first_name: validatedData.firstName,
@@ -46,6 +48,7 @@ export async function POST(req: NextRequest) {
         email: validatedData.email,
         industry: validatedData.industry,
         newsletter_consent: validatedData.newsletterConsent,
+        // Remove the fields that don't exist in the database schema
       },
     });
 
@@ -97,7 +100,8 @@ export async function POST(req: NextRequest) {
         await sendDownloadEmail(
           validatedData.email,
           validatedData.firstName,
-          validatedData.resourceSlug
+          validatedData.resourceSlug,
+          validatedData.resourceUrl // Pass the resource URL to the email function
         );
       } catch (error) {
         // Log the error but don't throw it

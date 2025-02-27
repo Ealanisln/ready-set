@@ -1,4 +1,4 @@
-// src/components/Resources/ui/DownloadPopup.tsx
+// src/components/ui/DownloadPopup.tsx
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { generateSlug } from "@/lib/create-slug";
@@ -9,7 +9,15 @@ interface DownloadPopupProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  downloadUrl: string;
+  downloadUrl?: string;
+  downloadFiles?: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string;
+      originalFilename: string;
+    }
+  }>;
   onSuccess?: () => void;
 }
 
@@ -18,14 +26,33 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
   onClose,
   title,
   downloadUrl,
+  downloadFiles,
   onSuccess,
 }) => {
   const isClosing = useRef(false);
 
+  // Determine the primary download URL (prefer Sanity files if available)
+  const primaryDownloadUrl = downloadFiles && downloadFiles.length > 0 
+    ? downloadFiles[0].asset.url 
+    : downloadUrl;
+
   const handleDownloadSuccess = () => {
     if (isClosing.current) return;
-    // Trigger the download
-    window.open(downloadUrl, "_blank");
+    
+    // If we have a direct download URL or a single file, open it
+    if (primaryDownloadUrl) {
+      window.open(primaryDownloadUrl, "_blank");
+    }
+    
+    // Multi-file download support (for Sanity files)
+    if (downloadFiles && downloadFiles.length > 1) {
+      // Open additional files
+      downloadFiles.slice(1).forEach(file => {
+        setTimeout(() => {
+          window.open(file.asset.url, "_blank");
+        }, 500); // Small delay between downloads
+      });
+    }
 
     setTimeout(() => {
       onSuccess?.();
@@ -52,7 +79,7 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
           resourceSlug={generateSlug(title)}
           resourceTitle={title}
           onSuccess={handleDownloadSuccess}
-          downloadUrl={downloadUrl}
+          downloadUrl={primaryDownloadUrl || ""}
         />
       </DialogContent>
     </Dialog>

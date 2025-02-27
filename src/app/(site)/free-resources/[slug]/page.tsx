@@ -6,6 +6,7 @@ import React from "react";
 import Image from "next/image";
 import Logo from "@/components/ui/logo";
 import type { Metadata } from "next";
+import { DownloadButtonWrapper } from "./DownloadButtonWrapper";
 export const revalidate = 30;
 
 // Define types for Portable Text blocks
@@ -75,7 +76,7 @@ interface GuideDocument {
       _id: string;
       url: string;
       originalFilename: string;
-    }
+    };
   }>;
   seo?: {
     metaTitle?: string;
@@ -107,20 +108,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const guide = await getGuide(slug);
-  
+
   if (!guide) {
     return {
       title: "Guide Not Found",
     };
   }
-  
+
   const { title, seo } = guide;
   const ogImage = seo?.openGraph?.image
     ? urlFor(seo.openGraph.image).url()
     : guide.coverImage
       ? urlFor(guide.coverImage).url()
       : undefined;
-      
+
   return {
     title: seo?.metaTitle ?? `${title} | Ready Set LLC`,
     description: seo?.metaDescription ?? title,
@@ -130,18 +131,24 @@ export async function generateMetadata({
       images: ogImage ? [{ url: ogImage }] : undefined,
       siteName: seo?.openGraph?.siteName ?? "Ready Set LLC",
       url: seo?.openGraph?.url,
-    }
+    },
   };
 }
 
 // Helper function to render portable text blocks
-const renderPortableText = (blocks: PortableTextBlock[] | undefined): string => {
+const renderPortableText = (
+  blocks: PortableTextBlock[] | undefined,
+): string => {
   if (!blocks || !Array.isArray(blocks)) return "";
-  
-  return blocks.map(block => {
-    if (!block.children) return "";
-    return block.children.map((child: PortableTextSpan) => child.text || "").join("");
-  }).join("<br/>");
+
+  return blocks
+    .map((block) => {
+      if (!block.children) return "";
+      return block.children
+        .map((child: PortableTextSpan) => child.text || "")
+        .join("");
+    })
+    .join("<br/>");
 };
 
 export default async function GuidePage({
@@ -151,46 +158,48 @@ export default async function GuidePage({
 }) {
   const { slug } = await params;
   const guide = await getGuide(slug);
-  
+
   if (!guide) notFound();
-  
+
   // Get the image URL from coverImage
-  const imageUrl = guide.coverImage ? urlFor(guide.coverImage).url() : 
-    "https://placehold.co/600x400/FCD34D/333333?text=Guide";
-  
+  const imageUrl = guide.coverImage
+    ? urlFor(guide.coverImage).url()
+    : "https://placehold.co/600x400/FCD34D/333333?text=Guide";
+
   // Create downloadable files section if files exist
-  const hasDownloadableFiles = guide.downloadableFiles && guide.downloadableFiles.length > 0;
-  
+  const hasDownloadableFiles =
+    guide.downloadableFiles && guide.downloadableFiles.length > 0;
+
   // Function to handle multiple file types with appropriate icons
   const getFileIcon = (filename: string): string => {
-    const extension = filename.split('.').pop()?.toLowerCase();
-    
-    switch(extension) {
-      case 'pdf':
-        return '📄';
-      case 'doc':
-      case 'docx':
-        return '📝';
-      case 'xls':
-      case 'xlsx':
-        return '📊';
-      case 'ppt':
-      case 'pptx':
-        return '📑';
-      case 'zip':
-        return '🗜️';
+    const extension = filename.split(".").pop()?.toLowerCase();
+
+    switch (extension) {
+      case "pdf":
+        return "📄";
+      case "doc":
+      case "docx":
+        return "📝";
+      case "xls":
+      case "xlsx":
+        return "📊";
+      case "ppt":
+      case "pptx":
+        return "📑";
+      case "zip":
+        return "🗜️";
       default:
-        return '📄';
+        return "📄";
     }
   };
-  
+
   return (
     <div className="min-h-screen">
       {/* Main content section */}
-      <div className="pt-32 pb-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="grid md:grid-cols-2 gap-8">
+      <div className="px-6 pb-12 pt-32">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-lg bg-white p-8 shadow-lg">
+            <div className="grid gap-8 md:grid-cols-2">
               {/* Left Column - Content */}
               <div className="space-y-6">
                 <h1 className="text-4xl font-bold text-gray-800">
@@ -199,19 +208,21 @@ export default async function GuidePage({
                 <h2 className="text-xl text-gray-600">
                   {guide.subtitle || "A Business Owner's Guide"}
                 </h2>
-                
+
                 {/* Introduction */}
                 {guide.introduction && (
                   <div className="text-gray-600">
-                    <div dangerouslySetInnerHTML={{ 
-                      __html: renderPortableText(guide.introduction)
-                    }} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: renderPortableText(guide.introduction),
+                      }}
+                    />
                   </div>
                 )}
-                
+
                 {/* Main Content Sections */}
                 {guide.mainContent && guide.mainContent.length > 0 && (
-                  <div className="space-y-6 mt-8">
+                  <div className="mt-8 space-y-6">
                     {guide.mainContent.map((section, index) => (
                       <div key={index} className="space-y-3">
                         <h2 className="text-2xl font-bold text-gray-800">
@@ -219,31 +230,36 @@ export default async function GuidePage({
                         </h2>
                         {section.content && (
                           <div className="text-gray-600">
-                            <div dangerouslySetInnerHTML={{ 
-                              __html: renderPortableText(section.content)
-                            }} />
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: renderPortableText(section.content),
+                              }}
+                            />
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 )}
-                
+
                 {/* List Sections */}
                 {guide.listSections && guide.listSections.length > 0 && (
-                  <div className="space-y-6 mt-8">
+                  <div className="mt-8 space-y-6">
                     {guide.listSections.map((section, index) => (
                       <div key={index} className="space-y-3">
                         <h2 className="text-2xl font-bold text-gray-800">
                           {section.title}
                         </h2>
                         {section.items && section.items.length > 0 && (
-                          <ul className="space-y-2 text-gray-600 list-disc pl-5">
+                          <ul className="list-disc space-y-2 pl-5 text-gray-600">
                             {section.items.map((item, itemIndex) => (
                               <li key={itemIndex}>
                                 {item.title ? (
                                   <>
-                                    <span className="font-bold">{item.title}:</span> {item.content}
+                                    <span className="font-bold">
+                                      {item.title}:
+                                    </span>{" "}
+                                    {item.content}
                                   </>
                                 ) : (
                                   item.content
@@ -256,48 +272,18 @@ export default async function GuidePage({
                     ))}
                   </div>
                 )}
-                
-                {/* Downloadable Files Section */}
-                {hasDownloadableFiles && (
-                  <div className="space-y-4 mt-8" id="download">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      Downloadable Resources
-                    </h2>
-                    <div className="space-y-3">
-                      {guide.downloadableFiles?.map((file) => (
-                        <div key={file._key} className="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="mr-4 text-2xl">
-                            {getFileIcon(file.asset.originalFilename)}
-                          </div>
-                          <div className="flex-grow">
-                            <p className="font-medium text-gray-800">{file.asset.originalFilename}</p>
-                          </div>
-                          <a 
-                            href={file.asset.url}
-                            download={file.asset.originalFilename}
-                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition duration-200"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Download
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
+
                 {/* Call to action */}
                 {guide.callToAction && (
-                  <div className="space-y-4 mt-8">
-                    <p className="text-gray-700 font-medium">
+                  <div className="mt-8 space-y-4">
+                    <p className="font-medium text-gray-700">
                       {guide.callToAction}
                     </p>
                     <p className="text-gray-600">
-                      If you found this guide helpful, share it with your network or
-                      schedule a consultation call with us. Ready to take the next
-                      step? Contact{" "}
-                      <a 
+                      If you found this guide helpful, share it with your
+                      network or schedule a consultation call with us. Ready to
+                      take the next step? Contact{" "}
+                      <a
                         href="/contact"
                         className="font-bold text-blue-500 underline hover:text-blue-700"
                       >
@@ -308,19 +294,19 @@ export default async function GuidePage({
                   </div>
                 )}
               </div>
-              
+
               {/* Right Column - Image and Card */}
               <div className="space-y-6">
                 {/* Resource Card with Image */}
-                <div className="bg-yellow-400 rounded-lg overflow-hidden">
+                <div className="overflow-hidden rounded-lg bg-yellow-400">
                   <div className="relative">
                     <img
                       src={imageUrl}
                       alt={guide.title}
-                      className="w-full h-auto object-cover"
+                      className="h-auto w-full object-cover"
                     />
                     <div className="p-6">
-                      <h2 className="text-2xl font-bold text-center mb-2">
+                      <h2 className="mb-2 text-center text-2xl font-bold">
                         {guide.title}
                       </h2>
                       <div className="mx-auto my-4 h-px w-32 bg-black"></div>
@@ -330,22 +316,18 @@ export default async function GuidePage({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Logo */}
                 <Logo />
-                
-                {/* Download Button - Now scrolls to the download section */}
+
+                {/* Download Button - Using client component wrapper */}
                 {hasDownloadableFiles && (
-                  <div className="mt-6 text-center">
-                    <a
-                      href="#download"
-                      className="inline-block px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg transition duration-200"
-                    >
-                      Download Guide
-                    </a>
-                  </div>
+                  <DownloadButtonWrapper
+                    files={guide.downloadableFiles}
+                    guideTitle={guide.title}
+                  />
                 )}
-                
+
                 {/* Consultation button with custom text */}
                 {guide.calendarUrl && (
                   <div className="mt-4 text-center">
@@ -353,7 +335,7 @@ export default async function GuidePage({
                       href={guide.calendarUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-200"
+                      className="inline-block rounded-lg bg-blue-600 px-6 py-3 font-bold text-white transition duration-200 hover:bg-blue-700"
                     >
                       {guide.consultationCta || "Schedule a Consultation"}
                     </a>
@@ -364,7 +346,7 @@ export default async function GuidePage({
           </div>
         </div>
       </div>
-      
+
       {/* Back button */}
       <div className="container mx-auto px-4 py-4">
         <BackArrow />
@@ -378,7 +360,7 @@ export async function generateStaticParams() {
     const guides = await client.fetch(`*[_type == "guide"]{
       "slug": slug.current
     }`);
-    
+
     return guides.map((guide: { slug: string }) => ({
       slug: guide.slug,
     }));

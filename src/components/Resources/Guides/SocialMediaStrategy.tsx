@@ -1,3 +1,5 @@
+// Old behaviour: The user can download a PDF file by clicking the "Download Now" button.
+
 "use client";
 
 import React, { useState } from 'react';

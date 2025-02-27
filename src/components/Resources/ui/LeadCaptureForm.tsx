@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { resources } from "@/components/Resources/Data/Resources";
 import { generateSlug } from "@/lib/create-slug";
 
 interface FormData {
@@ -13,19 +12,21 @@ interface FormData {
   industry: string;
   newsletterConsent: boolean;
   resourceSlug: string;
+  resourceUrl?: string; // Add URL to store in the database
 }
 
 interface LeadCaptureFormProps {
   resourceSlug: string;
   resourceTitle: string;
   onSuccess?: () => void;
-  downloadUrl: string;
+  downloadUrl?: string;
 }
 
 const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
   onSuccess,
   resourceSlug,
   resourceTitle,
+  downloadUrl,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -38,7 +39,16 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
     industry: "",
     newsletterConsent: true,
     resourceSlug: resourceSlug,
+    resourceUrl: downloadUrl,
   });
+
+  // Update resourceUrl if downloadUrl changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      resourceUrl: downloadUrl
+    }));
+  }, [downloadUrl]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,19 +59,16 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
   };
 
   const triggerDownload = React.useCallback(() => {
-    const resource = resources.find(
-      (r) => generateSlug(r.title) === resourceSlug,
-    );
-    if (resource?.downloadUrl) {
+    if (downloadUrl) {
       const link = document.createElement("a");
-      link.href = resource.downloadUrl;
+      link.href = downloadUrl;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
-  }, [resourceSlug]);
+  }, [downloadUrl]);
 
   useEffect(() => {
     if (isSubmitted) {
@@ -88,10 +95,11 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
           industry: "",
           newsletterConsent: true,
           resourceSlug: resourceSlug,
+          resourceUrl: downloadUrl,
         });
       }
     };
-  }, [resourceSlug, isSubmitted]);
+  }, [resourceSlug, isSubmitted, downloadUrl]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,11 +115,10 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
         body: JSON.stringify(formData),
       });
 
-      // Añadir estos logs
       console.log("Response status:", response.status);
       console.log("Response headers:", response.headers);
 
-      // Si la respuesta no es JSON, podemos verla como texto
+      // If the response is not JSON, we can see it as text
       if (!response.ok) {
         const textResponse = await response.text();
         console.log("Error response text:", textResponse);
@@ -126,6 +133,8 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
       console.error("Detailed error:", err);
       setError(err instanceof Error ? err.message : "Failed to submit form");
       setIsSubmitted(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

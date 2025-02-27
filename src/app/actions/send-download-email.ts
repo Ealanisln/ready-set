@@ -35,6 +35,7 @@ export const sendDownloadEmail = async (
   userEmail: string,
   firstName: string,
   resourceSlug: ResourceSlug,
+  resourceUrl?: string, // Add optional resourceUrl parameter
 ) => {
   try {
     // Input validation
@@ -43,8 +44,15 @@ export const sendDownloadEmail = async (
     }
 
     const resource = RESOURCE_MAP[resourceSlug];
-    if (!resource || !resource.downloadUrl) {
+    if (!resource && !resourceUrl) {
       throw new Error(`Resource not found or missing download URL: ${resourceSlug}`);
+    }
+
+    // Use the provided resourceUrl if available, otherwise fall back to the resource's downloadUrl
+    const downloadUrl = resourceUrl || (resource?.downloadUrl);
+    
+    if (!downloadUrl) {
+      throw new Error(`No download URL available for resource: ${resourceSlug}`);
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
@@ -57,6 +65,9 @@ export const sendDownloadEmail = async (
       fromEmail: FROM_EMAIL,
       toEmail: userEmail,
     });
+
+    // Get the title from the resource map or use a default if not found
+    const resourceTitle = resource?.title || "Resource";
 
     // Construct the email HTML
     const emailHtml = `<!DOCTYPE html>
@@ -96,12 +107,12 @@ export const sendDownloadEmail = async (
             <td style="padding: 40px;">
               <h1 style="margin: 0 0 20px; color: #343434; font-size: 24px; font-weight: bold;">Hi ${firstName}!</h1>
               <p style="margin: 0 0 20px; font-size: 16px; color: #343434;">
-                Thank you for downloading ${resource.title}. You can access your guide here:
+                Thank you for downloading ${resourceTitle}. You can access your guide here:
               </p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" style="padding: 20px 0;">
-                    <a href="${resource.downloadUrl}" style="display: inline-block; padding: 14px 30px; background-color: #fbd113; color: #343434; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center;">Download ${resource.title}</a>
+                    <a href="${downloadUrl}" style="display: inline-block; padding: 14px 30px; background-color: #fbd113; color: #343434; text-decoration: none; border-radius: 4px; font-weight: bold; text-align: center;">Download ${resourceTitle}</a>
                   </td>
                 </tr>
               </table>
