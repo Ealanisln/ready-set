@@ -73,8 +73,10 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
         }
       }}
     >
-      <DialogContent>
-        <DialogTitle>{`Download ${title}`}</DialogTitle>
+      <DialogContent className="bg-background bg-white rounded-lg border-none shadow-xl w-full max-w-md">
+        <DialogTitle className="text-center text-xl font-bold">
+          {`Download ${title}`}
+        </DialogTitle>
         <LeadCaptureForm
           resourceSlug={generateSlug(title)}
           resourceTitle={title}
