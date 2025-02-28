@@ -277,7 +277,7 @@ export default async function GuidePage({
                 {guide.callToAction && (
                   <div className="mt-8 space-y-4">
                     <p className="font-medium text-gray-700">
-                      {guide.callToAction}
+                      
                     </p>
                     <p className="text-gray-600">
                       If you found this guide helpful, share it with your
