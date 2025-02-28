@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import AddressModal from "./AddressModal";
 interface Address {
   id: string;
   county: string;
-  name: string;  // Added name field
+  name: string;
   street1: string;
   street2: string | null;
   city: string;
@@ -31,12 +31,39 @@ const UserAddresses: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
+  const [user, setUser] = useState<any>(null);
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const supabase = createClient();
+
+  // Get user session from Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!error && user) {
+        setUser(user);
+      }
+    };
+
+    getUser();
+
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setUser(session.user);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
+
+    // Clean up subscription
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const fetchAddresses = useCallback(async () => {
-    if (!session) {
+    if (!user) {
       setIsLoading(false);
       return;
     }
@@ -55,7 +82,7 @@ const UserAddresses: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [user]);
 
   useEffect(() => {
     fetchAddresses();
@@ -103,7 +130,7 @@ const UserAddresses: React.FC = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
-  if (!session) return <div>Please sign in to view addresses.</div>;
+  if (!user) return <div>Please sign in to view addresses.</div>;
 
   return (
     <div className="pt-8">
@@ -115,7 +142,7 @@ const UserAddresses: React.FC = () => {
         <TableCaption>A list of your addresses.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead> {/* Added Name column */}
+            <TableHead>Name</TableHead>
             <TableHead>County</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Street</TableHead>
@@ -128,7 +155,7 @@ const UserAddresses: React.FC = () => {
         <TableBody>
           {addresses.map((address) => (
             <TableRow key={address.id}>
-              <TableCell>{address.name}</TableCell> {/* Added Name cell */}
+              <TableCell>{address.name}</TableCell>
               <TableCell>{address.county}</TableCell>
               <TableCell>{address.isRestaurant ? 'Restaurant' : 'Address'}</TableCell>
               <TableCell>{`${address.street1}${address.street2 ? `, ${address.street2}` : ""}`}</TableCell>

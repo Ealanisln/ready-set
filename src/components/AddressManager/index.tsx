@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
 import AddAddressForm from "./AddAddressForm";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export interface Address {
   id: string;
@@ -30,18 +30,45 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   onAddressesLoaded,
   onAddressSelected,
 }) => {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<any>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [allowedCounties, setAllowedCounties] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [addressesLoaded, setAddressesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const supabase = createClient();
 
   const { control } = useForm();
 
+  // Get user from Supabase
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!error && user) {
+        setUser(user);
+      }
+    };
+
+    getUser();
+
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setUser(session.user);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
+
+    // Clean up subscription
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const fetchAddresses = useCallback(async () => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return;
     }
     if (addressesLoaded) {
@@ -73,10 +100,10 @@ const AddressManager: React.FC<AddressManagerProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id, addressesLoaded, onAddressesLoaded]);
+  }, [user?.id, addressesLoaded, onAddressesLoaded]);
 
   const fetchAllowedCounties = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
     try {
       const response = await fetch(`/api/user-counties`);
@@ -90,18 +117,18 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       console.error("Error fetching allowed counties:", error);
       setError("Failed to load counties. Please try again later.");
     }
-  }, [session?.user?.id]);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       fetchAddresses();
       fetchAllowedCounties();
     }
-  }, [session?.user?.id, fetchAddresses, fetchAllowedCounties]);
+  }, [user?.id, fetchAddresses, fetchAllowedCounties]);
 
   const handleAddAddress = useCallback(
     async (newAddress: Partial<Address>) => {
-      if (!session?.user?.id) return;
+      if (!user?.id) return;
 
       try {
         const response = await fetch("/api/addresses", {
@@ -120,7 +147,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         console.error("Error adding address:", error);
       }
     },
-    [session?.user?.id, fetchAddresses],
+    [user?.id, fetchAddresses],
   );
 
   return (

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { sendOrderEmail } from "@/utils/emailSender";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -18,9 +17,13 @@ type OnDemandOrder = Prisma.on_demandGetPayload<{
 type Order = CateringOrder | OnDemandOrder;
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // Create a Supabase client for server-side authentication
+  const supabase = await createClient();
 
-  if (!session || !session.user?.id) {
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -72,13 +75,19 @@ export async function GET(req: NextRequest) {
       { message: "Error fetching orders" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // Create a Supabase client for server-side authentication
+  const supabase = await createClient();
 
-  if (!session || !session.user?.id) {
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -190,7 +199,7 @@ export async function POST(req: NextRequest) {
             parkingLoading: address.parkingLoading || null,
             isRestaurant: address.isRestaurant || false,
             isShared: address.isShared || false,
-            createdBy: session.user.id,
+            createdBy: user.id,
           },
         });
         addressId = address.id;
@@ -207,7 +216,7 @@ export async function POST(req: NextRequest) {
             parkingLoading: address.parkingLoading || null,
             isRestaurant: address.isRestaurant || false,
             isShared: address.isShared || false,
-            createdBy: session.user.id,
+            createdBy: user.id,
           },
         });
         addressId = newAddress.id;
@@ -229,7 +238,7 @@ export async function POST(req: NextRequest) {
             parkingLoading: delivery_address.parkingLoading || null,
             isRestaurant: delivery_address.isRestaurant || false,
             isShared: delivery_address.isShared || false,
-            createdBy: session.user.id,
+            createdBy: user.id,
           },
         });
         deliveryAddressId = delivery_address.id;
@@ -246,7 +255,7 @@ export async function POST(req: NextRequest) {
             parkingLoading: delivery_address.parkingLoading || null,
             isRestaurant: delivery_address.isRestaurant || false,
             isShared: delivery_address.isShared || false,
-            createdBy: session.user.id,
+            createdBy: user.id,
           },
         });
         deliveryAddressId = newDeliveryAddress.id;
@@ -256,7 +265,7 @@ export async function POST(req: NextRequest) {
       if (order_type === "catering") {
         newOrder = await txPrisma.catering_request.create({
           data: {
-            user_id: session.user.id,
+            user_id: user.id,
             address_id: addressId,
             delivery_address_id: deliveryAddressId,
             brokerage,
@@ -290,7 +299,7 @@ export async function POST(req: NextRequest) {
       } else if (order_type === "on_demand") {
         newOrder = await txPrisma.on_demand.create({
           data: {
-            user_id: session.user.id,
+            user_id: user.id,
             address_id: addressId,
             delivery_address_id: deliveryAddressId,
             order_number,
@@ -328,7 +337,6 @@ export async function POST(req: NextRequest) {
       }
 
       // Send email notification
-      // In your API route:
       await sendOrderEmail({
         ...newOrder,
         order_type, 
@@ -365,5 +373,7 @@ export async function POST(req: NextRequest) {
       { message: "Error creating order" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

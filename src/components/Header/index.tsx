@@ -12,6 +12,7 @@ import menuData, {
   driverMenuItem,
 } from "./menuData";
 import MobileMenu from "./MobileMenu";
+import toast from "react-hot-toast";
 
 // Types
 type UserType = "client" | "admin" | "super_admin" | "vendor" | "driver" | undefined;
@@ -47,6 +48,7 @@ interface AuthButtonsProps {
   isVirtualAssistantPage: boolean;
   isHomePage: boolean;
   onSignOut: () => Promise<void>;
+  isSigningOut: boolean;
 }
 
 // Logo Component
@@ -138,6 +140,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
   isVirtualAssistantPage,
   isHomePage,
   onSignOut,
+  isSigningOut
 }) => {
   if (user) {
     return (
@@ -158,16 +161,18 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
         {isVirtualAssistantPage || isHomePage ? (
           <button
             onClick={onSignOut}
+            disabled={isSigningOut}
             className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white md:block"
           >
-            Sign Out
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
           </button>
         ) : (
           <button
             onClick={onSignOut}
+            disabled={isSigningOut}
             className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark md:block"
           >
-            Sign Out
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
           </button>
         )}
       </>
@@ -179,7 +184,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
       {pathUrl !== "/" || isVirtualAssistantPage ? (
         <div className="flex items-center gap-3">
           <Link
-            href="/signin"
+            href="/sign-in"
             className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
               ${sticky 
                 ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
@@ -192,7 +197,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
             Sign In
           </Link>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="hidden rounded-lg bg-amber-400 px-6 py-3 text-base font-medium text-black duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:hover:bg-white/20 lg:block"
           >
             Sign Up
@@ -201,7 +206,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
       ) : (
         <>
           <Link
-            href="/signin"
+            href="/sign-in"
             className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
               ${sticky 
                 ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
@@ -212,7 +217,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
             Sign In
           </Link>
           <Link
-            href="/signup"
+            href="/sign-up"
             className={`hidden rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out md:block ${
               sticky
                 ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
@@ -236,6 +241,7 @@ const Header: React.FC = () => {
   const [sticky, setSticky] = useState(false);
   const [openIndex, setOpenIndex] = useState(-1);
   const [user, setUser] = useState<User | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isVirtualAssistantPage = pathUrl === "/va";
   const isHomePage = pathUrl === "/";
@@ -250,7 +256,7 @@ const Header: React.FC = () => {
       if (supabaseUser) {
         // Fetch additional user data from your profiles table
         const { data: profile } = await supabase
-          .from('profiles')
+          .from('users') // Change this if your table is called 'profiles'
           .select('name, type')
           .eq('id', supabaseUser.id)
           .single();
@@ -271,7 +277,7 @@ const Header: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         const { data: profile } = await supabase
-          .from('profiles')
+          .from('users') // Change this if your table is called 'profiles'
           .select('name, type')
           .eq('id', session.user.id)
           .single();
@@ -292,11 +298,23 @@ const Header: React.FC = () => {
   }, [supabase]);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error.message);
-    } else {
-      router.push('/');
+    try {
+      setIsSigningOut(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error.message);
+        toast.error("Failed to sign out. Please try again.");
+      } else {
+        toast.success("Signed out successfully");
+        router.push('/');
+        router.refresh(); // Refresh to update auth state across the app
+      }
+    } catch (error: any) {
+      console.error('Error in sign out process:', error);
+      toast.error(error.message || "An error occurred while signing out");
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
@@ -439,6 +457,7 @@ const Header: React.FC = () => {
                 isVirtualAssistantPage={isVirtualAssistantPage}
                 isHomePage={isHomePage}
                 onSignOut={handleSignOut}
+                isSigningOut={isSigningOut}
               />
             </div>
           </div>

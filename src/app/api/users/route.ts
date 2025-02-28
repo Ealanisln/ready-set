@@ -13,6 +13,8 @@ export async function GET() {
     // Get user session from Supabase
     const { data: { user } } = await supabase.auth.getUser();
 
+    console.log("Auth User ID:", user?.id);
+
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -20,12 +22,17 @@ export async function GET() {
     // Get the user's type from your database
     const userData = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { type: true }
+      select: { type: true, id: true }
     });
+
+    console.log("Database User:", userData);
 
     // Check if user is admin or super_admin
     if (userData?.type !== "admin" && userData?.type !== "super_admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ 
+        error: "Forbidden", 
+        userType: userData?.type || "not found" 
+      }, { status: 403 });
     }
 
     const users = await prisma.user.findMany({

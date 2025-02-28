@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -109,27 +110,69 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check for existing user
-    const exist = await prisma.user.findUnique({
+    // Initialize Supabase client
+    const supabase = await createClient();
+
+    // We'll check for existing users in Prisma first
+    // Then we'll handle potential conflicts with Supabase during user creation
+
+    // Check for existing user in Prisma
+    const existInPrisma = await prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
       },
     });
 
-    if (exist) {
+    if (existInPrisma) {
       return NextResponse.json(
-        { error: "User already exists!" },
+        { error: "User already exists in our system!" },
         { status: 400 }
       );
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Prepare user data
-    const userData: Prisma.userCreateInput = {
+    // Create user in Supabase
+    // Note: Supabase will automatically return an error if the email already exists
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.toLowerCase(),
-      password: hashedPassword,
+      password: password,
+      options: {
+        // Set up email confirmation redirect if needed
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        // Include user metadata
+        data: {
+          userType,
+          name: userType === "driver" || userType === "helpdesk"
+            ? (body as DriverFormData | HelpDeskFormData).name
+            : (body as VendorFormData | ClientFormData).contact_name,
+          company: userType !== "driver" && userType !== "helpdesk"
+            ? (body as VendorFormData | ClientFormData).company
+            : "",
+        }
+      }
+    });
+
+    if (authError) {
+      return NextResponse.json(
+        { error: "Failed to create user in authentication system", details: authError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!authData.user) {
+      return NextResponse.json(
+        { error: "Failed to create user account", details: "No user data returned" },
+        { status: 500 }
+      );
+    }
+
+    // Get the Supabase user ID
+    const supabaseUserId = authData.user.id;
+
+    // Prepare user data for Prisma
+    const userData: Prisma.userCreateInput = {
+      id: supabaseUserId, // Use Supabase UUID as the user ID in Prisma
+      email: email.toLowerCase(),
+      password: "", // No need to store the password in Prisma anymore
       contact_number: phoneNumber,
       type: userType as users_type,
       name:
@@ -188,7 +231,7 @@ export async function POST(request: Request) {
       }),
     };
 
-    // Create the user
+    // Create the user in Prisma
     const newUser = await prisma.user.create({
       data: userData,
     });
@@ -206,7 +249,7 @@ export async function POST(request: Request) {
           userType === "vendor" || userType === "client"
             ? (body as VendorFormData | ClientFormData).countiesServed?.[0]
             : undefined,
-          locationNumber: "location_number" in body ? (body as VendorFormData | ClientFormData).location_number : undefined,
+        locationNumber: "location_number" in body ? body.location_number : undefined,
         parkingLoading:
           "parking" in body
             ? (body as VendorFormData | ClientFormData).parking
@@ -226,6 +269,8 @@ export async function POST(request: Request) {
         isDefault: true,
       },
     });
+
+    // No need to update user metadata here since we included it in the signUp options
 
     return NextResponse.json(
       {
@@ -270,5 +315,7 @@ export async function POST(request: Request) {
       { error: "An unexpected error occurred", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

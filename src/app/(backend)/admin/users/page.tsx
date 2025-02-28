@@ -1,11 +1,10 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { BreadcrumbNavigation } from "@/components/Dashboard/UserView/BreadCrumbNavigation";
 import { MainContent } from "@/components/Dashboard/UserView/MainContent";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { createClient } from "@/utils/supabase/client";
 
 interface User {
   id: string;
@@ -19,16 +18,46 @@ interface User {
 }
 
 export default function Users() {
-  const { data: session } = useSession();
+  const supabase = createClient();
   const router = useRouter();
   const { toast } = useToast();
+  const [session, setSession] = useState<any>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
 
+  // Fetch Supabase session
   useEffect(() => {
-    if (session?.user?.type !== 'super_admin') {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      
+      // Set up auth state change listener
+      const { data: authListener } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          setSession(session);
+        }
+      );
+      
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    };
+    
+    fetchSession();
+  }, [supabase]);
+
+  useEffect(() => {
+    // Check if user is authenticated and is a super_admin
+    if (!session) {
+      router.push('/login?redirect=/admin/users');
+      return;
+    }
+    
+    // Check if user has super_admin role in metadata
+    const userType = session.user.user_metadata?.type;
+    if (userType !== 'super_admin') {
       router.push('/');
       return;
     }
@@ -53,9 +82,9 @@ export default function Users() {
         setLoading(false);
       }
     };
-
+    
     fetchUsers();
-  }, [session, router, toast]);
+  }, [session, router, toast, supabase]);
 
   const handleDelete = async (userId: string) => {
     try {

@@ -19,7 +19,7 @@ import VendorClientDetailsCard from "@/components/Dashboard/VendorClientDetailsC
 import toast from "react-hot-toast";
 import { UnsavedChangesAlert } from "@/components/Dashboard/UnsavedChangesAlert";
 import { PasswordChange } from "@/components/Dashboard/AdminView/PasswordChange";
-import { createClient } from "@/utils/supabase/client"; // Import Supabase client
+import { createClient } from "@/utils/supabase/client";
 import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
@@ -252,7 +252,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     <div className="bg-muted/40 flex min-h-screen w-full flex-col pt-24">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Changed from form to div */}
+          <div>
             <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
               <div className="flex items-center gap-4">
                 {hasUnsavedChanges ? (
@@ -302,7 +303,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                       Discard
                     </Button>
                   )}
-                  <Button size="sm">Save User</Button>
+                  {/* Changed to onClick instead of relying on form submission */}
+                  <Button size="sm" onClick={handleSubmit(onSubmit)}>Save User</Button>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -357,15 +359,16 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 md:hidden">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleDiscard}>
                   Discard
                 </Button>
-                <Button size="sm" type="submit">
+                {/* Changed to onClick for mobile view */}
+                <Button size="sm" onClick={handleSubmit(onSubmit)}>
                   Save User
                 </Button>
               </div>
             </div>
-          </form>
+          </div>
         </main>
       </div>
     </div>

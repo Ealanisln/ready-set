@@ -1,18 +1,10 @@
-import React from "react";
+"use client";
+
 import Link from "next/link";
-import { createClient } from '@/utils/supabase/client';
-import { ChevronDown, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from 'next/navigation';
-
-// Types
-type UserType = "client" | "admin" | "super_admin" | "vendor" | "driver" | undefined;
-
-interface User {
-  id: string;
-  name?: string;
-  type?: UserType;
-}
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface MenuItem {
   id: string | number;
@@ -20,6 +12,12 @@ interface MenuItem {
   path?: string;
   newTab?: boolean;
   submenu?: MenuItem[];
+}
+
+interface User {
+  id: string;
+  name?: string;
+  type?: string;
 }
 
 interface MobileMenuProps {
@@ -34,305 +32,6 @@ interface MobileMenuProps {
   getTextColorClasses: () => string;
 }
 
-const DesktopMenu: React.FC<{
-  menuData: MenuItem[];
-  openIndex: number;
-  handleSubmenu: (index: number) => void;
-  getTextColorClasses: () => string;
-  pathUrl: string;
-}> = ({ menuData, openIndex, handleSubmenu, getTextColorClasses, pathUrl }) => {
-  const [hasMounted, setHasMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  if (!menuData) return null;
-
-  return (
-    <nav className="hidden lg:block">
-      <ul className="flex items-center gap-x-8">
-        {menuData.map((menuItem, index) => (
-          <motion.li
-            key={menuItem.id}
-            className="group relative py-4"
-            initial={hasMounted ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: hasMounted ? 0 : index * 0.1 }}
-          >
-            {menuItem.path ? (
-              <Link
-                href={menuItem.path}
-                className={`flex items-center text-base font-medium ${getTextColorClasses()} hover:text-primary`}
-              >
-                {menuItem.title}
-              </Link>
-            ) : (
-              <>
-                <button
-                  onClick={() => handleSubmenu(index)}
-                  className={`flex items-center text-base font-medium ${getTextColorClasses()} hover:text-primary`}
-                >
-                  {menuItem.title}
-                  <motion.div
-                    animate={{ rotate: openIndex === index ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </motion.div>
-                </button>
-                
-                <AnimatePresence>
-                  {openIndex === index && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="submenu absolute left-0 top-full min-w-[200px] rounded-lg bg-white p-2 shadow-lg dark:bg-dark-2"
-                    >
-                      {menuItem.submenu?.map((submenuItem) => (
-                        <motion.div
-                          key={submenuItem.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <Link
-                            href={submenuItem.path || "#"}
-                            className={`block rounded-lg px-4 py-2 text-sm transition-colors ${
-                              pathUrl === submenuItem.path
-                                ? "bg-amber-400/10 text-amber-500"
-                                : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
-                            }`}
-                          >
-                            {submenuItem.title}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </>
-            )}
-          </motion.li>
-        ))}
-      </ul>
-    </nav>
-  );
-};
-
-const MobileMenuOverlay: React.FC<{
-  navbarOpen: boolean;
-  menuData: MenuItem[];
-  openIndex: number;
-  handleSubmenu: (index: number) => void;
-  closeNavbarOnNavigate: () => void;
-  navbarToggleHandler: () => void;
-  user: User | null;
-  pathUrl: string;
-}> = ({
-  navbarOpen,
-  menuData,
-  openIndex,
-  handleSubmenu,
-  closeNavbarOnNavigate,
-  navbarToggleHandler,
-  user,
-  pathUrl
-}) => {
-  const router = useRouter();
-  const supabase = createClient();
-
-  const handleSignOutClick = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error.message);
-        return;
-      }
-      router.push('/');
-      navbarToggleHandler();
-    } catch (error) {
-      console.error('Error during sign out:', error);
-    }
-  };
-
-  if (!menuData) return null;
-
-  return (
-    <AnimatePresence>
-      {navbarOpen && (
-        <motion.div 
-          className="fixed inset-0 z-50 lg:hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <motion.div
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            onClick={navbarToggleHandler}
-          />
-          
-          <motion.nav
-            className="fixed right-0 top-0 bottom-0 w-72 overflow-y-auto bg-white/90 backdrop-blur-md dark:bg-dark-2/90"
-            style={{ height: '100vh' }}
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          >
-            <motion.button
-              onClick={navbarToggleHandler}
-              className="absolute right-4 top-4 z-50 rounded-full p-2 text-amber-500 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-400/10"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <X className="h-6 w-6" />
-            </motion.button>
-
-            <div className="flex h-full flex-col px-6 py-16">
-              <motion.ul 
-                className="space-y-2"
-                initial="closed"
-                animate="open"
-                variants={{
-                  open: {
-                    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-                  },
-                  closed: {
-                    transition: { staggerChildren: 0.05, staggerDirection: -1 }
-                  }
-                }}
-              >
-                {menuData.map((menuItem, index) => (
-                  <motion.li
-                    key={menuItem.id}
-                    className="group"
-                    variants={{
-                      open: { opacity: 1, x: 0 },
-                      closed: { opacity: 0, x: 50 }
-                    }}
-                  >
-                    {menuItem.path ? (
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        scroll={false}
-                        href={menuItem.path}
-                        className="flex w-full rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
-                      >
-                        {menuItem.title}
-                      </Link>
-                    ) : (
-                      <div className="space-y-2">
-                        <button
-                          onClick={() => handleSubmenu(index)}
-                          className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
-                        >
-                          {menuItem.title}
-                          <motion.div
-                            animate={{ rotate: openIndex === index ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <ChevronDown className="h-5 w-5" />
-                          </motion.div>
-                        </button>
-                        
-                        <AnimatePresence>
-                          {openIndex === index && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="space-y-1 pl-4">
-                                {menuItem.submenu?.map((submenuItem) => (
-                                  <motion.div
-                                    key={submenuItem.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <Link
-                                      href={submenuItem.path || "#"}
-                                      onClick={() => {
-                                        handleSubmenu(index);
-                                        navbarToggleHandler();
-                                      }}
-                                      className={`block rounded-lg px-4 py-2 text-sm transition-colors ${
-                                        pathUrl === submenuItem.path
-                                          ? "bg-amber-400/10 text-amber-500"
-                                          : "text-gray-600 hover:bg-amber-100 dark:text-gray-300 dark:hover:bg-amber-400/10"
-                                      }`}
-                                    >
-                                      {submenuItem.title}
-                                    </Link>
-                                  </motion.div>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </motion.li>
-                ))}
-              </motion.ul>
-
-              <motion.div
-                className="mt-auto border-t border-gray-200 py-6 dark:border-gray-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                {!user ? (
-                  <div className="space-y-3">
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        href="/signin"
-                        className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
-                      >
-                        Sign In
-                      </Link>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        href="/signup"
-                        className="block w-full rounded-lg bg-amber-400 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600"
-                      >
-                        Sign Up
-                      </Link>
-                    </motion.div>
-                  </div>
-                ) : (
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <button
-                      onClick={handleSignOutClick}
-                      className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
-                    >
-                      Sign Out
-                    </button>
-                  </motion.div>
-                )}
-              </motion.div>
-            </div>
-          </motion.nav>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
 const MobileMenu: React.FC<MobileMenuProps> = ({
   navbarOpen,
   menuData,
@@ -342,28 +41,146 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   navbarToggleHandler,
   user,
   pathUrl,
-  getTextColorClasses
+  getTextColorClasses,
 }) => {
+  const supabase = createClient();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      navbarToggleHandler(); // Close mobile menu
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error.message);
+        toast.error("Failed to sign out. Please try again.");
+      } else {
+        toast.success("Signed out successfully");
+        router.push('/');
+        router.refresh(); // Refresh to update auth state across the app
+      }
+    } catch (error: any) {
+      console.error('Error in sign out process:', error);
+      toast.error(error.message || "An error occurred while signing out");
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   return (
-    <>
-      <DesktopMenu
-        menuData={menuData}
-        openIndex={openIndex}
-        handleSubmenu={handleSubmenu}
-        getTextColorClasses={getTextColorClasses}
-        pathUrl={pathUrl}
-      />
-      <MobileMenuOverlay
-        navbarOpen={navbarOpen}
-        menuData={menuData}
-        openIndex={openIndex}
-        handleSubmenu={handleSubmenu}
-        closeNavbarOnNavigate={closeNavbarOnNavigate}
-        navbarToggleHandler={navbarToggleHandler}
-        user={user}
-        pathUrl={pathUrl}
-      />
-    </>
+    <nav
+      id="navbarCollapse"
+      className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-dark-2 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 lg:dark:bg-transparent ${
+        navbarOpen
+          ? "visibility top-full opacity-100"
+          : "invisible top-[120%] opacity-0"
+      }`}
+    >
+      <ul className="block lg:flex lg:space-x-12">
+        {menuData.map((menuItem, index) => (
+          <li key={menuItem.id} className="group relative">
+            {menuItem.submenu ? (
+              <>
+                <button
+                  onClick={() => handleSubmenu(index)}
+                  className={`flex cursor-pointer items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 lg:text-white lg:dark:text-white ${
+                    openIndex === index ? "text-primary dark:text-primary" : ""
+                  } ${getTextColorClasses()}`}
+                >
+                  {menuItem.title}
+                  <span className="pl-3">
+                    <svg width="15" height="14" viewBox="0 0 15 14">
+                      <path
+                        d="M7.81602 9.97495C7.68477 9.97495 7.57539 9.9312 7.46602 9.8437L2.43477 4.89995C2.23789 4.70308 2.23789 4.39683 2.43477 4.19995C2.63164 4.00308 2.93789 4.00308 3.13477 4.19995L7.81602 8.77183L12.4973 4.1562C12.6941 3.95933 13.0004 3.95933 13.1973 4.1562C13.3941 4.35308 13.3941 4.65933 13.1973 4.8562L8.16601 9.79995C8.05664 9.90933 7.94727 9.97495 7.81602 9.97495Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </button>
+                <div
+                  className={`submenu relative lg:absolute lg:left-0 lg:top-full lg:rounded-md lg:bg-white lg:px-8 lg:py-8 lg:shadow-lg lg:dark:bg-dark-2 ${
+                    openIndex === index ? "block" : "hidden"
+                  }`}
+                >
+                  <div className="relative grid gap-2 rounded-sm lg:grid-cols-1">
+                    {menuItem.submenu.map((submenuItem) => (
+                      <Link
+                        href={submenuItem.path || "#"}
+                        key={submenuItem.id}
+                        onClick={closeNavbarOnNavigate}
+                        target={submenuItem.newTab ? "_blank" : "_self"}
+                        className={`block rounded py-2.5 text-sm text-dark hover:text-primary dark:text-white/70 dark:hover:text-white lg:px-3 ${
+                          pathUrl === submenuItem.path
+                            ? "text-primary dark:text-white"
+                            : ""
+                        }`}
+                      >
+                        {submenuItem.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <Link
+                href={menuItem.path || "#"}
+                onClick={closeNavbarOnNavigate}
+                target={menuItem.newTab ? "_blank" : "_self"}
+                className={`block py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 lg:text-white lg:dark:text-white ${
+                  pathUrl === menuItem.path
+                    ? "text-primary dark:text-primary"
+                    : ""
+                } ${getTextColorClasses()}`}
+              >
+                {menuItem.title}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {/* Mobile auth buttons */}
+      <div className="flex flex-col gap-2 border-t border-stroke pt-3 dark:border-dark-3 lg:hidden">
+        {user ? (
+          <>
+            <Link
+              href={`/user/${user.id}`}
+              onClick={closeNavbarOnNavigate}
+              className="rounded-md px-6 py-3 text-base font-medium text-dark dark:text-white"
+            >
+              {user.name}
+            </Link>
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="rounded-md bg-blue-500 px-6 py-3 text-base font-medium text-white"
+            >
+              {isSigningOut ? "Signing Out..." : "Sign Out"}
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/sign-in"
+              onClick={closeNavbarOnNavigate}
+              className="rounded-md bg-body-color/10 px-6 py-3 text-base font-medium text-dark dark:bg-white/10 dark:text-white"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              onClick={closeNavbarOnNavigate}
+              className="rounded-md bg-blue-500 px-6 py-3 text-base font-medium text-white"
+            >
+              Sign Up
+            </Link>
+          </>
+        )}
+      </div>
+    </nav>
   );
 };
 

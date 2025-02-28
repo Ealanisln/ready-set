@@ -1,23 +1,58 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SectionTitle from "@/components/Common/SectionTitle";
 import Faq from "@/components/Faq";
 import OnDemandOrderForm from "@/components/CateringRequest/OnDemandForm";
+import { createClient } from "@/utils/supabase/client";
 
 const OnDemandPage = () => {
-  const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin");
-    }
-  }, [status, router]);
+    const getSession = async () => {
+      try {
+        setLoading(true);
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+          router.push("/signin");
+          return;
+        }
+        
+        setUser(user);
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        router.push("/signin");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (status === "loading") {
+    getSession();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT") {
+          router.push("/signin");
+        } else if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        }
+      }
+    );
+
+    // Clean up the subscription
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [router, supabase]);
+
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="ml-4 text-lg font-semibold">Loading...</p>
@@ -25,7 +60,7 @@ const OnDemandPage = () => {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -36,7 +71,7 @@ const OnDemandPage = () => {
     >
       <div className="container">
         <div className="mb-[60px]">
-        <SectionTitle
+          <SectionTitle
             title={"Catering Request"}
             subtitle={"8-point Checklist"}
             paragraph="We follow an 8-point checklist to minimize errors and ensure an on-time delivery set up."

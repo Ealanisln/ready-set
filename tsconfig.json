@@ -30,6 +30,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/scripts/sync-users.mts"  ],
   "exclude": ["node_modules"]
 }

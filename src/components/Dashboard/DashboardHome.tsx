@@ -44,29 +44,35 @@ export function DashboardHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersResponse, usersResponse] = await Promise.all([
-          fetch("/api/orders/catering-orders?recentOnly=true"),
-          fetch("/api/users"),
-        ]);
-
-        if (!ordersResponse.ok || !usersResponse.ok) {
-          throw new Error("One or more network responses were not ok");
+        const ordersResponse = await fetch("/api/orders/catering-orders?recentOnly=true");
+        const usersResponse = await fetch("/api/users");
+        
+        // Log response status
+        console.log("Orders response status:", ordersResponse.status);
+        console.log("Users response status:", usersResponse.status);
+        
+        if (!ordersResponse.ok) {
+          const errorText = await ordersResponse.text();
+          console.error("Orders API error:", errorText);
+          throw new Error(`Orders API failed: ${ordersResponse.status} - ${errorText}`);
         }
-
+        
+        if (!usersResponse.ok) {
+          const errorText = await usersResponse.text();
+          console.error("Users API error:", errorText);
+          throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
+        }
+        
+        // Continue with your existing code...
         const [ordersData, usersData] = await Promise.all([
           ordersResponse.json(),
           usersResponse.json(),
         ]);
-
-        setRecentOrders(ordersData);
-        const filteredActiveOrders = ordersData.filter(
-          (order: CateringOrder) => order.status === "active"
-        );
-        setActiveOrders(filteredActiveOrders);
-        setUsers(usersData);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
+        
+        // ...
+      } catch (error) {
+        console.error("Dashboard data fetch error:", error);
+        setError(error instanceof Error ? error.message : 'An unknown error occurred');
         setLoading(false);
       }
     };

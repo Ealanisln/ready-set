@@ -1,3 +1,5 @@
+// src/app/api/users/[userId]/route.ts 
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";

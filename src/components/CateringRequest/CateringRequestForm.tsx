@@ -1,7 +1,6 @@
 // components/CateringForm/CateringRequestForm.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import AddressManager from "../AddressManager";
 import { InputField } from "./FormFields/InputField";
@@ -12,6 +11,7 @@ import { CateringFormData, Address } from "@/types/catering";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import { X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
+import { createClient } from "@/utils/supabase/client";
 
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadThingFile[];
@@ -48,7 +48,8 @@ const BROKERAGE_OPTIONS = [
 ];
 
 const CateringRequestForm: React.FC = () => {
-  const { data: session } = useSession();
+  const supabase = createClient();
+  const [session, setSession] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFileKeys, setUploadedFileKeys] = useState<string[]>([]);
   const { control, handleSubmit, watch, setValue, reset } =
@@ -100,6 +101,27 @@ const CateringRequestForm: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Fetch Supabase session
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+
+    fetchSession();
+
+    // Set up listener for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
   }, []);
@@ -127,7 +149,7 @@ const CateringRequestForm: React.FC = () => {
     category: "catering",
     entityType: "catering_request",
     userId: session?.user?.id,
-    entityId: "your-entity-id-here"  // Add this line
+    entityId: "your-entity-id-here"
   });
 
   // Cleanup function for uploaded files

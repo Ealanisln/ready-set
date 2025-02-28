@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 import { PrismaClient } from "@prisma/client";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // Create a Supabase client for server-side authentication - with await
+  const supabase = await createClient();
 
-  if (!session?.user?.id) {
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (isShared === "all") {
       whereClause = {
         OR: [
-          { createdBy: session.user.id },
+          { createdBy: user.id },
           { isShared: true }
         ]
       };
@@ -28,11 +31,11 @@ export async function GET(request: NextRequest) {
       whereClause = { isShared: true };
     } else if (isShared === "false") {
       whereClause = {
-        createdBy: session.user.id,
+        createdBy: user.id,
         isShared: false,
       };
     } else {
-      whereClause = { createdBy: session.user.id };
+      whereClause = { createdBy: user.id };
     }
 
     const addresses = await prisma.address.findMany({
@@ -66,12 +69,19 @@ export async function GET(request: NextRequest) {
       { error: "An unexpected error occurred while fetching addresses" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  // Create a Supabase client for server-side authentication - with await
+  const supabase = await createClient();
+
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -79,7 +89,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const newAddress = await prisma.address.create({
       data: {
-        createdBy: session.user.id,
+        createdBy: user.id,
         name: data.name,
         street1: data.street1,
         street2: data.street2,
@@ -101,12 +111,19 @@ export async function POST(request: NextRequest) {
       { error: "Error adding address" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  // Create a Supabase client for server-side authentication - with await
+  const supabase = await createClient();
+
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -129,7 +146,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Address not found" }, { status: 404 });
     }
 
-    if (address.createdBy !== session.user.id) {
+    if (address.createdBy !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -144,12 +161,19 @@ export async function DELETE(request: NextRequest) {
       { error: "Error deleting address" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  // Create a Supabase client for server-side authentication - with await
+  const supabase = await createClient();
+
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -174,7 +198,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Address not found" }, { status: 404 });
     }
 
-    if (existingAddress.createdBy !== session.user.id) {
+    if (existingAddress.createdBy !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -202,5 +226,7 @@ export async function PUT(request: NextRequest) {
       { error: "Error updating address" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

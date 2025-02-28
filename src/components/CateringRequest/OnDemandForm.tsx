@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useSession } from "next-auth/react";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
+import { createClient } from "@/utils/supabase/client";
 
 interface OnDemandFormData {
   brokerage: string;
@@ -43,7 +43,32 @@ interface OnDemandFormData {
 }
 
 const OnDemandOrderForm: React.FC = () => {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+  
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setUser(session.user);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
+
+    // Clean up subscription
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const {
     control,
     handleSubmit,
@@ -96,7 +121,7 @@ const OnDemandOrderForm: React.FC = () => {
   }, []);
 
   const onSubmit = async (data: OnDemandFormData) => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       console.error("User not authenticated");
       return;
     }

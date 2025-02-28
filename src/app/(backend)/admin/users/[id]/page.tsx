@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
 import { UserType } from "@/components/Auth/SignUp/FormSchemas";
+import { createClient } from "@/utils/supabase/client"; // Import the client-side Supabase client
 
 interface User {
   id: string;
@@ -60,10 +60,11 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const { data: session } = useSession();
+  const [session, setSession] = useState<any>(null);
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const supabase = createClient();
 
   const userId = params.id;
 
@@ -89,6 +90,27 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   // Important: Watch all form values
   const watchedValues = watch();
+
+  // Fetch Supabase session
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+
+    fetchSession();
+
+    // Set up listener for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   // Memoize the default form values
   const defaultFormValues = useMemo(
@@ -384,6 +406,18 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     ? "Loading..."
     : `Editing ${watchedValues.displayName || "User"}`;
 
+  // Check if user is authenticated
+  if (!session) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg font-semibold">Please sign in to access this page</p>
+        <Button className="ml-4" onClick={() => router.push('/login')}>
+          Sign In
+        </Button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -391,6 +425,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       </div>
     );
   }
+
+  // Get the user type from the Supabase session user metadata
+  const currentUserRole = (session?.user?.user_metadata?.type as UserType) || "client";
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
@@ -476,9 +513,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                     }}
                     onStatusChange={handleStatusChange}
                     onRoleChange={handleRoleChange}
-                    currentUserRole={
-                      (session?.user?.type as UserType) || "client"
-                    }
+                    currentUserRole={currentUserRole}
                   />
                   <Card className="overflow-hidden">
                     <CardHeader>

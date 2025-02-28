@@ -1,23 +1,55 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Faq from "@/components/Faq";
 import SectionTitle from "@/components/Common/SectionTitle";
 import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm";
+import { createClient } from "@/utils/supabase/client";
 
 const CateringPage = () => {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const supabase = createClient();
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin");
-    }
-  }, [status, router]);
+    // Fetch the session when the component mounts
+    const fetchSession = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (status === "loading") {
+    fetchSession();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !session) {
+      router.push("/login?redirect=/catering");
+    }
+  }, [session, isLoading, router]);
+
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="ml-4 text-lg font-semibold">Loading...</p>

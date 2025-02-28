@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -32,9 +31,13 @@ type Delivery = (CateringDelivery | OnDemandDelivery) & {
 };
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  // Create a Supabase client for server-side authentication
+  const supabase = await createClient();
 
-  if (!session || !session.user?.id) {
+  // Get the user session from Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -47,7 +50,7 @@ export async function GET(req: NextRequest) {
     // Fetch dispatches for the current driver
     const driverDispatches = await prisma.dispatch.findMany({
       where: {
-        driverId: session.user.id,
+        driverId: user.id,
       },
       select: {
         cateringRequestId: true,
@@ -136,5 +139,7 @@ export async function GET(req: NextRequest) {
       { message: "Error fetching driver deliveries" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
