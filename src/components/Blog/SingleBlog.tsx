@@ -13,17 +13,22 @@ interface PostsProps {
 
 const SingleBlog = ({ data, basePath }: PostsProps) => {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl mx-auto">
+    <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {data.map((post) => (
-        <div key={post._id} className="flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden h-full">
-          <div className="p-4 flex-shrink-0">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white hover:text-primary dark:hover:text-primary line-clamp-2">
+        <div
+          key={post._id}
+          className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800"
+        >
+          <div className="flex-shrink-0 p-4">
+            <h3 className="line-clamp-2 text-xl font-semibold text-gray-800 hover:text-primary dark:text-white dark:hover:text-primary">
               <Link href={`/${basePath}/${post.slug?.current}`}>
                 {post.title}
               </Link>
             </h3>
           </div>
-          <div className="relative w-full aspect-video"> {/* 16:9 aspect ratio */}
+          <div className="relative aspect-video w-full">
+            {" "}
+            {/* 16:9 aspect ratio */}
             <Link href={`/${basePath}/${post.slug?.current}`} className="block">
               {post.mainImage ? (
                 <Image
@@ -34,37 +39,38 @@ const SingleBlog = ({ data, basePath }: PostsProps) => {
                   style={{ objectFit: "cover" }}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                  <span className="text-gray-500 dark:text-gray-400">No Image</span>
+                <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
+                  <span className="text-gray-500 dark:text-gray-400">
+                    No Image
+                  </span>
                 </div>
               )}
             </Link>
           </div>
-          <div className="p-4 flex-grow">
-            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
-              
-            </p>
+          <div className="flex-grow p-4">
+            <p className="line-clamp-3 text-sm text-gray-600 dark:text-gray-300"></p>
           </div>
-          <div className="px-4 pb-4 mt-auto flex justify-between items-center">
-         {/* Fecha del post */}
-      <span className="text-sm text-gray-600 dark:text-gray-400">
-        {post._updatedAt ? 
-        new Date(post._updatedAt).toLocaleDateString('en-EN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-      : 'Date not available'
-    }
-    </span>
-   {/* Botón Read More */}
-   <div className="inline-block px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-    <Link href={`/${basePath}/${post.slug?.current}`} className="block">
-      Read More
-    </Link>
-
-       </div>
-      </div>
+          <div className="mt-auto flex items-center justify-between px-4 pb-4">
+            {/* Fecha del post */}
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {post._updatedAt
+                ? new Date(post._updatedAt).toLocaleDateString("en-EN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Date not available"}
+            </span>
+            {/* Botón Read More */}
+            <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+              <Link
+                href={`/${basePath}/${post.slug?.current}`}
+                className="block"
+              >
+                Read More
+              </Link>
+            </div>
+          </div>
         </div>
       ))}
     </div>

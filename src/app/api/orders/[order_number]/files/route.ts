@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/utils/auth";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 // Add the serialization utility
 type SerializableObject = { [key: string]: any };
@@ -30,8 +29,12 @@ const serializeBigInt = <T extends SerializableObject>(
 
 export async function DELETE(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    // Initialize Supabase client and get current user
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check authentication
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -56,14 +59,20 @@ export async function DELETE(request: Request) {
       { message: "Internal server error" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function GET(request: Request, props: { params: Promise<{ order_number: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    // Initialize Supabase client and get current user
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check authentication
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -143,5 +152,7 @@ export async function GET(request: Request, props: { params: Promise<{ order_num
       { message: "Internal server error" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

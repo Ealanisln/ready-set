@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
-
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    const userId = session.user.id;
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is authenticated
+    if (!user || !user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = user.id;
     const allowedCounties = await fetchAllowedCountiesForUser(userId);
     return NextResponse.json({ counties: allowedCounties });
   } catch (error) {

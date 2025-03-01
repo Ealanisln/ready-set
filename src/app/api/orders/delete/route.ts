@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
 export async function DELETE(req: NextRequest) {
   try {
-    // Check if the user is authenticated and authorized
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.type !== "super_admin") {
+    // Initialize Supabase client
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if the user is authenticated
+    if (!user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the user is a super admin
+    // You'll need to retrieve user type from your database or from Supabase user metadata
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { type: true }
+    });
+
+    if (!userData || userData.type !== "super_admin") {
       return NextResponse.json({ error: "Unauthorized. Only super admins can delete orders." }, { status: 403 });
     }
 
