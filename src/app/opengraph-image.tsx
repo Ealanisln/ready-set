@@ -1,109 +1,79 @@
 import { ImageResponse } from 'next/og'
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 
-// Metadatos de la imagen
 export const alt = 'Ready Set Virtual Assistant Services'
-export const size = {
-  width: 1200,
-  height: 630,
-}
+export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-// Generación de la imagen
+// Valores reutilizables
+const BRAND_COLOR = '#5850EC'
+const TEXT_COLOR = '#333'
+const SECONDARY_TEXT = '#666'
+
 export default async function Image() {
-  // Definir una estructura para el logo que usaremos en el JSX
-  let logoElement;
-
-  try {
-    // Intentar cargar el logo desde el sistema de archivos local
-    const logoPath = join(process.cwd(), 'public/images/logo/logo-white.png');
-    const logoData = await readFile(logoPath);
-    // Convertir el buffer a una URL de datos base64
-    const logoSrc = `data:image/png;base64,${Buffer.from(logoData).toString('base64')}`;
-    
-    logoElement = (
-      <img
-        src={logoSrc}
-        alt="Ready Set LLC Logo"
-        style={{
-          width: '180px',
-          height: 'auto',
-          marginBottom: '30px',
-        }}
-      />
-    );
-  } catch (error) {
-    console.error('Error loading logo from file system:', error);
-    // Si hay un error, usamos un elemento de texto como respaldo
-    logoElement = (
-      <div
-        style={{
-          fontSize: '48px',
-          fontWeight: 'bold',
-          color: '#5850EC',
-          marginBottom: '30px',
-        }}
-      >
-        Ready Set
-      </div>
-    );
-  }
-
   return new ImageResponse(
     (
       <div
         style={{
-          fontSize: 48,
-          background: '#ffffff',
-          color: '#333333',
+          background: '#fff',
           width: '100%',
           height: '100%',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          flexDirection: 'column',
-          padding: '40px',
-          textAlign: 'center',
+          padding: '4rem',
+          position: 'relative',
         }}
       >
-        {/* Usar el elemento de logo (ya sea imagen o texto de respaldo) */}
-        {logoElement}
-        
+        {/* Logo - Usando ruta pública */}
+        <img
+          src={`${process.env.NEXT_PUBLIC_BASE_URL}/images/logo/logo-white.png`}
+          alt=""
+          style={{
+            width: '240px', // Tamaño aumentado para mejor visibilidad
+            marginBottom: '2rem',
+          }}
+        />
+
+        {/* Texto principal */}
         <h1
           style={{
-            margin: '0 0 20px',
-            fontSize: '60px',
-            fontWeight: 'bold',
-            letterSpacing: '-0.025em',
+            fontSize: '72px',
+            fontWeight: 700,
+            color: TEXT_COLOR,
+            margin: '0 0 1rem',
+            textAlign: 'center',
+            lineHeight: 1.1,
+            maxWidth: '900px',
           }}
         >
           Ready Set Virtual Assistant
         </h1>
-        
+
+        {/* Subtítulo */}
         <p
           style={{
-            margin: '0',
-            fontSize: '28px',
-            color: '#666666',
+            fontSize: '36px',
+            color: SECONDARY_TEXT,
+            margin: 0,
+            textAlign: 'center',
+            maxWidth: '800px',
           }}
         >
-          Expert Virtual Assistants, Ready When You Are.
+          Expert Virtual Assistants, Ready When You Are
         </p>
-        
+
+        {/* Dominio */}
         <div
           style={{
             position: 'absolute',
-            bottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 'auto',
-            padding: '8px 20px',
-            background: '#f8f9fa',
-            color: '#5850EC',
-            borderRadius: '4px',
-            fontSize: '18px',
+            bottom: '40px',
+            background: BRAND_COLOR,
+            color: '#fff',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '24px',
+            fontWeight: 600,
           }}
         >
           readysetllc.com
@@ -112,7 +82,19 @@ export default async function Image() {
     ),
     {
       ...size,
-      // Sin fuentes personalizadas para evitar errores
+      fonts: [
+        {
+          name: 'Inter',
+          data: await fetchFont('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap'),
+          style: 'normal',
+        },
+      ],
     }
   )
+}
+
+// Helper para cargar fuentes (opcional)
+async function fetchFont(url: string) {
+  const res = await fetch(url)
+  return await res.arrayBuffer()
 }

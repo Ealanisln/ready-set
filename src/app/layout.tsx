@@ -19,9 +19,12 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-// Metadatos mejorados - sin las propiedades de opengraph/twitter image
-// ya que ahora las manejamos con los archivos especiales de Next.js
+// URL base para los metadatos - usa variable de entorno o valor por defecto
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://readysetllc.com';
+
+// Metadatos mejorados con metadataBase
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Ready Set Virtual Assistant Services | Beyond Traditional VA Support',
   description: 'Expert Virtual Assistants, Ready When You Are.',
   icons: {
@@ -36,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Ready Set Virtual Assistant Services | Beyond Traditional VA Support',
     description: 'Expert Virtual Assistants, Ready When You Are.',
-    url: 'https://readysetllc.com',
+    url: siteUrl,
     siteName: 'Ready Set LLC',
     locale: 'en_US',
     type: 'website',
