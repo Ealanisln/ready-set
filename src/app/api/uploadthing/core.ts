@@ -1,4 +1,3 @@
-// src/app/api/uploadthing/core.ts
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { handleUploadComplete } from '@/server/upload';
@@ -55,12 +54,17 @@ export const ourFileRouter = {
           }))
         });
 
-        const { getServerAuth } = await import('@/server/auth');
-        const user = await getServerAuth(req);
+        const { createClient } = await import('@/server/auth');
+        const supabase = await createClient();
         
-        if (!user) {
+        // Get the user's session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
           throw new UploadThingError("Unauthorized");
         }
+
+        const user = session.user;
 
         // Extract metadata from headers with more detailed logging
         const category = getHeaderSafe(req.headers, "x-category");

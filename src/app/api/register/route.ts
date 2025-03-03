@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();

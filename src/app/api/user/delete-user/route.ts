@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
 import { PrismaClient } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Create Supabase client
+    const supabase = await createClient();
+    
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Check if the user is authenticated and is a super_admin
-    if (session?.user?.type !== "super_admin") {
+    // Check if the user is authenticated
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // Get the current user's details from the database to check type
+    const currentUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { type: true }
+    });
+
+    // Check if the user is a super_admin
+    if (currentUser?.type !== "super_admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -64,5 +78,7 @@ export async function DELETE(request: NextRequest) {
       },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

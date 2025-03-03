@@ -27,3 +27,11 @@ export const createClient = async () => {
     },
   );
 };
+
+// Add the missing getServerAuth function
+export const getServerAuth = async (req: Request) => {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  return session?.user || null;
+};

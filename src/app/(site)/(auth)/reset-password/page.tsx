@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { resetPasswordAction } from "@/app/actions/reset-password";
 import { toast } from "react-hot-toast";
 import Loader from "@/components/Common/Loader";
@@ -30,7 +30,21 @@ function SubmitButton() {
   );
 }
 
-export default function ResetPassword() {
+// Loading fallback component
+function ResetPasswordFallback() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+        <div className="flex justify-center items-center h-40">
+          <Loader />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Component that uses the search params (wrapped in Suspense by the parent)
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [resetCode, setResetCode] = useState<string>("");
@@ -153,5 +167,14 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the form with Suspense
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<ResetPasswordFallback />}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

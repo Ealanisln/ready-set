@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -60,9 +59,14 @@ function serializeBigInt(data: any): any {
 export async function GET(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    // Create Supabase client
+    const supabase = await createClient();
+    
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user?.id) {
+    // Check authentication
+    if (!user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -144,5 +148,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
       { message: "Error fetching order", error: (error as Error).message },
       { status: 500 },
     );
+  } finally {
+    // Disconnect Prisma client
+    await prisma.$disconnect();
   }
 }

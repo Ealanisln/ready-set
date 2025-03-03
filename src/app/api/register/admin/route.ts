@@ -1,10 +1,10 @@
-// src/app/api/register/admin/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
+import { PrismaClient, Prisma, users_status } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { validateAdminRole } from "@/middleware/authMiddleware";
 import sgMail from "@sendgrid/mail";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -58,8 +58,8 @@ const sendRegistrationEmail = async (
 export async function POST(request: Request) {
   try {
     // Validate admin role
-    const authError = await validateAdminRole(request);
-    if (authError) return authError;
+    const validationError = await validateAdminRole(request);
+    if (validationError) return validationError;
 
     const body: AdminRegistrationRequest = await request.json();
 
@@ -92,8 +92,32 @@ export async function POST(request: Request) {
     const passwordResetToken = crypto.randomBytes(32).toString("hex");
     const passwordResetTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Create user
+    // Create user in Supabase first
+    const supabase = await createClient();
+    const { data: authData, error: supabaseError } = await supabase.auth.admin.createUser({
+      email: body.email.toLowerCase(),
+      password: temporaryPassword,
+      email_confirm: true
+    });
+
+    if (supabaseError) {
+      console.error("Error creating user in Supabase:", supabaseError);
+      return NextResponse.json(
+        { error: "Failed to create user account", details: supabaseError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!authData.user) {
+      return NextResponse.json(
+        { error: "Failed to create user account" },
+        { status: 500 }
+      );
+    }
+
+    // Create user in your database with the Supabase UUID as the ID
     const userData: Prisma.userCreateInput = {
+      id: authData.user.id, // Use the Supabase user ID
       email: body.email.toLowerCase(),
       name: body.name,
       contact_number: body.phoneNumber,
@@ -149,16 +173,14 @@ export async function POST(request: Request) {
     }
 
     // Check if email exists before sending registration email
-    if (!newUser.email) {
-      throw new Error("User email is required but was not provided");
+    if (newUser.email) {
+      // Send registration email
+      await sendRegistrationEmail(
+        newUser.email,
+        temporaryPassword,
+        passwordResetToken,
+      );
     }
-
-    // Send registration email
-    await sendRegistrationEmail(
-      newUser.email,
-      temporaryPassword,
-      passwordResetToken,
-    );
 
     return NextResponse.json(
       {
@@ -184,5 +206,7 @@ export async function POST(request: Request) {
       { error: "An unexpected error occurred" },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

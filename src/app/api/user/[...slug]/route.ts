@@ -1,34 +1,37 @@
-// app/api/user/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/utils/auth";
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Create Supabase client
+    const supabase = await createClient();
+    
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user) {
+    // Check authentication
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    if (!session.user.email) {
+    if (!user.email) {
       return NextResponse.json(
         { error: "User email not found" },
         { status: 400 },
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const dbUser = await prisma.user.findUnique({
+      where: { email: user.email },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json(dbUser);
   } catch (error: unknown) {
     console.error("Error fetching current user:", error);
     let errorMessage = "Failed to fetch current user";
@@ -39,18 +42,25 @@ export async function GET(request: NextRequest) {
       { error: "Failed to fetch current user", details: errorMessage },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Create Supabase client
+    const supabase = await createClient();
+    
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user) {
+    // Check authentication
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    if (!session.user.email) {
+    if (!user.email) {
       return NextResponse.json({ error: "User email not found" }, { status: 400 });
     }
 
@@ -58,7 +68,7 @@ export async function PUT(request: NextRequest) {
 
     // Fetch the current user to get their type
     const currentUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: user.email },
       select: { type: true }
     });
 
@@ -83,12 +93,10 @@ export async function PUT(request: NextRequest) {
       (updateData[key] === undefined || updateData[key] === null) && delete updateData[key]
     );
 
-
     const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: user.email },
       data: updateData,
     });
-
 
     return NextResponse.json(updatedUser);
   } catch (error: unknown) {
@@ -101,5 +109,7 @@ export async function PUT(request: NextRequest) {
       { error: "Failed to update user", details: error instanceof Error ? error.message : String(error) },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

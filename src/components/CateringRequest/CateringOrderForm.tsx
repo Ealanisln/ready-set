@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useSession } from "next-auth/react";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
+import { createClient } from "@/utils/supabase/client";
 
 interface FormData {
   order_type: "catering" | "on_demand";
@@ -55,8 +55,34 @@ interface FormData {
   };
 }
 
-const CombinedOrderForm: React.FC = () => {
-  const { data: session } = useSession();
+const CateringOrderForm: React.FC = () => {
+  // 1. Set up state and initialize client
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+  
+  // 2. Add useEffect hook for authentication
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+    
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setUser(session.user);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
+    
+    // Clean up subscription
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const {
     control,
     handleSubmit,
@@ -126,7 +152,7 @@ const CombinedOrderForm: React.FC = () => {
   const needHost = watch("need_host");
 
   const onSubmit = async (data: FormData) => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       console.error("User not authenticated");
       return;
     }
@@ -877,4 +903,4 @@ const CombinedOrderForm: React.FC = () => {
   );
 };
 
-export default CombinedOrderForm;
+export default CateringOrderForm;
