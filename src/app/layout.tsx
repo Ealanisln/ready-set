@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import ClientLayout from "@/components/Clients/ClientLayout";
@@ -20,7 +19,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-// Metadatos mejorados para Open Graph y redes sociales
+// Metadatos mejorados - sin las propiedades de opengraph/twitter image
+// ya que ahora las manejamos con los archivos especiales de Next.js
 export const metadata: Metadata = {
   title: 'Ready Set Virtual Assistant Services | Beyond Traditional VA Support',
   description: 'Expert Virtual Assistants, Ready When You Are.',
@@ -38,36 +38,21 @@ export const metadata: Metadata = {
     description: 'Expert Virtual Assistants, Ready When You Are.',
     url: 'https://readysetllc.com',
     siteName: 'Ready Set LLC',
-    images: [
-      {
-        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
-        width: 1200,
-        height: 630,
-        alt: 'Ready Set LLC Logo - Penguin',
-        type: 'image/png',
-      },
-    ],
     locale: 'en_US',
     type: 'website',
+    // Se eliminan las propiedades de imágenes ya que ahora están manejadas
+    // por el archivo opengraph-image.tsx
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Ready Set Virtual Assistant Services',
     description: 'Expert Virtual Assistants, Ready When You Are.',
     creator: '@ReadySetLLC',
-    images: [
-      {
-        url: 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
-        alt: 'Ready Set LLC Penguin Logo',
-        width: 1200,
-        height: 630,
-      }
-    ],
+    // Se eliminan las propiedades de imágenes ya que ahora están manejadas
+    // por el archivo twitter-image.tsx
   },
-  // Metadatos adicionales para otras plataformas
   other: {
-    'fb:app_id': '', // Si tienes un ID de aplicación de Facebook
-    'og:image:secure_url': 'https://readysetllc.com/images/logo/new-logo-ready-set.png',
+    'fb:app_id': process.env.NEXT_PUBLIC_FB_APP_ID || '', // Usar variable de entorno
   },
   applicationName: 'Ready Set LLC',
   appleWebApp: {
@@ -79,7 +64,6 @@ export const metadata: Metadata = {
     email: true,
     address: true,
   },
-  // Se eliminó la propiedad viewport de aquí
   keywords: 'virtual assistant, VA services, Ready Set LLC, administrative support, professional VA',
 };
 
@@ -95,8 +79,13 @@ export default function RootLayout({
       lang="en"
     >
       <head>
-        {/* Etiquetas adicionales de verificación de Pinterest si las necesitas */}
-        <meta name="p:domain_verify" content="" />
+        {/* Solo mantener etiquetas que no son manejadas automáticamente por Next.js */}
+        {process.env.NEXT_PUBLIC_PINTEREST_VERIFICATION && (
+          <meta 
+            name="p:domain_verify" 
+            content={process.env.NEXT_PUBLIC_PINTEREST_VERIFICATION} 
+          />
+        )}
       </head>
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
