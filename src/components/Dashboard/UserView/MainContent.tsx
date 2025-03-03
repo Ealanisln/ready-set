@@ -314,14 +314,22 @@ export const MainContent: React.FC<MainContentProps> = ({
                               </span>
                             </td>
                             <td className="p-4">
-                             {user.created_at ? (
-                              <div className="text-sm">
-                                {new Date(user.created_at).toISOString().replace('T', ' ').slice(0, 23)}
-                              </div>
-                            ) : (
-                              <div className="text-muted-foreground text-sm">N/A</div>
-                            )}
-                          </td>
+                              {user.created_at ? (
+                                <div className="text-sm">
+                                  {new Date(user.created_at).toLocaleDateString('en-US', {
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    year: 'numeric'
+                                  })} {new Date(user.created_at).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: false
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="text-muted-foreground text-sm">N/A</div>
+                              )}
+                            </td>
                           <td className="p-4">
                               <Button
                                 variant="ghost"
