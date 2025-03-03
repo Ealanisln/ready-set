@@ -109,7 +109,7 @@ const ClientSidePromoPopup = () => {
                     </Dialog.Close>
 
                     <motion.h1
-                      className="text-center text-xl font-bold leading-tight tracking-wide sm:text-3xl"
+                      className="text-center text-4xl font-bold leading-tight tracking-wide sm:text-3xl"
                       variants={textVariants}
                       custom={0}
                     >
@@ -184,7 +184,7 @@ const ClientSidePromoPopup = () => {
                       variants={textVariants}
                       custom={3}
                     >
-                      Limited offer this February 5 to 28, 2025.
+                      Limited-time offer from March 1 to 15, 2025.{" "}
                     </motion.p>
                   </CardContent>
                 </Card>
