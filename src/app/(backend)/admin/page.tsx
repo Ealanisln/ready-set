@@ -6,6 +6,7 @@ const Admin = () => {
   return (
     <main>
       <DashboardHome />
+
     </main>
   );
 };

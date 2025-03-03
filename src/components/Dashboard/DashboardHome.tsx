@@ -10,24 +10,7 @@ import { DashboardCard } from "./ui/DashboardCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-interface CateringOrder {
-  id: string;
-  order_number: string;
-  status: string;
-  order_total: string | number;
-  order_type: string;
-}
-
-interface User {
-  id: string;
-  name?: string;
-  contact_name?: string;
-  contact_number: string;
-  email: string;
-  type: "vendor" | "client" | "driver" | "admin";
-  created_at?: string;
-}
+import { User, CateringOrder } from "@/types/user"; // Import the shared types
 
 export function DashboardHome() {
   const [recentOrders, setRecentOrders] = useState<CateringOrder[]>([]);
@@ -63,13 +46,27 @@ export function DashboardHome() {
           throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
         }
         
-        // Continue with your existing code...
+        // Process the responses and extract the data with proper typing
         const [ordersData, usersData] = await Promise.all([
-          ordersResponse.json(),
-          usersResponse.json(),
+          ordersResponse.json() as Promise<CateringOrder[]>,
+          usersResponse.json() as Promise<User[]>,
         ]);
         
-        // ...
+        // Set the state with the fetched data
+        setRecentOrders(ordersData);
+        
+        // Filter active orders with proper typing
+        const activeOrdersList = ordersData.filter((order: CateringOrder) => 
+          ['active', 'pending', 'confirmed', 'in_progress'].includes(order.status)
+        );
+        setActiveOrders(activeOrdersList);
+        
+        // Set users data
+        setUsers(usersData);
+        
+        // Turn off loading state
+        setLoading(false);
+        
       } catch (error) {
         console.error("Dashboard data fetch error:", error);
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
