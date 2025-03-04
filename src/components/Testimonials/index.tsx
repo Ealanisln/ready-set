@@ -1,48 +1,43 @@
-// components/TestimonialsSection.tsx
+"use client";
+
 import React from 'react';
+import Image from 'next/image'; // Importamos el componente Image de Next.js
 
 interface Testimonial {
   category: 'CLIENTS' | 'VENDORS' | 'DRIVERS';
   name: string;
   role: string;
   text: string;
-  image?: string; // Added image property
+  image?: string;
 }
 
 const Testimonials = () => {
   const testimonials: Testimonial[] = [
     {
       category: 'CLIENTS',
-      name: 'Wendy S.',
-      role: 'TheHRLady',
-      text: 'As a small business owner, my team makes me feel like I have an entire team behind me. One of their tasks is to transform my presentations into professional, polished materials that consistently impress me and my clients. Quick, perfect, and effective, they handle tasks with remarkable speed and precision.',
-      image: '/images/wendy.jpg'
+      name: 'Wendy Sellers.',
+      role: 'PPT',
+      text: 'As a small business owner, my team of virtual assistants makes me feel like I have an entire team behind me. One of their tasks is to transform my PowerPoint presentations into professional, polished files that consistently impress me and my clients. Quick, efficient, and effective, they handle tasks with remarkable speed and precision. Their support has been invaluable to my business and my sanity!',
+      image: '/images/testimonials/author-01.png'
     },
     {
       category: 'CLIENTS',
-      name: 'Cris & Ray',
-      role: 'Owner of Bloom',
-      text: 'Ready Set has transformed our delivery system. Custom solutions and always on time, our customers are thrilled with the reliable, seamless partnership!',
-      image: '/images/crisray.jpg'
+      name: 'Dennis Ngai.',
+      role: 'Video Editing',
+      text: 'These guys came through for me and built a solid business along the way. A few years back, pre-covid, my lunch catering business was taking off to a point where I had to turn down orders. Ready Set always had drivers available and helped me scale so I did not have to turn down orders. They are reliable and trustworthy',
+      image: '/images/testimonials/author-02.png'
     },
     {
-      category: 'VENDORS',
-      name: 'Alex R.',
-      role: 'Product Supplier',
-      text: 'From onboarding to operations, Ready Set has exceeded expectations.',
-      image: '/images/alex.jpg'
-    },
-    {
-      category: 'VENDORS',
-      name: 'Lydia N.',
+      category: 'CLIENTS',
+      name: 'Racheal Gallegos.',
       role: 'Vendor Partner',
-      text: 'Partnering with Ready Set has increased our efficiency by 40%. Their team is reliable and professional.',
+      text: 'Kaleb was an exceptional asset to the company during my tenure there. I would hire him again in a second for any position. Kaleb started his journey with us in customer service and sales, where he quickly showcased his remarkable intelligence and aptitude for learning. His analytical skills and ability to see both the big picture and the finer details set him apart from the beginning. Kaleb’s dedication and rapid growth led him to transition into product and brand management, where he truly excelled. His innovative approach, strategic thinking, and maticulous attention to detail made a significatn impact on the company’s success. When I left the company, I felt secure knowing that Kaleb was taking over. It wasn’t long before he was leading the team of brand managers, steering the conpany’s vision with expertise. Kaleb ability to adapt, learn, and lead with insight and precision is truly commendable. His contributions were instrumental in the company growth, and I am confident that he will continue to achieve great success in any future endeavors. Any organization would be fortunate to have Kaleb on their team.',
       image: '/images/lydia.jpg'
     },
     {
-      category: 'VENDORS',
-      name: 'George E.',
-      role: 'Vendor Partner',
+      category: 'CLIENTS',
+      name: 'Crystal Rapada.',
+      role: 'Virtual Assistant',
       text: 'Efficient, reliable, and seamless partnership!',
       image: '/images/george.jpg'
     },
@@ -59,7 +54,23 @@ const Testimonials = () => {
       role: 'Delivery Driver',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
       image: '/images/chris.jpg'
-    }
+    }, 
+
+    {
+      category: 'VENDORS',
+      name: 'Chris L.',
+      role: 'Delivery Driver',
+      text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
+      image: '/images/chris.jpg'
+    }, 
+
+    {
+      category: 'VENDORS',
+      name: 'Chris L.',
+      role: 'Delivery Driver',
+      text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
+      image: '/images/chris.jpg'
+    }, 
   ];
 
   const groupedTestimonials = testimonials.reduce((acc, testimonial) => {
@@ -84,16 +95,31 @@ const Testimonials = () => {
     </div>
   );
 
-  // Placeholder image component since we don't have actual images
-  const ProfileImage = ({ alt }: { alt: string }) => (
-    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
-      <img 
-        src={`/api/placeholder/80/80`} 
-        alt={alt} 
-        className="w-full h-full object-cover"
-      />
-    </div>
-  );
+  // Componente de imagen de perfil actualizado
+  const ProfileImage = ({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
+    const [imageError, setImageError] = React.useState(false);
+    
+    return (
+      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
+        {imageSrc && !imageError ? (
+          <Image 
+            src={imageSrc}
+            alt={alt}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <img 
+            src="/api/placeholder/80/80"
+            alt={alt}
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
@@ -104,19 +130,19 @@ const Testimonials = () => {
             What People Say About Us
           </h2>
           
-         {/* Real Stories. Real Impact with dotted lines extending from both sides */}
-<div className="mb-8 flex items-center justify-center">
-  <div className="relative flex items-center justify-center w-full">
-    {/* Left dotted line - changed from w-1/3 to w-2/5 */}
-    <div className="border-t-2 border-dashed border-black w-2/5 absolute right-1/2 mr-4"></div>
-    
-    {/* Text in the middle */}
-    <p className="text-xl text-black z-10 bg-white px-4 relative">Real Stories. Real Impact</p>
-    
-    {/* Right dotted line - changed from w-1/3 to w-2/5 */}
-    <div className="border-t-2 border-dashed border-black w-2/5 absolute left-1/2 ml-4"></div>
-  </div>
-</div>
+          {/* Real Stories. Real Impact with dotted lines extending from both sides */}
+          <div className="mb-8 flex items-center justify-center">
+            <div className="relative flex items-center justify-center w-full">
+              {/* Left dotted line - changed from w-1/3 to w-2/5 */}
+              <div className="border-t-2 border-dashed border-black w-1/2 absolute right-1/2 mr-4"></div>
+              
+              {/* Text in the middle */}
+              <p className="text-xl text-black z-10 bg-white px-4 relative">Real Stories. Real Impact</p>
+              
+              {/* Right dotted line - changed from w-1/3 to w-2/5 */}
+              <div className="border-t-2 border-dashed border-black w-1/2 absolute left-1/2 ml-4"></div>
+            </div>
+          </div>
           
           <p className="text-black max-w-2xl mx-auto">
             See how Ready Set is making a difference for our clients, vendors, and drivers
@@ -125,59 +151,106 @@ const Testimonials = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {Object.entries(groupedTestimonials).map(([category, items]) => (
-            <div key={category} className="space-y-8 relative">
-              {/* Category Header with Dotted Border */}
-              {/* Category Header - Removed dotted border */}
-<div className="text-center relative pb-8 mb-8">
-  <div className="p-4">
-    <h3 className="text-2xl font-bold text-black">{category}</h3>
-    <p className="text-black text-sm">
-      {category === 'CLIENTS' && 'Why Our Clients Love Us'}
-      {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
-      {category === 'DRIVERS' && 'Our Drivers, Our Heroes'}
-    </p>
-  </div>
-</div>
-              
-              <div className="space-y-12">
-                {items.map((testimonial, index) => (
-                  <div key={index} className="relative pt-6">
-                    {/* Profile Image - Positioned to overlap card */}
-                    <div className="absolute -top-8 left-8 z-10">
-                      <ProfileImage alt={testimonial.name} />
+            <div key={category} className="relative">
+              {/* Full container with dotted border and position relative */}
+              <div className="relative border-2 border-dotted border-black p-6 pt-12 pb-6">
+                {/* Category header positioned to break the top border */}
+                <div className="absolute -top-5 left-0 w-full text-center">
+                  <h3 className="text-2xl font-bold text-black inline-block px-6 bg-white">{category}</h3>
+                </div>
+                
+               {/* Subtitle - Pegado prácticamente al título principal */}
+               <div className="text-center -mt-9 mb-12">
+                  <p className="text-black text-sm">
+                    {category === 'CLIENTS' && 'Why Our Clients Love Us'}
+                    {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
+                    {category === 'DRIVERS' && 'Our Drivers, Our Heroes'}
+                  </p>
+                </div>
+                
+                {/* All testimonial cards within the dotted border */}
+                <div className="space-y-12">
+                  {items.map((testimonial, index) => (
+                    <div key={index} className="relative pt-6">
+                      {/* Alternating layout based on index */}
+                      {index % 2 === 0 ? (
+                        // Left-aligned card (odd indices - first card)
+                        <>
+                          {/* Profile Image - Left positioned */}
+                          <div className="absolute -top-8 left-8 z-10">
+                            <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
+                          </div>
+                          
+                          {/* Curved connector line using SVG */}
+                          <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none">
+                            <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              {/* Small circle at the start of the line */}
+                              <circle cx="68" cy="10" r="2" fill="black" />
+                              {/* Curved path from profile to card */}
+                              <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                                    stroke="black" 
+                                    strokeWidth="2" 
+                                    fill="none" />
+                            </svg>
+                          </div>
+                          
+                          {/* Star Rating - Right of profile */}
+                          <div className="absolute -top-4 left-[60%] transform -translate-x-1/2 z-20">
+                            <StarRating count={5} />
+                          </div>
+                          
+                          {/* Card with testimonial */}
+                          <div className="relative rounded-xl shadow-lg p-6 pt-8 pl-24 bg-yellow-400 text-black">
+                            <div className="mb-4">
+                              <h4 className="font-bold text-lg">{testimonial.name}</h4>
+                              <p className="text-sm text-yellow-800">{testimonial.role}</p>
+                            </div>
+                            <p className="text-sm leading-relaxed">
+                              {testimonial.text}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        // Right-aligned card (even indices - second card)
+                        <>
+                          {/* Profile Image - Right positioned */}
+                          <div className="absolute -top-8 right-8 z-10">
+                            <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
+                          </div>
+                          
+                          {/* Curved connector line using SVG */}
+                          <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none">
+                            <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                              {/* Small circle at the start of the line */}
+                              <circle cx="68" cy="10" r="2" fill="black" />
+                              {/* Curved path from profile to card */}
+                              <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                                    stroke="black" 
+                                    strokeWidth="2" 
+                                    fill="none" />
+                            </svg>
+                          </div>
+                          
+                          {/* Star Rating - Left of profile */}
+                          <div className="absolute -top-4 right-[60%] transform translate-x-1/2 z-20">
+                            <StarRating count={5} />
+                          </div>
+                          
+                          {/* Card with testimonial */}
+                          <div className="relative rounded-xl shadow-lg p-6 pt-8 pr-24 bg-black text-white">
+                            <div className="mb-4">
+                              <h4 className="font-bold text-lg">{testimonial.name}</h4>
+                              <p className="text-sm text-yellow-400">{testimonial.role}</p>
+                            </div>
+                            <p className="text-sm leading-relaxed">
+                              {testimonial.text}
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    
-                    {/* Line connecting to stars */}
-                    <div className="absolute -top-4 left-24 right-24 border-t border-gray-300 z-5"></div>
-                    
-                    {/* Star Rating - Positioned in the center top */}
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                      <StarRating count={5} />
-                    </div>
-                    
-                    {/* Card with testimonial */}
-                    <div 
-                      className={`relative rounded-xl shadow-lg p-6 pt-8 pl-24 ${
-                        index % 2 === 0 
-                          ? 'bg-yellow-400 text-black' 
-                          : 'bg-black text-white'
-                      }`}
-                    >
-                      
-                      <div className="mb-4">
-                        <h4 className="font-bold text-lg">{testimonial.name}</h4>
-                        <p className={`text-sm ${
-                          index % 2 === 0 ? 'text-yellow-800' : 'text-yellow-400'
-                        }`}>
-                          {testimonial.role}
-                        </p>
-                      </div>
-                      <p className="text-sm leading-relaxed">
-                        {testimonial.text}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           ))}
