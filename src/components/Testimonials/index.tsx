@@ -1,364 +1,186 @@
-"use client";
+// components/TestimonialsSection.tsx
+import React from 'react';
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { Testimonial } from "@/types/testimonial";
-import Image from "next/image";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-
-// Extended testimonial type to include category
-interface ExtendedTestimonial extends Testimonial {
-  category: "client" | "vendor" | "driver";
-  shortQuote?: string;
+interface Testimonial {
+  category: 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+  name: string;
+  role: string;
+  text: string;
+  image?: string; // Added image property
 }
 
-const testimonialData: ExtendedTestimonial[] = [
-  {
-    id: 1,
-    name: "Wendy S.",
-    designation: "TheHRLady",
-    content: "As a small business owner, my team of virtual assistants makes me feel like I have an entire team behind me. One of their tasks is to transform my PowerPoint presentations into professional, polished files that consistently impress me and my clients. Quick, efficient, and effective, they handle tasks with remarkable speed and precision. Their support has been invaluable to my business and my sanity!",
-    image: "/images/testimonials/author-01.png",
-    star: 5,
-    category: "client",
-  },
-  {
-    id: 2,
-    name: "Cris & Ray",
-    designation: "Owner of Bloom",
-    content: "Ready Set has streamlined our delivery system. Orders are always on time, and our customers are thrilled.",
-    image: "/images/testimonials/author-02.png",
-    star: 5,
-    category: "client",
-  },
-  {
-    id: 3,
-    name: "Alex R.",
-    designation: "Product Supplier",
-    content: "From onboarding to operations, Ready Set has exceeded expectations.",
-    image: "/images/testimonials/author-03.png",
-    star: 3,
-    category: "client",
-  },
-  {
-    id: 4,
-    name: "Lydia N.",
-    designation: "Vendor Partner",
-    content: "Partnering with Ready Set has increased our efficiency by 40%. Their team is reliable and professional.",
-    image: "/images/testimonials/author-04.png",
-    star: 5,
-    category: "client",
-  },
-  {
-    id: 5,
-    name: "George E.",
-    designation: "Vendor Partner",
-    content: "Efficient, reliable, and seamless partnership!",
-    image: "/images/testimonials/author-05.png",
-    star: 5,
-    category: "vendor",
-  },
-  {
-    id: 6,
-    name: "Maria R.",
-    designation: "Logistics Partner",
-    content: "I love the flexibility and the team's professionalism. I feel valued every single day.",
-    image: "/images/testimonials/author-06.png",
-    star: 4,
-    category: "driver",
-  },
-  {
-    id: 7,
-    name: "Chris L.",
-    designation: "Delivery Driver",
-    content: "Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I've also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job, it feels like a community that genuinely cares about its drivers.",
-    image: "/images/testimonials/author-07.png",
-    star: 5,
-    category: "driver",
-  },
-];
-
-const TestimonialCard = ({ testimonial }: { testimonial: ExtendedTestimonial }) => {
-  // Determine background color based on testimonial id
-  const getBgColor = () => {
-    // Use a more intense yellow for yellow cards
-    if (testimonial.id === 1 || testimonial.id === 4 || testimonial.id === 6) {
-      return "bg-yellow-300 text-black";
-    } else {
-      return "bg-gray-800 text-white";
-    }
-  };
-
-  return (
-    <div className="relative">
-      <div className={`rounded-lg p-4 ${getBgColor()}`}>
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h4 className="font-bold text-base">{testimonial.name}, {testimonial.designation}</h4>
-            <div className="flex gap-1 mt-1">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className={`${testimonial.id === 1 || testimonial.id === 4 || testimonial.id === 6 ? "text-yellow-500" : "text-yellow-400"}`}>
-                  {i < testimonial.star ? "★" : "☆"}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="ml-2">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white">
-              <Image
-                src={testimonial.image}
-                alt={testimonial.name}
-                width={48}
-                height={48}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-        <p className="text-sm">{testimonial.content}</p>
-      </div>
-    </div>
-  );
-};
-
-const CategoryTestimonialCarousel = ({
-  testimonials,
-  title,
-  subtitle
-}: {
-  testimonials: ExtendedTestimonial[],
-  title: string,
-  subtitle: string
-}) => {
-  const [api, setApi] = useState<any>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
-
-  // Función para avanzar al siguiente slide
-  const scrollToNext = useCallback(() => {
-    if (api) {
-      const nextIndex = (currentIndex + 1) % testimonials.length;
-      api.scrollTo(nextIndex);
-      setCurrentIndex(nextIndex);
-    }
-  }, [api, currentIndex, testimonials.length]);
-
-  // Configurar el autoscroll cuando el mouse está sobre el carrusel
-  useEffect(() => {
-    // Limpia cualquier intervalo existente inmediatamente
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
-      autoScrollRef.current = null;
-    }
-    
-    // Solo crea un nuevo intervalo si está en hover y el API existe
-    if (api && isHovered) {
-      console.log("Iniciando autoscroll"); // Para debugging
-      autoScrollRef.current = setInterval(() => {
-        console.log("Avanzando slide"); // Para debugging
-        scrollToNext();
-      }, 1000); // Desplazamiento cada 2 segundos
-    }
-
-    // Limpiar al desmontar o cuando cambien las dependencias
-    return () => {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
-        autoScrollRef.current = null;
-      }
-    };
-  }, [api, isHovered, scrollToNext]);
-
-  // Mejorar la detección de hover usando eventos nativos
-  useEffect(() => {
-    const element = carouselRef.current;
-    
-    if (!element) return;
-    
-    const handleMouseEnter = () => {
-      console.log("Mouse enter"); // Para debugging
-      setIsHovered(true);
-    };
-    
-    const handleMouseLeave = () => {
-      console.log("Mouse leave"); // Para debugging
-      setIsHovered(false);
-    };
-    
-    // Usar eventos nativos para mejor detección
-    element.addEventListener('mouseenter', handleMouseEnter);
-    element.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
-
-  // Seguir el índice actual cuando el carrusel se desplaza
-  useEffect(() => {
-    if (!api) return;
-    
-    const onSelect = () => {
-      setCurrentIndex(api.selectedScrollSnap());
-    };
-    
-    api.on('select', onSelect);
-    
-    return () => {
-      api.off('select', onSelect);
-    };
-  }, [api]);
-
-  return (
-    <div className="w-full lg:w-1/3 px-4">
-      <div className="border-dotted border-2 border-gray-300 p-4 h-full">
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-bold uppercase mb-1">{title}</h3>
-          <p className="text-sm text-gray-600">{subtitle}</p>
-        </div>
-
-        <div 
-          ref={carouselRef}
-          className="relative w-full h-[500px] overflow-hidden"
-        >
-          <Carousel
-            setApi={setApi}
-            opts={{
-              align: "center",
-              loop: true,
-              skipSnaps: false,
-              containScroll: "keepSnaps"
-            }}
-            orientation="vertical"
-            className="w-full h-full"
-          >
-            <CarouselContent className="-mt-2 h-full">
-              {testimonials.map((testimonial) => (
-                <CarouselItem 
-                  key={testimonial.id} 
-                  className="pt-2 h-full flex items-center justify-center"
-                >
-                  <div className="w-full max-h-[400px] overflow-y-auto">
-                    <TestimonialCard testimonial={testimonial} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            <div className="absolute bottom-0 left-0 right-0 flex justify-center mb-2 gap-2 z-10">
-              <CarouselPrevious 
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevenir que el evento afecte al hover
-                  if (api) {
-                    const prevIndex = (currentIndex - 1 + testimonials.length) % testimonials.length;
-                    api.scrollTo(prevIndex);
-                    setCurrentIndex(prevIndex);
-                  }
-                }}
-                className="h-8 w-8 border-0 bg-yellow-300 hover:bg-yellow-400 text-black rounded-full"
-              >
-                <span className="sr-only">Previous testimonial</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 rotate-90"
-                >
-                  <path d="m15 18-6-6 6-6" />
-                </svg>
-              </CarouselPrevious>
-              <CarouselNext 
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevenir que el evento afecte al hover
-                  scrollToNext();
-                }}
-                className="h-8 w-8 border-0 bg-yellow-300 hover:bg-yellow-400 text-black rounded-full"
-              >
-                <span className="sr-only">Next testimonial</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 rotate-90"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </CarouselNext>
-            </div>
-          </Carousel>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const Testimonials = () => {
-  // Filter testimonials by category
-  const clientTestimonials = testimonialData.filter(
-    (testimonial) => testimonial.category === "client"
+  const testimonials: Testimonial[] = [
+    {
+      category: 'CLIENTS',
+      name: 'Wendy S.',
+      role: 'TheHRLady',
+      text: 'As a small business owner, my team makes me feel like I have an entire team behind me. One of their tasks is to transform my presentations into professional, polished materials that consistently impress me and my clients. Quick, perfect, and effective, they handle tasks with remarkable speed and precision.',
+      image: '/images/wendy.jpg'
+    },
+    {
+      category: 'CLIENTS',
+      name: 'Cris & Ray',
+      role: 'Owner of Bloom',
+      text: 'Ready Set has transformed our delivery system. Custom solutions and always on time, our customers are thrilled with the reliable, seamless partnership!',
+      image: '/images/crisray.jpg'
+    },
+    {
+      category: 'VENDORS',
+      name: 'Alex R.',
+      role: 'Product Supplier',
+      text: 'From onboarding to operations, Ready Set has exceeded expectations.',
+      image: '/images/alex.jpg'
+    },
+    {
+      category: 'VENDORS',
+      name: 'Lydia N.',
+      role: 'Vendor Partner',
+      text: 'Partnering with Ready Set has increased our efficiency by 40%. Their team is reliable and professional.',
+      image: '/images/lydia.jpg'
+    },
+    {
+      category: 'VENDORS',
+      name: 'George E.',
+      role: 'Vendor Partner',
+      text: 'Efficient, reliable, and seamless partnership!',
+      image: '/images/george.jpg'
+    },
+    {
+      category: 'DRIVERS',
+      name: 'Maria R.',
+      role: 'Logistics Partner',
+      text: 'I love the flexibility and the team\'s professionalism. I feel valued every single day.',
+      image: '/images/maria.jpg'
+    },
+    {
+      category: 'DRIVERS',
+      name: 'Chris L.',
+      role: 'Delivery Driver',
+      text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
+      image: '/images/chris.jpg'
+    }
+  ];
+
+  const groupedTestimonials = testimonials.reduce((acc, testimonial) => {
+    acc[testimonial.category] = acc[testimonial.category] || [];
+    acc[testimonial.category].push(testimonial);
+    return acc;
+  }, {} as Record<Testimonial['category'], Testimonial[]>);
+
+  // Updated star component to match the design
+  const StarRating = ({ count = 5 }: { count?: number }) => (
+    <div className="flex bg-white px-2 py-1 rounded-md">
+      {[...Array(count)].map((_, i) => (
+        <svg
+          key={i}
+          className="w-6 h-6 text-yellow-400"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
   );
-  const vendorTestimonials = testimonialData.filter(
-    (testimonial) => testimonial.category === "vendor"
-  );
-  const driverTestimonials = testimonialData.filter(
-    (testimonial) => testimonial.category === "driver"
+
+  // Placeholder image component since we don't have actual images
+  const ProfileImage = ({ alt }: { alt: string }) => (
+    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
+      <img 
+        src={`/api/placeholder/80/80`} 
+        alt={alt} 
+        className="w-full h-full object-cover"
+      />
+    </div>
   );
 
   return (
-    <section className="py-16 md:py-20">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What People Say About Us</h2>
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-center">
-              <div className="border-b border-dotted border-gray-400 w-1/4"></div>
-              <div className="px-4">
-                <p className="font-medium">Real Stories. Real Impact</p>
-              </div>
-              <div className="border-b border-dotted border-gray-400 w-1/4"></div>
-            </div>
-            <p className="text-sm mt-2">
-              See how Ready Set is making a difference for our clients, vendors, and drivers
-            </p>
-          </div>
+    <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
+      <div className="max-w-7xl mx-auto">
+        {/* Updated header section with dotted lines extending from title */}
+        <div className="text-center mb-12 relative">
+          <h2 className="text-4xl font-bold text-black mb-4">
+            What People Say About Us
+          </h2>
+          
+         {/* Real Stories. Real Impact with dotted lines extending from both sides */}
+<div className="mb-8 flex items-center justify-center">
+  <div className="relative flex items-center justify-center w-full">
+    {/* Left dotted line - changed from w-1/3 to w-2/5 */}
+    <div className="border-t-2 border-dashed border-black w-2/5 absolute right-1/2 mr-4"></div>
+    
+    {/* Text in the middle */}
+    <p className="text-xl text-black z-10 bg-white px-4 relative">Real Stories. Real Impact</p>
+    
+    {/* Right dotted line - changed from w-1/3 to w-2/5 */}
+    <div className="border-t-2 border-dashed border-black w-2/5 absolute left-1/2 ml-4"></div>
+  </div>
+</div>
+          
+          <p className="text-black max-w-2xl mx-auto">
+            See how Ready Set is making a difference for our clients, vendors, and drivers
+          </p>
         </div>
 
-        <div className="flex flex-wrap -mx-4">
-          <CategoryTestimonialCarousel
-            testimonials={clientTestimonials}
-            title="CLIENTS"
-            subtitle="Why Our Clients Love Us"
-          />
-          <CategoryTestimonialCarousel
-            testimonials={vendorTestimonials}
-            title="VENDORS"
-            subtitle="Trusted Partners for Seamless Operations"
-          />
-          <CategoryTestimonialCarousel
-            testimonials={driverTestimonials}
-            title="DRIVERS"
-            subtitle="Our Drivers, Our Heroes"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Object.entries(groupedTestimonials).map(([category, items]) => (
+            <div key={category} className="space-y-8 relative">
+              {/* Category Header with Dotted Border */}
+              {/* Category Header - Removed dotted border */}
+<div className="text-center relative pb-8 mb-8">
+  <div className="p-4">
+    <h3 className="text-2xl font-bold text-black">{category}</h3>
+    <p className="text-black text-sm">
+      {category === 'CLIENTS' && 'Why Our Clients Love Us'}
+      {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
+      {category === 'DRIVERS' && 'Our Drivers, Our Heroes'}
+    </p>
+  </div>
+</div>
+              
+              <div className="space-y-12">
+                {items.map((testimonial, index) => (
+                  <div key={index} className="relative pt-6">
+                    {/* Profile Image - Positioned to overlap card */}
+                    <div className="absolute -top-8 left-8 z-10">
+                      <ProfileImage alt={testimonial.name} />
+                    </div>
+                    
+                    {/* Line connecting to stars */}
+                    <div className="absolute -top-4 left-24 right-24 border-t border-gray-300 z-5"></div>
+                    
+                    {/* Star Rating - Positioned in the center top */}
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                      <StarRating count={5} />
+                    </div>
+                    
+                    {/* Card with testimonial */}
+                    <div 
+                      className={`relative rounded-xl shadow-lg p-6 pt-8 pl-24 ${
+                        index % 2 === 0 
+                          ? 'bg-yellow-400 text-black' 
+                          : 'bg-black text-white'
+                      }`}
+                    >
+                      
+                      <div className="mb-4">
+                        <h4 className="font-bold text-lg">{testimonial.name}</h4>
+                        <p className={`text-sm ${
+                          index % 2 === 0 ? 'text-yellow-800' : 'text-yellow-400'
+                        }`}>
+                          {testimonial.role}
+                        </p>
+                      </div>
+                      <p className="text-sm leading-relaxed">
+                        {testimonial.text}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
