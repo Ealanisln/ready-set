@@ -10,6 +10,11 @@ const TEXT_COLOR = '#333'
 const SECONDARY_TEXT = '#666'
 
 export default async function Image() {
+  // Cargar la fuente Inter directamente
+  const interFont = await fetch(
+    'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiA.woff2'
+  ).then((res) => res.arrayBuffer())
+
   return new ImageResponse(
     (
       <div
@@ -23,6 +28,7 @@ export default async function Image() {
           justifyContent: 'center',
           padding: '4rem',
           position: 'relative',
+          fontFamily: 'Inter',
         }}
       >
         {/* Logo - Usando ruta pública */}
@@ -85,16 +91,11 @@ export default async function Image() {
       fonts: [
         {
           name: 'Inter',
-          data: await fetchFont('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap'),
+          data: interFont,
           style: 'normal',
+          weight: 700
         },
       ],
     }
   )
-}
-
-// Helper para cargar fuentes (opcional)
-async function fetchFont(url: string) {
-  const res = await fetch(url)
-  return await res.arrayBuffer()
 }

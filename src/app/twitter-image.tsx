@@ -10,6 +10,15 @@ const TEXT_COLOR = '#1a1a1a'
 const SECONDARY_COLOR = '#4a5568'
 
 export default async function Image() {
+  // Cargar fuentes directamente como archivos binarios
+  const interRegular = await fetch(
+    'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuDyfAZ9hiA.woff2'
+  ).then((res) => res.arrayBuffer())
+  
+  const interBold = await fetch(
+    'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiA.woff2'
+  ).then((res) => res.arrayBuffer())
+
   return new ImageResponse(
     (
       <div
@@ -69,7 +78,7 @@ export default async function Image() {
             Expert Support When You Need It Most
           </p>
 
-          {/* Nuevo CTA destacado */}
+          {/* CTA destacado */}
           <div
             style={{
               background: BRAND_COLOR,
@@ -91,7 +100,7 @@ export default async function Image() {
           </div>
         </div>
 
-        {/* Footer de Twitter */}
+        {/* Footer */}
         <div
           style={{
             position: 'absolute',
@@ -139,16 +148,17 @@ export default async function Image() {
       fonts: [
         {
           name: 'Inter',
-          data: await fetchFont('https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap'),
+          data: interRegular,
           style: 'normal',
+          weight: 400
+        },
+        {
+          name: 'Inter',
+          data: interBold,
+          style: 'normal',
+          weight: 700
         },
       ],
     }
   )
-}
-
-// Helper para fuentes
-async function fetchFont(url: string) {
-  const response = await fetch(url)
-  return await response.arrayBuffer()
 }
