@@ -218,7 +218,7 @@ const Testimonials = () => {
                 </div>
                 
                 {/* Subtítulo */}
-                <div className="text-center -mt-9 mb-8">
+                <div className="text-center -mt-9 mb-16">
                   <p className="text-black text-sm">
                     {category === 'CLIENTS' && 'Why Our Clients Love Us'}
                     {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
@@ -234,7 +234,7 @@ const Testimonials = () => {
                 >
 
 {/* Controles de navegación */}
-<div className="absolute -top-6 right-0 flex space-x-2 z-30">
+<div className="absolute -top-16 right-0 flex space-x-2 z-30">
   <button 
     onClick={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
     className="w-8 h-8 rounded-full bg-black bg-opacity-5 text-white flex items-center justify-center hover:bg-opacity-40 transition-all"
