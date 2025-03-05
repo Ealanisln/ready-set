@@ -32,28 +32,28 @@ const Testimonials = () => {
       name: 'Racheal Gallegos.',
       role: 'Vendor Partner',
       text: 'Kaleb was an exceptional asset to the company during my tenure there. I would hire him again in a second for any position. Kaleb started his journey with us in customer service and sales, where he quickly showcased his remarkable intelligence and aptitude for learning. His analytical skills and ability to see both the big picture and the finer details set him apart from the beginning. Kaleb’s dedication and rapid growth led him to transition into product and brand management, where he truly excelled. His innovative approach, strategic thinking, and maticulous attention to detail made a significatn impact on the company’s success. When I left the company, I felt secure knowing that Kaleb was taking over. It wasn’t long before he was leading the team of brand managers, steering the conpany’s vision with expertise. Kaleb ability to adapt, learn, and lead with insight and precision is truly commendable. His contributions were instrumental in the company growth, and I am confident that he will continue to achieve great success in any future endeavors. Any organization would be fortunate to have Kaleb on their team.',
-      image: '/images/lydia.jpg'
+      image: '/images/testimonials/author-03.png'
     },
     {
       category: 'CLIENTS',
       name: 'Crystal Rapada.',
       role: 'Virtual Assistant',
-      text: 'Efficient, reliable, and seamless partnership!',
-      image: '/images/george.jpg'
+      text: 'A Game-Changer for CareerLearning. Ready Set Virtual Assistants was instrumental in propelling CareerLearning to new heights. Their team seamlessly integrated into our operations, from customer service to sales support and beyond. We were particularly impressed with their ability to quickly grasp complex software platforms like Zendesk, HubSpot, On24, and Shopify. Their dedication to continuous learning and growth was evident as the VA Brand Managers took on increasing responsibilities and became experts in various departments. The impact of Ready Set’s email marketing team was especially noteworthy. Their coordinators expertly managed our email campaigns through Marketo and Klaviyo, while their experienced email marketing consultant provided strategic guidance that significantly boosted our results. Ultimately, these efforts, combined with their contributions to social media management and overall marketing strategy, led to a record-breaking $3.5 million in sales in 2023. If you’re seeking a reliable, skilled, and innovative virtual assistant team to elevate your business, I wholeheartedly recommend Ready Set Virtual Assistants. They’re not just service providers; they’re true partners in growth. 5 stars. 10 out of 10!',
+      image: '/images/testimonials/author-04.png'
     },
     {
       category: 'DRIVERS',
       name: 'Maria R.',
       role: 'Logistics Partner',
       text: 'I love the flexibility and the team\'s professionalism. I feel valued every single day.',
-      image: '/images/maria.jpg'
+      image: '/images/testimonials/author-05.png'
     },
     {
       category: 'DRIVERS',
       name: 'Chris L.',
       role: 'Delivery Driver',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
-      image: '/images/chris.jpg'
+      image: '/images/testimonials/author-06.png'
     }, 
 
     {
@@ -61,7 +61,7 @@ const Testimonials = () => {
       name: 'Chris L.',
       role: 'Delivery Driver',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
-      image: '/images/chris.jpg'
+      image: '/images/testimonials/author-07.png'
     }, 
 
     {
@@ -69,7 +69,7 @@ const Testimonials = () => {
       name: 'Chris L.',
       role: 'Delivery Driver',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
-      image: '/images/chris.jpg'
+      image: '/images/testimonials/author-06.png'
     }, 
   ];
 
