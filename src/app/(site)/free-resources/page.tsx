@@ -12,7 +12,6 @@ const FreeResourcesPage = () => {
           <ResourcesGrid />
           <Separator className="my-8 bg-gray-200" /> 
           <NewsletterForm />
-          <Testimonials />
         </div>
       </div>
     </div>
