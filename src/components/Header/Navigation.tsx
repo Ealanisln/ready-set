@@ -105,7 +105,7 @@ const Navigation: React.FC<NavigationProps> = ({
         {!user && (
           <>
             <AuthLink
-              href="/signin"
+              href="/sign-in"
               title="Sign In"
               navbarToggleHandler={navbarToggleHandler}
             />

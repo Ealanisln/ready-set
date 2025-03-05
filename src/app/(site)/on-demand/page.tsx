@@ -20,14 +20,14 @@ const OnDemandPage = () => {
         const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error || !user) {
-          router.push("/signin");
+          router.push("/sign-in");
           return;
         }
         
         setUser(user);
       } catch (error) {
         console.error("Error checking auth:", error);
-        router.push("/signin");
+        router.push("/sign-in");
       } finally {
         setLoading(false);
       }
@@ -39,7 +39,7 @@ const OnDemandPage = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === "SIGNED_OUT") {
-          router.push("/signin");
+          router.push("/sign-in");
         } else if (event === "SIGNED_IN" && session) {
           setUser(session.user);
         }

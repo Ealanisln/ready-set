@@ -83,7 +83,7 @@ const SignUp = () => {
         );
       } else {
         toast.success("Successfully registered");
-        router.push("/signin");
+        router.push("/sign-in");
       }
     } catch (err) {
       console.error("SignUp: Registration error:", err);
@@ -105,9 +105,9 @@ const SignUp = () => {
   };
 
   const handleUploadComplete = () => {
-    console.log("Upload complete, redirecting to signin"); // Debug log
+    console.log("Upload complete, redirecting to sign-in"); // Debug log
     toast.success("Documents uploaded successfully");
-    router.push("/signin");
+    router.push("/sign-in");
   };
 
   const handleBack = () => {
@@ -287,7 +287,7 @@ const SignUp = () => {
 
                 <p className="text-center text-sm text-gray-500">
                   Already have an account?{" "}
-                  <Link href="/signin" className="text-primary hover:underline">
+                  <Link href="/sign-in" className="text-primary hover:underline">
                     Sign In
                   </Link>
                 </p>

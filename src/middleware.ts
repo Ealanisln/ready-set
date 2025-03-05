@@ -41,7 +41,9 @@ export async function middleware(request: NextRequest) {
   let userRole = null
   if (user) {
     try {
-      // First check profiles table - it looks like in your schema this is likely where the type/role is stored
+      console.log('Attempting to fetch user role for user ID:', user.id)
+      
+      // First check profiles table
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('type')
@@ -52,28 +54,40 @@ export async function middleware(request: NextRequest) {
         userRole = profile.type
         console.log('Found role in profiles table:', userRole)
       } else {
-        console.log('Profile not found, error:', error)
+        console.log('Profile not found in database:', error?.message)
+        console.log('Raw profile query result:', profile)
         
-        // Try to get user metadata from auth, which might contain role info
-        const { data: userData } = await supabase.auth.admin.getUserById(user.id)
+        // Try to get user metadata from auth
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user.id)
+        console.log('User metadata:', userData?.user?.user_metadata)
         if (userData?.user?.user_metadata?.role) {
           userRole = userData.user.user_metadata.role
           console.log('Found role in user metadata:', userRole)
+        } else {
+          console.log('No role found in user metadata')
+        }
+        if (userError) {
+          console.log('Error fetching user metadata:', userError)
         }
       }
     } catch (error) {
-      console.error('Error fetching user role:', error)
+      console.error('Error fetching user role - Full error:', error)
     }
+  } else {
+    console.log('No user object found in middleware')
   }
 
   // Handle authentication and role-based routing
-  if (!user && 
-      !request.nextUrl.pathname.startsWith('/login') && 
-      !request.nextUrl.pathname.startsWith('/auth') &&
-      !request.nextUrl.pathname.startsWith('/signin')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/signin'
-    return NextResponse.redirect(url)
+  if (!user) {
+    // Only redirect to sign-in for protected routes (admin and addresses)
+    if (request.nextUrl.pathname.startsWith('/admin') || 
+        request.nextUrl.pathname.startsWith('/addresses')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/sign-in'
+      return NextResponse.redirect(url)
+    }
+    // For other routes (including root), allow access
+    return supabaseResponse
   }
 
   // For debugging only
@@ -132,8 +146,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:path*',
     '/addresses/:path*',
-    '/',
   ],
 }

@@ -109,7 +109,7 @@ const menuData: MenuItem[] = [
   {
     id: 7,
     title: "Sign In",
-    path: "/signin",
+    path: "/sign-in",
     newTab: false,
   },
   {
