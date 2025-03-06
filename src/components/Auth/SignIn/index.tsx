@@ -1,13 +1,11 @@
-// src/components/Auth/SignIn/index.tsx
-
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import Loader from "@/components/Common/Loader";
 import { login, signup } from '@/app/actions/login';
+import GoogleAuthButton from "@/components/Auth/GoogleAuthButton"; 
 
 const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: string } }) => {
   const [loginData, setLoginData] = useState({
@@ -59,7 +57,6 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
   };
 
   // Display error from URL params if present
-  // We need to use useEffect for initialization
   useEffect(() => {
     if (searchParams?.error) {
       setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
@@ -143,7 +140,7 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                   )}
                 </div>
 
-                <div className="flex space-x-4 mb-9">
+                <div className="flex space-x-4 mb-5">
                   <button
                     formAction={login}
                     disabled={loading}
@@ -166,6 +163,17 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                   >
                     Sign Up
                   </button>
+                </div>
+                
+                {/* Google Sign-in Button */}
+                <div className="mb-5">
+                  <GoogleAuthButton />
+                </div>
+
+                {/* Or divider */}
+                <div className="relative flex justify-center text-xs uppercase mb-5">
+                  <span className="bg-white dark:bg-dark-2 px-2 text-gray-500">Or</span>
+                  <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-300 dark:bg-dark-3"></div>
                 </div>
               </form>
 

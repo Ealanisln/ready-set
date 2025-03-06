@@ -26,6 +26,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // Add Turbopack configuration
+    turbo: {
+      // Set memory limit to 1GB (1073741824 bytes)
+      memoryLimit: 1073741824,
+      // Optional: Configure module ID strategy for better caching in dev
+      moduleIdStrategy: 'named',
+      // Add any other Turbopack specific configuration if needed
+    },
+  },
   async rewrites() {
     return [
       {

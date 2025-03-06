@@ -61,6 +61,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<UserType>("client");
   const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -111,6 +112,47 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  // Fetch the current user's role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!session) return;
+      
+      try {
+        // Fetch the current user's role from the API
+        const response = await fetch("/api/users/current-user");
+        
+        if (!response.ok) {
+          console.error("Failed to fetch current user role:", response.statusText);
+          
+          // Fallback to metadata if API fails
+          if (session?.user?.user_metadata?.type) {
+            setCurrentUserRole(session.user.user_metadata.type as UserType);
+            console.log("Current user role set from metadata:", session.user.user_metadata.type);
+          }
+          return;
+        }
+        
+        const userData = await response.json();
+        
+        // Set the role from the API response
+        if (userData.type) {
+          setCurrentUserRole(userData.type as UserType);
+          console.log("Current user role set to:", userData.type);
+        }
+      } catch (error) {
+        console.error("Error fetching current user role:", error);
+        
+        // Fallback to metadata if API fails
+        if (session?.user?.user_metadata?.type) {
+          setCurrentUserRole(session.user.user_metadata.type as UserType);
+          console.log("Current user role set from metadata (fallback):", session.user.user_metadata.type);
+        }
+      }
+    };
+    
+    fetchUserRole();
+  }, [session]);
 
   // Memoize the default form values
   const defaultFormValues = useMemo(
@@ -425,9 +467,6 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       </div>
     );
   }
-
-  // Get the user type from the Supabase session user metadata
-  const currentUserRole = (session?.user?.user_metadata?.type as UserType) || "client";
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">

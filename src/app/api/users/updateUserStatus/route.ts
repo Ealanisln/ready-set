@@ -1,152 +1,106 @@
+// src/app/api/users/updateUserStatus/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient, users_status, Prisma } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-interface UpdateUserStatusBody {
-  userId: string;
-  newStatus: users_status;
-}
-
-// Type guard for users_status
-function isValidStatus(status: any): status is users_status {
-  return Object.values(users_status).includes(status);
-}
+import { prisma } from "@/utils/prismaDB";
+import { createClient } from "@/utils/supabase/server";
 
 export async function PUT(request: Request) {
-  let requestBody: Partial<UpdateUserStatusBody> = {};
-
   try {
-    // Validate request content-type
-    const contentType = request.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
-      return NextResponse.json(
-        { error: "Content-Type must be application/json" },
-        { status: 415 }
-      );
-    }
-
-    const body = await request.json();
-    requestBody = body;
+    // Initialize Supabase client
+    const supabase = await createClient();
     
-    const { userId, newStatus } = requestBody;
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // More detailed validation
-    const missingFields = [];
-    if (!userId) missingFields.push('userId');
-    if (!newStatus) missingFields.push('newStatus');
-
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        { 
-          error: "Missing required fields", 
-          details: {
-            missingFields,
-            received: { userId, newStatus }
-          }
-        },
-        { status: 400 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Type validation for userId
-    if (typeof userId !== 'string') {
-      return NextResponse.json(
-        { 
-          error: "Invalid userId format",
-          details: {
-            expected: "string",
-            received: typeof userId
-          }
-        },
-        { status: 400 }
-      );
+    // Get the user's role from your database
+    let userData;
+    
+    try {
+      // First try profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('type')
+        .eq('auth_user_id', user.id)
+        .single();
+      
+      if (profile) {
+        userData = { type: profile.type };
+      } else {
+        // Fall back to prisma if not in profiles
+        userData = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { type: true }
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 
-    // Validate status enum using type guard
-    if (!isValidStatus(newStatus)) {
-      return NextResponse.json(
-        { 
-          error: "Invalid status provided",
-          details: {
-            providedStatus: newStatus,
-            validStatuses: Object.values(users_status)
-          }
-        },
-        { status: 400 }
-      );
+    // Check if user is super_admin
+    if (userData?.type !== "super_admin") {
+      return NextResponse.json({ 
+        error: "Forbidden. Only super admins can update user status."
+      }, { status: 403 });
     }
 
+    // Get request body
+    const body = await request.json();
+    const { userId, newStatus } = body;
+
+    if (!userId || !newStatus) {
+      return NextResponse.json({
+        error: "Missing required fields",
+        details: { userId, newStatus }
+      }, { status: 400 });
+    }
+
+    // Validate the status
+    const validStatuses = ["active", "pending", "deleted"];
+    if (!validStatuses.includes(newStatus)) {
+      return NextResponse.json({
+        error: "Invalid status. Must be one of: active, pending, deleted",
+        details: { providedStatus: newStatus }
+      }, { status: 400 });
+    }
+
+    console.log(`Attempting to update user ${userId} status to ${newStatus}`);
+    
+    // Update user status in database
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { 
-        status: newStatus, // TypeScript now knows this is a valid status
-        updated_at: new Date()
-      },
+      data: { status: newStatus },
       select: {
         id: true,
+        name: true,
+        email: true,
+        type: true,
         status: true,
-        updated_at: true
       }
     });
 
+    console.log("User status updated successfully:", updatedUser);
+
     return NextResponse.json({
-      success: true,
       message: "User status updated successfully",
       user: updatedUser
     });
-
-  } catch (error) {
-    // Handle specific Prisma errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Handle "Record not found" error
-      if (error.code === 'P2025') {
-        return NextResponse.json(
-          { 
-            error: "User not found",
-            details: { userId: requestBody?.userId }
-          },
-          { status: 404 }
-        );
-      }
-      
-      // Handle invalid data error
-      if (error.code === 'P2002') {
-        return NextResponse.json(
-          { 
-            error: "Database constraint violation",
-            details: error.meta
-          },
-          { status: 409 }
-        );
-      }
+  } catch (error: any) {
+    console.error("Error updating user status:", error);
+    
+    // Handle common errors with descriptive messages
+    if (error.code === 'P2025') {
+      return NextResponse.json({ 
+        error: "User not found" 
+      }, { status: 404 });
     }
-
-    // Handle validation errors
-    if (error instanceof Prisma.PrismaClientValidationError) {
-      return NextResponse.json(
-        { 
-          error: "Invalid data provided",
-          details: error.message
-        },
-        { status: 400 }
-      );
-    }
-
-    // Log the error for debugging
-    console.error("Update user status error:", {
-      error,
-      timestamp: new Date().toISOString(),
-      receivedBody: requestBody
-    });
-
-    // Generic error response
-    return NextResponse.json(
-      { 
-        error: "An unexpected error occurred",
-        requestId: crypto.randomUUID()
-      },
-      { status: 500 }
-    );
+    
+    return NextResponse.json({
+      error: "Failed to update user status",
+      details: error.message
+    }, { status: 500 });
   }
 }

@@ -21,14 +21,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
   const userType = useWatch({
     control,
     name: "type",
-    defaultValue: "driver",
+    defaultValue: "vendor",
   });
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Profile</CardTitle>
-        <CardDescription>Update basic user info</CardDescription>
+        <CardDescription>Update basic user information</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         <div className="grid gap-6">
@@ -72,18 +72,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ control, errors }) => {
             control={control}
             defaultValue=""
             rules={{ required: "Name is required" }}
-            render={({ field: { value, ...fieldProps } }) => (
+            render={({ field: { value, ...fieldProps }, fieldState: { error } }) => (
               <>
                 <Input
                   id="displayName"
                   type="text"
-                  className={`w-full ${errors.displayName ? "border-red-500" : ""}`}
+                  className={`w-full ${error ? "border-red-500" : ""}`}
                   {...fieldProps}
                   value={value ?? ""}
                 />
-                {errors.displayName && (
+                {error && (
                   <p className="mt-1 text-sm text-red-500">
-                    {errors.displayName?.message}
+                    {error.message}
                   </p>
                 )}
               </>
