@@ -1,7 +1,9 @@
+// src/components/Dashboard/VendorClientDetailsCard.tsx
+
 "use client";
 
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   CheckboxGroup,
@@ -48,10 +50,10 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
               render={({ field }) => (
                 <>
                   <CheckboxGroup
-                    {...field}
                     control={control}
                     options={COUNTIES}
                     label="Counties Served"
+                    name="countiesServed"
                   />
                   {errors.countiesServed && (
                     <p className="mt-2 text-red-500">
@@ -70,23 +72,21 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
               rules={{
                 required: "Please select at least one time option",
               }}
-              render={({ field }) => {
-                return (
-                  <>
-                    <CheckboxGroup
-                      {...field}
-                      control={control}
-                      options={TIME_NEEDED}
-                      label="Time Needed"
-                    />
-                    {errors.timeNeeded && (
-                      <p className="mt-2 text-red-500">
-                        {errors.timeNeeded.message}
-                      </p>
-                    )}
-                  </>
-                );
-              }}
+              render={({ field }) => (
+                <>
+                  <CheckboxGroup
+                    control={control}
+                    options={TIME_NEEDED}
+                    label="Time Needed"
+                    name="timeNeeded"
+                  />
+                  {errors.timeNeeded && (
+                    <p className="mt-2 text-red-500">
+                      {errors.timeNeeded.message}
+                    </p>
+                  )}
+                </>
+              )}
             />
           </div>
 
@@ -101,10 +101,10 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
                 render={({ field }) => (
                   <>
                     <CheckboxGroup
-                      {...field}
                       control={control}
                       options={CATERING_BROKERAGE}
                       label="Catering Brokerage"
+                      name="cateringBrokerage"
                     />
                     {errors.cateringBrokerage && (
                       <p className="mt-2 text-red-500">
@@ -125,10 +125,10 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
               render={({ field }) => (
                 <>
                   <RadioGroup
-                    {...field}
                     control={control}
                     options={FREQUENCY}
                     label="Frequency"
+                    name="frequency"
                   />
                   {errors.frequency && (
                     <p className="mt-2 text-red-500">
@@ -141,31 +141,31 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
           </div>
 
           {userType === "vendor" && (
-  <div>
-    <Controller
-      name="provisions"
-      control={control}
-      rules={{
-        required: "Please select at least one provision",
-      }}
-      render={({ field }) => (
-        <>
-          <CheckboxGroup
-            name={field.name}
-            control={control}
-            options={PROVISIONS}
-            label="Do you provide"
-          />
-          {errors.provisions && (
-            <p className="mt-2 text-red-500">
-              {errors.provisions.message}
-            </p>
+            <div>
+              <Controller
+                name="provisions"
+                control={control}
+                rules={{
+                  required: "Please select at least one provision",
+                }}
+                render={({ field }) => (
+                  <>
+                    <CheckboxGroup
+                      control={control}
+                      options={PROVISIONS}
+                      label="Do you provide"
+                      name="provisions"
+                    />
+                    {errors.provisions && (
+                      <p className="mt-2 text-red-500">
+                        {errors.provisions.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
           )}
-        </>
-      )}
-    />
-  </div>
-)}
 
           {userType === "client" && (
             <div>
@@ -176,10 +176,10 @@ const VendorClientDetailsCard: React.FC<VendorClientDetailsCardProps> = ({
                 render={({ field }) => (
                   <>
                     <RadioGroup
-                      {...field}
                       control={control}
                       options={HEAD_COUNT}
                       label="Headcount"
+                      name="head_count"
                     />
                     {errors.head_count && (
                       <p className="mt-2 text-red-500">

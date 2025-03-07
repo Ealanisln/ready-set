@@ -24,8 +24,10 @@ import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
 import { useUploadFile } from "@/hooks/use-upload-file";
+import { COUNTIES, TIME_NEEDED, CATERING_BROKERAGE, PROVISIONS } from "@/components/Auth/SignUp/ui/FormData";
 
 // Updated to match the db schema fields
+// Base database user interface
 interface User {
   id: string;
   name?: string;
@@ -55,8 +57,47 @@ interface User {
   isTemporaryPassword?: boolean;
 }
 
-interface UserFormValues extends User {
+  // Form-specific option type
+interface OptionType {
+  label: string;
+  value: string;
+}
+
+// Extended interface to include transformed array fields for form usage
+interface UserFormValues {
+  id: string;
+  name?: string;
+  email?: string;
+  emailVerified?: Date;
+  image?: string;
+  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
+  company_name?: string;
+  contact_name?: string;
+  contact_number?: string;
+  website?: string;
+  street1?: string;
+  street2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  location_number?: string;
+  parking_loading?: string;
+  counties?: string;
+  time_needed?: string;
+  catering_brokerage?: string;
+  frequency?: string;
+  provide?: string;
+  head_count?: string;
+  status: "active" | "pending" | "deleted";
+  side_notes?: string;
+  isTemporaryPassword?: boolean;
+  
+  // Form-specific fields
   displayName: string;
+  countiesServed?: string[];
+  timeNeeded?: string[];
+  cateringBrokerage?: string[];
+  provisions?: string[];
 }
 
 export default function EditUser(props: { params: Promise<{ id: string }> }) {
@@ -81,6 +122,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
     getUser();
   }, [router, supabase]);
+
 
   // Update the useUploadFileHook to handle the proper return type
   const useUploadFileHook = (category: string) => {
@@ -139,6 +181,10 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       type: "vendor",
       status: "pending",
       displayName: "",
+      countiesServed: [],
+      timeNeeded: [],
+      cateringBrokerage: [],
+      provisions: []
     },
   });
 
@@ -147,6 +193,25 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     setHasUnsavedChanges(isDirty);
   }, [isDirty]);
+
+  // Helper function to convert comma-separated string to array of values
+  const stringToValueArray = (str: string | undefined): string[] => {
+    if (!str) return [];
+    return str.split(',').map((item: string) => item.trim());
+  };
+  
+  // Helper function to convert comma-separated string to array of option objects
+  const stringToOptionsArray = (str: string | undefined, optionsArray: readonly { label: string; value: string }[]): OptionType[] => {
+    if (!str) return [];
+    
+    const values = str.split(',').map((item: string) => item.trim());
+    return values.map((value: string) => {
+      // Try to find the matching option in the predefined array
+      const matchingOption = optionsArray.find((option: OptionType) => option.value === value);
+      // Return the matching option if found, otherwise create a new option
+      return matchingOption || { label: value, value: value };
+    });
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -181,15 +246,23 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         setValue("parking_loading", data.parking_loading || "");
         setValue("type", data.type);
         setValue("status", data.status);
+        setValue("frequency", data.frequency || "");
+        setValue("head_count", data.head_count || "");
+        setValue("side_notes", data.side_notes || "");
+        setValue("isTemporaryPassword", data.isTemporaryPassword || false);
+        
+        // Transform string values to arrays of simple values (not objects)
+        // This matches what CheckboxGroup expects for the checked state
+        setValue("countiesServed", stringToValueArray(data.counties));
+        setValue("timeNeeded", stringToValueArray(data.time_needed));
+        setValue("cateringBrokerage", stringToValueArray(data.catering_brokerage));
+        setValue("provisions", stringToValueArray(data.provide));
+        
+        // Keep the original string values for reference or backup
         setValue("counties", data.counties || "");
         setValue("time_needed", data.time_needed || "");
         setValue("catering_brokerage", data.catering_brokerage || "");
-        setValue("frequency", data.frequency || "");
         setValue("provide", data.provide || "");
-        setValue("head_count", data.head_count || "");
-        setValue("side_notes", data.side_notes || "");
-        // Added isTemporaryPassword to match schema
-        setValue("isTemporaryPassword", data.isTemporaryPassword || false);
       } catch (error) {
         console.error("Error fetching user:", error);
       } finally {
@@ -202,8 +275,56 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
-      const submitData: User = { ...data };
-      delete (submitData as any).displayName;
+      // Create a clean User object for submission
+      const submitData: User = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        emailVerified: data.emailVerified,
+        image: data.image,
+        type: data.type,
+        company_name: data.company_name,
+        contact_name: data.contact_name,
+        contact_number: data.contact_number,
+        website: data.website,
+        street1: data.street1,
+        street2: data.street2,
+        city: data.city,
+        state: data.state,
+        zip: data.zip,
+        location_number: data.location_number,
+        parking_loading: data.parking_loading,
+        frequency: data.frequency,
+        head_count: data.head_count,
+        status: data.status,
+        side_notes: data.side_notes,
+        isTemporaryPassword: data.isTemporaryPassword
+      };
+      
+      // Transform arrays back to comma-separated strings for API
+      if (data.countiesServed && Array.isArray(data.countiesServed)) {
+        submitData.counties = data.countiesServed.join(',');
+      } else {
+        submitData.counties = data.counties;
+      }
+      
+      if (data.timeNeeded && Array.isArray(data.timeNeeded)) {
+        submitData.time_needed = data.timeNeeded.join(',');
+      } else {
+        submitData.time_needed = data.time_needed;
+      }
+      
+      if (data.cateringBrokerage && Array.isArray(data.cateringBrokerage)) {
+        submitData.catering_brokerage = data.cateringBrokerage.join(',');
+      } else {
+        submitData.catering_brokerage = data.catering_brokerage;
+      }
+      
+      if (data.provisions && Array.isArray(data.provisions)) {
+        submitData.provide = data.provisions.join(',');
+      } else {
+        submitData.provide = data.provide;
+      }
 
       // Ensure we're matching the expected fields in the schema
       // This is important for the PUT API call to work correctly
@@ -220,7 +341,18 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
       const updatedUser = await response.json();
       toast.success("User saved successfully!");
-      reset(updatedUser);
+      
+      // Update the form with the returned data from server to keep it in sync
+      const formattedUser = {
+        ...updatedUser,
+        countiesServed: updatedUser.counties ? updatedUser.counties.split(',').map((s: string) => s.trim()) : [],
+        timeNeeded: updatedUser.time_needed ? updatedUser.time_needed.split(',').map((s: string) => s.trim()) : [],
+        cateringBrokerage: updatedUser.catering_brokerage ? updatedUser.catering_brokerage.split(',').map((s: string) => s.trim()) : [],
+        provisions: updatedUser.provide ? updatedUser.provide.split(',').map((s: string) => s.trim()) : [],
+        displayName: updatedUser.name || updatedUser.contact_name || ""
+      };
+      
+      reset(formattedUser);
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error updating user:", error);

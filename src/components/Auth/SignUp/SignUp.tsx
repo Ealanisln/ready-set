@@ -1,3 +1,5 @@
+// src/components/Auth/SignUp/SignUp.tsx
+
 "use client";
 
 import React, { useState } from "react";
@@ -15,27 +17,23 @@ import {
 import { Button } from "@/components/ui/button";
 import VendorForm from "./ui/VendorForm";
 import ClientForm from "./ui/ClientForm";
-import DriverForm from "./ui/DriverForm";
-import HelpDeskForm from "./ui/HelpDeskForm";
-import { Store, Users, Truck, HeadsetIcon } from "lucide-react";
+import { Store, Users } from "lucide-react";
 import {
   UserType,
   FormDataUnion,
   VendorFormData,
   ClientFormData,
-  DriverFormData,
-  HelpdeskFormData,
-  userTypes,
 } from "./FormSchemas";
 import { sendRegistrationNotification } from "@/lib/notifications";
-import DriverSignupUploads from "@/components/Uploader/driver-signup-uploads";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
+
+// Update user types to only include vendor and client
+const userTypes = ["vendor", "client"] as const;
 
 const userTypeIcons = {
   vendor: Store,
   client: Users,
-  driver: Truck,
-  helpdesk: HeadsetIcon,
 } as const;
 
 const SignUp = () => {
@@ -43,11 +41,10 @@ const SignUp = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState<UserType | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (data: FormDataUnion) => {
-    console.log("Form submission started:", data); // Debug log
+    console.log("Form submission started:", data);
     setLoading(true);
     setError(null);
 
@@ -61,37 +58,25 @@ const SignUp = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || "An error occurred during registration",
+          errorData.error || "An error occurred during registration"
         );
       }
 
       const userData = await response.json();
       console.log("Full registration response:", userData);
-      if (!userData.userId) {
-        throw new Error("No user ID received from registration");
-      }
 
-      setUserId(userData.userId);
       // Send notification email
       await sendRegistrationNotification(data);
 
-      if (data.userType === "driver") {
-        console.log("Setting step to 3 for driver uploads"); // Debug log
-        setStep(3);
-        toast.success(
-          "Registration successful. Please upload required documents.",
-        );
-      } else {
-        toast.success("Successfully registered");
-        router.push("/sign-in");
-      }
+      toast.success("Successfully registered");
+      router.push("/sign-in");
     } catch (err) {
       console.error("SignUp: Registration error:", err);
       setError(
-        err instanceof Error ? err.message : "An unknown error occurred",
+        err instanceof Error ? err.message : "An unknown error occurred"
       );
       toast.error(
-        err instanceof Error ? err.message : "An unknown error occurred",
+        err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
       setLoading(false);
@@ -99,15 +84,9 @@ const SignUp = () => {
   };
 
   const handleUserTypeSelection = (type: UserType) => {
-    console.log("User type selected:", type); // Debug log
+    console.log("User type selected:", type);
     setUserType(type);
     setStep(2);
-  };
-
-  const handleUploadComplete = () => {
-    console.log("Upload complete, redirecting to sign-in"); // Debug log
-    toast.success("Documents uploaded successfully");
-    router.push("/sign-in");
   };
 
   const handleBack = () => {
@@ -118,7 +97,7 @@ const SignUp = () => {
   };
 
   const renderUserTypeSelection = () => (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4">
       {userTypes.map((type) => {
         const Icon = userTypeIcons[type];
         return (
@@ -138,7 +117,7 @@ const SignUp = () => {
   );
 
   const renderForm = () => {
-    console.log("Rendering form for user type:", userType); // Debug log
+    console.log("Rendering form for user type:", userType);
     switch (userType) {
       case "vendor":
         return (
@@ -158,50 +137,38 @@ const SignUp = () => {
             isLoading={loading}
           />
         );
-      case "driver":
-        return (
-          <DriverForm
-            onSubmit={(data: DriverFormData) =>
-              onSubmit({ ...data, userType: "driver" })
-            }
-            isLoading={loading}
-          />
-        );
-      case "helpdesk":
-        return (
-          <HelpDeskForm
-            onSubmit={(data: HelpdeskFormData) =>
-              onSubmit({ ...data, userType: "helpdesk" })
-            }
-            isLoading={loading}
-          />
-        );
       default:
         return null;
     }
   };
 
   const renderContent = () => {
-    console.log("Rendering content for step:", step); // Debug log
+    console.log("Rendering content for step:", step);
     switch (step) {
       case 1:
-        return renderUserTypeSelection();
+        return (
+          <>
+            <div className="mb-6">
+              {renderUserTypeSelection()}
+            </div>
+            
+            {/* Divider */}
+            <div className="relative flex justify-center text-xs uppercase my-6">
+              <span className="bg-white dark:bg-dark-2 px-2 text-gray-500">Or</span>
+              <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-300 dark:bg-dark-3"></div>
+            </div>
+            
+            {/* Google Sign-up Button */}
+            <div className="mb-2">
+              <GoogleAuthButton />
+            </div>
+            <p className="text-xs text-center text-gray-500 mt-1">
+              By signing up with Google, you'll be asked to complete your profile after authentication.
+            </p>
+          </>
+        );
       case 2:
         return renderForm();
-      case 3:
-        console.log("Attempting to render driver uploads, userId:", userId); // Debug log
-        return userId ? (
-          <DriverSignupUploads
-            userId={userId}
-            onUploadComplete={handleUploadComplete}
-          />
-        ) : (
-          <Alert variant="destructive">
-            <AlertDescription>
-              Error: User ID not found. Please try registering again.
-            </AlertDescription>
-          </Alert>
-        );
       default:
         return null;
     }
@@ -213,8 +180,6 @@ const SignUp = () => {
         return "Please select your user type to begin.";
       case 2:
         return userType ? `Sign up as ${userType}` : "Complete registration";
-      case 3:
-        return "Upload Required Documents";
       default:
         return "";
     }
@@ -259,7 +224,7 @@ const SignUp = () => {
 
               {renderContent()}
 
-              {step > 1 && step !== 3 && (
+              {step > 1 && (
                 <Button
                   variant="outline"
                   onClick={handleBack}

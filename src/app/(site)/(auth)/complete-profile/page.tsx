@@ -36,7 +36,7 @@ export default function CompleteProfile() {
   const router = useRouter();
   const supabase = createClient();
 
-  // Add loading timeout to prevent infinite loading state
+  // Simple global loading timeout
   useEffect(() => {
     // If loading state persists for more than 30 seconds, reset it
     let loadingTimeout: NodeJS.Timeout;
@@ -54,10 +54,13 @@ export default function CompleteProfile() {
     };
   }, [loading]);
 
+  // Simplified fetchUser with no custom timeouts
   useEffect(() => {
     const fetchUser = async () => {
       try {
         console.log("Fetching user data...");
+        
+        // Simple user fetch with no custom timeouts
         const { data, error } = await supabase.auth.getUser();
 
         if (error) {
@@ -76,18 +79,15 @@ export default function CompleteProfile() {
         console.log("User found:", data.user.id);
         setUser(data.user);
 
-        // Check if user already has a profile
+        // Check if user already has a profile - simple approach
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("auth_user_id", data.user.id)
           .single();
 
-        if (profileError) {
-          console.log(
-            "Profile fetch error or no profile:",
-            profileError.message,
-          );
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.log("Profile fetch error:", profileError.message);
         }
 
         if (profile) {
@@ -118,30 +118,26 @@ export default function CompleteProfile() {
     console.log("Form submission started:", formData);
     setLoading(true);
     setError(null);
-
+  
     if (!user) {
       console.error("No user found in state");
       setError("User not authenticated");
       setLoading(false);
       return;
     }
-
+  
     try {
       console.log("Creating profile for user:", user.id);
-
-      // Prepare profile data - using formData correctly
+  
+      // Prepare profile data
       const profileData = {
         auth_user_id: user.id,
-        guid: null, // Required field, but can be null
-        name:
-          user.user_metadata?.full_name ||
-          formData.contact_name ||
-          user.user_metadata?.name,
+        guid: null,
+        name: user.user_metadata?.full_name || formData.contact_name || user.user_metadata?.name,
         image: user.user_metadata?.avatar_url || user.user_metadata?.picture,
         type: userType,
         company_name: formData.company || null,
-        contact_name:
-          formData.contact_name || user.user_metadata?.full_name || null,
+        contact_name: formData.contact_name || user.user_metadata?.full_name || null,
         contact_number: formData.phone || null,
         website: formData.website || null,
         street1: formData.street1 || null,
@@ -151,20 +147,12 @@ export default function CompleteProfile() {
         zip: formData.zip || null,
         location_number: null,
         parking_loading: formData.parking || null,
-        counties: Array.isArray(formData.countiesServed)
-          ? formData.countiesServed.join(",")
-          : null,
-        time_needed: Array.isArray(formData.timeNeeded)
-          ? formData.timeNeeded.join(",")
-          : null,
+        counties: Array.isArray(formData.countiesServed) ? formData.countiesServed.join(",") : null,
+        time_needed: Array.isArray(formData.timeNeeded) ? formData.timeNeeded.join(",") : null,
         frequency: formData.frequency || null,
-        provide: Array.isArray(formData.provisions)
-          ? formData.provisions.join(",")
-          : null,
+        provide: Array.isArray(formData.provisions) ? formData.provisions.join(",") : null,
         head_count: formData.head_count || null,
-        catering_brokerage: Array.isArray(formData.cateringBrokerage)
-          ? formData.cateringBrokerage.join(",")
-          : null,
+        catering_brokerage: Array.isArray(formData.cateringBrokerage) ? formData.cateringBrokerage.join(",") : null,
         status: "pending",
         side_notes: null,
         confirmation_code: null,
@@ -172,37 +160,12 @@ export default function CompleteProfile() {
         updated_at: new Date(),
         is_temporary_password: false,
       };
-
+  
       console.log("Profile data to insert:", profileData);
-
-      // Debugging: Test database connection before insert
-      console.log("Testing database connection...");
-      const { data: testData, error: testError } = await supabase
-        .from("profiles")
-        .select("count")
-        .limit(1);
-
-      if (testError) {
-        console.error("Database connection test failed:", testError);
-        throw new Error(`Database connection error: ${testError.message}`);
-      }
-
-      console.log("Database connection successful, proceeding with insert");
-
-      // Create the profile in the profiles table
-      const { data: insertedData, error: profileError } = await supabase
-        .from("profiles")
-        .insert(profileData)
-        .select();
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-        throw new Error(`Profile creation failed: ${profileError.message}`);
-      }
-
-      console.log("Profile created successfully:", insertedData);
+  
+      // Prepare user table data
       const userTableData = {
-        id: user.id, // Use the same ID as in auth.users
+        id: user.id,
         guid: null,
         name: profileData.name,
         email: user.email,
@@ -229,74 +192,49 @@ export default function CompleteProfile() {
         updated_at: new Date(),
         isTemporaryPassword: false,
       };
-
-      console.log("Creating user record in public.user table:", userTableData);
-
-      const { data: userTableInsert, error: userTableError } = await supabase
-        .from("user")
-        .insert(userTableData)
-        .select();
-
-      if (userTableError) {
-        console.error("Error creating user record:", userTableError);
-        // You may want to handle this error, but you can still continue
-        // since the profile was created successfully
+  
+      // Use the API route for profile creation
+      console.log("Submitting profile data to API...");
+      
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileData,
+          userTableData
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Profile creation failed');
       }
-
-      if (userTableInsert) {
-        console.log("User record created successfully:", userTableInsert);
-        
-        // Add the redirect logic here, immediately after confirming user record was created
-        console.log("All operations successful, redirecting to home page");
-        toast.success("Profile completed successfully");
-        
-        // Short timeout to allow the toast to display before redirecting
-        setTimeout(() => {
-          setLoading(false);
-          router.push("/");
-        }, 500);
-        
-        // Return early to prevent the code below from executing
-        return;
-      }
-
-      // Also update user's metadata with the role
-      console.log("Updating user metadata with role:", userType);
-      const { data: updatedUser, error: updateError } =
-        await supabase.auth.updateUser({
-          data: { role: userType },
-        });
-
-      if (updateError) {
-        console.error("Error updating user metadata:", updateError);
-        // Continue anyway since the profile was created
-      } else {
-        console.log("User metadata updated successfully:", updatedUser);
-      }
-
-      console.log("Profile completion successful, preparing to redirect");
+  
+      // Success - show toast and redirect
+      console.log("Profile created successfully via API");
       toast.success("Profile completed successfully");
+      
+      // Short timeout to allow the toast to display before redirecting
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
+      
+      return;
+      
     } catch (err) {
-      console.error("CompleteProfile Error (Full details):", err);
-
-      // More detailed error handling
+      console.error("CompleteProfile Error:", err);
+      
       let errorMessage = "An unexpected error occurred";
-
       if (err instanceof Error) {
         errorMessage = err.message;
-        console.error("Error name:", err.name);
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
       }
-
+      
       setError(errorMessage);
       toast.error(errorMessage);
-      setLoading(false); // Make sure to set loading to false
     } finally {
       console.log("Form submission process completed");
-      
-      // Only set loading to false if we haven't already redirected
-      // (This acts as a fallback)
       setLoading(false);
     }
   };
@@ -460,19 +398,17 @@ export default function CompleteProfile() {
               <CardContent className="flex flex-col items-center">
                 <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
 
-                {/* Add a cancel button that appears after 10 seconds */}
-                {loading && (
-                  <Button
-                    variant="outline"
-                    className="mt-4"
-                    onClick={() => {
-                      setLoading(false);
-                      setError("Operation cancelled. Please try again.");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                )}
+                {/* Cancel button */}
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => {
+                    setLoading(false);
+                    setError("Operation cancelled. Please try again.");
+                  }}
+                >
+                  Cancel
+                </Button>
               </CardContent>
             </Card>
           </div>

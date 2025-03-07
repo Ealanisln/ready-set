@@ -43,10 +43,14 @@ interface User {
   zip: string;
   parking_loading?: string;
   countiesServed?: string[];
+  counties?: string;
   timeNeeded?: string[];
+  time_needed?: string;
   cateringBrokerage?: string[];
+  catering_brokerage?: string;
   frequency?: string;
   provisions?: string[];
+  provide?: string;
   head_count?: string;
   status?: "active" | "pending" | "deleted";
 }
@@ -68,6 +72,12 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const supabase = createClient();
 
   const userId = params.id;
+
+  // Helper function to convert comma-separated string to array of values
+  const stringToValueArray = useCallback((str: string | undefined): string[] => {
+    if (!str) return [];
+    return str.split(',').map((item: string) => item.trim());
+  }, []);
 
   // Form setup with default values
   const {
@@ -200,12 +210,19 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
 
       const data = await response.json();
+      console.log("Raw API data:", data); // Debug: log the raw API data
 
       const formData = {
         ...defaultFormValues,
         ...data,
         displayName: data.displayName || data.contact_name || data.name || "",
-        provisions: data.provide ? data.provide.split(", ") : [],
+        
+        // Properly convert string values to arrays for checkbox groups
+        countiesServed: data.counties ? stringToValueArray(data.counties) : [],
+        timeNeeded: data.time_needed ? stringToValueArray(data.time_needed) : [],
+        cateringBrokerage: data.catering_brokerage ? stringToValueArray(data.catering_brokerage) : [],
+        provisions: data.provide ? stringToValueArray(data.provide) : [],
+        
         // Ensure other fields aren't null
         company_name: data.company_name || "",
         website: data.website || "",
@@ -213,6 +230,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         parking_loading: data.parking_loading || "",
       };
 
+      console.log("Transformed form data:", formData); // Debug: log the transformed data
       reset(formData);
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -221,7 +239,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false);
     }
-  }, [userId, reset, defaultFormValues]);
+  }, [userId, reset, defaultFormValues, stringToValueArray]);
 
   // Initial fetch and refresh handling
   useEffect(() => {
@@ -239,12 +257,28 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
-      // Use destructuring to properly remove displayName
-      const { displayName, ...finalSubmitData } = data;
+      // Create a clean submission object
+      const { displayName, countiesServed, timeNeeded, cateringBrokerage, provisions, ...baseSubmitData } = data;
+      const submitData: any = { ...baseSubmitData };
 
-      // Type-safe submission data
-      const submitData: User = finalSubmitData;
+      // Transform arrays back to comma-separated strings
+      if (countiesServed && Array.isArray(countiesServed)) {
+        submitData.counties = countiesServed.join(',');
+      }
+      
+      if (timeNeeded && Array.isArray(timeNeeded)) {
+        submitData.time_needed = timeNeeded.join(',');
+      }
+      
+      if (cateringBrokerage && Array.isArray(cateringBrokerage)) {
+        submitData.catering_brokerage = cateringBrokerage.join(',');
+      }
+      
+      if (provisions && Array.isArray(provisions)) {
+        submitData.provide = provisions.join(',');
+      }
 
+      // Set the display name based on user type
       if (data.type === "driver" || data.type === "helpdesk") {
         submitData.name = displayName;
         delete submitData.contact_name;
@@ -257,6 +291,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       if (data.type === "client") {
         submitData.head_count = data.head_count;
       }
+
+      console.log("Submitting data:", submitData); // Debug: log submission data
 
       const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
@@ -273,12 +309,18 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
 
       const updatedUser = await response.json();
+      console.log("Updated user response:", updatedUser); // Debug: log the response
 
       const formData = {
         ...defaultFormValues,
         ...updatedUser,
         displayName: updatedUser.contact_name || updatedUser.name || "",
-        provisions: updatedUser.provide ? updatedUser.provide.split(", ") : [],
+        
+        // Convert strings back to arrays for form
+        countiesServed: updatedUser.counties ? stringToValueArray(updatedUser.counties) : [],
+        timeNeeded: updatedUser.time_needed ? stringToValueArray(updatedUser.time_needed) : [],
+        cateringBrokerage: updatedUser.catering_brokerage ? stringToValueArray(updatedUser.catering_brokerage) : [],
+        provisions: updatedUser.provide ? stringToValueArray(updatedUser.provide) : [],
       };
 
       reset(formData);
