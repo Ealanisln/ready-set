@@ -90,8 +90,8 @@ const VirtualAssistantPage = () => {
       <DiscoveryCallSection />
       <BusinessScaleSection />
       {/* <Pricing /> */}
-      <DiscoveryBanner />
       <Testimonials />
+      <DiscoveryBanner />
     </main>
   );
 };

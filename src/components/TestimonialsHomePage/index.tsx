@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const Testimonials = () => {
+const TestimonialsHomePage = () => {
   interface Testimonial {
     category: 'CLIENTS' | 'VENDORS' | 'DRIVERS';
     name: string;
@@ -112,7 +112,7 @@ const Testimonials = () => {
     }));
   };
 
-  // Configurar intervalos para el autoplay
+  // Configurar intervalos para el autoplay - ACTUALIZADO A 6 SEGUNDOS (6000ms)
   useEffect(() => {
     const intervals: NodeJS.Timeout[] = [];
     
@@ -125,7 +125,7 @@ const Testimonials = () => {
         if (!isPaused[categoryKey]) {
           nextTestimonial(categoryKey);
         }
-      }, 4000 + Math.random() * 1000); // Tiempos ligeramente diferentes para evitar sincronización
+      }, 6000); // Cambiado de 4000-5000ms a exactamente 6000ms (6 segundos)
       
       intervals.push(intervalId);
     });
@@ -232,28 +232,7 @@ const Testimonials = () => {
                   onMouseEnter={() => setIsPaused({...isPaused, [category]: true})}
                   onMouseLeave={() => setIsPaused({...isPaused, [category]: false})}
                 >
-
-{/* Controles de navegación */}
-<div className="absolute -top-16 right-0 flex space-x-2 z-30">
-  <button 
-    onClick={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-    className="w-8 h-8 rounded-full bg-black bg-opacity-5 text-white flex items-center justify-center hover:bg-opacity-40 transition-all"
-    aria-label="Previous testimonial"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  </button>
-  <button 
-    onClick={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-    className="w-8 h-8 rounded-full bg-black bg-opacity-5 text-white flex items-center justify-center hover:bg-opacity-70 transition-all"
-    aria-label="Next testimonial"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  </button>
-</div>
+                  {/* Eliminamos los controles de navegación (flechas izquierda/derecha) */}
                   
                   {/* Indicadores de página */}
                   <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -374,4 +353,4 @@ const Testimonials = () => {
   );
 };
 
-export default Testimonials;
+export default TestimonialsHomePage;
