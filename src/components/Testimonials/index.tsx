@@ -26,6 +26,9 @@ const Testimonials = () => {
     DRIVERS: false
   });
 
+  // Estado para controlar categoría activa en móvil
+  const [activeMobileCategory, setActiveMobileCategory] = useState<'CLIENTS' | 'VENDORS' | 'DRIVERS'>('CLIENTS');
+
   const testimonials: Testimonial[] = [
     {
       category: 'CLIENTS',
@@ -38,7 +41,7 @@ const Testimonials = () => {
       category: 'CLIENTS',
       name: 'Dennis Ngai.',
       role: 'Video Editing',
-      text: 'These guys came through for me and built a solid business along the way. A few years back, pre-covid, my lunch catering business was taking off to a point where I had to turn down orders. Ready Set always had drivers available and helped me scale so I did not have to turn down orders. They are reliable and trustworthy',
+      text: 'These guys came through for me and built a solid business along the way. A few years back, pre-covid, my lunch catering business was taking off to a point where I had to turn down orders. Ready Set always had drivers available and helped me scale so I did not have to turn down orders. They are reliable and trustworthy.',
       image: '/images/testimonials/author-02.png'
     },
     {
@@ -142,7 +145,7 @@ const Testimonials = () => {
       {[...Array(count)].map((_, i) => (
         <svg
           key={i}
-          className="w-6 h-6 text-yellow-400"
+          className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-400"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -157,7 +160,7 @@ const Testimonials = () => {
     const [imageError, setImageError] = React.useState(false);
     
     return (
-      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
         {imageSrc && !imageError ? (
           <Image 
             src={imageSrc}
@@ -178,196 +181,234 @@ const Testimonials = () => {
     );
   };
 
+  // Selector de categoría para móviles
+  const CategorySelector = () => (
+    <div className="flex flex-wrap justify-center gap-2 my-6 md:hidden">
+      {Object.keys(groupedTestimonials).map((category) => (
+        <button
+          key={category}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            category === activeMobileCategory 
+              ? 'bg-black text-white' 
+              : 'bg-gray-200 text-black hover:bg-gray-300'
+          }`}
+          onClick={() => setActiveMobileCategory(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
-    <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
+    <section className="bg-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
       <div className="max-w-7xl mx-auto">
         {/* Updated header section with dotted lines extending from title */}
-        <div className="text-center mb-12 relative">
-          <h2 className="text-4xl font-bold text-black mb-4">
+        <div className="text-center mb-8 sm:mb-12 relative">
+          <h2 className="text-3xl sm:text-4xl font-bold text-black mb-4">
             What People Say About Us
           </h2>
           
           {/* Real Stories. Real Impact with dotted lines extending from both sides */}
-          <div className="mb-8 flex items-center justify-center">
+          <div className="mb-6 sm:mb-8 flex items-center justify-center">
             <div className="relative flex items-center justify-center w-full">
               {/* Left dotted line */}
-              <div className="border-t-2 border-dashed border-black w-1/2 absolute right-1/2 mr-4"></div>
+              <div className="border-t-2 border-dashed border-black w-1/4 sm:w-1/2 absolute right-1/2 mr-4"></div>
               
               {/* Text in the middle */}
-              <p className="text-xl text-black z-10 bg-white px-4 relative">Real Stories. Real Impact</p>
+              <p className="text-lg sm:text-xl text-black z-10 bg-white px-4 relative">Real Stories. Real Impact</p>
               
               {/* Right dotted line */}
-              <div className="border-t-2 border-dashed border-black w-1/2 absolute left-1/2 ml-4"></div>
+              <div className="border-t-2 border-dashed border-black w-1/4 sm:w-1/2 absolute left-1/2 ml-4"></div>
             </div>
           </div>
           
-          <p className="text-black max-w-2xl mx-auto">
+          <p className="text-black max-w-2xl mx-auto text-sm sm:text-base">
             See how Ready Set is making a difference for our clients, vendors, and drivers
           </p>
         </div>
 
-        {/* Grid de tres columnas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {Object.entries(groupedTestimonials).map(([category, items]) => (
-            <div key={category} className="relative">
-              {/* Contenedor con borde punteado */}
-              <div className="relative border-2 border-dotted border-black p-6 pt-12 pb-6">
-                {/* Título de categoría */}
-                <div className="absolute -top-5 left-0 w-full text-center">
-                  <h3 className="text-2xl font-bold text-black inline-block px-6 bg-white">{category}</h3>
-                </div>
-                
-                {/* Subtítulo */}
-                <div className="text-center -mt-9 mb-16">
-                  <p className="text-black text-sm">
-                    {category === 'CLIENTS' && 'Why Our Clients Love Us'}
-                    {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
-                    {category === 'DRIVERS' && 'Our Drivers, Our Heroes'}
-                  </p>
-                </div>
-                
-                {/* Carrusel manual */}
-                <div 
-                  className="relative h-[450px]"
-                  onMouseEnter={() => setIsPaused({...isPaused, [category]: true})}
-                  onMouseLeave={() => setIsPaused({...isPaused, [category]: false})}
-                >
+        {/* Selector de categoría para móviles */}
+        <CategorySelector />
 
-{/* Controles de navegación */}
-<div className="absolute -top-16 right-0 flex space-x-2 z-30">
-  <button 
-    onClick={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-    className="w-8 h-8 rounded-full bg-black bg-opacity-5 text-white flex items-center justify-center hover:bg-opacity-40 transition-all"
-    aria-label="Previous testimonial"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  </button>
-  <button 
-    onClick={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-    className="w-8 h-8 rounded-full bg-black bg-opacity-5 text-white flex items-center justify-center hover:bg-opacity-70 transition-all"
-    aria-label="Next testimonial"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  </button>
-</div>
-                  
-                  {/* Indicadores de página */}
-                  <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    {items.map((_, idx) => (
-                      <button
-                        key={idx}
-                        className={`w-3 h-3 rounded-full transition-colors ${
-                          idx === activeIndices[category as keyof typeof activeIndices] 
-                            ? 'bg-yellow-400' 
-                            : 'bg-gray-300'
-                        }`}
-                        onClick={() => setActiveIndices({...activeIndices, [category]: idx})}
-                        aria-label={`Go to testimonial ${idx + 1}`}
-                      />
-                    ))}
+        {/* Espacio adicional entre selector y contenido en móvil */}
+        <div className="h-4 md:h-0"></div>
+
+        {/* Grid de tres columnas en desktop, una columna en móvil */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Object.entries(groupedTestimonials).map(([category, items]) => {
+            // En móvil, solo mostrar la categoría activa
+            const isCategoryVisible = window.innerWidth >= 768 || category === activeMobileCategory;
+            
+            return (
+              <div 
+                key={category} 
+                className={`relative transition-all duration-300 ${
+                  isCategoryVisible ? 'block' : 'hidden md:block'
+                }`}
+              >
+                {/* Contenedor con borde punteado */}
+                <div className="relative border-2 border-dotted border-black p-4 sm:p-6 pt-10 sm:pt-12 pb-6">
+                  {/* Título de categoría */}
+                  <div className="absolute -top-5 left-0 w-full text-center">
+                    <h3 className="text-xl sm:text-2xl font-bold text-black inline-block px-4 sm:px-6 bg-white">{category}</h3>
                   </div>
                   
-                  {/* Contenedor con animación de fade */}
-                  <div className="h-full">
-                    {items.map((testimonial, index) => {
-                      const isActive = index === activeIndices[category as keyof typeof activeIndices];
-                      
-                      return (
-                        <div 
-                          key={index}
-                          className={`absolute inset-0 transition-opacity duration-500 ${
-                            isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  {/* Subtítulo */}
+                  <div className="text-center -mt-6 sm:-mt-9 mb-14 sm:mb-16">
+                    <p className="text-black text-xs sm:text-sm">
+                      {category === 'CLIENTS' && 'Why Our Clients Love Us'}
+                      {category === 'VENDORS' && 'Trusted Partners for Seamless Operations'}
+                      {category === 'DRIVERS' && 'Our Drivers, Our Heroes'}
+                    </p>
+                  </div>
+                  
+                  {/* Carrusel manual */}
+                  <div 
+                    className="relative h-[350px] sm:h-[450px]"
+                    onMouseEnter={() => setIsPaused({...isPaused, [category]: true})}
+                    onMouseLeave={() => setIsPaused({...isPaused, [category]: false})}
+                    onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
+                    onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
+                  >
+                    {/* Controles de navegación - Posición ajustada en móvil */}
+                    <div className="absolute -top-12 md:-top-16 right-0 flex space-x-2 z-30">
+                      <button 
+                        onClick={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black bg-opacity-5 text-black flex items-center justify-center hover:bg-opacity-20 transition-all"
+                        aria-label="Previous testimonial"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button 
+                        onClick={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black bg-opacity-5 text-black flex items-center justify-center hover:bg-opacity-20 transition-all"
+                        aria-label="Next testimonial"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Indicadores de página */}
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                      {items.map((_, idx) => (
+                        <button
+                          key={idx}
+                          className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
+                            idx === activeIndices[category as keyof typeof activeIndices] 
+                              ? 'bg-yellow-400' 
+                              : 'bg-gray-300'
                           }`}
-                        >
-                          <div className="relative h-full pt-6">
-                            {index % 2 === 0 ? (
-                              // Left-aligned card (odd indices - first card)
-                              <>
-                                {/* Profile Image - Left positioned */}
-                                <div className="absolute -top-8 left-8 z-10">
-                                  <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
-                                </div>
-                                
-                                {/* Curved connector line using SVG */}
-                                <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none">
-                                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    {/* Small circle at the start of the line */}
-                                    <circle cx="68" cy="10" r="2" fill="black" />
-                                    {/* Curved path from profile to card */}
-                                    <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                                          stroke="black" 
-                                          strokeWidth="2" 
-                                          fill="none" />
-                                  </svg>
-                                </div>
-                                
-                                {/* Star Rating - Right of profile */}
-                                <div className="absolute -top-4 left-[60%] transform -translate-x-1/2 z-20">
-                                  <StarRating count={5} />
-                                </div>
-                                
-                                {/* Card with testimonial */}
-                                <div className="relative rounded-xl shadow-lg p-6 pt-8 bg-yellow-400 text-black max-h-[400px] overflow-y-auto">
-                                  <div className="mb-4">
-                                    <h4 className="font-bold text-lg">{testimonial.name}</h4>
-                                    <p className="text-sm text-yellow-800">{testimonial.role}</p>
+                          onClick={() => setActiveIndices({...activeIndices, [category]: idx})}
+                          aria-label={`Go to testimonial ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Contenedor con animación de fade */}
+                    <div className="h-full">
+                      {items.map((testimonial, index) => {
+                        const isActive = index === activeIndices[category as keyof typeof activeIndices];
+                        // Alternar el layout en móvil para consistencia
+                        const layoutStyle = window.innerWidth < 768 ? (index % 2 === 0) : (index % 2 === 0);
+                        
+                        return (
+                          <div 
+                            key={index}
+                            className={`absolute inset-0 transition-opacity duration-500 ${
+                              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                            }`}
+                          >
+                            <div className="relative h-full pt-6">
+                              {layoutStyle ? (
+                                // Left-aligned card (odd indices - first card)
+                                <>
+                                  {/* Profile Image - Left positioned - Más pegada al card en móvil */}
+                                  <div className="absolute -top-4 sm:-top-8 left-4 sm:left-8 z-10">
+                                    <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
                                   </div>
-                                  <p className="text-sm leading-relaxed">
-                                    {testimonial.text}
-                                  </p>
-                                </div>
-                              </>
-                            ) : (
-                              // Right-aligned card (even indices - second card)
-                              <>
-                                {/* Profile Image - Right positioned */}
-                                <div className="absolute -top-8 right-8 z-10">
-                                  <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
-                                </div>
-                                
-                                {/* Curved connector line using SVG */}
-                                <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none">
-                                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
-                                    {/* Small circle at the start of the line */}
-                                    <circle cx="68" cy="10" r="2" fill="black" />
-                                    {/* Curved path from profile to card */}
-                                    <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                                          stroke="black" 
-                                          strokeWidth="2" 
-                                          fill="none" />
-                                  </svg>
-                                </div>
-                                
-                                {/* Star Rating - Left of profile */}
-                                <div className="absolute -top-4 right-[60%] transform translate-x-1/2 z-20">
-                                  <StarRating count={5} />
-                                </div>
-                                
-                                {/* Card with testimonial */}
-                                <div className="relative rounded-xl shadow-lg p-6 pt-8 pr-24 bg-black text-white max-h-[400px] overflow-y-auto">
-                                  <div className="mb-4">
-                                    <h4 className="font-bold text-lg">{testimonial.name}</h4>
-                                    <p className="text-sm text-yellow-400">{testimonial.role}</p>
+                                  
+                                  {/* Curved connector line using SVG - Escondido en móvil */}
+                                  <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
+                                    <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      {/* Small circle at the start of the line */}
+                                      <circle cx="68" cy="10" r="2" fill="black" />
+                                      {/* Curved path from profile to card */}
+                                      <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                                            stroke="black" 
+                                            strokeWidth="2" 
+                                            fill="none" />
+                                    </svg>
                                   </div>
-                                  <p className="text-sm leading-relaxed">
-                                    {testimonial.text}
-                                  </p>
-                                </div>
-                              </>
-                            )}
+                                  
+                                  {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                                  <div className="absolute top-2 sm:-top-4 left-1/2 sm:left-[60%] transform -translate-x-1/2 sm:-translate-x-1/2 z-20">
+                                    <StarRating count={5} />
+                                  </div>
+                                  
+                                  {/* Card with testimonial */}
+                                  <div className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 bg-yellow-400 text-black max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0">
+                                    <div className="mb-3 sm:mb-4">
+                                      <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
+                                      <p className="text-xs sm:text-sm text-yellow-800">{testimonial.role}</p>
+                                    </div>
+                                    <p className="text-xs sm:text-sm leading-relaxed">
+                                      {testimonial.text}
+                                    </p>
+                                  </div>
+                                </>
+                              ) : (
+                                // Right-aligned card (even indices - second card)
+                                <>
+                                  {/* Profile Image - Right positioned - Más pegada al card en móvil */}
+                                  <div className="absolute -top-4 sm:-top-8 right-4 sm:right-8 z-10">
+                                    <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
+                                  </div>
+                                  
+                                  {/* Curved connector line using SVG - Escondido en móvil */}
+                                  <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
+                                    <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                                      {/* Small circle at the start of the line */}
+                                      <circle cx="68" cy="10" r="2" fill="black" />
+                                      {/* Curved path from profile to card */}
+                                      <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                                            stroke="black" 
+                                            strokeWidth="2" 
+                                            fill="none" />
+                                    </svg>
+                                  </div>
+                                  
+                                  {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                                  <div className="absolute top-2 sm:-top-4 right-1/2 sm:right-[60%] transform translate-x-1/2 sm:translate-x-1/2 z-20">
+                                    <StarRating count={5} />
+                                  </div>
+                                  
+                                  {/* Card with testimonial - Padding ajustado en móvil */}
+                                  <div className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 pr-4 sm:pr-24 bg-black text-white max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0">
+                                    <div className="mb-3 sm:mb-4">
+                                      <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
+                                      <p className="text-xs sm:text-sm text-yellow-400">{testimonial.role}</p>
+                                    </div>
+                                    <p className="text-xs sm:text-sm leading-relaxed">
+                                      {testimonial.text}
+                                    </p>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
