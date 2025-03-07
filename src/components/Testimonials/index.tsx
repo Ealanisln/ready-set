@@ -28,6 +28,26 @@ const Testimonials = () => {
 
   // Estado para controlar categoría activa en móvil
   const [activeMobileCategory, setActiveMobileCategory] = useState<'CLIENTS' | 'VENDORS' | 'DRIVERS'>('CLIENTS');
+  
+  // Estado para detectar si estamos en el navegador
+  const [isBrowser, setIsBrowser] = useState(false);
+  
+  // Estado para detectar si estamos en móvil
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar si estamos en el navegador al montar el componente
+  useEffect(() => {
+    setIsBrowser(true);
+    setIsMobile(window.innerWidth < 768);
+    
+    // Añadir un listener para actualizar isMobile cuando cambia el tamaño
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const testimonials: Testimonial[] = [
     {
@@ -200,6 +220,11 @@ const Testimonials = () => {
     </div>
   );
 
+  // Si no estamos en el navegador, renderizamos un contenedor vacío
+  if (!isBrowser) {
+    return <div className="bg-white py-10 px-4 border border-purple-500 rounded-lg">Cargando testimonios...</div>;
+  }
+
   return (
     <section className="bg-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
       <div className="max-w-7xl mx-auto">
@@ -238,7 +263,7 @@ const Testimonials = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {Object.entries(groupedTestimonials).map(([category, items]) => {
             // En móvil, solo mostrar la categoría activa
-            const isCategoryVisible = window.innerWidth >= 768 || category === activeMobileCategory;
+            const isCategoryVisible = !isMobile || category === activeMobileCategory;
             
             return (
               <div 
@@ -314,7 +339,7 @@ const Testimonials = () => {
                       {items.map((testimonial, index) => {
                         const isActive = index === activeIndices[category as keyof typeof activeIndices];
                         // Alternar el layout en móvil para consistencia
-                        const layoutStyle = window.innerWidth < 768 ? (index % 2 === 0) : (index % 2 === 0);
+                        const layoutStyle = isMobile ? (index % 2 === 0) : (index % 2 === 0);
                         
                         return (
                           <div 
