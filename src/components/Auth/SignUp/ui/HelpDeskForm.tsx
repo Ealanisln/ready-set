@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { helpdeskSchema } from "@/components/Auth/SignUp/FormSchemas";
 
 interface HelpDeskFormData {
-  userType: "helpdesk"; // Add this line
+  userType: "helpdesk";
   name: string;
   email: string;
   password: string;
@@ -28,11 +26,12 @@ const HelpDeskForm: React.FC<HelpDeskFormProps> = ({ onSubmit }) => {
     handleSubmit,
     formState: { errors },
   } = useForm<HelpDeskFormData>({
-    resolver: zodResolver(helpdeskSchema),
+    defaultValues: {
+      userType: "helpdesk"
+    }
   });
 
   const onSubmitWrapper = async (data: HelpDeskFormData) => {
-
     setIsLoading(true);
     try {
       await onSubmit(data);

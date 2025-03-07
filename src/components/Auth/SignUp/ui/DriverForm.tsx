@@ -1,7 +1,5 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { driverSchema } from "@/components/Auth/SignUp/FormSchemas";
 import { Loader2 } from "lucide-react";
 
 interface DriverFormData {
@@ -28,7 +26,6 @@ const DriverForm: React.FC<DriverFormProps> = ({ onSubmit, isLoading = false }) 
     handleSubmit,
     formState: { errors },
   } = useForm<DriverFormData>({
-    resolver: zodResolver(driverSchema),
     defaultValues: {
       userType: "driver"
     }

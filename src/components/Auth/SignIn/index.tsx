@@ -22,32 +22,6 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
     general: "",
   });
 
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {
-      email: "",
-      password: "",
-      general: "",
-    };
-
-    // Email validation
-    if (!loginData.email) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(loginData.email)) {
-      newErrors.email = "Please enter a valid email address";
-      isValid = false;
-    }
-
-    // Password validation
-    if (!loginData.password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -169,6 +143,7 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                 
                 {/* Google Sign-in Button */}
                 <div className="mb-5">
+                  {/* <GoogleAuthButton /> */}
                   <GoogleAuthButton />
                 </div>
 

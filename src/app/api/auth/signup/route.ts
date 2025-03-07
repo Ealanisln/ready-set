@@ -1,3 +1,5 @@
+// src/app/api/auth/signup/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { z } from "zod";

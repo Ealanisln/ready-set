@@ -1,5 +1,4 @@
-import React from "react";
-
+// src/components/Auth/SocialSignIn.tsx
 const SocialSignIn = () => {
   return (
     <>

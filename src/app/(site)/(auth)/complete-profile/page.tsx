@@ -54,7 +54,7 @@ export default function CompleteProfile() {
     };
   }, [loading]);
 
-  // Simplified fetchUser with no custom timeouts
+  // Updated fetchUser to prevent false redirects for manual users
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -76,27 +76,73 @@ export default function CompleteProfile() {
           return;
         }
 
-        console.log("User found:", data.user.id);
+        const userId = data.user.id;
+        console.log("User found:", userId);
+        console.log("User metadata:", data.user.user_metadata);
+        console.log("App metadata:", data.user.app_metadata);
         setUser(data.user);
 
-        // Check if user already has a profile - simple approach
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("auth_user_id", data.user.id)
-          .single();
-
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.log("Profile fetch error:", profileError.message);
+        // Check if userType exists in metadata and use it
+        if (data.user.user_metadata?.userType) {
+          console.log("User type found in metadata:", data.user.user_metadata.userType);
+          setUserType(data.user.user_metadata.userType as UserType);
         }
 
-        if (profile) {
+        // IMPORTANT: First check public.user table directly with a raw query
+        // This ensures we're definitely checking the right table
+        try {
+          const { data: rawUserData, error: rawUserError } = await supabase.rpc(
+            'get_user_by_id',
+            { user_id: userId }
+          );
+
+          console.log("Raw user query result:", rawUserData, rawUserError);
+
+          if (!rawUserError && rawUserData) {
+            console.log("User found in public.user table via RPC, redirecting to home");
+            router.push("/");
+            return;
+          }
+        } catch (rpcError) {
+          console.error("RPC query error:", rpcError);
+          // Fall back to standard query if RPC fails
+        }
+
+        // Standard check if the above RPC isn't available
+        const { data: publicUserData, error: publicUserError } = await supabase
+          .from("user")
+          .select("*")
+          .eq("id", userId)
+          .limit(1);
+
+        console.log("Public user table search result:", publicUserData, publicUserError);
+
+        if (!publicUserError && publicUserData && publicUserData.length > 0) {
+          console.log("User found in public.user table, redirecting to home");
+          router.push("/");
+          return;
+        }
+
+        // Then check if user has a profile in the 'profiles' table
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("auth_user_id", userId)
+          .limit(1);
+
+        console.log("Profiles table search result:", profilesData, profilesError);
+
+        if (!profilesError && profilesData && profilesData.length > 0) {
           console.log("User already has a profile, redirecting to home");
           router.push("/");
           return;
         }
 
-        // Successfully loaded user without profile
+        // Special debug: Log user data from Supabase to see what's going on
+        console.log("User not found in public.user or profiles tables!");
+        console.log("This user needs to complete their profile");
+
+        // Allow profile completion
         setLoading(false);
       } catch (err) {
         console.error("Unexpected error in fetchUser:", err);
@@ -193,8 +239,47 @@ export default function CompleteProfile() {
         isTemporaryPassword: false,
       };
   
-      // Use the API route for profile creation
-      console.log("Submitting profile data to API...");
+      // Try direct Supabase insertion first for better error handling
+      console.log("Inserting profile data directly via Supabase...");
+      
+      try {
+        // Insert into profiles table first
+        const { data: profileInsertData, error: profileInsertError } = await supabase
+          .from('profiles')
+          .insert([profileData]);
+          
+        if (profileInsertError) {
+          console.error("Error inserting profile:", profileInsertError);
+          throw new Error(`Profile insertion failed: ${profileInsertError.message}`);
+        }
+        
+        console.log("Profile inserted successfully:", profileInsertData);
+        
+        // Insert into user table (public schema, not 'users')
+        const { data: userInsertData, error: userInsertError } = await supabase
+          .from('user')
+          .insert([userTableData]);
+          
+        if (userInsertError) {
+          console.error("Error inserting user:", userInsertError);
+          throw new Error(`User insertion failed: ${userInsertError.message}`);
+        }
+        
+        console.log("User inserted successfully:", userInsertData);
+        
+        // Success with direct Supabase insertion
+        toast.success("Profile completed successfully");
+        setTimeout(() => {
+          router.push("/");
+        }, 500);
+        return;
+      } catch (supabaseError) {
+        // If direct Supabase insertion fails, fall back to API route
+        console.warn("Direct Supabase insertion failed, falling back to API route:", supabaseError);
+      }
+
+      // Fall back to the API route for profile creation
+      console.log("Falling back to API route for profile creation...");
       
       const response = await fetch('/api/profile', {
         method: 'POST',
@@ -364,6 +449,19 @@ export default function CompleteProfile() {
     }
   };
 
+  // Debug function to manually redirect user
+  const debugRedirectHome = () => {
+    console.log("Manual redirect triggered by user");
+    router.push("/");
+  };
+
+  // Debug function to manually clear state and retry
+  const debugRetry = () => {
+    console.log("Manual retry triggered by user");
+    setLoading(false);
+    setError(null);
+  };
+
   // Show loading state while fetching user data
   if (loading && !error) {
     return (
@@ -401,7 +499,7 @@ export default function CompleteProfile() {
                 {/* Cancel button */}
                 <Button
                   variant="outline"
-                  className="mt-4"
+                  className="mt-4 mb-2"
                   onClick={() => {
                     setLoading(false);
                     setError("Operation cancelled. Please try again.");
@@ -409,6 +507,26 @@ export default function CompleteProfile() {
                 >
                   Cancel
                 </Button>
+                
+                {/* Debug buttons */}
+                <div className="flex space-x-2 mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={debugRedirectHome}
+                  >
+                    Go to Home
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={debugRetry}
+                  >
+                    Retry
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
