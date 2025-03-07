@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 // URL base para los metadatos - usa variable de entorno o valor por defecto
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://readysetllc.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fvcmtjw0-3000.usw3.devtunnels.ms';
 
 // Metadatos mejorados con metadataBase
 export const metadata: Metadata = {
@@ -43,30 +43,16 @@ export const metadata: Metadata = {
     siteName: 'Ready Set LLC',
     locale: 'en_US',
     type: 'website',
-    // images ahora hace referencia al archivo opengraph-image generado automáticamente
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Ready Set Virtual Assistant Services',
-      }
-    ],
+    // Eliminamos la referencia directa a /opengraph-image ya que Next.js lo maneja automáticamente
+    // cuando se proporcionan los archivos correctos en el directorio de la app
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Ready Set Virtual Assistant Services',
     description: 'Expert Virtual Assistants, Ready When You Are.',
     creator: '@ReadySetLLC',
-    // images ahora hace referencia al archivo twitter-image generado automáticamente
-    images: [
-      {
-        url: '/twitter-image',
-        width: 1200,
-        height: 628,
-        alt: 'Ready Set Virtual Assistant Services',
-      }
-    ],
+    // Eliminamos la referencia directa a /twitter-image ya que Next.js lo maneja automáticamente
+    // cuando se proporcionan los archivos correctos en el directorio de la app
   },
   other: {
     'fb:app_id': process.env.NEXT_PUBLIC_FB_APP_ID || '', // Usar variable de entorno
@@ -92,8 +78,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      suppressHydrationWarning={true}
-      className={`!scroll-smooth ${montserrat.className}`}
+      className={`scroll-smooth ${montserrat.className}`}
       lang="en"
     >
       <head>
