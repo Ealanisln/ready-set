@@ -3,6 +3,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
+import { getRedirectUrl } from '@/utils/supabase/auth-helpers'
 import { useState } from 'react'
 import Loader from "@/components/Common/Loader";
 
@@ -17,10 +18,11 @@ const GoogleAuthButton = ({ className = '' }: GoogleAuthButtonProps) => {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true)
+      // Use the dynamic redirect URL from our helper function
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getRedirectUrl(),
         }
       })
       
