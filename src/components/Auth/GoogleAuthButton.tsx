@@ -18,15 +18,17 @@ const GoogleAuthButton = ({ className = '' }: GoogleAuthButtonProps) => {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true)
-      // Use the dynamic redirect URL from our helper function
+      console.log("Redirecting to:", getRedirectUrl()); // Debug log
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getRedirectUrl(),
+          redirectTo: getRedirectUrl(), // This now guarantees /auth/callback is included
         }
       })
       
       if (error) {
+        console.error("OAuth error:", error.message);
         throw error
       }
     } catch (error) {
