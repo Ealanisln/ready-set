@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 const Testimonials = () => {
@@ -35,6 +35,18 @@ const Testimonials = () => {
   // Estado para detectar si estamos en móvil
   const [isMobile, setIsMobile] = useState(false);
 
+  // Estado para controlar si hay contenido que desborda
+  const [hasOverflow, setHasOverflow] = useState({
+    CLIENTS: [] as boolean[],
+    VENDORS: [] as boolean[],
+    DRIVERS: [] as boolean[]
+  });
+
+  // Refs para los contenedores de testimonios
+  const cardRefs = useRef<{[key: string]: (HTMLDivElement | null)[]}>(
+    { 'CLIENTS': [], 'VENDORS': [], 'DRIVERS': [] }
+  );
+
   // Detectar si estamos en el navegador al montar el componente
   useEffect(() => {
     setIsBrowser(true);
@@ -43,11 +55,47 @@ const Testimonials = () => {
     // Añadir un listener para actualizar isMobile cuando cambia el tamaño
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
+      
+      // Revalidar el overflow cuando cambia el tamaño de la ventana
+      setTimeout(() => {
+        checkContentOverflow();
+      }, 300);
     };
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Función para verificar el overflow del contenido
+  const checkContentOverflow = () => {
+    const newHasOverflow = { ...hasOverflow };
+    
+    Object.keys(groupedTestimonials).forEach((category) => {
+      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+      const items = groupedTestimonials[categoryKey] || [];
+      
+      if (!cardRefs.current[categoryKey]) {
+        cardRefs.current[categoryKey] = [];
+      }
+      
+      items.forEach((_, index) => {
+        const element = cardRefs.current[categoryKey][index];
+        if (element) {
+          const hasContentOverflow = element.scrollHeight > element.clientHeight;
+          
+          // Inicializar el array si no existe
+          if (!newHasOverflow[categoryKey]) {
+            newHasOverflow[categoryKey] = [];
+          }
+          
+          // Asignar el valor de overflow
+          newHasOverflow[categoryKey][index] = hasContentOverflow;
+        }
+      });
+    });
+    
+    setHasOverflow(newHasOverflow);
+  };
 
   const testimonials: Testimonial[] = [
     {
@@ -114,6 +162,17 @@ const Testimonials = () => {
     return acc;
   }, {} as Record<Testimonial['category'], Testimonial[]>);
 
+  // Revisar si hay overflow en cada testimonio activo
+  useEffect(() => {
+    // Verificar el overflow si estamos en el navegador
+    if (isBrowser) {
+      // Revisar después de un breve retraso para asegurarnos de que el contenido está renderizado
+      const timeoutId = setTimeout(checkContentOverflow, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [groupedTestimonials, isBrowser, activeIndices, activeMobileCategory]);
+
   // Funciones para controlar la navegación
   const nextTestimonial = (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
     const items = groupedTestimonials[category] || [];
@@ -172,6 +231,26 @@ const Testimonials = () => {
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
+    </div>
+  );
+
+  // Componente de flecha para indicar scroll
+  const ScrollArrow = () => (
+    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce md:hidden">
+      <svg 
+        className="w-5 h-5 text-white opacity-80" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24" 
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M19 9l-7 7-7-7" 
+        />
+      </svg>
     </div>
   );
 
@@ -296,27 +375,7 @@ const Testimonials = () => {
                     onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
                     onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
                   >
-                    {/* Controles de navegación - Posición ajustada en móvil */}
-                    <div className="absolute -top-12 md:-top-16 right-0 flex space-x-2 z-30">
-                      <button 
-                        onClick={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black bg-opacity-5 text-black flex items-center justify-center hover:bg-opacity-20 transition-all"
-                        aria-label="Previous testimonial"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black bg-opacity-5 text-black flex items-center justify-center hover:bg-opacity-20 transition-all"
-                        aria-label="Next testimonial"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
+                    {/* Se han eliminado las flechas de navegación */}
                     
                     {/* Indicadores de página */}
                     <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -340,6 +399,9 @@ const Testimonials = () => {
                         const isActive = index === activeIndices[category as keyof typeof activeIndices];
                         // Alternar el layout en móvil para consistencia
                         const layoutStyle = isMobile ? (index % 2 === 0) : (index % 2 === 0);
+                        
+                        // Verificar si este testimonio tiene overflow
+                        const cardHasOverflow = hasOverflow[category as keyof typeof hasOverflow]?.[index];
                         
                         return (
                           <div 
@@ -376,7 +438,15 @@ const Testimonials = () => {
                                   </div>
                                   
                                   {/* Card with testimonial */}
-                                  <div className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 bg-yellow-400 text-black max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0">
+                                  <div 
+                                    ref={el => {
+                                      if (!cardRefs.current[category]) {
+                                        cardRefs.current[category] = [];
+                                      }
+                                      cardRefs.current[category][index] = el;
+                                    }}
+                                    className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 bg-yellow-400 text-black max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
+                                  >
                                     <div className="mb-3 sm:mb-4">
                                       <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
                                       <p className="text-xs sm:text-sm text-yellow-800">{testimonial.role}</p>
@@ -384,6 +454,26 @@ const Testimonials = () => {
                                     <p className="text-xs sm:text-sm leading-relaxed">
                                       {testimonial.text}
                                     </p>
+                                    
+                                    {/* Indicador de scroll si hay overflow (móvil y desktop) */}
+                                    {isActive && cardHasOverflow && (
+                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
+                                        <svg 
+                                          className="w-5 h-5 text-black opacity-80" 
+                                          fill="none" 
+                                          stroke="currentColor" 
+                                          viewBox="0 0 24 24" 
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M19 9l-7 7-7-7" 
+                                          />
+                                        </svg>
+                                      </div>
+                                    )}
                                   </div>
                                 </>
                               ) : (
@@ -413,7 +503,15 @@ const Testimonials = () => {
                                   </div>
                                   
                                   {/* Card with testimonial - Padding ajustado en móvil */}
-                                  <div className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 pr-4 sm:pr-24 bg-black text-white max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0">
+                                  <div 
+                                    ref={el => {
+                                      if (!cardRefs.current[category]) {
+                                        cardRefs.current[category] = [];
+                                      }
+                                      cardRefs.current[category][index] = el;
+                                    }}
+                                    className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 pr-4 sm:pr-24 bg-black text-white max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
+                                  >
                                     <div className="mb-3 sm:mb-4">
                                       <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
                                       <p className="text-xs sm:text-sm text-yellow-400">{testimonial.role}</p>
@@ -421,6 +519,26 @@ const Testimonials = () => {
                                     <p className="text-xs sm:text-sm leading-relaxed">
                                       {testimonial.text}
                                     </p>
+                                    
+                                    {/* Indicador de scroll si hay overflow (móvil y desktop) */}
+                                    {isActive && cardHasOverflow && (
+                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
+                                        <svg 
+                                          className="w-5 h-5 text-white opacity-80" 
+                                          fill="none" 
+                                          stroke="currentColor" 
+                                          viewBox="0 0 24 24" 
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M19 9l-7 7-7-7" 
+                                          />
+                                        </svg>
+                                      </div>
+                                    )}
                                   </div>
                                 </>
                               )}
