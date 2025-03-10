@@ -133,14 +133,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       </Card>
 
       {/* PDF Modal */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
   <DialogContent className="mb-8 mt-16 sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-6">
     <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
       <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
         {title}
       </DialogTitle>
-      <div className="mt-4 flex gap-4">
-        
+      <div className="mt-4 flex flex-wrap gap-4">
         <a
           href={`/pdf/${pdfName}`}
           target="_blank"
@@ -167,8 +166,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         />
       ) : (
         <iframe
-          src={`/pdf/${pdfName}`}
+          src={`/pdf/${pdfName}#view=FitH&zoom=scale-down`}
           className="h-full w-full rounded-md border-0"
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            overflow: 'hidden'
+          }}
           title={`${title} PDF viewer`}
         />
       )}
