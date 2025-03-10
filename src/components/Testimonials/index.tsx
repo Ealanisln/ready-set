@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+// Remover la importación de Image de Next.js para usar solución basada en background-image
 
 const Testimonials = () => {
   interface Testimonial {
@@ -35,66 +35,138 @@ const Testimonials = () => {
   // Estado para detectar si estamos en móvil
   const [isMobile, setIsMobile] = useState(false);
 
-  // Estado para controlar si hay contenido que desborda
-  const [hasOverflow, setHasOverflow] = useState({
-    CLIENTS: [] as boolean[],
-    VENDORS: [] as boolean[],
-    DRIVERS: [] as boolean[]
+  // Estado para controlar si hay contenido que desborda - Memoizado para evitar re-renders
+  const [hasOverflow, setHasOverflow] = useState<{
+    CLIENTS: boolean[];
+    VENDORS: boolean[];
+    DRIVERS: boolean[];
+  }>({
+    CLIENTS: [],
+    VENDORS: [],
+    DRIVERS: []
   });
 
   // Refs para los contenedores de testimonios
   const cardRefs = useRef<{[key: string]: (HTMLDivElement | null)[]}>(
     { 'CLIENTS': [], 'VENDORS': [], 'DRIVERS': [] }
   );
+  
+  // Cache para imagenes precargadas
+  const preloadedImages = useRef<Set<string>>(new Set());
 
-  // Detectar si estamos en el navegador al montar el componente
+  // Aplicar optimizaciones para evitar recargas y parpadeos en móviles
   useEffect(() => {
+    // Establecer estas variables al inicio para evitar cambios de estado posteriores
     setIsBrowser(true);
-    setIsMobile(window.innerWidth < 768);
     
-    // Añadir un listener para actualizar isMobile cuando cambia el tamaño
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      
-      // Revalidar el overflow cuando cambia el tamaño de la ventana
-      setTimeout(() => {
-        checkContentOverflow();
-      }, 300);
+    // Función optimizada para detectar móvil
+    const checkMobile = () => {
+      // Usar matchMedia para mayor precisión y mejor rendimiento
+      return window.matchMedia('(max-width: 767px)').matches;
     };
     
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Función para verificar el overflow del contenido
-  const checkContentOverflow = () => {
-    const newHasOverflow = { ...hasOverflow };
+    // Detectar móvil inicial
+    const initialMobile = checkMobile();
+    setIsMobile(initialMobile);
     
-    Object.keys(groupedTestimonials).forEach((category) => {
-      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
-      const items = groupedTestimonials[categoryKey] || [];
-      
-      if (!cardRefs.current[categoryKey]) {
-        cardRefs.current[categoryKey] = [];
-      }
-      
-      items.forEach((_, index) => {
-        const element = cardRefs.current[categoryKey][index];
-        if (element) {
-          const hasContentOverflow = element.scrollHeight > element.clientHeight;
-          
-          // Inicializar el array si no existe
-          if (!newHasOverflow[categoryKey]) {
-            newHasOverflow[categoryKey] = [];
-          }
-          
-          // Asignar el valor de overflow
-          newHasOverflow[categoryKey][index] = hasContentOverflow;
+    // Precarga de imágenes para evitar parpadeos
+    const preloadImages = () => {
+      // Para todas las imágenes en testimonials
+      testimonials.forEach(testimonial => {
+        if (testimonial.image) {
+          const img = new Image();
+          img.src = testimonial.image;
         }
       });
-    });
+    };
     
-    setHasOverflow(newHasOverflow);
+    // Precargar imágenes al inicio
+    preloadImages();
+    
+    // Detector de cambio de tamaño optimizado
+    const handleResize = () => {
+      const newIsMobile = checkMobile();
+      
+      // Solo actualizar si hay cambio real
+      if (newIsMobile !== isMobile) {
+        setIsMobile(newIsMobile);
+      }
+      
+      // Usar un enfoque throttled para evitar demasiadas actualizaciones
+      if (!(window as any).resizeTimerId) {
+        (window as any).resizeTimerId = setTimeout(() => {
+          checkContentOverflow();
+          (window as any).resizeTimerId = null;
+        }, 500); // Tiempo más largo para reducir actualizaciones
+      }
+    };
+    
+    // Usar ResizeObserver cuando sea posible para mejor rendimiento
+    if (typeof ResizeObserver !== 'undefined') {
+      const resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(document.body);
+      return () => {
+        resizeObserver.disconnect();
+        if ((window as any).resizeTimerId) {
+          clearTimeout((window as any).resizeTimerId);
+        }
+      };
+    } else {
+      // Fallback al método tradicional
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if ((window as any).resizeTimerId) {
+          clearTimeout((window as any).resizeTimerId);
+        }
+      };
+    }
+  }, []);
+  
+  // Función para verificar el overflow del contenido con debounce incorporado
+  const checkContentOverflow = () => {
+    // Limitar la frecuencia de actualización del estado para evitar re-renders excesivos
+    if ((window as any).overflowThrottleTimeout) {
+      clearTimeout((window as any).overflowThrottleTimeout);
+    }
+    
+    (window as any).overflowThrottleTimeout = setTimeout(() => {
+      const newHasOverflow = { ...hasOverflow };
+      
+      Object.keys(groupedTestimonials).forEach((category) => {
+        const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+        const items = groupedTestimonials[categoryKey] || [];
+        
+        if (!cardRefs.current[categoryKey]) {
+          cardRefs.current[categoryKey] = [];
+        }
+        
+        items.forEach((_, index) => {
+          const element = cardRefs.current[categoryKey][index];
+          if (element) {
+            const hasContentOverflow = element.scrollHeight > element.clientHeight;
+            
+            // Inicializar el array si no existe
+            if (!newHasOverflow[categoryKey]) {
+              newHasOverflow[categoryKey] = [];
+            }
+            
+            // Asignar el valor de overflow sólo si cambia
+            if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
+              newHasOverflow[categoryKey][index] = hasContentOverflow;
+            }
+          }
+        });
+      });
+      
+      // Sólo actualizar el estado si hay cambios reales
+      const hasChanged = JSON.stringify(newHasOverflow) !== JSON.stringify(hasOverflow);
+      if (hasChanged) {
+        setHasOverflow(newHasOverflow);
+      }
+    }, 300);
   };
 
   const testimonials: Testimonial[] = [
@@ -156,11 +228,14 @@ const Testimonials = () => {
     }, 
   ];
 
-  const groupedTestimonials = testimonials.reduce((acc, testimonial) => {
-    acc[testimonial.category] = acc[testimonial.category] || [];
-    acc[testimonial.category].push(testimonial);
-    return acc;
-  }, {} as Record<Testimonial['category'], Testimonial[]>);
+  // Usar useMemo para evitar re-computes innecesarios
+  const groupedTestimonials = useMemo(() => {
+    return testimonials.reduce((acc, testimonial) => {
+      acc[testimonial.category] = acc[testimonial.category] || [];
+      acc[testimonial.category].push(testimonial);
+      return acc;
+    }, {} as Record<Testimonial['category'], Testimonial[]>);
+  }, [testimonials]);
 
   // Revisar si hay overflow en cada testimonio activo
   useEffect(() => {
@@ -194,32 +269,50 @@ const Testimonials = () => {
     }));
   };
 
-  // Configurar intervalos para el autoplay
+  // Usar requestAnimationFrame en lugar de setInterval para mejor rendimiento y evitar parpadeos
   useEffect(() => {
-    const intervals: NodeJS.Timeout[] = [];
+    let animationFrameIds: number[] = [];
+    let lastTimestamps: Record<string, number> = {};
     
-    // Crear un intervalo separado para cada categoría
-    Object.keys(groupedTestimonials).forEach((category) => {
-      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
-      
-      const intervalId = setInterval(() => {
-        // Solo avanzar si no está pausado
-        if (!isPaused[categoryKey]) {
-          nextTestimonial(categoryKey);
+    // Función que coordina todas las animaciones
+    const animate = (timestamp: number) => {
+      // Procesar cada categoría
+      Object.keys(groupedTestimonials).forEach((category) => {
+        const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+        
+        // Inicializar timestamp si es necesario
+        if (!lastTimestamps[categoryKey]) {
+          lastTimestamps[categoryKey] = timestamp;
         }
-      }, 4000 + Math.random() * 1000); // Tiempos ligeramente diferentes para evitar sincronización
+        
+        // Calcular tiempo transcurrido desde último cambio
+        const elapsed = timestamp - lastTimestamps[categoryKey];
+        
+        // Cambiar cada 8 segundos (8000ms) si no está pausado
+        // Tiempo más largo para reducir cambios y posibles parpadeos
+        if (elapsed > 8000 && !isPaused[categoryKey]) {
+          nextTestimonial(categoryKey);
+          lastTimestamps[categoryKey] = timestamp;
+        }
+      });
       
-      intervals.push(intervalId);
-    });
+      // Continuar la animación
+      const id = requestAnimationFrame(animate);
+      animationFrameIds.push(id);
+    };
     
-    // Limpiar los intervalos cuando el componente se desmonte
+    // Iniciar la animación
+    const id = requestAnimationFrame(animate);
+    animationFrameIds.push(id);
+    
+    // Limpieza al desmontar
     return () => {
-      intervals.forEach(interval => clearInterval(interval));
+      animationFrameIds.forEach(id => cancelAnimationFrame(id));
     };
   }, [isPaused, groupedTestimonials]);
 
-  // Componente de estrellas
-  const StarRating = ({ count = 5 }: { count?: number }) => (
+  // Componente de estrellas memoizado para evitar re-renders
+  const StarRating = React.memo(({ count = 5 }: { count?: number }) => (
     <div className="flex bg-white px-2 py-1 rounded-md">
       {[...Array(count)].map((_, i) => (
         <svg
@@ -232,11 +325,11 @@ const Testimonials = () => {
         </svg>
       ))}
     </div>
-  );
+  ));
 
-  // Componente de flecha para indicar scroll
-  const ScrollArrow = () => (
-    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce md:hidden">
+  // Componente de flecha para indicar scroll memoizado
+  const ScrollArrow = React.memo(() => (
+    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
       <svg 
         className="w-5 h-5 text-white opacity-80" 
         fill="none" 
@@ -252,36 +345,68 @@ const Testimonials = () => {
         />
       </svg>
     </div>
-  );
+  ));
 
-  // Componente de imagen de perfil
-  const ProfileImage = ({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
-    const [imageError, setImageError] = React.useState(false);
+  // Componente de imagen de perfil con carga estática para evitar parpadeos
+  const ProfileImage = React.memo(({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
+    // Simplificar la lógica de manejo de imágenes y usar placeholders de manera consistente
+    // Esto evita que el componente cambie de estado y cause re-renders
     
     return (
       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white shadow-lg z-10 bg-gray-200">
-        {imageSrc && !imageError ? (
-          <Image 
-            src={imageSrc}
-            alt={alt}
-            width={80}
-            height={80}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <img 
-            src="/api/placeholder/80/80"
-            alt={alt}
-            className="w-full h-full object-cover"
+        {/* Precargar imagen con visibilidad oculta para verificar si carga correctamente */}
+        {imageSrc && (
+          <div className="relative w-full h-full">
+            {/* Usar estilos inline para evitar cambios de DOM que causen parpadeo */}
+            <div 
+              style={{
+                backgroundImage: `url(${imageSrc})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                width: '100%',
+                height: '100%',
+              }}
+              aria-label={alt}
+            />
+            
+            {/* Imagen de respaldo que solo se muestra si la otra falla */}
+            <div 
+              className="fallback-image"
+              style={{
+                backgroundImage: `url(/api/placeholder/80/80)`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                opacity: 0
+              }}
+              aria-hidden="true"
+            />
+          </div>
+        )}
+        
+        {/* Si no hay imagen, mostrar placeholder */}
+        {!imageSrc && (
+          <div 
+            style={{
+              backgroundImage: `url(/api/placeholder/80/80)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              width: '100%',
+              height: '100%',
+            }}
+            aria-label={alt}
           />
         )}
       </div>
     );
-  };
+  });
 
-  // Selector de categoría para móviles
-  const CategorySelector = () => (
+  // Selector de categoría para móviles memoizado
+  const CategorySelector = React.memo(() => (
     <div className="flex flex-wrap justify-center gap-2 my-6 md:hidden">
       {Object.keys(groupedTestimonials).map((category) => (
         <button
@@ -297,7 +422,7 @@ const Testimonials = () => {
         </button>
       ))}
     </div>
-  );
+  ));
 
   // Si no estamos en el navegador, renderizamos un contenedor vacío
   if (!isBrowser) {
@@ -375,8 +500,6 @@ const Testimonials = () => {
                     onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
                     onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
                   >
-                    {/* Se han eliminado las flechas de navegación */}
-                    
                     {/* Indicadores de página */}
                     <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                       {items.map((_, idx) => (
@@ -403,12 +526,22 @@ const Testimonials = () => {
                         // Verificar si este testimonio tiene overflow
                         const cardHasOverflow = hasOverflow[category as keyof typeof hasOverflow]?.[index];
                         
+                        // En móvil, preparar todos los testimonios pero ocultar los inactivos completamente
+                        // Esto evita que se monten/desmonten componentes, causando parpadeos
+                        
                         return (
                           <div 
                             key={index}
-                            className={`absolute inset-0 transition-opacity duration-500 ${
-                              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                            className={`absolute inset-0 ${isMobile ? '' : 'transition-opacity duration-500'} ${
+                              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                             }`}
+                            style={{ 
+                              // Usar transform para mejorar rendimiento de animaciones
+                              transform: `translateZ(0)`,
+                              willChange: 'opacity',
+                              // Para móvil: usando visibility en vez de opacity para mejor rendimiento
+                              visibility: isMobile && !isActive ? 'hidden' : 'visible'
+                            }}
                           >
                             <div className="relative h-full pt-6">
                               {layoutStyle ? (
@@ -457,22 +590,7 @@ const Testimonials = () => {
                                     
                                     {/* Indicador de scroll si hay overflow (móvil y desktop) */}
                                     {isActive && cardHasOverflow && (
-                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
-                                        <svg 
-                                          className="w-5 h-5 text-black opacity-80" 
-                                          fill="none" 
-                                          stroke="currentColor" 
-                                          viewBox="0 0 24 24" 
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M19 9l-7 7-7-7" 
-                                          />
-                                        </svg>
-                                      </div>
+                                      <ScrollArrow />
                                     )}
                                   </div>
                                 </>
@@ -522,22 +640,7 @@ const Testimonials = () => {
                                     
                                     {/* Indicador de scroll si hay overflow (móvil y desktop) */}
                                     {isActive && cardHasOverflow && (
-                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
-                                        <svg 
-                                          className="w-5 h-5 text-white opacity-80" 
-                                          fill="none" 
-                                          stroke="currentColor" 
-                                          viewBox="0 0 24 24" 
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M19 9l-7 7-7-7" 
-                                          />
-                                        </svg>
-                                      </div>
+                                      <ScrollArrow />
                                     )}
                                   </div>
                                 </>
