@@ -43,20 +43,20 @@ export const metadata: Metadata = {
     siteName: 'Ready Set LLC',
     locale: 'en_US',
     type: 'website',
-    // Eliminamos la referencia directa a /opengraph-image ya que Next.js lo maneja automáticamente
-    // cuando se proporcionan los archivos correctos en el directorio de la app
+    // Eliminamos las referencias a imágenes de OpenGraph, ya que Next.js las manejará automáticamente
+    // mediante los archivos de convención opengraph-image.(jpg|jpeg|png|gif) en los segmentos de ruta
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Ready Set Virtual Assistant Services',
     description: 'Expert Virtual Assistants, Ready When You Are.',
     creator: '@ReadySetLLC',
-    // Eliminamos la referencia directa a /twitter-image ya que Next.js lo maneja automáticamente
-    // cuando se proporcionan los archivos correctos en el directorio de la app
+    // Eliminamos las referencias a imágenes de Twitter, ya que Next.js las manejará automáticamente
+    // mediante los archivos de convención twitter-image.(jpg|jpeg|png|gif) en los segmentos de ruta
   },
   other: {
     'fb:app_id': process.env.NEXT_PUBLIC_FB_APP_ID || '', // Usar variable de entorno
-    'og:logo': `${siteUrl}/images/logo/logo-white.png`, // Agregada la etiqueta og:logo que faltaba
+    'og:logo': `${siteUrl}/images/logo/logo-white.png`,
   },
   applicationName: 'Ready Set LLC',
   appleWebApp: {

@@ -1,5 +1,8 @@
 import { ImageResponse } from 'next/og'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
+// Metadata para la imagen OpenGraph
 export const alt = 'Ready Set Virtual Assistant Services'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -11,6 +14,13 @@ const SECONDARY_TEXT = '#666'
 
 export default async function Image() {
   try {
+    // Cargar el logo directamente del sistema de archivos
+    // Usamos path.join para construir la ruta absoluta al archivo
+    const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'logo-white.png')
+    const logoData = await fs.readFile(logoPath)
+    // Convertir la imagen a un formato que ImageResponse pueda utilizar
+    const logoBase64 = `data:image/png;base64,${Buffer.from(logoData).toString('base64')}`
+
     return new ImageResponse(
       (
         <div
@@ -24,7 +34,7 @@ export default async function Image() {
             justifyContent: 'center',
             padding: '4rem',
             position: 'relative',
-            fontFamily: 'system-ui, sans-serif', // Usar fuentes del sistema
+            fontFamily: 'system-ui, sans-serif',
           }}
         >
           {/* Borde superior con color de marca */}
@@ -39,22 +49,17 @@ export default async function Image() {
             }}
           />
 
-          {/* En lugar de la imagen, usamos un div con texto */}
-          <div
+          {/* Logo de la empresa */}
+          <img
+            src={logoBase64}
+            alt="Ready Set Logo"
             style={{
               width: '240px',
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: BRAND_COLOR,
-              fontWeight: 'bold',
-              fontSize: '32px',
+              height: 'auto',
               marginBottom: '2rem',
+              objectFit: 'contain',
             }}
-          >
-            READY SET
-          </div>
+          />
 
           {/* Texto principal */}
           <h1
@@ -115,12 +120,12 @@ export default async function Image() {
       ),
       {
         ...size,
-        // Sin especificar fuentes personalizadas
       }
     )
   } catch (error) {
-    // Creamos una imagen de respaldo en caso de error
-    console.error('Error generating Open Graph image:', error)
+    console.error('Error al generar la imagen OpenGraph:', error)
+    
+    // Imagen de respaldo en caso de error
     return new ImageResponse(
       (
         <div
@@ -133,19 +138,40 @@ export default async function Image() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '4rem',
-            fontFamily: 'system-ui, sans-serif', // Usar fuentes del sistema
+            fontFamily: 'system-ui, sans-serif',
           }}
         >
+          {/* Logo texto de respaldo */}
+          <div
+            style={{
+              background: BRAND_COLOR,
+              padding: '20px 40px',
+              borderRadius: '8px',
+              marginBottom: '2rem',
+            }}
+          >
+            <div
+              style={{
+                color: 'white',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              READY SET
+            </div>
+          </div>
+          
           <h1
             style={{
               fontSize: '64px',
               fontWeight: 'bold',
-              color: BRAND_COLOR,
+              color: TEXT_COLOR,
               margin: '0 0 1rem',
               textAlign: 'center',
             }}
           >
-            Ready Set LLC
+            Ready Set Virtual Assistant
           </h1>
           <p
             style={{
