@@ -5,7 +5,7 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
-import { Metadata, Viewport } from 'next';
+import { Metadata, Viewport } from 'next/types';
 
 const montserrat = Montserrat({
   subsets: ["latin"],

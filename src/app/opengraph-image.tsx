@@ -11,17 +11,6 @@ const SECONDARY_TEXT = '#666'
 
 export default async function Image() {
   try {
-    // Cargar la fuente Inter directamente - con manejo de errores
-    const interFont = await fetch(
-      'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiA.woff2'
-    ).then((res) => {
-      if (!res.ok) throw new Error(`Failed to fetch Inter font: ${res.status}`)
-      return res.arrayBuffer()
-    })
-
-    // URL base para recursos estáticos
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://readysetllc.com'
-    
     return new ImageResponse(
       (
         <div
@@ -35,7 +24,7 @@ export default async function Image() {
             justifyContent: 'center',
             padding: '4rem',
             position: 'relative',
-            fontFamily: 'Inter',
+            fontFamily: 'system-ui, sans-serif', // Usar fuentes del sistema
           }}
         >
           {/* Borde superior con color de marca */}
@@ -50,15 +39,22 @@ export default async function Image() {
             }}
           />
 
-          {/* Logo - Usando ruta pública */}
-          <img
-            src={`${baseUrl}/images/logo/logo-white.png`}
-            alt=""
+          {/* En lugar de la imagen, usamos un div con texto */}
+          <div
             style={{
-              width: '240px', 
+              width: '240px',
+              height: '80px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: BRAND_COLOR,
+              fontWeight: 'bold',
+              fontSize: '32px',
               marginBottom: '2rem',
             }}
-          />
+          >
+            READY SET
+          </div>
 
           {/* Texto principal */}
           <h1
@@ -119,14 +115,7 @@ export default async function Image() {
       ),
       {
         ...size,
-        fonts: [
-          {
-            name: 'Inter',
-            data: interFont,
-            style: 'normal',
-            weight: 700
-          },
-        ],
+        // Sin especificar fuentes personalizadas
       }
     )
   } catch (error) {
@@ -144,6 +133,7 @@ export default async function Image() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '4rem',
+            fontFamily: 'system-ui, sans-serif', // Usar fuentes del sistema
           }}
         >
           <h1

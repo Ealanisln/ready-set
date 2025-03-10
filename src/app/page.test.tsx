@@ -2,7 +2,7 @@
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Home, { metadata } from '@/app/page'
-import { Metadata } from 'next'
+import { Metadata } from 'next/types'
 
 // Mock the child components
 jest.mock('@/components/Common/ScrollUp', () => {
