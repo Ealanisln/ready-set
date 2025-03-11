@@ -1,6 +1,5 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header/index";
@@ -41,7 +40,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <SessionProvider>
       <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
         <ToasterContext />
         {!isBackendAdminRoute && !isStudioRoute && !isHomePage && <Header />}
@@ -49,6 +47,5 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {!isBackendAdminRoute && !isStudioRoute && <Footer />}
         <ScrollToTop />
       </ThemeProvider>
-    </SessionProvider>
   );
 }
