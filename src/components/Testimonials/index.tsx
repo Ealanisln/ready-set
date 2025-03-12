@@ -577,25 +577,7 @@ const Testimonials = () => {
                   <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
                 </motion.div>
                 
-                {/* Curved connector line using SVG - Escondido en móvil */}
-                <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
-                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Small circle at the start of the line */}
-                    <circle cx="68" cy="10" r="2" fill="black" />
-                    {/* Curved path from profile to card */}
-                    <motion.path 
-                      d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                      stroke="black" 
-                      strokeWidth="2" 
-                      fill="none"
-                      initial={{ pathLength: 0 }}
-                      animate={{ 
-                        pathLength: 1,
-                        transition: { delay: 0.3, duration: 0.6 }
-                      }}
-                    />
-                  </svg>
-                </div>
+                
                 
                 {/* Star Rating - Reposicionado en móvil (más abajo) */}
                 <motion.div 
@@ -663,26 +645,6 @@ const Testimonials = () => {
                 >
                   <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
                 </motion.div>
-                
-                {/* Curved connector line using SVG - Escondido en móvil */}
-                <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
-                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
-                    {/* Small circle at the start of the line */}
-                    <circle cx="68" cy="10" r="2" fill="black" />
-                    {/* Curved path from profile to card */}
-                    <motion.path 
-                      d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                      stroke="black" 
-                      strokeWidth="2" 
-                      fill="none"
-                      initial={{ pathLength: 0 }}
-                      animate={{ 
-                        pathLength: 1,
-                        transition: { delay: 0.3, duration: 0.6 }
-                      }}
-                    />
-                  </svg>
-                </div>
                 
                 {/* Star Rating - Reposicionado en móvil (más abajo) */}
                 <motion.div 
