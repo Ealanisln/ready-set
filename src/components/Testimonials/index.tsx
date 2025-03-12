@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence } from "framer-motion"
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 // Remover la importación de Image de Next.js para usar solución basada en background-image
 
@@ -180,14 +180,14 @@ const Testimonials = () => {
     },
     {
       category: 'CLIENTS',
-      name: 'Dennis Ngai.',
+      name: 'Dennis Ngai',
       role: 'Video Editing',
       text: 'These guys came through for me and built a solid business along the way. A few years back, pre-covid, my lunch catering business was taking off to a point where I had to turn down orders. Ready Set always had drivers available and helped me scale so I did not have to turn down orders. They are reliable and trustworthy.',
       image: '/images/testimonials/author-02.png'
     },
     {
       category: 'CLIENTS',
-      name: 'Racheal Gallegos.',
+      name: 'Racheal Gallegos',
       role: 'Operations Extraordinaire | Project Manager',
       text: 'Kaleb was an exceptional asset to the company during my tenure there. I would hire him again in a second for any position. Kaleb started his journey with us in customer service and sales, where he quickly showcased his remarkable intelligence and aptitude for learning. His analytical skills and ability to see both the big picture and the finer details set him apart from the beginning. Kaleb dedication and rapid growth led him to transition into product and brand management, where he truly excelled. His innovative approach, strategic thinking, and meticulous attention to detail made a significant impact on the company success. When I left the company, I felt secure knowing that Kaleb was taking over. It was not long before he was leading the team of brand managers, steering the company vision with expertise. Kaleb ability to adapt, learn, and lead with insight and precision is truly commendable. His contributions were instrumental in the company growth, and I am confident that he will continue to achieve great success in any future endeavors. Any organization would be fortunate to have Kaleb on their team.',
       image: '/images/testimonials/author-03.png'
