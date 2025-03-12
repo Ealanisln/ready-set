@@ -41,7 +41,7 @@ const sendRegistrationEmail = async (
 
   const msg = {
     to: email,
-    from: process.env.FROM_EMAIL || "emmanuel@alanis.dev",
+    from: process.env.FROM_EMAIL || "solutions@updates.readysetllc.com",
     subject: "Welcome to Our Platform - Account Created",
     html: body,
   };

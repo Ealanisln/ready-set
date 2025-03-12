@@ -1,9 +1,11 @@
+// Old behaviour: The user can download a PDF file by clicking the "Download Now" button.
+
 "use client";
 
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import AppointmentDialog from '@/components/VirtualAssistant/Appointment';
-import DownloadPopup from '../ui/DownloadPopup';
+import { DownloadPopup } from '../ui/DownloadPopup';
 
 const SocialMediaStrategy = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
@@ -126,11 +128,12 @@ const SocialMediaStrategy = () => {
                   Download Now
                 </button>
 
-                <DownloadPopup
-                  isOpen={isDownloadOpen}
-                  onClose={() => setIsDownloadOpen(false)}
-                  title={guideTitle}
-                />
+                  <DownloadPopup
+                                  isOpen={isDownloadOpen}
+                                  onClose={() => setIsDownloadOpen(false)}
+                                  title={guideTitle}
+                                  downloadUrl={`/downloads/how-to-hire-the-right-virtual-assistant.pdf`} // Adjust this path to where your PDF is actually stored
+                                />
 
                 <div className="flex justify-center">
                   <AppointmentDialog

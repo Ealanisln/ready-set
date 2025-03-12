@@ -2,6 +2,39 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+// Constants and Types
+const USER_TYPES = {
+  ADMIN: 'admin',
+  SUPER_ADMIN: 'super_admin',
+  DRIVER: 'driver',
+  HELPDESK: 'helpdesk',
+  VENDOR: 'vendor',
+  CLIENT: 'client'
+} as const;
+
+type UserType = typeof USER_TYPES[keyof typeof USER_TYPES];
+
+type TypeRoutes = {
+  readonly [K in UserType]: string;
+};
+
+interface CustomToken {
+  type?: UserType;
+  isTemporaryPassword?: boolean;
+}
+
+// Constants
+const TYPE_ROUTES: TypeRoutes = {
+  admin: '/admin',
+  super_admin: '/admin',
+  driver: '/driver',
+  helpdesk: '/helpdesk',
+  vendor: '/vendor',
+  client: '/client'
+} as const;
+
+const PROTECTED_PATHS: ReadonlySet<string> = new Set(['/admin', '/addresses']);
+
 export async function middleware(request: NextRequest) {
   console.log('Middleware called for:', request.nextUrl.pathname)
   
