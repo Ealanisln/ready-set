@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import AppointmentDialog from '@/components/VirtualAssistant/Appointment';
-import DownloadPopup from '../ui/DownloadPopup';
+import { DownloadPopup } from '../ui/DownloadPopup';
 
 const DeliveryNetwork = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
@@ -152,10 +152,11 @@ const DeliveryNetwork = () => {
                 </div>
 
                 <DownloadPopup
-                  isOpen={isDownloadOpen}
-                  onClose={() => setIsDownloadOpen(false)}
-                  title={guideTitle}
-                />
+  isOpen={isDownloadOpen}
+  onClose={() => setIsDownloadOpen(false)}
+  title={guideTitle}
+  downloadUrl={`/downloads/building-reliable-delivery-network.pdf`} // Adjust this path to where your PDF is actually stored
+/>
               </div>
             </div>
           </div>

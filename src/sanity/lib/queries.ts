@@ -177,3 +177,29 @@ export const allCategoriesQuery = groq`
     "guideCount": count(*[_type == "guide" && references(^._id)])
   }
 `;
+
+export const guidesQuery = groq`
+  *[_type == "guide" && defined(slug.current)]{
+    _id,
+    _type,
+    title,
+    subtitle,
+    "slug": slug.current,
+    "coverImage": coverImage.asset->,
+    "category": category->{
+      title,
+      "slug": slug.current
+    },
+    seo{
+      ${seoFields}
+    }
+  }
+`;
+
+export async function getGuides() {
+  return await client.fetch(guidesQuery);
+}
+
+export async function getGuideBySlug(slug: string) {
+  return await client.fetch(guideQuery, { slug });
+}
