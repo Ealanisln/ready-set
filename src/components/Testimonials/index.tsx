@@ -313,12 +313,12 @@ const Testimonials = () => {
   }, [isPaused, groupedTestimonials]);
 
   // Componente de estrellas memoizado para evitar re-renders
-  const StarRating = React.memo(({ count = 5 }: { count?: number }) => (
-    <div className="flex bg-white px-2 py-1 rounded-md">
+  const StarRating = React.memo(({ count = 5, position = "right" }: { count?: number, position?: "right" | "left" }) => (
+    <div className={`flex -mt-2 sm:mt-0 bg-white px-0 py-0 rounded-md ${position === "left" ? "justify-end" : "justify-start"}`}>
       {[...Array(count)].map((_, i) => (
         <svg
           key={i}
-          className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-400"
+          className="w-8 h-8 sm:w-7 sm:h-7 text-yellow-400"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
