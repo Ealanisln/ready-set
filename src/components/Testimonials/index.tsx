@@ -188,7 +188,7 @@ const Testimonials = () => {
     {
       category: 'CLIENTS',
       name: 'Racheal Gallegos.',
-      role: 'Vendor Partner',
+      role: 'Operations Extraordinaire | Project Manager',
       text: 'Kaleb was an exceptional asset to the company during my tenure there. I would hire him again in a second for any position. Kaleb started his journey with us in customer service and sales, where he quickly showcased his remarkable intelligence and aptitude for learning. His analytical skills and ability to see both the big picture and the finer details set him apart from the beginning. Kaleb dedication and rapid growth led him to transition into product and brand management, where he truly excelled. His innovative approach, strategic thinking, and meticulous attention to detail made a significant impact on the company success. When I left the company, I felt secure knowing that Kaleb was taking over. It was not long before he was leading the team of brand managers, steering the company vision with expertise. Kaleb ability to adapt, learn, and lead with insight and precision is truly commendable. His contributions were instrumental in the company growth, and I am confident that he will continue to achieve great success in any future endeavors. Any organization would be fortunate to have Kaleb on their team.',
       image: '/images/testimonials/author-03.png'
     },
@@ -199,6 +199,15 @@ const Testimonials = () => {
       text: "A Game-Changer for CareerLearning. Ready Set Virtual Assistants was instrumental in propelling CareerLearning to new heights. Their team seamlessly integrated into our operations, from customer service to sales support and beyond. We were particularly impressed with their ability to quickly grasp complex software platforms like Zendesk, HubSpot, On24, and Shopify. Their dedication to continuous learning and growth was evident as the VA Brand Managers took on increasing responsibilities and became experts in various departments. The impact of Ready Set's email marketing team was especially noteworthy. Their coordinators expertly managed our email campaigns through Marketo and Klaviyo, while their experienced email marketing consultant provided strategic guidance that significantly boosted our results. Ultimately, these efforts, combined with their contributions to social media management and overall marketing strategy, led to a record-breaking $3.5 million in sales in 2023. If you're seeking a reliable, skilled, and innovative virtual assistant team to elevate your business, I wholeheartedly recommend Ready Set Virtual Assistants. They're not just service providers; they're true partners in growth. 5 stars. 10 out of 10!",
       image: '/images/testimonials/author-04.png',
     },
+
+    {
+      category: 'CLIENTS',
+      name: 'Brian Escobar',
+      role: 'Virtual Assistant',
+      text: "If you're looking for a reliable, detail-oriented, and proactive Virtual Assistant, I cannot recommend Kaleb Bautista enough. His ability to manage tasks efficiently, maintain clear communication, and consistently exceed expectations has been a game-changer for anyone fortunate enough to work with him. Kaleb is not just someone who completes tasks; he anticipates needs, streamlines processes, and truly takes ownership of his responsibilities. From scheduling and email management to more complex administrative projects, he brings a sense of organization and calm to every challenge. If you need a Virtual Assistant who will lighten your workload and allow you to focus on your priorities, you need Kaleb Bautista on your team. Feel free to reach out to me if you’d like to hear more about his outstanding work!",
+      image: '/images/testimonials/author-10.png',
+    },
+
     {
       category: 'DRIVERS',
       name: 'Chris L.',
@@ -328,25 +337,92 @@ const Testimonials = () => {
     </div>
   ));
 
-  // Componente de flecha para indicar scroll memoizado
-  const ScrollArrow = React.memo(() => (
-    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 animate-bounce">
-      <svg 
-        className="w-5 h-5 text-white opacity-80" 
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24" 
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth={2} 
-          d="M19 9l-7 7-7-7" 
-        />
-      </svg>
+  // Componente de flecha para indicar scroll mejorado
+const ScrollArrow = React.memo(() => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [maxScroll, setMaxScroll] = useState(0);
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+  
+  // Referencia para el elemento contenedor actual
+  const arrowRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Encontrar el elemento padre con scroll (el card)
+    if (arrowRef.current) {
+      let parent = arrowRef.current.parentElement;
+      
+      // Buscar el primer padre con overflow auto o scroll
+      while (parent && !['auto', 'scroll'].includes(getComputedStyle(parent).overflowY)) {
+        parent = parent.parentElement;
+      }
+      
+      setScrollElement(parent);
+      
+      // Establecer el desplazamiento máximo disponible
+      if (parent) {
+        setMaxScroll(parent.scrollHeight - parent.clientHeight);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (!scrollElement) return;
+    
+    // Función para manejar el evento de scroll
+    const handleScroll = () => {
+      // Obtener posición actual de scroll
+      const currentPosition = scrollElement.scrollTop;
+      setScrollPosition(currentPosition);
+      
+      // Actualizar máximo scroll (puede cambiar si el contenido cambia)
+      setMaxScroll(scrollElement.scrollHeight - scrollElement.clientHeight);
+    };
+    
+    // Ejecutar una vez al inicio para verificar el estado inicial
+    handleScroll();
+    
+    // Agregar el event listener
+    scrollElement.addEventListener('scroll', handleScroll);
+    
+    // Limpiar el event listener cuando el componente se desmonte
+    return () => {
+      scrollElement.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollElement]);
+  
+  // Calcular la posición dinámica y opacidad de la flecha
+  const arrowPosition = Math.min(80, 20 + (scrollPosition / maxScroll) * 60);
+  const arrowOpacity = maxScroll > 0 ? 1 - (scrollPosition / maxScroll) * 1.3 : 0;
+  
+  return (
+    <div 
+      ref={arrowRef}
+      className={`absolute left-1/2 transform -translate-x-1/2 transition-all duration-200`}
+      style={{
+        bottom: `${arrowPosition}px`,
+        opacity: Math.max(0, arrowOpacity),
+        visibility: arrowOpacity <= 0.1 ? 'hidden' : 'visible',
+      }}
+    >
+      <div className={`animate-bounce`}>
+        <svg 
+          className="w-5 h-5 text-white" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M19 9l-7 7-7-7" 
+          />
+        </svg>
+      </div>
     </div>
-  ));
+  );
+});
 
   // Componente de imagen de perfil con carga estática para evitar parpadeos
   const ProfileImage = React.memo(({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
@@ -493,29 +569,80 @@ const Testimonials = () => {
                     </p>
                   </div>
                   
-                  {/* Carrusel manual */}
-                  <div 
-                    className="relative h-[350px] sm:h-[450px]"
-                    onMouseEnter={() => setIsPaused({...isPaused, [category]: true})}
-                    onMouseLeave={() => setIsPaused({...isPaused, [category]: false})}
-                    onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
-                    onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
-                  >
-                    {/* Indicadores de página */}
-                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                      {items.map((_, idx) => (
-                        <button
-                          key={idx}
-                          className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-                            idx === activeIndices[category as keyof typeof activeIndices] 
-                              ? 'bg-yellow-400' 
-                              : 'bg-gray-300'
-                          }`}
-                          onClick={() => setActiveIndices({...activeIndices, [category]: idx})}
-                          aria-label={`Go to testimonial ${idx + 1}`}
-                        />
-                      ))}
-                    </div>
+                 {/* Carrusel manual */}
+                <div 
+                  className="relative h-[350px] sm:h-[450px]"
+                  onMouseEnter={() => setIsPaused({...isPaused, [category]: true})}
+                  onMouseLeave={() => setIsPaused({...isPaused, [category]: false})}
+                  onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
+                  onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
+                >
+                 {/* Botón de pausa/reanudar (versión mejorada para móvil y escritorio) */}
+                 <button
+  className="
+    absolute
+    top-4 
+    -right-2 sm:right-0 
+    z-10 bg-gray-100 bg-opacity-50 text-gray-800 p-0.5 scale-75 rounded-full 
+    hover:bg-opacity-30 transition-all duration-300 shadow-sm
+  "
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsPaused({
+      ...isPaused, 
+      [category as keyof typeof isPaused]: !isPaused[category as keyof typeof isPaused]
+    });
+  }}
+  // Agregar eventos táctiles específicos
+  onTouchStart={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }}
+  onTouchEnd={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsPaused({
+      ...isPaused, 
+      [category as keyof typeof isPaused]: !isPaused[category as keyof typeof isPaused]
+    });
+  }}
+  style={{ 
+    WebkitTapHighlightColor: 'transparent',
+    touchAction: 'manipulation',
+    padding: '8px', // Aumentar el área táctil
+    position: 'absolute', // Siempre absolute
+    top: '16px' // Valor fijo para colocarlo en la parte superior
+    // Eliminamos right del estilo en línea porque lo controlamos con Tailwind
+  }}
+  aria-label={isPaused[category as keyof typeof isPaused] ? "Reanudar carrusel" : "Pausar carrusel"}
+>
+  {isPaused[category as keyof typeof isPaused] ? (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+    </svg>
+  ) : (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+  )}
+</button>
+
+  {/* Indicadores de página */}
+  <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+    {items.map((_, idx: number) => (
+      <button
+        key={idx}
+        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
+          idx === activeIndices[category as keyof typeof activeIndices] 
+            ? 'bg-yellow-400' 
+            : 'bg-gray-300'
+        }`}
+        onClick={() => setActiveIndices({...activeIndices, [category]: idx})}
+        aria-label={`Go to testimonial ${idx + 1}`}
+      />
+    ))}
+  </div>
                     
                     {/* Contenedor con animación de fade */}
                   {/* Contenedor con animación usando Motion */}
