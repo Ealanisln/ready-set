@@ -289,9 +289,9 @@ const Testimonials = () => {
         // Calcular tiempo transcurrido desde último cambio
         const elapsed = timestamp - lastTimestamps[categoryKey];
         
-        // Cambiar cada 8 segundos (8000ms) si no está pausado
+        // Cambiar cada 10 segundos (10000ms) si no está pausado
         // Tiempo más largo para reducir cambios y posibles parpadeos
-        if (elapsed > 8000 && !isPaused[categoryKey]) {
+        if (elapsed > 10000 && !isPaused[categoryKey]) {
           nextTestimonial(categoryKey);
           lastTimestamps[categoryKey] = timestamp;
         }
@@ -427,11 +427,11 @@ const Testimonials = () => {
 
   // Si no estamos en el navegador, renderizamos un contenedor vacío
   if (!isBrowser) {
-    return <div className="bg-white py-10 px-4 border border-purple-500 rounded-lg">Cargando testimonios...</div>;
+    return <div className="bg-white py-10 px-4 border border-black rounded-lg">Cargando testimonios...</div>;
   }
 
   return (
-    <section className="bg-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 border border-purple-500 rounded-lg">
+    <section className="bg-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 border border-black rounded-lg">
       <div className="max-w-7xl mx-auto">
         {/* Updated header section with dotted lines extending from title */}
         <div className="text-center mb-8 sm:mb-12 relative">
