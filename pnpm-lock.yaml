@@ -165,8 +165,11 @@ importers:
       dotenv-cli:
         specifier: ^8.0.0
         version: 8.0.0
+      embla-carousel:
+        specifier: ^8.5.2
+        version: 8.5.2
       embla-carousel-autoplay:
-        specifier: ^8.5.1
+        specifier: ^8.5.2
         version: 8.5.2(embla-carousel@8.5.2)
       embla-carousel-react:
         specifier: ^8.5.1

@@ -1,4 +1,5 @@
 import ConsultationBanner from "@/components/PopUpBanner/Consultation";
+import Testimonials from "@/components/Testimonials";
 import HeroHeader from "@/components/VirtualAssistant";
 import DiscoveryCallSection from "@/components/VirtualAssistant/DiscoveryCall";
 import DiscoveryBanner from "@/components/VirtualAssistant/DiscoveryCallBanner";
@@ -89,6 +90,7 @@ const VirtualAssistantPage = () => {
       <DiscoveryCallSection />
       <BusinessScaleSection />
       {/* <Pricing /> */}
+      <Testimonials />
       <DiscoveryBanner />
     </main>
   );
