@@ -114,7 +114,7 @@
     "react-virtualized": "^9.22.5",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
-    "resend": "^4.0.1",
+    "resend": "^4.1.1",
     "rimraf": "6.0.1",
     "sanity": "^3.71.2",
     "sanity-plugin-seo": "1.2.6-alpha",

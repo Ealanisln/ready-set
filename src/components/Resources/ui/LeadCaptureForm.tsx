@@ -1,9 +1,8 @@
 // src/components/Resources/ui/LeadCaptureForm.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { generateSlug } from "@/lib/create-slug";
 
 interface FormData {
   firstName: string;
@@ -12,7 +11,8 @@ interface FormData {
   industry: string;
   newsletterConsent: boolean;
   resourceSlug: string;
-  resourceUrl?: string; // Add URL to store in the database
+  resourceUrl?: string;
+  sendEmail: boolean;
 }
 
 interface LeadCaptureFormProps {
@@ -31,6 +31,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const downloadAttempted = useRef(false);
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -40,13 +41,14 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
     newsletterConsent: true,
     resourceSlug: resourceSlug,
     resourceUrl: downloadUrl,
+    sendEmail: true,
   });
 
   // Update resourceUrl if downloadUrl changes
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      resourceUrl: downloadUrl
+      resourceUrl: downloadUrl,
     }));
   }, [downloadUrl]);
 
@@ -58,33 +60,80 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
     }));
   };
 
+  // Improved download function with better debugging and fallbacks
   const triggerDownload = React.useCallback(() => {
-    if (downloadUrl) {
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (!downloadUrl) {
+      console.error("Download URL is missing");
+      return;
+    }
+
+    try {
+      // Method 1: Direct window.open
+      window.open(downloadUrl, "_blank");
+
+      // Method 2: Create and click an anchor element (backup)
+      setTimeout(() => {
+        try {
+          const link = document.createElement("a");
+          link.href = downloadUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+
+          // For PDF files
+          if (downloadUrl.toLowerCase().endsWith(".pdf")) {
+            const filename = downloadUrl.split("/").pop() || "download.pdf";
+            link.setAttribute("download", filename);
+          }
+
+          document.body.appendChild(link);
+          link.click();
+
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(link);
+          }, 100);
+        } catch (error) {
+          console.error("Error in anchor element download method:", error);
+        }
+      }, 300);
+
+      downloadAttempted.current = true;
+    } catch (error) {
+      console.error("Error triggering download:", error);
     }
   }, [downloadUrl]);
 
+  // Dedicated effect for download
+  useEffect(() => {
+    if (isSubmitted && downloadUrl && !downloadAttempted.current) {
+      // Try immediately
+      triggerDownload();
+
+      // Also try after a delay to ensure browser is ready
+      const downloadTimer = setTimeout(() => {
+        if (!downloadAttempted.current) {
+          triggerDownload();
+        }
+      }, 800);
+
+      return () => clearTimeout(downloadTimer);
+    }
+  }, [isSubmitted, downloadUrl, triggerDownload]);
+
+  // Separate useEffect for the onSuccess callback
   useEffect(() => {
     if (isSubmitted) {
-      triggerDownload();
       // Delay onSuccess to allow the success message to be shown
-      const timer = setTimeout(() => {
+      const successTimer = setTimeout(() => {
         onSuccess?.();
-      }, 2000); // Increased timeout to give users time to see the success message
-      return () => clearTimeout(timer);
+      }, 2000);
+      return () => clearTimeout(successTimer);
     }
-  }, [isSubmitted, triggerDownload, onSuccess]);
+  }, [isSubmitted, onSuccess]);
 
-  // Add a separate effect for cleanup when component unmounts
+  // Cleanup effect
   useEffect(() => {
     return () => {
-      // Only reset if not in submitted state
       if (!isSubmitted) {
         setIsSubmitting(false);
         setError(null);
@@ -96,6 +145,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
           newsletterConsent: true,
           resourceSlug: resourceSlug,
           resourceUrl: downloadUrl,
+          sendEmail: true,
         });
       }
     };
@@ -105,8 +155,10 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    downloadAttempted.current = false;
 
     try {
+      // Store the lead in the database
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
@@ -115,20 +167,21 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
         body: JSON.stringify(formData),
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-
-      // If the response is not JSON, we can see it as text
       if (!response.ok) {
         const textResponse = await response.text();
-        console.log("Error response text:", textResponse);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Response from server:", data);
 
       setIsSubmitted(true);
+
+      // Try to trigger download immediately after form submission
+      if (downloadUrl) {
+        setTimeout(() => {
+          triggerDownload();
+        }, 100);
+      }
     } catch (err) {
       console.error("Detailed error:", err);
       setError(err instanceof Error ? err.message : "Failed to submit form");
@@ -233,16 +286,6 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
               required
             />
             <div className="flex items-start space-x-2 pt-2">
-              {/* <Checkbox
-                id="newsletterConsent"
-                checked={formData.newsletterConsent}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    newsletterConsent: !!checked,
-                  }))
-                }
-              /> */}
               <label
                 htmlFor="newsletterConsent"
                 className="text-xs leading-tight text-gray-600"

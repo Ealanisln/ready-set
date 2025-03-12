@@ -8,6 +8,7 @@ import { sendDownloadEmail } from "@/app/actions/send-download-email";
 const prisma = new PrismaClient();
 const client = new Client();
 
+// We're still using SendGrid for list management, but Resend for transactional emails
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_LIST_ID) {
   throw new Error('SendGrid configuration is missing');
 }
@@ -15,6 +16,7 @@ if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_LIST_ID) {
 client.setApiKey(process.env.SENDGRID_API_KEY);
 const WEBSITE_LEADS_LIST_ID = process.env.SENDGRID_LIST_ID;
 
+// Updated schema to include sendEmail flag
 const FormSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
@@ -22,7 +24,8 @@ const FormSchema = z.object({
   industry: z.string(),
   newsletterConsent: z.boolean(),
   resourceSlug: z.string().optional(),
-  resourceUrl: z.string().optional(), // Add resource URL
+  resourceUrl: z.string().optional(),
+  sendEmail: z.boolean().optional().default(true) // Add sendEmail flag with default true
 });
 
 export async function POST(req: NextRequest) {
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Handle SendGrid subscription
+    // Handle SendGrid subscription for newsletter
     if (validatedData.newsletterConsent) {
       try {
         const sendgridData = {
@@ -94,14 +97,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Handle resource download email
-    if (validatedData.resourceSlug) {
+    // Handle resource download email using Resend - only send if sendEmail flag is true
+    if (validatedData.resourceSlug && validatedData.sendEmail) {
       try {
+        // This now uses Resend instead of SendGrid for the transactional email
         await sendDownloadEmail(
           validatedData.email,
           validatedData.firstName,
           validatedData.resourceSlug,
-          validatedData.resourceUrl // Pass the resource URL to the email function
+          validatedData.resourceUrl
         );
       } catch (error) {
         // Log the error but don't throw it
@@ -109,7 +113,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Return success even if SendGrid operations fail
+    // Return success even if email operations fail
     return NextResponse.json({ success: true, data: lead });
     
   } catch (error) {
