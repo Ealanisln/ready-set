@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, AnimatePresence } from "motion/react"
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 // Remover la importación de Image de Next.js para usar solución basada en background-image
 
@@ -200,17 +201,17 @@ const Testimonials = () => {
     },
     {
       category: 'DRIVERS',
-      name: 'Maria R.',
-      role: 'Logistics Partner',
-      text: 'I love the flexibility and the team\'s professionalism. I feel valued every single day.',
-      image: '/images/testimonials/author-05.png'
-    },
-    {
-      category: 'DRIVERS',
       name: 'Chris L.',
       role: 'Delivery Driver',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
       image: '/images/testimonials/author-06.png'
+    },
+    {
+      category: 'DRIVERS',
+      name: 'Emmanuel Cardenas',
+      role: 'Delivery Driver',
+      text: 'During my two-year tenure as a driver with Ready Set, I experienced a remarkably fulfilling professional chapter. The flexibility of the scheduling system allowed me to  maintain an ideal work-life balance, with the freedom to select shifts that complemented  my personal commitments. The user-friendly driver app streamlined the entire process,  from clocking in to navigating routes and processing deliveries with minimal friction. What truly distinguished Ready Set was its comprehensive driver support system. Whenever I encountered challenges on the road, the responsive dispatch team provided immediate assistance, ensuring I never felt isolated during difficult situations. The companys commitment to driver wellbeing was evident through regular check-ins and a genuine interest in addressing concerns promptly.',
+      image: '/images/testimonials/author-05.png'
     }, 
     {
       category: 'VENDORS',
@@ -224,7 +225,7 @@ const Testimonials = () => {
       name: 'Sarah Johnson',
       role: 'Business Partner',
       text: 'Working with Ready Set has been life-changing for me. The support from the team is unmatched—they always ensure I have all the information I need to complete my deliveries efficiently. I\'ve also gained access to great opportunities and flexible hours, which allow me to balance work with my personal life. I feel respected and valued every step of the way, and that motivates me to give my best every day. Ready Set is not just a job; it feels like a community that genuinely cares about its drivers.',
-      image: '/images/testimonials/author-03.png'
+      image: '/images/testimonials/author-08.png'
     }, 
   ];
 
@@ -517,139 +518,230 @@ const Testimonials = () => {
                     </div>
                     
                     {/* Contenedor con animación de fade */}
-                    <div className="h-full">
-                      {items.map((testimonial, index) => {
-                        const isActive = index === activeIndices[category as keyof typeof activeIndices];
-                        // Alternar el layout en móvil para consistencia
-                        const layoutStyle = isMobile ? (index % 2 === 0) : (index % 2 === 0);
-                        
-                        // Verificar si este testimonio tiene overflow
-                        const cardHasOverflow = hasOverflow[category as keyof typeof hasOverflow]?.[index];
-                        
-                        // En móvil, preparar todos los testimonios pero ocultar los inactivos completamente
-                        // Esto evita que se monten/desmonten componentes, causando parpadeos
-                        
-                        return (
-                          <div 
-                            key={index}
-                            className={`absolute inset-0 ${isMobile ? '' : 'transition-opacity duration-500'} ${
-                              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                            }`}
-                            style={{ 
-                              // Usar transform para mejorar rendimiento de animaciones
-                              transform: `translateZ(0)`,
-                              willChange: 'opacity',
-                              // Para móvil: usando visibility en vez de opacity para mejor rendimiento
-                              visibility: isMobile && !isActive ? 'hidden' : 'visible'
-                            }}
-                          >
-                            <div className="relative h-full pt-6">
-                              {layoutStyle ? (
-                                // Left-aligned card (odd indices - first card)
-                                <>
-                                  {/* Profile Image - Left positioned - Más pegada al card en móvil */}
-                                  <div className="absolute -top-4 sm:-top-8 left-4 sm:left-8 z-10">
-                                    <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
-                                  </div>
-                                  
-                                  {/* Curved connector line using SVG - Escondido en móvil */}
-                                  <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
-                                    <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      {/* Small circle at the start of the line */}
-                                      <circle cx="68" cy="10" r="2" fill="black" />
-                                      {/* Curved path from profile to card */}
-                                      <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                                            stroke="black" 
-                                            strokeWidth="2" 
-                                            fill="none" />
-                                    </svg>
-                                  </div>
-                                  
-                                  {/* Star Rating - Reposicionado en móvil (más abajo) */}
-                                  <div className="absolute top-2 sm:-top-4 left-1/2 sm:left-[60%] transform -translate-x-1/2 sm:-translate-x-1/2 z-20">
-                                    <StarRating count={5} />
-                                  </div>
-                                  
-                                  {/* Card with testimonial */}
-                                  <div 
-                                    ref={el => {
-                                      if (!cardRefs.current[category]) {
-                                        cardRefs.current[category] = [];
-                                      }
-                                      cardRefs.current[category][index] = el;
-                                    }}
-                                    className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 bg-yellow-400 text-black max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
-                                  >
-                                    <div className="mb-3 sm:mb-4">
-                                      <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
-                                      <p className="text-xs sm:text-sm text-yellow-800">{testimonial.role}</p>
-                                    </div>
-                                    <p className="text-xs sm:text-sm leading-relaxed">
-                                      {testimonial.text}
-                                    </p>
-                                    
-                                    {/* Indicador de scroll si hay overflow (móvil y desktop) */}
-                                    {isActive && cardHasOverflow && (
-                                      <ScrollArrow />
-                                    )}
-                                  </div>
-                                </>
-                              ) : (
-                                // Right-aligned card (even indices - second card)
-                                <>
-                                  {/* Profile Image - Right positioned - Más pegada al card en móvil */}
-                                  <div className="absolute -top-4 sm:-top-8 right-4 sm:right-8 z-10">
-                                    <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
-                                  </div>
-                                  
-                                  {/* Curved connector line using SVG - Escondido en móvil */}
-                                  <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
-                                    <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
-                                      {/* Small circle at the start of the line */}
-                                      <circle cx="68" cy="10" r="2" fill="black" />
-                                      {/* Curved path from profile to card */}
-                                      <path d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
-                                            stroke="black" 
-                                            strokeWidth="2" 
-                                            fill="none" />
-                                    </svg>
-                                  </div>
-                                  
-                                  {/* Star Rating - Reposicionado en móvil (más abajo) */}
-                                  <div className="absolute top-2 sm:-top-4 right-1/2 sm:right-[60%] transform translate-x-1/2 sm:translate-x-1/2 z-20">
-                                    <StarRating count={5} />
-                                  </div>
-                                  
-                                  {/* Card with testimonial - Padding ajustado en móvil */}
-                                  <div 
-                                    ref={el => {
-                                      if (!cardRefs.current[category]) {
-                                        cardRefs.current[category] = [];
-                                      }
-                                      cardRefs.current[category][index] = el;
-                                    }}
-                                    className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 pr-4 sm:pr-24 bg-black text-white max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
-                                  >
-                                    <div className="mb-3 sm:mb-4">
-                                      <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
-                                      <p className="text-xs sm:text-sm text-yellow-400">{testimonial.role}</p>
-                                    </div>
-                                    <p className="text-xs sm:text-sm leading-relaxed">
-                                      {testimonial.text}
-                                    </p>
-                                    
-                                    {/* Indicador de scroll si hay overflow (móvil y desktop) */}
-                                    {isActive && cardHasOverflow && (
-                                      <ScrollArrow />
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {/* Contenedor con animación usando Motion */}
+<div className="h-full">
+  <AnimatePresence mode="wait">
+    {items.map((testimonial, index) => {
+      const isActive = index === activeIndices[category as keyof typeof activeIndices];
+      // Alternar el layout en móvil para consistencia
+      const layoutStyle = isMobile ? (index % 2 === 0) : (index % 2 === 0);
+      
+      // Verificar si este testimonio tiene overflow
+      const cardHasOverflow = hasOverflow[category as keyof typeof hasOverflow]?.[index];
+      
+      // Solo mostramos el testimonio activo para la animación
+      if (!isActive) return null;
+      
+      return (
+        <motion.div 
+          key={`${category}-${index}`}
+          className="absolute inset-0"
+          initial={{ 
+            opacity: 0, 
+            x: layoutStyle ? -30 : 30 
+          }}
+          animate={{ 
+            opacity: 1, 
+            x: 0,
+            transition: { 
+              duration: 0.4,
+              ease: "easeOut"
+            }
+          }}
+          exit={{ 
+            opacity: 0, 
+            x: layoutStyle ? 30 : -30,
+            transition: { 
+              duration: 0.3,
+              ease: "easeIn"
+            }
+          }}
+          style={{ 
+            willChange: 'transform, opacity',
+          }}
+        >
+          <div className="relative h-full pt-6">
+            {layoutStyle ? (
+              // Left-aligned card (odd indices - first card)
+              <>
+                {/* Profile Image - Left positioned - Más pegada al card en móvil */}
+                <motion.div 
+                  className="absolute -top-4 sm:-top-8 left-4 sm:left-8 z-10"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ 
+                    scale: 1, 
+                    opacity: 1,
+                    transition: { delay: 0.2, duration: 0.3 }
+                  }}
+                >
+                  <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
+                </motion.div>
+                
+                {/* Curved connector line using SVG - Escondido en móvil */}
+                <div className="absolute top-0 left-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
+                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Small circle at the start of the line */}
+                    <circle cx="68" cy="10" r="2" fill="black" />
+                    {/* Curved path from profile to card */}
+                    <motion.path 
+                      d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                      stroke="black" 
+                      strokeWidth="2" 
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ 
+                        pathLength: 1,
+                        transition: { delay: 0.3, duration: 0.6 }
+                      }}
+                    />
+                  </svg>
+                </div>
+                
+                {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                <motion.div 
+                  className="absolute top-2 sm:-top-4 left-1/2 sm:left-[60%] transform -translate-x-1/2 sm:-translate-x-1/2 z-20"
+                  initial={{ y: -10, opacity: 0 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    transition: { delay: 0.4, duration: 0.3 }
+                  }}
+                >
+                  <StarRating count={5} />
+                </motion.div>
+                
+                {/* Card with testimonial */}
+                <motion.div 
+                  ref={el => {
+                    if (!cardRefs.current[category]) {
+                      cardRefs.current[category] = [];
+                    }
+                    cardRefs.current[category][index] = el;
+                  }}
+                  className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 bg-yellow-400 text-black max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    transition: { delay: 0.1, duration: 0.4 }
+                  }}
+                >
+                  <div className="mb-3 sm:mb-4">
+                    <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
+                    <p className="text-xs sm:text-sm text-yellow-800">{testimonial.role}</p>
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed">
+                    {testimonial.text}
+                  </p>
+                  
+                  {/* Indicador de scroll si hay overflow (móvil y desktop) */}
+                  {cardHasOverflow && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: 1,
+                        transition: { delay: 0.6, duration: 0.3 }
+                      }}
+                    >
+                      <ScrollArrow />
+                    </motion.div>
+                  )}
+                </motion.div>
+              </>
+            ) : (
+              // Right-aligned card (even indices - second card)
+              <>
+                {/* Profile Image - Right positioned - Más pegada al card en móvil */}
+                <motion.div 
+                  className="absolute -top-4 sm:-top-8 right-4 sm:right-8 z-10"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ 
+                    scale: 1, 
+                    opacity: 1,
+                    transition: { delay: 0.2, duration: 0.3 }
+                  }}
+                >
+                  <ProfileImage imageSrc={testimonial.image} alt={testimonial.name} />
+                </motion.div>
+                
+                {/* Curved connector line using SVG - Escondido en móvil */}
+                <div className="absolute top-0 right-0 w-full h-32 z-5 pointer-events-none hidden sm:block">
+                  <svg width="100%" height="100%" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                    {/* Small circle at the start of the line */}
+                    <circle cx="68" cy="10" r="2" fill="black" />
+                    {/* Curved path from profile to card */}
+                    <motion.path 
+                      d="M68 10 H150 C180 10, 250 5, 270 30 S300 50, 330 35" 
+                      stroke="black" 
+                      strokeWidth="2" 
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ 
+                        pathLength: 1,
+                        transition: { delay: 0.3, duration: 0.6 }
+                      }}
+                    />
+                  </svg>
+                </div>
+                
+                {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                <motion.div 
+                  className="absolute top-2 sm:-top-4 right-1/2 sm:right-[60%] transform translate-x-1/2 sm:translate-x-1/2 z-20"
+                  initial={{ y: -10, opacity: 0 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    transition: { delay: 0.4, duration: 0.3 }
+                  }}
+                >
+                  <StarRating count={5} />
+                </motion.div>
+                
+                {/* Card with testimonial - Padding ajustado en móvil */}
+                <motion.div 
+                  ref={el => {
+                    if (!cardRefs.current[category]) {
+                      cardRefs.current[category] = [];
+                    }
+                    cardRefs.current[category][index] = el;
+                  }}
+                  className="relative rounded-xl shadow-lg p-4 sm:p-6 pt-6 sm:pt-8 pr-4 sm:pr-24 bg-black text-white max-h-[320px] sm:max-h-[400px] overflow-y-auto mt-2 sm:mt-0"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    transition: { delay: 0.1, duration: 0.4 }
+                  }}
+                >
+                  <div className="mb-3 sm:mb-4">
+                    <h4 className="font-bold text-base sm:text-lg">{testimonial.name}</h4>
+                    <p className="text-xs sm:text-sm text-yellow-400">{testimonial.role}</p>
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed">
+                    {testimonial.text}
+                  </p>
+                  
+                  {/* Indicador de scroll si hay overflow (móvil y desktop) */}
+                  {cardHasOverflow && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: 1,
+                        transition: { delay: 0.6, duration: 0.3 }
+                      }}
+                    >
+                      <ScrollArrow />
+                    </motion.div>
+                  )}
+                </motion.div>
+              </>
+            )}
+          </div>
+        </motion.div>
+      );
+    })}
+</AnimatePresence>
+</div>
                   </div>
                 </div>
               </div>
