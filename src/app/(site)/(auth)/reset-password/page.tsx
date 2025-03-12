@@ -1,3 +1,5 @@
+// src/app/(site)/(auth)/reset-password/page.tsx
+
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -47,20 +49,29 @@ function ResetPasswordFallback() {
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [resetCode, setResetCode] = useState<string>("");
-  const [hasCode, setHasCode] = useState<boolean>(false);
+  const [resetToken, setResetToken] = useState<string>("");
+  const [hasToken, setHasToken] = useState<boolean>(false);
 
-  // Extract reset code from URL parameters
+  // Extract reset token from URL parameters - support both 'code' for backward compatibility
+  // and 'token_hash' for Supabase PKCE flow
   useEffect(() => {
+    // First check for Supabase token_hash parameter
+    const tokenHash = searchParams.get("token_hash");
+    // Also check for the 'code' parameter for backward compatibility or if using implicit flow
     const code = searchParams.get("code");
     
-    if (code) {
+    // Set the token - prioritize token_hash if both are present
+    if (tokenHash) {
+      console.log("Reset token_hash found in URL:", tokenHash.substring(0, 5) + "...");
+      setResetToken(tokenHash);
+      setHasToken(true);
+    } else if (code) {
       console.log("Reset code found in URL:", code.substring(0, 5) + "...");
-      setResetCode(code);
-      setHasCode(true);
+      setResetToken(code);
+      setHasToken(true);
     } else {
-      console.log("No reset code found in URL");
-      setHasCode(false);
+      console.log("No reset token found in URL");
+      setHasToken(false);
     }
     
     // Check for status messages
@@ -88,19 +99,19 @@ function ResetPasswordForm() {
           <h1 className="text-2xl font-bold">Reset Your Password</h1>
           <p className="text-gray-600">Please enter your new password below</p>
           
-          {!hasCode && (
+          {!hasToken && (
             <div className="mt-2 p-2 bg-red-50 rounded-md">
               <p className="text-sm text-red-600">
-                No reset code found. Please use the link from your email or request a new one.
+                No reset token found. Please use the link from your email or request a new one.
               </p>
             </div>
           )}
         </div>
 
-        {hasCode ? (
+        {hasToken ? (
           <form action={resetPasswordAction}>
-            {/* Hidden field to pass the reset code to the server action */}
-            <input type="hidden" name="resetCode" value={resetCode} />
+            {/* Hidden field to pass the reset token to the server action */}
+            <input type="hidden" name="resetCode" value={resetToken} />
             
             <div className="mb-4">
               <label
@@ -118,7 +129,7 @@ function ResetPasswordForm() {
                 required
               />
               <p className="mt-1 text-xs text-gray-500">
-                Must be different from your current password and at least 6 characters long
+                Must be at least 6 characters long
               </p>
             </div>
 

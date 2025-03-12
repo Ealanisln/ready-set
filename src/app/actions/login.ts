@@ -1,3 +1,5 @@
+// src/app/actions/login.ts
+
 'use server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -18,7 +20,7 @@ export async function login(formData: FormData) {
   // Form validation
   if (!email || !password) {
     console.log('Missing email or password')
-    redirect('/login?error=Email+and+password+are+required')
+    redirect('/sign-in?error=Email+and+password+are+required')
   }
   
   // Try to sign in directly - we'll handle user existence through the signin response
@@ -45,7 +47,7 @@ export async function login(formData: FormData) {
     }
     
     // Redirect with error
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    redirect(`/sign-in?error=${encodeURIComponent(error.message)}`)
   }
   
   // Check if the user has a temporary password (using user metadata)
@@ -72,12 +74,12 @@ export async function signup(formData: FormData) {
   
   // Form validation
   if (!email || !password) {
-    redirect('/login?error=Email+and+password+are+required')
+    redirect('/sign-in?error=Email+and+password+are+required')
   }
   
   // Password strength validation (optional)
   if (password.length < 8) {
-    redirect('/login?error=Password+must+be+at+least+8+characters+long')
+    redirect('/sign-in?error=Password+must+be+at+least+8+characters+long')
   }
   
   const { data, error } = await supabase.auth.signUp({
@@ -86,7 +88,7 @@ export async function signup(formData: FormData) {
   })
   
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    redirect(`/sign-in?error=${encodeURIComponent(error.message)}`)
   }
   
   // Check if email confirmation is required

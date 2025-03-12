@@ -1,26 +1,24 @@
-// src/components/Auth/SignIn/index.tsx
-
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Loader from "@/components/Common/Loader";
 import { login, signup } from '@/app/actions/login';
 import GoogleAuthButton from "@/components/Auth/GoogleAuthButton"; 
+import { useSearchParams } from "next/navigation";
 
-const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: string } }) => {
+const Signin = () => {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     general: "",
   });
+  const searchParams = useSearchParams();
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,12 +30,26 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
     setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };
 
-  // Display error from URL params if present
   useEffect(() => {
-    if (searchParams?.error) {
-      setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
+    const error = searchParams.get('error');
+    const message = searchParams.get('message');
+    
+    if (error) {
+      console.log("Error from URL:", error);
+      
+      // For critical auth errors, show inline error message
+      if (error.includes("Invalid") || error.includes("credentials")) {
+        setErrors((prev) => ({ ...prev, general: error }));
+      } else {
+        // For other errors, show toast
+      }
+    }
+    
+    if (message) {
+      console.log("Message from URL:", message);
     }
   }, [searchParams]);
+
 
   return (
     <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-20">
@@ -66,19 +78,16 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                   />
                 </Link>
               </div>
-
-              {searchParams?.message && (
+              {searchParams.get('message') && (
                 <div className="p-3 mb-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                  {searchParams.message}
+                  {searchParams.get('message')}
                 </div>
               )}
-
               {errors.general && (
                 <div className="p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
                   {errors.general}
                 </div>
               )}
-
               <form noValidate>
                 <div className="mb-[22px]">
                   <input
@@ -97,7 +106,6 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                     </p>
                   )}
                 </div>
-
                 <div className="mb-[22px]">
                   <input
                     type="password"
@@ -115,7 +123,6 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                     </p>
                   )}
                 </div>
-
                 <div className="flex space-x-4 mb-5">
                   <button
                     formAction={login}
@@ -143,29 +150,24 @@ const Signin = ({ searchParams }: { searchParams?: { error?: string; message?: s
                 
                 {/* Google Sign-in Button */}
                 <div className="mb-5">
-                  {/* <GoogleAuthButton /> */}
                   <GoogleAuthButton />
                 </div>
-
                 {/* Or divider */}
                 <div className="relative flex justify-center text-xs uppercase mb-5">
                   <span className="bg-white dark:bg-dark-2 px-2 text-gray-500">Or</span>
                   <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-300 dark:bg-dark-3"></div>
                 </div>
               </form>
-
               <Link
                 href="/forgot-password"
                 className="mb-2 inline-block text-base text-dark hover:text-primary dark:text-white dark:hover:text-primary"
               >
                 Forgot Password?
               </Link>
-
               {/* Migration notice - can be removed after migration is complete */}
               <div className="mt-6 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm">
                 <p><strong>Important:</strong> If you're a returning user from our previous system and can't log in, please use the "Forgot password" link to reset your password.</p>
               </div>
-
               <div>
                 <span className="absolute right-1 top-1">
                   <svg

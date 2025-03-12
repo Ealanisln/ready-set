@@ -35,7 +35,7 @@ export async function resetPasswordAction(formData: FormData) {
   const confirmPassword = formData.get("confirmPassword") as string;
   const resetCode = formData.get("resetCode") as string;
   
-  console.log("Reset action started with code:", resetCode ? `${resetCode.substring(0, 5)}...` : "missing");
+  console.log("Reset action started with token:", resetCode ? `${resetCode.substring(0, 5)}...` : "missing");
   
   // Create the server-side Supabase client
   const supabase = await createClient();
@@ -46,7 +46,7 @@ export async function resetPasswordAction(formData: FormData) {
       "error",
       "/reset-password",
       "Password and confirm password are required",
-      ["code"]
+      ["token_hash", "code"] // Preserve both possible token parameters
     );
   }
 
@@ -55,7 +55,7 @@ export async function resetPasswordAction(formData: FormData) {
       "error",
       "/reset-password",
       "Passwords do not match",
-      ["code"]
+      ["token_hash", "code"]
     );
   }
 
@@ -64,7 +64,7 @@ export async function resetPasswordAction(formData: FormData) {
       "error",
       "/reset-password",
       "Password must be at least 6 characters",
-      ["code"]
+      ["token_hash", "code"]
     );
   }
 
@@ -77,9 +77,9 @@ export async function resetPasswordAction(formData: FormData) {
   }
 
   try {
-    console.log("Starting password reset with code", resetCode.substring(0, 5) + "...");
+    console.log("Starting password reset with token", resetCode.substring(0, 5) + "...");
     
-    // Step 1: Exchange the reset code for a session
+    // Exchange the reset code for a session using Supabase's PKCE flow
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(resetCode);
     
     if (sessionError) {
@@ -93,7 +93,7 @@ export async function resetPasswordAction(formData: FormData) {
     
     console.log("Successfully exchanged code for session");
 
-    // Step 2: Update the password with the new session
+    // Update the user's password using the established session
     const { error: updateError } = await supabase.auth.updateUser({
       password: password
     });
@@ -101,17 +101,18 @@ export async function resetPasswordAction(formData: FormData) {
     if (updateError) {
       console.error("Password update error:", updateError);
       
-      // Pass the exact error message from Supabase
+      // Include the token in case we need to retry due to a fixable error
+      const tokenParam = resetCode ? `?code=${resetCode}` : "";
       return await encodedRedirect(
         "error",
-        "/reset-password?code=" + resetCode,
+        `/reset-password${tokenParam}`,
         updateError.message
       );
     }
 
     console.log("Password updated successfully");
     
-    // Success - redirect to login
+    // Success - redirect to login page with success message
     return await encodedRedirect(
       "success",
       "/login",
@@ -120,10 +121,11 @@ export async function resetPasswordAction(formData: FormData) {
   } catch (err: any) {
     console.error("Unexpected error:", err);
     
-    // Make sure we keep the code in the URL when redirecting after an error
+    // Include reset code in URL for potential retries
+    const tokenParam = resetCode ? `?code=${resetCode}` : "";
     return await encodedRedirect(
       "error",
-      "/reset-password?code=" + resetCode,
+      `/reset-password${tokenParam}`,
       err.message || "An unexpected error occurred"
     );
   }
