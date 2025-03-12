@@ -1,73 +1,59 @@
-// src/components/Resources/ResourcesGrid.tsx
-import Link from "next/link";
-import { Card, CardContent, CardFooter, CardTitle } from "../ui/card";
-import Image from "next/image";
-import { Button } from "../ui/button";
-import { generateSlug } from "@/lib/create-slug";
-import { resources } from "./Data/Resources";
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-const ResourcesGrid = () => {
+// Update this interface to match your Sanity data structure
+interface Guide {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  slug: string; // From Sanity, this should already be the slug string
+  coverImage?: {
+    url: string;
+  };
+  category?: {
+    title: string;
+    slug: string;
+  };
+}
+
+interface ResourcesGridProps {
+  guides: Guide[];
+  basePath: string;
+}
+
+const ResourcesGrid = ({ guides, basePath }: ResourcesGridProps) => {
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="flex justify-center pb-8">
-        
-            <Image
-              src="/images/logo/logo.png"
-              alt="logo"
-              width={140}
-              height={30}
-              className="dark:hidden"
-            />
-          </div>
-          <h1 className="mb-4 text-3xl font-bold tracking-wide text-gray-700">
-            Welcome to Our Free Guides and Resources.
-          </h1>
-        </div>
-
-        {/* Resources Grid */}
-        <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {resources.map((resource, index) => (
-            <Card
-              key={index}
-              className="flex flex-col overflow-hidden rounded-none bg-white transition-shadow hover:shadow-lg"
-            >
-              <div className="relative aspect-[4/3] w-full">
-              <picture>
-                <source srcSet={resource.imageUrl} type="image/webp" />
-                <img
-                  src={resource.imageUrl || resource.imageFallback}
-                  alt={resource.title}
-                  width={400}
-                  height={300}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                </picture>
-              </div>
-              <div className="flex h-full flex-col">
-                <CardContent className="flex-1 p-6">
-                  <CardTitle className="mb-3 text-xl leading-tight">
-                    {resource.title}
-                  </CardTitle>
-                  <p className="text-gray-600">{resource.description}</p>
-                </CardContent>
-                <CardFooter className="px-6 pb-6">
-                  <Link
-                    href={`/free-resources/${generateSlug(resource.title)}`}
-                    className="w-full"
-                  >
-                    <Button className="w-full rounded-none bg-yellow-400 text-gray-900 hover:bg-yellow-500">
-                      Learn more
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {guides.map((guide) => (
+        <Link 
+          href={`/${basePath}/${guide.slug}`} 
+          key={guide._id}
+          className="group rounded-lg border border-gray-200 p-4 transition-all hover:shadow-md"
+        >
+          {guide.coverImage?.url && (
+            <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
+              <Image
+                src={guide.coverImage.url}
+                alt={guide.title}
+                fill
+                className="object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+          )}
+          <h3 className="mb-2 text-xl font-semibold">{guide.title}</h3>
+          {guide.subtitle && (
+            <p className="text-gray-700">{guide.subtitle}</p>
+          )}
+          {guide.category && (
+  <div className="mt-3">
+    <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm text-gray-800">
+      Learn More
+    </span>
+  </div>
+)}
+        </Link>
+      ))}
     </div>
   );
 };

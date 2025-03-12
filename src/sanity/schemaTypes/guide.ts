@@ -15,7 +15,8 @@ export default defineType({
     defineField({
       name: 'subtitle',
       title: 'Subtitle',
-      type: 'string'
+      type: 'string',
+      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'slug',
@@ -38,11 +39,12 @@ export default defineType({
       name: 'introduction',
       title: 'Introduction',
       type: 'array',
-      of: [{type: 'block'}]
+      of: [{type: 'block'}],
+      validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'sections',
-      title: 'Content Sections',
+      name: 'mainContent',
+      title: 'Main Content Sections',
       type: 'array',
       of: [{
         type: 'object',
@@ -50,22 +52,88 @@ export default defineType({
           {
             name: 'title',
             title: 'Section Title',
-            type: 'string'
+            type: 'string',
+            validation: Rule => Rule.required()
           },
           {
             name: 'content',
             title: 'Section Content',
             type: 'array',
             of: [{type: 'block'}]
+          }
+        ],
+        preview: {
+          select: {
+            title: 'title'
+          }
+        }
+      }]
+    }),
+    defineField({
+      name: 'listSections',
+      title: 'List Sections',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          {
+            name: 'title',
+            title: 'Section Title',
+            type: 'string',
+            validation: Rule => Rule.required()
           },
           {
-            name: 'bulletPoints',
-            title: 'Bullet Points',
+            name: 'items',
+            title: 'List Items',
             type: 'array',
-            of: [{type: 'string'}]
+            of: [{
+              type: 'object',
+              fields: [
+                {
+                  name: 'title',
+                  title: 'Item Title',
+                  type: 'string'
+                },
+                {
+                  name: 'content',
+                  title: 'Item Content',
+                  type: 'text',
+                  validation: Rule => Rule.required()
+                }
+              ],
+              preview: {
+                select: {
+                  title: 'title',
+                  subtitle: 'content'
+                },
+                prepare({ title, subtitle }) {
+                  return {
+                    title: title || subtitle?.slice(0, 50) + '...',
+                    subtitle: title ? subtitle?.slice(0, 50) + '...' : ''
+                  }
+                }
+              }
+            }]
           }
-        ]
+        ],
+        preview: {
+          select: {
+            title: 'title',
+            items: 'items'
+          },
+          prepare({ title, items }) {
+            return {
+              title,
+              subtitle: `${items?.length || 0} items`
+            }
+          }
+        }
       }]
+    }),
+    defineField({
+      name: 'callToAction',
+      title: 'Call to Action',
+      type: 'text'
     }),
     defineField({
       name: 'coverImage',
@@ -73,12 +141,28 @@ export default defineType({
       type: 'image',
       options: {
         hotspot: true
-      }
+      },
+      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'calendarUrl',
       title: 'Calendar URL',
-      type: 'url'
+      type: 'url',
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: 'downloadableFiles',
+      title: 'Downloadable Files',
+      type: 'array',
+      of: [
+        {
+          type: 'file',
+          options: {
+            accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip'
+          }
+        }
+      ],
+      description: 'Upload PDFs and other documents for this guide'
     }),
     defineField({
       name: 'ctaText',

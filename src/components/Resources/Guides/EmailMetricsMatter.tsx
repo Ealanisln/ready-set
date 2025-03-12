@@ -127,10 +127,11 @@ const EmailMetricsMatter = () => {
                 </button>
 
                 <DownloadPopup
-                  isOpen={isDownloadOpen}
-                  onClose={() => setIsDownloadOpen(false)}
-                  title={guideTitle}
-                />
+  isOpen={isDownloadOpen}
+  onClose={() => setIsDownloadOpen(false)}
+  title={guideTitle}
+  downloadUrl="/path/to/your/guide.pdf" // Add this line with the actual path to your download
+/>
 
                 {/* AppointmentDialog */}
                 <div className="flex justify-center">
