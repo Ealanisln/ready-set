@@ -197,7 +197,7 @@ export const guidesQuery = groq`
 `;
 
 export async function getGuides() {
-  return await client.fetch(guidesQuery);
+  return await client.fetch(guidesQuery, {}, { next: { revalidate: 30 } });
 }
 
 export async function getGuideBySlug(slug: string) {

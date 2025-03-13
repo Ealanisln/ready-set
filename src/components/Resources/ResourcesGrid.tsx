@@ -1,6 +1,6 @@
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 // Update this interface to match your Sanity data structure
 interface Guide {
@@ -26,8 +26,8 @@ const ResourcesGrid = ({ guides, basePath }: ResourcesGridProps) => {
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       {guides.map((guide) => (
-        <Link 
-          href={`/${basePath}/${guide.slug}`} 
+        <Link
+          href={`/${basePath}/${guide.slug}`}
           key={guide._id}
           className="group rounded-lg border border-gray-200 p-4 transition-all hover:shadow-md"
         >
@@ -42,16 +42,14 @@ const ResourcesGrid = ({ guides, basePath }: ResourcesGridProps) => {
             </div>
           )}
           <h3 className="mb-2 text-xl font-semibold">{guide.title}</h3>
-          {guide.subtitle && (
-            <p className="text-gray-700">{guide.subtitle}</p>
-          )}
+          {guide.subtitle && <p className="text-gray-700">{guide.subtitle}</p>}
           {guide.category && (
-  <div className="mt-3">
-    <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm text-gray-800">
-      Learn More
-    </span>
-  </div>
-)}
+            <div className="mt-3">
+              <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm text-gray-800">
+                Learn More
+              </span>
+            </div>
+          )}
         </Link>
       ))}
     </div>

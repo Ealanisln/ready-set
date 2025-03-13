@@ -2,7 +2,6 @@
 import SingleBlog from "@/components/Blog/SingleBlog";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
-import NewsLetterSignup from "@/components/Resources/ui/NewsLetterSignUp";
 import { client } from "@/sanity/lib/client";
 import { postPathsQuery } from "@/sanity/lib/queries";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
