@@ -1,24 +1,27 @@
+// app/opengraph-image.tsx
 import { ImageResponse } from 'next/og'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-// Metadata para la imagen OpenGraph
+// OpenGraph image metadata
 export const alt = 'Ready Set Virtual Assistant Services'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-// Valores reutilizables
+// Reusable values
 const BRAND_COLOR = '#5850EC'
 const TEXT_COLOR = '#333'
 const SECONDARY_TEXT = '#666'
 
+// This ensures the image is generated at build time
+export const runtime = 'edge'
+
 export default async function Image() {
   try {
-    // Cargar el logo directamente del sistema de archivos
-    // Usamos path.join para construir la ruta absoluta al archivo
-    const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'logo-white.png')
+    // Load the logo directly from the filesystem
+    const logoPath = path.join(process.cwd(), 'public', 'og-image.png')
     const logoData = await fs.readFile(logoPath)
-    // Convertir la imagen a un formato que ImageResponse pueda utilizar
+    // Convert the image to a format that ImageResponse can use
     const logoBase64 = `data:image/png;base64,${Buffer.from(logoData).toString('base64')}`
 
     return new ImageResponse(
@@ -37,7 +40,7 @@ export default async function Image() {
             fontFamily: 'system-ui, sans-serif',
           }}
         >
-          {/* Borde superior con color de marca */}
+          {/* Top border with brand color */}
           <div 
             style={{
               position: 'absolute',
@@ -49,7 +52,7 @@ export default async function Image() {
             }}
           />
 
-          {/* Logo de la empresa */}
+          {/* Company logo */}
           <img
             src={logoBase64}
             alt="Ready Set Logo"
@@ -61,7 +64,7 @@ export default async function Image() {
             }}
           />
 
-          {/* Texto principal */}
+          {/* Main text */}
           <h1
             style={{
               fontSize: '72px',
@@ -76,7 +79,7 @@ export default async function Image() {
             Ready Set Virtual Assistant
           </h1>
 
-          {/* Subtítulo */}
+          {/* Subtitle */}
           <p
             style={{
               fontSize: '36px',
@@ -89,7 +92,7 @@ export default async function Image() {
             Expert Virtual Assistants, Ready When You Are
           </p>
 
-          {/* Dominio */}
+          {/* Domain */}
           <div
             style={{
               position: 'absolute',
@@ -105,7 +108,7 @@ export default async function Image() {
             readysetllc.com
           </div>
           
-          {/* Decoración de esquina */}
+          {/* Corner decoration */}
           <div
             style={{
               position: 'absolute',
@@ -123,9 +126,9 @@ export default async function Image() {
       }
     )
   } catch (error) {
-    console.error('Error al generar la imagen OpenGraph:', error)
+    console.error('Error generating OpenGraph image:', error)
     
-    // Imagen de respaldo en caso de error
+    // Fallback image in case of error
     return new ImageResponse(
       (
         <div
@@ -141,7 +144,7 @@ export default async function Image() {
             fontFamily: 'system-ui, sans-serif',
           }}
         >
-          {/* Logo texto de respaldo */}
+          {/* Text logo fallback */}
           <div
             style={{
               background: BRAND_COLOR,
