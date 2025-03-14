@@ -3,7 +3,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Add request tracking for debugging
+  const requestId = Math.random().toString(36).substring(7);
+  const url = new URL(request.url);
+  console.log(`[${requestId}] API call to /api/users/current-user from ${url.pathname} - Headers:`, 
+    Object.fromEntries(request.headers));
+  
   try {
     // Initialize Supabase client
     const supabase = await createClient();
@@ -12,6 +18,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
+      console.log(`[${requestId}] No authenticated user found`);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +30,7 @@ export async function GET() {
       .single();
 
     if (profile) {
-      console.log("Found user in profiles table:", profile);
+      console.log(`[${requestId}] Found user in profiles table:`, profile);
       return NextResponse.json({
         id: user.id,
         email: user.email,
@@ -43,16 +50,16 @@ export async function GET() {
       });
 
       if (userData) {
-        console.log("Found user in prisma table:", userData);
+        console.log(`[${requestId}] Found user in prisma table:`, userData);
         return NextResponse.json(userData);
       }
     } catch (prismaError) {
-      console.error("Error fetching from Prisma:", prismaError);
+      console.error(`[${requestId}] Error fetching from Prisma:`, prismaError);
     }
 
     // If we still can't find a role, check user metadata
     if (user.user_metadata && (user.user_metadata.type || user.user_metadata.role)) {
-      console.log("Using role from user metadata:", user.user_metadata);
+      console.log(`[${requestId}] Using role from user metadata:`, user.user_metadata);
       return NextResponse.json({
         id: user.id,
         email: user.email,
@@ -61,6 +68,7 @@ export async function GET() {
     }
 
     // If we got here, we couldn't determine the user's role
+    console.log(`[${requestId}] User profile not found for ID: ${user.id}`);
     return NextResponse.json({ 
       error: "User profile not found",
       id: user.id,
@@ -68,7 +76,7 @@ export async function GET() {
       type: "unknown"
     }, { status: 404 });
   } catch (error) {
-    console.error("Error fetching current user:", error);
+    console.error(`[${requestId}] Error fetching current user:`, error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

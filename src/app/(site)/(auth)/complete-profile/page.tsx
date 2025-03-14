@@ -33,8 +33,18 @@ export default function CompleteProfile() {
   const [userType, setUserType] = useState<UserType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
 
   // Simple global loading timeout
   useEffect(() => {
@@ -57,6 +67,8 @@ export default function CompleteProfile() {
   // Updated fetchUser to prevent false redirects for manual users
   useEffect(() => {
     const fetchUser = async () => {
+      if (!supabase) return; // Wait until supabase is initialized
+      
       try {
         console.log("Fetching user data...");
         
@@ -151,7 +163,9 @@ export default function CompleteProfile() {
       }
     };
 
-    fetchUser();
+    if (supabase) {
+      fetchUser();
+    }
   }, [router, supabase]);
 
   const handleUserTypeSelection = (type: UserType) => {
@@ -161,6 +175,11 @@ export default function CompleteProfile() {
   };
 
   const onSubmit = async (formData: any) => {
+    if (!supabase) {
+      setError("Supabase client not initialized");
+      return;
+    }
+    
     console.log("Form submission started:", formData);
     setLoading(true);
     setError(null);

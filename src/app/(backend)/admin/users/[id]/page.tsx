@@ -25,7 +25,7 @@ import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
 import { UserType } from "@/components/Auth/SignUp/FormSchemas";
-import { createClient } from "@/utils/supabase/client"; // Import the client-side Supabase client
+import { useUser } from "@/contexts/UserContext";
 
 interface User {
   id: string;
@@ -64,12 +64,12 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [session, setSession] = useState<any>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<UserType>("client");
-  const router = useRouter();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const supabase = createClient();
+  const router = useRouter();
+  
+  // Use the shared user context
+  const { session, userRole, isLoading: isUserLoading } = useUser();
 
   const userId = params.id;
 
@@ -102,68 +102,6 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   // Important: Watch all form values
   const watchedValues = watch();
 
-  // Fetch Supabase session
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
-
-    fetchSession();
-
-    // Set up listener for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
-
-  // Fetch the current user's role
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!session) return;
-      
-      try {
-        // Fetch the current user's role from the API
-        const response = await fetch("/api/users/current-user");
-        
-        if (!response.ok) {
-          console.error("Failed to fetch current user role:", response.statusText);
-          
-          // Fallback to metadata if API fails
-          if (session?.user?.user_metadata?.type) {
-            setCurrentUserRole(session.user.user_metadata.type as UserType);
-            console.log("Current user role set from metadata:", session.user.user_metadata.type);
-          }
-          return;
-        }
-        
-        const userData = await response.json();
-        
-        // Set the role from the API response
-        if (userData.type) {
-          setCurrentUserRole(userData.type as UserType);
-          console.log("Current user role set to:", userData.type);
-        }
-      } catch (error) {
-        console.error("Error fetching current user role:", error);
-        
-        // Fallback to metadata if API fails
-        if (session?.user?.user_metadata?.type) {
-          setCurrentUserRole(session.user.user_metadata.type as UserType);
-          console.log("Current user role set from metadata (fallback):", session.user.user_metadata.type);
-        }
-      }
-    };
-    
-    fetchUserRole();
-  }, [session]);
-
   // Memoize the default form values
   const defaultFormValues = useMemo(
     () => ({
@@ -188,20 +126,23 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       head_count: "",
       status: "pending" as const,
     }),
-    [],
+    []
   );
 
   // Fetch user data
   const fetchUser = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || isUserLoading) return;
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/users/${userId}?t=${Date.now()}`, {
+      // Add a timestamp and request id to prevent caching
+      const cacheKey = Date.now().toString() + Math.random().toString(36).substring(7);
+      const response = await fetch(`/api/users/${userId}?t=${cacheKey}`, {
         cache: "no-store",
         headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "x-request-source": "EditUserComponent",
         },
       });
 
@@ -210,7 +151,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
 
       const data = await response.json();
-      console.log("Raw API data:", data); // Debug: log the raw API data
+      console.log("Raw API data:", data);
 
       const formData = {
         ...defaultFormValues,
@@ -230,7 +171,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         parking_loading: data.parking_loading || "",
       };
 
-      console.log("Transformed form data:", formData); // Debug: log the transformed data
+      console.log("Transformed form data:", formData);
       reset(formData);
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -239,12 +180,14 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false);
     }
-  }, [userId, reset, defaultFormValues, stringToValueArray]);
+  }, [userId, reset, defaultFormValues, stringToValueArray, isUserLoading]);
 
-  // Initial fetch and refresh handling
+  // Initial fetch and refresh handling - wait for user context to initialize
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser, refreshTrigger]);
+    if (!isUserLoading) {
+      fetchUser();
+    }
+  }, [fetchUser, refreshTrigger, isUserLoading]);
 
   // Watch for form changes
   useEffect(() => {
@@ -292,14 +235,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         submitData.head_count = data.head_count;
       }
 
-      console.log("Submitting data:", submitData); // Debug: log submission data
+      console.log("Submitting data:", submitData);
 
       const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
-          Pragma: "no-cache",
+          "Pragma": "no-cache",
+          "x-request-source": "EditUserComponent-Submit",
         },
         body: JSON.stringify(submitData),
       });
@@ -309,7 +253,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
 
       const updatedUser = await response.json();
-      console.log("Updated user response:", updatedUser); // Debug: log the response
+      console.log("Updated user response:", updatedUser);
 
       const formData = {
         ...defaultFormValues,
@@ -344,7 +288,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
-          Pragma: "no-cache",
+          "Pragma": "no-cache",
+          "x-request-source": "EditUserComponent-StatusChange",
         },
         body: JSON.stringify({
           userId: params.id,
@@ -388,7 +333,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
-          Pragma: "no-cache",
+          "Pragma": "no-cache",
+          "x-request-source": "EditUserComponent-RoleChange",
         },
         body: JSON.stringify({ newRole }),
       });
@@ -489,6 +435,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const currentPageTitle = loading
     ? "Loading..."
     : `Editing ${watchedValues.displayName || "User"}`;
+
+  // Check if user is still loading
+  if (isUserLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="ml-4 text-lg font-semibold">Initializing auth...</p>
+      </div>
+    );
+  }
 
   // Check if user is authenticated
   if (!session) {
@@ -594,7 +549,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                     }}
                     onStatusChange={handleStatusChange}
                     onRoleChange={handleRoleChange}
-                    currentUserRole={currentUserRole}
+                    currentUserRole={userRole || "client"}
                   />
                   <Card className="overflow-hidden">
                     <CardHeader>

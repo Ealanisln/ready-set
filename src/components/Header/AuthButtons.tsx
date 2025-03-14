@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User, SupabaseClient, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 interface AuthButtonsProps {
   sticky: boolean;
@@ -10,30 +10,62 @@ interface AuthButtonsProps {
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({ sticky, pathUrl }) => {
   const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        setIsLoading(false);
+      }
+    };
+
+    initSupabase();
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     // Get the current user when component mounts
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUser();
-
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        setUser(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setIsLoading(false);
       }
-    });
-
+    };
+    
+    getUser();
+    
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
+      }
+    );
+  
     // Clean up subscription
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (user) {
     return (
@@ -51,7 +83,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({ sticky, pathUrl }) => {
       </>
     );
   }
-
+  
   return (
     <>
       <SignInButton sticky={sticky} pathUrl={pathUrl} />
@@ -66,13 +98,36 @@ interface ButtonProps {
 }
 
 const SignOutButton: React.FC<ButtonProps> = ({ sticky, pathUrl }) => {
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  };
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+      }
+    };
 
+    initSupabase();
+  }, []);
+
+  const handleSignOut = async () => {
+    if (!supabase) {
+      console.error("Supabase client not initialized");
+      return;
+    }
+    
+    try {
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+  
   return (
     <button
       onClick={handleSignOut}

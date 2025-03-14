@@ -198,9 +198,6 @@ importers:
       next:
         specifier: ^15.2.1
         version: 15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      next-auth:
-        specifier: ^4.24.11
-        version: 4.24.11(next@15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@6.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-sanity:
         specifier: ^9.8.42
         version: 9.8.47(@sanity/client@6.27.2(debug@4.4.0))(@sanity/icons@3.5.7(react@18.3.1))(@sanity/types@3.72.1(@types/react@19.0.8)(debug@4.4.0))(@sanity/ui@2.11.7(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)))(debug@4.4.0)(next@15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sanity@3.72.1(@emotion/is-prop-valid@1.2.2)(@types/babel__core@7.20.5)(@types/node@22.12.0)(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.37.0)(typescript@5.7.3))(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -16914,23 +16911,6 @@ snapshots:
   natural-compare@1.4.0: {}
 
   neo-async@2.6.2: {}
-
-  next-auth@4.24.11(next@15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@6.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@babel/runtime': 7.26.7
-      '@panva/hkdf': 1.2.1
-      cookie: 0.7.2
-      jose: 4.15.9
-      next: 15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      oauth: 0.9.15
-      openid-client: 5.7.1
-      preact: 10.25.4
-      preact-render-to-string: 5.2.6(preact@10.25.4)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      uuid: 11.0.3
-    optionalDependencies:
-      nodemailer: 6.10.0
 
   next-sanity@9.8.47(@sanity/client@6.27.2(debug@4.4.0))(@sanity/icons@3.5.7(react@18.3.1))(@sanity/types@3.72.1(@types/react@19.0.8)(debug@4.4.0))(@sanity/ui@2.11.7(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)))(debug@4.4.0)(next@15.2.1(@babel/core@7.26.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sanity@3.72.1(@emotion/is-prop-valid@1.2.2)(@types/babel__core@7.20.5)(@types/node@22.12.0)(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.37.0)(typescript@5.7.3))(styled-components@6.1.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:

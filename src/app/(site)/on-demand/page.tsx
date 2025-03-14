@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import SectionTitle from "@/components/Common/SectionTitle";
 import Faq from "@/components/Faq";
 import OnDemandOrderForm from "@/components/CateringRequest/OnDemandForm";
@@ -9,11 +10,24 @@ import { createClient } from "@/utils/supabase/client";
 
 const OnDemandPage = () => {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
 
   useEffect(() => {
+    // Skip if Supabase client is not yet initialized
+    if (!supabase) return;
+    
     const getSession = async () => {
       try {
         setLoading(true);
@@ -37,7 +51,7 @@ const OnDemandPage = () => {
 
     // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: AuthChangeEvent, session: Session | null) => {
         if (event === "SIGNED_OUT") {
           router.push("/sign-in");
         } else if (event === "SIGNED_IN" && session) {

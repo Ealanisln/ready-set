@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Session, AuthChangeEvent } from "@supabase/supabase-js";
 import Faq from "@/components/Faq";
 import SectionTitle from "@/components/Common/SectionTitle";
 import CateringRequestForm from "@/components/CateringRequest/CateringRequestForm";
@@ -9,11 +10,24 @@ import { createClient } from "@/utils/supabase/client";
 
 const CateringPage = () => {
   const router = useRouter();
-  const supabase = createClient();
-  const [session, setSession] = useState<any>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize Supabase client
   useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
+
+  useEffect(() => {
+    // Skip if Supabase client is not yet initialized
+    if (!supabase) return;
+    
     // Fetch the session when the component mounts
     const fetchSession = async () => {
       try {
@@ -31,7 +45,7 @@ const CateringPage = () => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
       }
     );
@@ -40,7 +54,7 @@ const CateringPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase]); // Depend on supabase client
 
   // Redirect to login if not authenticated
   useEffect(() => {

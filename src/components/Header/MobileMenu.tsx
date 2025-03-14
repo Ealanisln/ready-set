@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 interface MenuItem {
   id: string | number;
@@ -43,11 +44,31 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   pathUrl,
   getTextColorClasses,
 }) => {
-  const supabase = createClient();
   const router = useRouter();
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Error connecting to service. Please try again later.");
+      }
+    };
+
+    initSupabase();
+  }, []);
+
   const handleSignOut = async () => {
+    if (!supabase) {
+      toast.error("Unable to connect to authentication service");
+      return;
+    }
+
     try {
       setIsSigningOut(true);
       navbarToggleHandler(); // Close mobile menu
@@ -55,8 +76,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Error signing out:', error.message);
-        toast.error("Failed to sign out. Please try again.");
+        throw error;
       } else {
         toast.success("Signed out successfully");
         router.push('/');
@@ -155,10 +175,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </Link>
             <button
               onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="rounded-md bg-blue-500 px-6 py-3 text-base font-medium text-white"
+              disabled={isSigningOut || !supabase}
+              className={`rounded-md ${
+                isSigningOut || !supabase 
+                  ? "bg-blue-400" 
+                  : "bg-blue-500 hover:bg-blue-600"
+              } px-6 py-3 text-base font-medium text-white transition-colors`}
             >
-              {isSigningOut ? "Signing Out..." : "Sign Out"}
+              {isSigningOut ? "Signing Out..." : !supabase ? "Connecting..." : "Sign Out"}
             </button>
           </>
         ) : (

@@ -24,7 +24,12 @@ import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
 import { useUploadFile } from "@/hooks/use-upload-file";
-import { COUNTIES, TIME_NEEDED, CATERING_BROKERAGE, PROVISIONS } from "@/components/Auth/SignUp/ui/FormData";
+import {
+  COUNTIES,
+  TIME_NEEDED,
+  CATERING_BROKERAGE,
+  PROVISIONS,
+} from "@/components/Auth/SignUp/ui/FormData";
 
 // Updated to match the db schema fields
 // Base database user interface
@@ -57,7 +62,7 @@ interface User {
   isTemporaryPassword?: boolean;
 }
 
-  // Form-specific option type
+// Form-specific option type
 interface OptionType {
   label: string;
   value: string;
@@ -91,7 +96,7 @@ interface UserFormValues {
   status: "active" | "pending" | "deleted";
   side_notes?: string;
   isTemporaryPassword?: boolean;
-  
+
   // Form-specific fields
   displayName: string;
   countiesServed?: string[];
@@ -110,19 +115,32 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const supabase = createClient();
 
   // Get the current user session using Supabase
+  // Get the current user session using Supabase
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/sign-in');
-        return;
+      try {
+        // Create and await the Supabase client inside the function
+        const supabase = await createClient();
+
+        // Now you can safely use the auth property
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          router.push("/sign-in");
+          return;
+        }
+
+        setUser(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        router.push("/sign-in");
       }
-      setUser(user);
     };
 
     getUser();
-  }, [router, supabase]);
-
+  }, [router]); // Remove supabase from the dependency array
 
   // Update the useUploadFileHook to handle the proper return type
   const useUploadFileHook = (category: string) => {
@@ -184,7 +202,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       countiesServed: [],
       timeNeeded: [],
       cateringBrokerage: [],
-      provisions: []
+      provisions: [],
     },
   });
 
@@ -197,17 +215,22 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   // Helper function to convert comma-separated string to array of values
   const stringToValueArray = (str: string | undefined): string[] => {
     if (!str) return [];
-    return str.split(',').map((item: string) => item.trim());
+    return str.split(",").map((item: string) => item.trim());
   };
-  
+
   // Helper function to convert comma-separated string to array of option objects
-  const stringToOptionsArray = (str: string | undefined, optionsArray: readonly { label: string; value: string }[]): OptionType[] => {
+  const stringToOptionsArray = (
+    str: string | undefined,
+    optionsArray: readonly { label: string; value: string }[],
+  ): OptionType[] => {
     if (!str) return [];
-    
-    const values = str.split(',').map((item: string) => item.trim());
+
+    const values = str.split(",").map((item: string) => item.trim());
     return values.map((value: string) => {
       // Try to find the matching option in the predefined array
-      const matchingOption = optionsArray.find((option: OptionType) => option.value === value);
+      const matchingOption = optionsArray.find(
+        (option: OptionType) => option.value === value,
+      );
       // Return the matching option if found, otherwise create a new option
       return matchingOption || { label: value, value: value };
     });
@@ -250,14 +273,17 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         setValue("head_count", data.head_count || "");
         setValue("side_notes", data.side_notes || "");
         setValue("isTemporaryPassword", data.isTemporaryPassword || false);
-        
+
         // Transform string values to arrays of simple values (not objects)
         // This matches what CheckboxGroup expects for the checked state
         setValue("countiesServed", stringToValueArray(data.counties));
         setValue("timeNeeded", stringToValueArray(data.time_needed));
-        setValue("cateringBrokerage", stringToValueArray(data.catering_brokerage));
+        setValue(
+          "cateringBrokerage",
+          stringToValueArray(data.catering_brokerage),
+        );
         setValue("provisions", stringToValueArray(data.provide));
-        
+
         // Keep the original string values for reference or backup
         setValue("counties", data.counties || "");
         setValue("time_needed", data.time_needed || "");
@@ -298,30 +324,30 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         head_count: data.head_count,
         status: data.status,
         side_notes: data.side_notes,
-        isTemporaryPassword: data.isTemporaryPassword
+        isTemporaryPassword: data.isTemporaryPassword,
       };
-      
+
       // Transform arrays back to comma-separated strings for API
       if (data.countiesServed && Array.isArray(data.countiesServed)) {
-        submitData.counties = data.countiesServed.join(',');
+        submitData.counties = data.countiesServed.join(",");
       } else {
         submitData.counties = data.counties;
       }
-      
+
       if (data.timeNeeded && Array.isArray(data.timeNeeded)) {
-        submitData.time_needed = data.timeNeeded.join(',');
+        submitData.time_needed = data.timeNeeded.join(",");
       } else {
         submitData.time_needed = data.time_needed;
       }
-      
+
       if (data.cateringBrokerage && Array.isArray(data.cateringBrokerage)) {
-        submitData.catering_brokerage = data.cateringBrokerage.join(',');
+        submitData.catering_brokerage = data.cateringBrokerage.join(",");
       } else {
         submitData.catering_brokerage = data.catering_brokerage;
       }
-      
+
       if (data.provisions && Array.isArray(data.provisions)) {
-        submitData.provide = data.provisions.join(',');
+        submitData.provide = data.provisions.join(",");
       } else {
         submitData.provide = data.provide;
       }
@@ -341,17 +367,27 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
       const updatedUser = await response.json();
       toast.success("User saved successfully!");
-      
+
       // Update the form with the returned data from server to keep it in sync
       const formattedUser = {
         ...updatedUser,
-        countiesServed: updatedUser.counties ? updatedUser.counties.split(',').map((s: string) => s.trim()) : [],
-        timeNeeded: updatedUser.time_needed ? updatedUser.time_needed.split(',').map((s: string) => s.trim()) : [],
-        cateringBrokerage: updatedUser.catering_brokerage ? updatedUser.catering_brokerage.split(',').map((s: string) => s.trim()) : [],
-        provisions: updatedUser.provide ? updatedUser.provide.split(',').map((s: string) => s.trim()) : [],
-        displayName: updatedUser.name || updatedUser.contact_name || ""
+        countiesServed: updatedUser.counties
+          ? updatedUser.counties.split(",").map((s: string) => s.trim())
+          : [],
+        timeNeeded: updatedUser.time_needed
+          ? updatedUser.time_needed.split(",").map((s: string) => s.trim())
+          : [],
+        cateringBrokerage: updatedUser.catering_brokerage
+          ? updatedUser.catering_brokerage
+              .split(",")
+              .map((s: string) => s.trim())
+          : [],
+        provisions: updatedUser.provide
+          ? updatedUser.provide.split(",").map((s: string) => s.trim())
+          : [],
+        displayName: updatedUser.name || updatedUser.contact_name || "",
       };
-      
+
       reset(formattedUser);
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -441,7 +477,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                       Discard
                     </Button>
                   )}
-                  <Button size="sm" type="submit">Save User</Button>
+                  <Button size="sm" type="submit">
+                    Save User
+                  </Button>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -496,7 +534,12 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 md:hidden">
-                <Button variant="outline" size="sm" onClick={handleDiscard} type="button">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDiscard}
+                  type="button"
+                >
                   Discard
                 </Button>
                 <Button size="sm" type="submit">

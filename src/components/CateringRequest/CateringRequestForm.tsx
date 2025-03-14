@@ -12,6 +12,7 @@ import { useUploadFile } from "@/hooks/use-upload-file";
 import { X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 import { createClient } from "@/utils/supabase/client";
+import { SupabaseClient, Session } from "@supabase/supabase-js";
 
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadThingFile[];
@@ -48,10 +49,29 @@ const BROKERAGE_OPTIONS = [
 ];
 
 const CateringRequestForm: React.FC = () => {
-  const supabase = createClient();
-  const [session, setSession] = useState<any>(null);
+  // State for Supabase client
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFileKeys, setUploadedFileKeys] = useState<string[]>([]);
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Error connecting to the service. Please try again.");
+        setIsInitializing(false);
+      }
+    };
+
+    initSupabase();
+  }, []);
+
   const { control, handleSubmit, watch, setValue, reset } =
     useForm<ExtendedCateringFormData>({
       defaultValues: {
@@ -101,19 +121,28 @@ const CateringRequestForm: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Fetch Supabase session
+  // Fetch Supabase session when client is initialized
   useEffect(() => {
+    if (!supabase) return;
+
     const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(data.session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      } finally {
+        setIsInitializing(false);
+      }
     };
 
     fetchSession();
 
     // Set up listener for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+      (_event, newSession) => {
+        setSession(newSession);
       }
     );
 
@@ -127,7 +156,6 @@ const CateringRequestForm: React.FC = () => {
   }, []);
 
   const needHost = watch("need_host");
-
   const {
     onUpload,
     uploadedFiles,
@@ -174,7 +202,6 @@ const CateringRequestForm: React.FC = () => {
         // Show browser's default "Changes you made may not be saved" dialog
         e.preventDefault();
         e.returnValue = "";
-
         // Note: We can't guarantee this cleanup will complete before the window closes
         // That's why we also need server-side cleanup for orphaned files
         cleanupUploadedFiles(uploadedFileKeys);
@@ -182,7 +209,6 @@ const CateringRequestForm: React.FC = () => {
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       // Cleanup if component unmounts without submission
@@ -196,7 +222,6 @@ const CateringRequestForm: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (!event.target.files?.length) return;
-
     const files = Array.from(event.target.files) as FileWithPath[];
     try {
       const result = await onUpload(files);
@@ -216,12 +241,10 @@ const CateringRequestForm: React.FC = () => {
       (file) => file.key !== fileToRemove.key,
     ) as UploadThingFile[];
     setValue("attachments", updatedFiles);
-
     // Remove from tracked keys
     setUploadedFileKeys((prev) =>
       prev.filter((key) => key !== fileToRemove.key),
     );
-
     // Clean up the removed file
     await cleanupUploadedFiles([fileToRemove.key]);
   };
@@ -233,6 +256,7 @@ const CateringRequestForm: React.FC = () => {
   
     if (!session?.user?.id) {
       console.error("User not authenticated", { userId: session?.user?.id });
+      toast.error("You must be logged in to submit a request");
       return;
     }
   
@@ -317,6 +341,54 @@ const CateringRequestForm: React.FC = () => {
       console.log("Form submission process completed");
     }
   };
+
+  // Show loading state while Supabase is initializing
+  if (isInitializing) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <svg
+            className="mx-auto h-8 w-8 animate-spin text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="mt-2 text-sm text-gray-500">Loading form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if user is not authenticated
+  if (!session) {
+    return (
+      <div className="rounded-md bg-yellow-50 p-4">
+        <div className="flex">
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-yellow-800">Authentication required</h3>
+            <div className="mt-2 text-sm text-yellow-700">
+              <p>You must be signed in to submit catering requests.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -327,7 +399,6 @@ const CateringRequestForm: React.FC = () => {
           {errorMessage}
         </div>
       )}
-
       <AddressManager
         onAddressesLoaded={handleAddressesLoaded}
         onAddressSelected={(addressId) => {
@@ -339,7 +410,6 @@ const CateringRequestForm: React.FC = () => {
           }
         }}
       />
-
       <SelectField
         control={control}
         name="brokerage"
@@ -347,7 +417,6 @@ const CateringRequestForm: React.FC = () => {
         options={BROKERAGE_OPTIONS}
         required
       />
-
       <InputField
         control={control}
         name="headcount"
@@ -355,7 +424,6 @@ const CateringRequestForm: React.FC = () => {
         type="number"
         required
       />
-
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
           Do you need a Host?
@@ -389,16 +457,13 @@ const CateringRequestForm: React.FC = () => {
           )}
         />
       </div>
-
       <HostSection control={control} needHost={needHost} />
-
       <InputField
         control={control}
         name="order_number"
         label="Order Number"
         required
       />
-
       <InputField
         control={control}
         name="date"
@@ -406,7 +471,6 @@ const CateringRequestForm: React.FC = () => {
         type="date"
         required
       />
-
       <InputField
         control={control}
         name="pickup_time"
@@ -414,7 +478,6 @@ const CateringRequestForm: React.FC = () => {
         type="time"
         required
       />
-
       <InputField
         control={control}
         name="arrival_time"
@@ -422,7 +485,6 @@ const CateringRequestForm: React.FC = () => {
         type="time"
         required
       />
-
       <InputField
         control={control}
         name="complete_time"
@@ -430,14 +492,12 @@ const CateringRequestForm: React.FC = () => {
         type="time"
         optional
       />
-
       <InputField
         control={control}
         name="client_attention"
         label="Client / Attention"
         required
       />
-
       <InputField
         control={control}
         name="order_total"
@@ -446,13 +506,11 @@ const CateringRequestForm: React.FC = () => {
         required
         rules={{ min: { value: 0, message: "Order total must be positive" } }}
       />
-
       <AddressSection
         control={control}
         addresses={addresses}
         onAddressSelected={(address) => setValue("delivery_address", address)}
       />
-
       <InputField
         control={control}
         name="tip"
@@ -470,7 +528,6 @@ const CateringRequestForm: React.FC = () => {
           },
         }}
       />
-
       <InputField
         control={control}
         name="pickup_notes"
@@ -479,7 +536,6 @@ const CateringRequestForm: React.FC = () => {
         rows={3}
         optional
       />
-
       <InputField
         control={control}
         name="special_notes"
@@ -488,7 +544,6 @@ const CateringRequestForm: React.FC = () => {
         rows={3}
         optional
       />
-
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">
           Attachments
@@ -513,7 +568,6 @@ const CateringRequestForm: React.FC = () => {
             size: 10MB per file.
           </p>
         </div>
-
         {/* Uploaded Files List */}
         <div className="space-y-2">
           {uploadedFiles?.map((file: UploadThingFile) => (
@@ -541,7 +595,6 @@ const CateringRequestForm: React.FC = () => {
           ))}
         </div>
       </div>
-
       <button
         type="submit"
         disabled={isSubmitting}
@@ -556,7 +609,6 @@ const CateringRequestForm: React.FC = () => {
         >
           Submit Catering Request
         </div>
-
         {isSubmitting && (
           <div className="absolute inset-0 flex items-center justify-center">
             <svg

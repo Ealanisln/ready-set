@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,7 +15,13 @@ import MobileMenu from "./MobileMenu";
 import toast from "react-hot-toast";
 
 // Types
-type UserType = "client" | "admin" | "super_admin" | "vendor" | "driver" | undefined;
+type UserType =
+  | "client"
+  | "admin"
+  | "super_admin"
+  | "vendor"
+  | "driver"
+  | undefined;
 
 interface MenuItem {
   id: string | number;
@@ -52,7 +58,12 @@ interface AuthButtonsProps {
 }
 
 // Logo Component
-const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualAssistantPage }) => {
+const Logo: React.FC<LogoProps> = ({
+  isHomePage,
+  sticky,
+  logoClasses,
+  isVirtualAssistantPage,
+}) => {
   if (isVirtualAssistantPage) {
     return (
       <Link
@@ -61,7 +72,10 @@ const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualA
       >
         {sticky ? (
           <picture>
-            <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
+            <source
+              srcSet="/images/virtual/logo-headset.webp"
+              type="image/webp"
+            />
             <Image
               src="/images/virtual/logo-headset.png"
               alt="Virtual Assistant Logo"
@@ -73,7 +87,10 @@ const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualA
           </picture>
         ) : (
           <picture>
-            <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
+            <source
+              srcSet="/images/virtual/logo-headset-dark.webp"
+              type="image/webp"
+            />
             <Image
               src="/images/virtual/logo-headset-dark.png"
               alt="Virtual Assistant Logo"
@@ -140,7 +157,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
   isVirtualAssistantPage,
   isHomePage,
   onSignOut,
-  isSigningOut
+  isSigningOut,
 }) => {
   if (user) {
     return (
@@ -185,14 +202,13 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
         <div className="flex items-center gap-3">
           <Link
             href="/sign-in"
-            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
-              ${sticky 
+            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block ${
+              sticky
                 ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-                : isVirtualAssistantPage 
+                : isVirtualAssistantPage
                   ? "bg-white/90 text-dark shadow-md hover:bg-white"
                   : "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-              }
-            `}
+            } `}
           >
             Sign In
           </Link>
@@ -207,12 +223,11 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
         <>
           <Link
             href="/sign-in"
-            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
-              ${sticky 
+            className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block ${
+              sticky
                 ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
                 : "bg-white/90 text-dark shadow-md hover:bg-white"
-              }
-            `}
+            } `}
           >
             Sign In
           </Link>
@@ -247,71 +262,88 @@ const Header: React.FC = () => {
   const isHomePage = pathUrl === "/";
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('Error fetching user:', error.message);
-        return;
-      }
-      if (supabaseUser) {
-        // Fetch additional user data from your profiles table
-        const { data: profile } = await supabase
-          .from('users') // Change this if your table is called 'profiles'
-          .select('name, type')
-          .eq('id', supabaseUser.id)
-          .single();
+    // Initialize Supabase and fetch user data
+    const initializeAuth = async () => {
+      try {
+        const supabase = await createClient();
 
-        setUser({
-          id: supabaseUser.id,
-          name: profile?.name || supabaseUser.email?.split('@')[0],
-          type: profile?.type as UserType,
+        const getUser = async () => {
+          const {
+            data: { user: supabaseUser },
+            error,
+          } = await supabase.auth.getUser();
+          if (error) {
+            console.error("Error fetching user:", error.message);
+            return;
+          }
+          if (supabaseUser) {
+            // Fetch additional user data from your profiles table
+            const { data: profile } = await supabase
+              .from("users")
+              .select("name, type")
+              .eq("id", supabaseUser.id)
+              .single();
+
+            setUser({
+              id: supabaseUser.id,
+              name: profile?.name || supabaseUser.email?.split("@")[0],
+              type: profile?.type as UserType,
+            });
+          } else {
+            setUser(null);
+          }
+        };
+
+        await getUser();
+
+        // Set up auth state change listener
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (session?.user) {
+            const { data: profile } = await supabase
+              .from("users")
+              .select("name, type")
+              .eq("id", session.user.id)
+              .single();
+
+            setUser({
+              id: session.user.id,
+              name: profile?.name || session.user.email?.split("@")[0],
+              type: profile?.type as UserType,
+            });
+          } else {
+            setUser(null);
+          }
         });
-      } else {
-        setUser(null);
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
       }
     };
 
-    getUser();
-
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('users') // Change this if your table is called 'profiles'
-          .select('name, type')
-          .eq('id', session.user.id)
-          .single();
-
-        setUser({
-          id: session.user.id,
-          name: profile?.name || session.user.email?.split('@')[0],
-          type: profile?.type as UserType,
-        });
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+    initializeAuth();
+  }, []);
 
   const handleSignOut = async () => {
     try {
       setIsSigningOut(true);
+      const supabase = await createClient();
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
-        console.error('Error signing out:', error.message);
+        console.error("Error signing out:", error.message);
         toast.error("Failed to sign out. Please try again.");
       } else {
         toast.success("Signed out successfully");
-        router.push('/');
+        router.push("/");
         router.refresh(); // Refresh to update auth state across the app
       }
     } catch (error: any) {
-      console.error('Error in sign out process:', error);
+      console.error("Error in sign out process:", error);
       toast.error(error.message || "An error occurred while signing out");
     } finally {
       setIsSigningOut(false);

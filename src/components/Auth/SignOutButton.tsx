@@ -1,11 +1,12 @@
 // src/components/Auth/SignOutButton.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button, ButtonProps } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 interface SignOutButtonProps extends ButtonProps {
   redirectTo?: string;
@@ -17,10 +18,33 @@ export default function SignOutButton({
   ...props
 }: SignOutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Connection error. Try again later.");
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initSupabase();
+  }, []);
 
   const handleSignOut = async () => {
+    if (!supabase) {
+      toast.error("Unable to connect to authentication service");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
@@ -41,10 +65,10 @@ export default function SignOutButton({
   return (
     <Button
       onClick={handleSignOut}
-      disabled={isLoading}
+      disabled={isLoading || isInitializing}
       {...props}
     >
-      {isLoading ? "Signing out..." : children}
+      {isLoading ? "Signing out..." : isInitializing ? "Loading..." : children}
     </Button>
   );
 }

@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
+import { SupabaseClient, User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 interface FormData {
   order_type: "catering" | "on_demand";
@@ -56,26 +57,57 @@ interface FormData {
 }
 
 const CateringOrderForm: React.FC = () => {
-  // 1. Set up state and initialize client
-  const [user, setUser] = useState<any>(null);
-  const supabase = createClient();
+  // 1. Set up state with proper types
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // 2. Add useEffect hook for authentication
+  // 2. Initialize the Supabase client
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Error connecting to the database. Please try again later.");
+        setIsLoading(false);
+      }
     };
+
+    initSupabase();
+  }, []);
+  
+  // 3. Add useEffect hook for authentication that depends on supabase being initialized
+  useEffect(() => {
+    if (!supabase) return;
+    
+    const getUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (user) {
+          setUser(user);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     getUser();
     
     // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
-    });
+    );
     
     // Clean up subscription
     return () => {
@@ -227,6 +259,12 @@ const CateringOrderForm: React.FC = () => {
       toast.error("An error occurred. Please try again.");
     }
   };
+
+  // Show loading indicator while Supabase is initializing
+  if (isLoading) return <div>Loading...</div>;
+  
+  // Show sign in message if user is not authenticated
+  if (!user) return <div>Please sign in to create orders.</div>;
 
   return (
     <form

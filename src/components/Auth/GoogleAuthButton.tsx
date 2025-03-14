@@ -12,10 +12,10 @@ interface GoogleAuthButtonProps {
 }
 
 const GoogleAuthButton = ({ className = '' }: GoogleAuthButtonProps) => {
-  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGoogleSignIn = async () => {
+    const supabase = await createClient()
     try {
       setIsLoading(true)
       console.log("Redirecting to:", getRedirectUrl()); // Debug log

@@ -7,13 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-export default function ForgotPasswordPage() {
+export default function MagicLinkLogin() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!email || !email.includes('@')) {
@@ -27,23 +27,25 @@ export default function ForgotPasswordPage() {
     try {
       const supabase = await createClient()
       
-      // Use the resetPasswordForEmail function
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        // Make sure this redirectTo is set to your site's base URL + the confirm path
-        redirectTo: `${window.location.origin}/auth/confirm?next=/account/update-password`,
+      // Send the magic link
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
       
       if (error) {
         throw error
       }
       
-      // Show success message
-      setMessage('Check your email for a password reset link')
+      // Success!
+      setMessage(`Magic link sent to ${email}. Please check your inbox.`)
       setEmail('')
       
     } catch (err: any) {
-      console.error('Password reset error:', err)
-      setError(err.message || 'Failed to send password reset email')
+      console.error('Magic link error:', err)
+      setError(err.message || 'Failed to send magic link')
     } finally {
       setIsSubmitting(false)
     }
@@ -53,8 +55,8 @@ export default function ForgotPasswordPage() {
     <div className="flex justify-center items-center min-h-screen p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Forgot Password</CardTitle>
-          <CardDescription>Enter your email to reset your password</CardDescription>
+          <CardTitle>Login with Magic Link</CardTitle>
+          <CardDescription>We'll email you a magic link to sign in instantly</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -69,7 +71,7 @@ export default function ForgotPasswordPage() {
             </Alert>
           )}
           
-          <form onSubmit={handleResetPassword}>
+          <form onSubmit={handleSendMagicLink}>
             <div className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email">Email</label>
@@ -89,7 +91,7 @@ export default function ForgotPasswordPage() {
                 className="w-full"
                 disabled={isSubmitting || !!message}
               >
-                {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+                {isSubmitting ? 'Sending...' : 'Send Magic Link'}
               </Button>
             </div>
           </form>

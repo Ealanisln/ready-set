@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import AddressManager, { Address } from "../AddressManager";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
@@ -43,32 +44,46 @@ interface OnDemandFormData {
 }
 
 const OnDemandOrderForm: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
-  const supabase = createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+  
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
   
   useEffect(() => {
+    if (!supabase) return;
+    
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
-
+    
     getUser();
-
+    
     // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
-    });
-
+    );
+    
     // Clean up subscription
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [supabase]);
-
+  
   const {
     control,
     handleSubmit,
@@ -112,30 +127,32 @@ const OnDemandOrderForm: React.FC = () => {
       },
     },
   });
-
+  
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  
   const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
     setAddresses(loadedAddresses);
   }, []);
-
+  
   const onSubmit = async (data: OnDemandFormData) => {
     if (!user?.id) {
       console.error("User not authenticated");
       return;
     }
+    
     if (!data.address) {
       console.error("Pickup address not selected");
       toast.error("Please select a pickup address");
       return;
     }
+    
     if (!data.delivery_address) {
       console.error("Delivery address not selected for on-demand order");
       toast.error("Please select a delivery address for on-demand order");
       return;
     }
-
+    
     try {
       const endpoint = "/api/orders";
       const response = await fetch(endpoint, {
@@ -163,7 +180,7 @@ const OnDemandOrderForm: React.FC = () => {
           tip: data.tip ? parseFloat(data.tip) : undefined,
         }),
       });
-
+      
       if (response.ok) {
         const result = await response.json();
         reset();
@@ -171,7 +188,7 @@ const OnDemandOrderForm: React.FC = () => {
       } else {
         const errorData = await response.json();
         console.error("Failed to create on-demand request", errorData);
-
+        
         if (errorData.message === "Order number already exists") {
           setErrorMessage(
             "This order number already exists. Please use a different order number.",
@@ -185,7 +202,7 @@ const OnDemandOrderForm: React.FC = () => {
       toast.error("An error occurred. Please try again.");
     }
   };
-
+  
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -196,13 +213,13 @@ const OnDemandOrderForm: React.FC = () => {
           {errorMessage}
         </div>
       )}
+      
       <label
         htmlFor="date"
         className="mb-2 block text-sm font-medium text-gray-700"
       >
         Pickup location
       </label>
-
       <AddressManager
         onAddressesLoaded={handleAddressesLoaded}
         onAddressSelected={(addressId) => {
@@ -221,7 +238,7 @@ const OnDemandOrderForm: React.FC = () => {
           }
         }}
       />
-
+      
       <div>
         <label
           htmlFor="brokerage"
@@ -256,7 +273,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="order_number"
@@ -282,7 +299,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="date"
@@ -306,7 +323,7 @@ const OnDemandOrderForm: React.FC = () => {
           <span className="text-sm text-red-500">{errors.date.message}</span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="pickup_time"
@@ -332,7 +349,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="arrival_time"
@@ -358,7 +375,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="complete_time"
@@ -378,7 +395,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="item_delivered"
@@ -404,7 +421,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="vehicle_type"
@@ -433,7 +450,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="length"
@@ -453,7 +470,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="width"
@@ -473,7 +490,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="height"
@@ -493,7 +510,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="weight"
@@ -513,7 +530,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="client_attention"
@@ -539,7 +556,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="order_total"
@@ -566,7 +583,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="tip"
@@ -601,7 +618,7 @@ const OnDemandOrderForm: React.FC = () => {
           <span className="text-sm text-red-500">{errors.tip.message}</span>
         )}
       </div>
-
+      
       <div>
         <label
           htmlFor="pickup_notes"
@@ -621,7 +638,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="special_notes"
@@ -641,7 +658,7 @@ const OnDemandOrderForm: React.FC = () => {
           )}
         />
       </div>
-
+      
       <div>
         <label
           htmlFor="delivery_address"
@@ -687,7 +704,7 @@ const OnDemandOrderForm: React.FC = () => {
           </span>
         )}
       </div>
-
+      
       <button
         type="submit"
         className="w-full rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"

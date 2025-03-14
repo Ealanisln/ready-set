@@ -1,8 +1,8 @@
-// src/components/AddressManager/index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import AddAddressForm from "./AddAddressForm";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
@@ -30,19 +30,31 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   onAddressesLoaded,
   onAddressSelected,
 }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [allowedCounties, setAllowedCounties] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [addressesLoaded, setAddressesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
 
   const { control } = useForm();
 
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
+
   // Get user from Supabase
   useEffect(() => {
+    if (!supabase) return;
+
     const getUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (!error && user) {
@@ -53,13 +65,15 @@ const AddressManager: React.FC<AddressManagerProps> = ({
     getUser();
 
     // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
-    });
+    );
 
     // Clean up subscription
     return () => {

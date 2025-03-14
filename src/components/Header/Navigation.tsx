@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 interface MenuItem {
   title: string;
@@ -27,24 +27,39 @@ const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const [openIndex, setOpenIndex] = useState<number>(-1);
   const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await createClient();
+      setSupabase(client);
+    };
+    
+    initSupabase();
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     // Get the current user when component mounts
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
+    
     getUser();
 
     // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
-    });
+    );
 
     // Clean up subscription
     return () => {
@@ -57,6 +72,8 @@ const Navigation: React.FC<NavigationProps> = ({
   };
 
   const handleSignOut = async () => {
+    if (!supabase) return;
+    
     await supabase.auth.signOut();
     window.location.href = "/";
     navbarToggleHandler();

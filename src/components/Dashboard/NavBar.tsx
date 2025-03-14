@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tooltip,
   TooltipProvider,
@@ -38,28 +38,52 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const closeSheet = () => setIsOpen(false);
   const router = useRouter();
-  const supabase = createClient();
+  
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Connection error. Please try again later.");
+      }
+    };
+
+    initSupabase();
+  }, []);
 
   const handleSignOut = async () => {
+    if (!supabase) {
+      toast.error("Unable to connect to authentication service");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        toast.error("Error signing out: " + error.message);
-        return;
+        throw error;
       }
       
       toast.success("Successfully signed out");
       router.push("/");
       router.refresh(); // Refresh to update auth state across the app
-    } catch (err) {
+    } catch (err: any) {
       console.error("Sign out error:", err);
-      toast.error("An unexpected error occurred while signing out");
+      toast.error(err.message || "An unexpected error occurred while signing out");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -265,8 +289,8 @@ const NavBar = () => {
               </Link>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                Sign out
+              <DropdownMenuItem onClick={handleSignOut} disabled={isLoading}>
+                {isLoading ? "Signing out..." : "Sign out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -1,11 +1,13 @@
-// src/app/(backend)/admin/users/page.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { BreadcrumbNavigation } from "@/components/Dashboard/UserView/BreadCrumbNavigation";
 import { MainContent } from "@/components/Dashboard/UserView/MainContent";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { createClient } from "@/utils/supabase/client";
+import { useUser } from "@/contexts/UserContext";
+
+// Define UserType to ensure consistency
+type UserType = "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
 
 interface User {
   id: string;
@@ -13,112 +15,96 @@ interface User {
   contact_name?: string;
   contact_number: string;
   email: string;
-  type: "vendor" | "client" | "driver" | "admin" | "helpdesk" | "super_admin";
+  type: UserType;
   created_at?: Date;
   status: "active" | "pending" | "deleted";
 }
 
 export default function Users() {
-  const supabase = createClient();
   const router = useRouter();
   const { toast } = useToast();
-  const [session, setSession] = useState<any>(null);
+  const { session, userRole, isLoading: isUserLoading } = useUser();
+  
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
 
-  // Fetch Supabase session
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-      } catch (err) {
-        console.error("Error fetching session:", err);
-        setError("Failed to authenticate");
-        setLoading(false);
+  // Fetch users data
+  const fetchUsers = useCallback(async () => {
+    if (isUserLoading || !session) return;
+    
+    try {
+      setLoading(true);
+      
+      // First check if user has permission to view this page
+      // Ensure proper type checking by explicitly casting or type guarding userRole
+      const role = userRole as UserType | null; // Cast to match our expected types
+      
+      if (role !== "super_admin" && role !== "admin") {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to view this page",
+          variant: "destructive",
+        });
+        router.push("/");
+        return;
       }
-
-      // Set up auth state change listener
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          setSession(session);
-        },
-      );
-
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
-    };
-
-    fetchSession();
-  }, [supabase]);
-
-  useEffect(() => {
-    // Only proceed if session state has been determined (either set or null)
-    if (session === null && !loading) {
-      router.push("/login?redirect=/admin/users");
-      return;
-    }
-
-    if (session) {
-      const fetchUsers = async () => {
-        try {
-          // Get user profile data - check directly from prisma API
-          const profileResponse = await fetch("/api/profile");
-          if (!profileResponse.ok) {
-            throw new Error("Failed to verify user profile");
-          }
-
-          const profileData = await profileResponse.json();
-
-          // Check if user has super_admin or admin role
-          if (
-            profileData.type !== "super_admin" &&
-            profileData.type !== "admin"
-          ) {
-            toast({
-              title: "Access Denied",
-              description: "You don't have permission to view this page",
-              variant: "destructive",
-            });
-            router.push("/");
-            return;
-          }
-
-          // Fetch users data
-          const response = await fetch("/api/users");
-          if (!response.ok) throw new Error("Failed to fetch users");
-
-          const data = await response.json();
-          setUsers(
-            data.map((user: User) => ({
-              ...user,
-              status: user.status || "active",
-            })),
-          );
-        } catch (error) {
-          console.error("Error in fetchUsers:", error);
-          setError(error instanceof Error ? error.message : String(error));
-          toast({
-            title: "Error",
-            description: "Failed to fetch users data",
-            variant: "destructive",
-          });
-        } finally {
-          setLoading(false);
+      
+      // Then fetch users list
+      const response = await fetch("/api/users", {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "x-request-source": "UsersListComponent",
         }
-      };
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      
+      const data = await response.json();
+      setUsers(
+        data.map((user: User) => ({
+          ...user,
+          status: user.status || "active",
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError(error instanceof Error ? error.message : String(error));
+      toast({
+        title: "Error",
+        description: "Failed to fetch users data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [session, userRole, isUserLoading, router, toast]);
 
+  // Load data once authentication is initialized
+  useEffect(() => {
+    if (!isUserLoading) {
       fetchUsers();
     }
-  }, [session, router, toast, loading]);
+  }, [fetchUsers, isUserLoading]);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!isUserLoading && !session) {
+      router.push("/login?redirect=/admin/users");
+    }
+  }, [session, isUserLoading, router]);
 
   const handleDelete = async (userId: string) => {
     try {
       const response = await fetch(`/api/user/delete-user?id=${userId}`, {
         method: "DELETE",
+        headers: {
+          "x-request-source": "UsersListComponent-Delete",
+        }
       });
 
       if (!response.ok) throw new Error("Failed to delete user");
@@ -137,7 +123,7 @@ export default function Users() {
     }
   };
 
-  if (loading) {
+  if (isUserLoading || loading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="ml-4 text-lg font-semibold">Loading...</p>
@@ -146,6 +132,9 @@ export default function Users() {
   }
 
   if (error) return <div>Error: {error}</div>;
+
+  // No session - will be redirected by the effect
+  if (!session) return null;
 
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">

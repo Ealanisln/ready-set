@@ -1,7 +1,5 @@
 import { NavBar } from "@/components/Dashboard";
-// import { SidebarProvider } from "@/components/ui/sidebar";
-// import { AppSidebar } from "@/components/Dashboard/Sidebar/app-sidebar";
-// import { SidebarTrigger } from "@/components/ui/sidebar";
+import { UserProvider } from '@/contexts/UserContext';
 
 export default function AdminLayout({
   children,
@@ -12,7 +10,11 @@ export default function AdminLayout({
     <>
       <NavBar />
       <main className="admin-content">
+      <UserProvider>
+
         {children}
+        </UserProvider>
+
       </main>
     </>
   );

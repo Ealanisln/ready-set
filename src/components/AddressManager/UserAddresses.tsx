@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { SupabaseClient, User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import {
   Table,
   TableBody,
@@ -31,30 +32,55 @@ const UserAddresses: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        setError("Error connecting to the database. Please try again later.");
+        setIsLoading(false);
+      }
+    };
+
+    initSupabase();
+  }, []);
 
   // Get user session from Supabase
   useEffect(() => {
+    if (!supabase) return;
+
     const getUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (!error && user) {
-        setUser(user);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (user) {
+          setUser(user);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
       }
     };
 
     getUser();
 
     // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setUser(session.user);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          setUser(session.user);
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
-    });
+    );
 
     // Clean up subscription
     return () => {
@@ -69,7 +95,7 @@ const UserAddresses: React.FC = () => {
     }
 
     try {
-      const response = await fetch("/api/addresses?isShared=true"); 
+      const response = await fetch("/api/addresses?isShared=true");
       if (!response.ok) {
         throw new Error("Failed to fetch addresses");
       }
@@ -85,8 +111,10 @@ const UserAddresses: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    fetchAddresses();
-  }, [fetchAddresses]);
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user, fetchAddresses]);
 
   const handleDeleteAddress = async (addressId: string) => {
     if (confirm("Are you sure you want to delete this address?")) {
@@ -106,7 +134,7 @@ const UserAddresses: React.FC = () => {
         setError(
           error instanceof Error
             ? error.message
-            : "Error deleting address. Please try again later.",
+            : "Error deleting address. Please try again later."
         );
       }
     }
@@ -128,7 +156,7 @@ const UserAddresses: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading && (!supabase || !user)) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   if (!user) return <div>Please sign in to view addresses.</div>;
 
