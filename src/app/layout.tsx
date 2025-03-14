@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import ClientLayout from "@/components/Clients/ClientLayout";
 import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
@@ -23,6 +24,21 @@ export default function RootLayout({
       className={`!scroll-smooth ${montserrat.className}`}
       lang="en"
     >
+      <head>
+        {/* Perception Company Analytics Script */}
+        <Script
+          id="perception-company-analytics"
+          strategy="afterInteractive"
+          src="https://www.perception-company.com/js/803213.js"
+        />
+        <noscript>
+          <img
+            src="https://www.perception-company.com/803213.png"
+            style={{ display: "none" }}
+            alt="analytics-pixel"
+          />
+        </noscript>
+      </head>
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ClientLayout>{children}</ClientLayout>

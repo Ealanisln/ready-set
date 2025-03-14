@@ -1,7 +1,14 @@
+// components/GoogleAnalytics.tsx
 "use client";
 
 import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
 import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    [key: `ga-disable-${string}`]: boolean;
+  }
+}
 
 interface GoogleAnalyticsProps {
   measurementId: string;
@@ -22,7 +29,11 @@ const GoogleAnalytics = ({ measurementId }: GoogleAnalyticsProps) => {
     };
   }, [measurementId]);
 
-  return <NextGoogleAnalytics gaId={measurementId} />;
+  return (
+    <>
+      <NextGoogleAnalytics gaId={measurementId} />
+    </>
+  );
 };
 
 export default GoogleAnalytics;
