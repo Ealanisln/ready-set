@@ -143,7 +143,6 @@ const SignUp = () => {
   };
 
   const renderContent = () => {
-    console.log("Rendering content for step:", step);
     switch (step) {
       case 1:
         return (

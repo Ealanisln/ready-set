@@ -5,8 +5,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useFormState } from "react-dom";
 import Loader from "@/components/Common/Loader";
-import { login, signup } from "@/app/actions/login";
+import { login, FormState } from "@/app/actions/login";
 import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
 
 const Signin = ({
@@ -17,6 +18,9 @@ const Signin = ({
   // Check if user is already logged in
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [state, formAction] = useFormState<FormState, FormData>(login, {
+    error: "",
+  });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -41,6 +45,7 @@ const Signin = ({
 
     checkSession();
   }, []);
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -60,12 +65,17 @@ const Signin = ({
     general: "",
   });
 
+  useEffect(() => {
+    if (state?.error) {
+      setErrors((prev) => ({ ...prev, general: state.error || "" }));
+      setLoading(false);
+    }
+  }, [state]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Convert email to lowercase if the field is email
     const processedValue = name === "email" ? value.toLowerCase() : value;
     setLoginData((prev) => ({ ...prev, [name]: processedValue }));
-    // Clear error when user starts typing
     setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };
 
@@ -79,7 +89,6 @@ const Signin = ({
   const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simple validation
     if (!magicLinkEmail) {
       setErrors((prev) => ({ ...prev, magicLinkEmail: "Email is required" }));
       return;
@@ -96,13 +105,11 @@ const Signin = ({
     setMagicLinkLoading(true);
 
     try {
-      // First check if the email exists in your database
       const { createClient } = await import("@/utils/supabase/client");
       const supabase = await createClient();
 
-      // Query your user table to check if the email exists
       const { data, error: queryError } = await supabase
-        .from("user") // Or your appropriate table name
+        .from("user")
         .select("email")
         .eq("email", magicLinkEmail)
         .single();
@@ -117,20 +124,16 @@ const Signin = ({
         return;
       }
 
-      // If we get here, the email exists, so send the magic link
       const { error } = await supabase.auth.signInWithOtp({
         email: magicLinkEmail,
         options: {
-          shouldCreateUser: false, // Don't create new users - we've verified the email exists
+          shouldCreateUser: false,
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Show success message only if we successfully sent the magic link
       setMagicLinkSent(true);
     } catch (error: any) {
       console.error("Magic link error:", error);
@@ -144,14 +147,12 @@ const Signin = ({
     }
   };
 
-  // Display error from URL params if present
   useEffect(() => {
     if (searchParams?.error) {
       setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
     }
   }, [searchParams]);
 
-  // Show loading state or redirect if already logged in
   if (isLoading) {
     return (
       <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-20">
@@ -169,7 +170,6 @@ const Signin = ({
     );
   }
 
-  // If already logged in, we'll redirect (handled in useEffect)
   if (isLoggedIn) {
     return null;
   }
@@ -214,7 +214,6 @@ const Signin = ({
                 </div>
               )}
 
-              {/* Login method selector */}
               <div className="mb-5 flex rounded border">
                 <button
                   onClick={() => setLoginMethod("password")}
@@ -239,7 +238,11 @@ const Signin = ({
               </div>
 
               {loginMethod === "password" ? (
-                <form noValidate>
+                <form
+                  action={formAction}
+                  noValidate
+                  onSubmit={() => setLoading(true)}
+                >
                   <div className="mb-[22px]">
                     <input
                       type="email"
@@ -278,7 +281,7 @@ const Signin = ({
 
                   <div className="mb-5 flex space-x-4">
                     <button
-                      formAction={login}
+                      type="submit"
                       disabled={loading}
                       className="flex-1 cursor-pointer rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                     >
@@ -360,10 +363,8 @@ const Signin = ({
                 </form>
               )}
 
-              {/* Only show the OR divider and Google button if not in magic link sent state */}
               {!(loginMethod === "magic" && magicLinkSent) && (
                 <>
-                  {/* Or divider */}
                   <div className="relative mb-5 flex justify-center text-xs uppercase">
                     <span className="bg-white px-2 text-gray-500 dark:bg-dark-2">
                       Or
@@ -371,19 +372,17 @@ const Signin = ({
                     <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-300 dark:bg-dark-3"></div>
                   </div>
 
-                  {/* Google Sign-in Button */}
                   <div className="mb-5">
                     <GoogleAuthButton />
                   </div>
                 </>
               )}
 
-              {/* Migration notice - can be removed after migration is complete */}
               <div className="mt-6 rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
                 <p>
                   <strong>Important:</strong> If you're a returning user from
-                  our previous system and can't log in, please use the "Forgot
-                  password" link to reset your password.
+                  our previous system and can't log in, please use the "Magic
+                  Link" option to sign in.
                 </p>
               </div>
 

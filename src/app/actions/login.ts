@@ -5,60 +5,43 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
-export async function login(formData: FormData) {
-  // Use cookies() to opt out of caching
-  await cookies();
+export interface FormState {
+  error?: string;
+}
 
-  // Create and await the Supabase client
+export async function login(
+  prevState: FormState | null,
+  formData: FormData
+): Promise<FormState> {
+  await cookies();
   const supabase = await createClient();
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = formData.get("email")?.toString().toLowerCase() || "";
+  const password = formData.get("password")?.toString() || "";
 
-  console.log(`Login attempt for: ${email}`);
-
-  // Form validation
   if (!email || !password) {
-    console.log("Missing email or password");
-    redirect("/sign-in?error=Email+and+password+are+required");
+    return { error: "Email and password are required" };
   }
 
-  // Try to sign in directly
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    console.log("Login error:", error.message, error.code);
-
-    // Instead of using password reset as a user check, use a direct database query
-    // Check if user exists by querying the "user" table
-    const { data: userData, error: queryError } = await supabase
-      .from("user") // Use your user table name here
+    const { data: userData } = await supabase
+      .from("user")
       .select("email")
       .eq("email", email)
       .maybeSingle();
 
-    const userExists = userData !== null;
-
-    if (userExists) {
-      console.log(
-        "User exists but password is incorrect - likely a migration issue",
-      );
-      redirect(
-        `/sign-in?error=${encodeURIComponent('Incorrect password. Please try again or use "Forgot Password" to reset it.')}`,
-      );
-    } else {
-      console.log("User does not exist");
-      redirect(
-        `/sign-in?error=${encodeURIComponent("Account not found. Please check your email or sign up.")}`,
-      );
-    }
+    return userData 
+      ? { error: "Incorrect password. Please try again or use Magic Link." }
+      : { error: "Account not found. Please check your email or sign up." };
   }
 
-  // Redirect to home page on successful login
   redirect("/");
+  return { error: "" }; // Unreachable but satisfies TypeScript
 }
 
 export async function signup(formData: FormData) {
