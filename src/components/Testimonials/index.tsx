@@ -47,6 +47,21 @@ const Testimonials = () => {
     DRIVERS: []
   });
 
+  // Añade este efecto después de declarar todos tus estados
+useEffect(() => {
+  // Este código solo se ejecuta en el cliente
+  setIsBrowser(true);
+  setIsMobile(window.innerWidth < 768);
+  
+  // Agregar listener para detectar cambios en el tamaño de ventana
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+  
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
   // Refs para los contenedores de testimonios
   const cardRefs = useRef<{[key: string]: (HTMLDivElement | null)[]}>(
     { 'CLIENTS': [], 'VENDORS': [], 'DRIVERS': [] }
@@ -54,123 +69,12 @@ const Testimonials = () => {
   
   // Cache para imagenes precargadas
   const preloadedImages = useRef<Set<string>>(new Set());
-
-  // Aplicar optimizaciones para evitar recargas y parpadeos en móviles
-  useEffect(() => {
-    // Establecer estas variables al inicio para evitar cambios de estado posteriores
-    setIsBrowser(true);
-    
-    // Función optimizada para detectar móvil
-    const checkMobile = () => {
-      // Usar matchMedia para mayor precisión y mejor rendimiento
-      return window.matchMedia('(max-width: 767px)').matches;
-    };
-    
-    // Detectar móvil inicial
-    const initialMobile = checkMobile();
-    setIsMobile(initialMobile);
-    
-    // Precarga de imágenes para evitar parpadeos
-    const preloadImages = () => {
-      // Para todas las imágenes en testimonials
-      testimonials.forEach(testimonial => {
-        if (testimonial.image) {
-          const img = new Image();
-          img.src = testimonial.image;
-        }
-      });
-    };
-    
-    // Precargar imágenes al inicio
-    preloadImages();
-    
-    // Detector de cambio de tamaño optimizado
-    const handleResize = () => {
-      const newIsMobile = checkMobile();
-      
-      // Solo actualizar si hay cambio real
-      if (newIsMobile !== isMobile) {
-        setIsMobile(newIsMobile);
-      }
-      
-      // Usar un enfoque throttled para evitar demasiadas actualizaciones
-      if (!(window as any).resizeTimerId) {
-        (window as any).resizeTimerId = setTimeout(() => {
-          checkContentOverflow();
-          (window as any).resizeTimerId = null;
-        }, 500); // Tiempo más largo para reducir actualizaciones
-      }
-    };
-    
-    // Usar ResizeObserver cuando sea posible para mejor rendimiento
-    if (typeof ResizeObserver !== 'undefined') {
-      const resizeObserver = new ResizeObserver(() => {
-        handleResize();
-      });
-      resizeObserver.observe(document.body);
-      return () => {
-        resizeObserver.disconnect();
-        if ((window as any).resizeTimerId) {
-          clearTimeout((window as any).resizeTimerId);
-        }
-      };
-    } else {
-      // Fallback al método tradicional
-      window.addEventListener('resize', handleResize);
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        if ((window as any).resizeTimerId) {
-          clearTimeout((window as any).resizeTimerId);
-        }
-      };
-    }
-  }, []);
+  
   
   // Función para verificar el overflow del contenido con debounce incorporado
-  const checkContentOverflow = () => {
-    // Limitar la frecuencia de actualización del estado para evitar re-renders excesivos
-    if ((window as any).overflowThrottleTimeout) {
-      clearTimeout((window as any).overflowThrottleTimeout);
-    }
-    
-    (window as any).overflowThrottleTimeout = setTimeout(() => {
-      const newHasOverflow = { ...hasOverflow };
-      
-      Object.keys(groupedTestimonials).forEach((category) => {
-        const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
-        const items = groupedTestimonials[categoryKey] || [];
-        
-        if (!cardRefs.current[categoryKey]) {
-          cardRefs.current[categoryKey] = [];
-        }
-        
-        items.forEach((_, index) => {
-          const element = cardRefs.current[categoryKey][index];
-          if (element) {
-            const hasContentOverflow = element.scrollHeight > element.clientHeight;
-            
-            // Inicializar el array si no existe
-            if (!newHasOverflow[categoryKey]) {
-              newHasOverflow[categoryKey] = [];
-            }
-            
-            // Asignar el valor de overflow sólo si cambia
-            if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
-              newHasOverflow[categoryKey][index] = hasContentOverflow;
-            }
-          }
-        });
-      });
-      
-      // Sólo actualizar el estado si hay cambios reales
-      const hasChanged = JSON.stringify(newHasOverflow) !== JSON.stringify(hasOverflow);
-      if (hasChanged) {
-        setHasOverflow(newHasOverflow);
-      }
-    }, 300);
-  };
-
-  const testimonials: Testimonial[] = [
+  // Primero, envuelve el array testimonials en su propio useMemo
+const testimonials = useMemo(() => {
+  return [
     {
       category: 'CLIENTS',
       name: 'Wendy Sellers',
@@ -188,7 +92,7 @@ const Testimonials = () => {
     {
       category: 'CLIENTS',
       name: 'Racheal Gallegos',
-      role: 'Operations Extraordinaire | Project Manager',
+      role: 'Vendor Partner',
       text: 'Kaleb was an exceptional asset to the company during my tenure there. I would hire him again in a second for any position. Kaleb started his journey with us in customer service and sales, where he quickly showcased his remarkable intelligence and aptitude for learning. His analytical skills and ability to see both the big picture and the finer details set him apart from the beginning. Kaleb dedication and rapid growth led him to transition into product and brand management, where he truly excelled. His innovative approach, strategic thinking, and meticulous attention to detail made a significant impact on the company success. When I left the company, I felt secure knowing that Kaleb was taking over. It was not long before he was leading the team of brand managers, steering the company vision with expertise. Kaleb ability to adapt, learn, and lead with insight and precision is truly commendable. His contributions were instrumental in the company growth, and I am confident that he will continue to achieve great success in any future endeavors. Any organization would be fortunate to have Kaleb on their team.',
       image: '/images/testimonials/author-03.png'
     },
@@ -199,15 +103,6 @@ const Testimonials = () => {
       text: "A Game-Changer for CareerLearning. Ready Set Virtual Assistants was instrumental in propelling CareerLearning to new heights. Their team seamlessly integrated into our operations, from customer service to sales support and beyond. We were particularly impressed with their ability to quickly grasp complex software platforms like Zendesk, HubSpot, On24, and Shopify. Their dedication to continuous learning and growth was evident as the VA Brand Managers took on increasing responsibilities and became experts in various departments. The impact of Ready Set's email marketing team was especially noteworthy. Their coordinators expertly managed our email campaigns through Marketo and Klaviyo, while their experienced email marketing consultant provided strategic guidance that significantly boosted our results. Ultimately, these efforts, combined with their contributions to social media management and overall marketing strategy, led to a record-breaking $3.5 million in sales in 2023. If you're seeking a reliable, skilled, and innovative virtual assistant team to elevate your business, I wholeheartedly recommend Ready Set Virtual Assistants. They're not just service providers; they're true partners in growth. 5 stars. 10 out of 10!",
       image: '/images/testimonials/author-04.png',
     },
-
-    {
-      category: 'CLIENTS',
-      name: 'Brian Escobar',
-      role: 'Virtual Assistant',
-      text: "If you're looking for a reliable, detail-oriented, and proactive Virtual Assistant, I cannot recommend Kaleb Bautista enough. His ability to manage tasks efficiently, maintain clear communication, and consistently exceed expectations has been a game-changer for anyone fortunate enough to work with him. Kaleb is not just someone who completes tasks; he anticipates needs, streamlines processes, and truly takes ownership of his responsibilities. From scheduling and email management to more complex administrative projects, he brings a sense of organization and calm to every challenge. If you need a Virtual Assistant who will lighten your workload and allow you to focus on your priorities, you need Kaleb Bautista on your team. Feel free to reach out to me if you’d like to hear more about his outstanding work!",
-      image: '/images/testimonials/author-10.png',
-    },
-
     {
       category: 'DRIVERS',
       name: 'Chris L.',
@@ -237,16 +132,60 @@ const Testimonials = () => {
       image: '/images/testimonials/author-08.png'
     }, 
   ];
+}, []); // Array de dependencias vacío, ya que los testimonials son estáticos
 
-  // Usar useMemo para evitar re-computes innecesarios
-  const groupedTestimonials = useMemo(() => {
-    return testimonials.reduce((acc, testimonial) => {
-      acc[testimonial.category] = acc[testimonial.category] || [];
-      acc[testimonial.category].push(testimonial);
-      return acc;
-    }, {} as Record<Testimonial['category'], Testimonial[]>);
-  }, [testimonials]);
+// Ahora el useMemo para agrupar testimonials solo se recalculará si cambia la referencia a testimonials
+const groupedTestimonials = useMemo(() => {
+  return testimonials.reduce((acc, testimonial) => {
+    const category = testimonial.category as keyof typeof acc;
+    acc[category] = acc[category] || [];
+    acc[category].push(testimonial as Testimonial);
+    return acc;
+  }, {} as Record<Testimonial['category'], Testimonial[]>);
+}, [testimonials]); // Ahora esta dependencia es estable entre renderizados
 
+const checkContentOverflow = useCallback(() => {
+  // Limitar la frecuencia de actualización del estado para evitar re-renders excesivos
+  if ((window as any).overflowThrottleTimeout) {
+    clearTimeout((window as any).overflowThrottleTimeout);
+  }
+  
+  (window as any).overflowThrottleTimeout = setTimeout(() => {
+    const newHasOverflow = { ...hasOverflow };
+    
+    Object.keys(groupedTestimonials).forEach((category) => {
+      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+      const items = groupedTestimonials[categoryKey] || [];
+      
+      if (!cardRefs.current[categoryKey]) {
+        cardRefs.current[categoryKey] = [];
+      }
+      
+      items.forEach((_, index) => {
+        const element = cardRefs.current[categoryKey][index];
+        if (element) {
+          const hasContentOverflow = element.scrollHeight > element.clientHeight;
+          
+          // Inicializar el array si no existe
+          if (!newHasOverflow[categoryKey]) {
+            newHasOverflow[categoryKey] = [];
+          }
+          
+          // Asignar el valor de overflow sólo si cambia
+          if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
+            newHasOverflow[categoryKey][index] = hasContentOverflow;
+          }
+        }
+      });
+    });
+    
+    // Sólo actualizar el estado si hay cambios reales
+    const hasChanged = JSON.stringify(newHasOverflow) !== JSON.stringify(hasOverflow);
+    if (hasChanged) {
+      setHasOverflow(newHasOverflow);
+    }
+  }, 300);
+}, [groupedTestimonials, hasOverflow]);
   // Revisar si hay overflow en cada testimonio activo
   useEffect(() => {
     // Verificar el overflow si estamos en el navegador
@@ -256,28 +195,28 @@ const Testimonials = () => {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [groupedTestimonials, isBrowser, activeIndices, activeMobileCategory]);
+  }, [groupedTestimonials, isBrowser, activeIndices, activeMobileCategory, checkContentOverflow]);
 
   // Funciones para controlar la navegación
-  const nextTestimonial = (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
-    const items = groupedTestimonials[category] || [];
-    if (items.length === 0) return;
-    
-    setActiveIndices(prev => ({
-      ...prev,
-      [category]: (prev[category] + 1) % items.length
-    }));
-  };
+const nextTestimonial = useCallback((category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
+  const items = groupedTestimonials[category] || [];
+  if (items.length === 0) return;
+  
+  setActiveIndices(prev => ({
+    ...prev,
+    [category]: (prev[category] + 1) % items.length
+  }));
+}, [groupedTestimonials, setActiveIndices]);
 
-  const prevTestimonial = (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
-    const items = groupedTestimonials[category] || [];
-    if (items.length === 0) return;
-    
-    setActiveIndices(prev => ({
-      ...prev,
-      [category]: (prev[category] - 1 + items.length) % items.length
-    }));
-  };
+const prevTestimonial = useCallback((category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
+  const items = groupedTestimonials[category] || [];
+  if (items.length === 0) return;
+  
+  setActiveIndices(prev => ({
+    ...prev,
+    [category]: (prev[category] - 1 + items.length) % items.length
+  }));
+}, [groupedTestimonials, setActiveIndices]);
 
   // Usar requestAnimationFrame en lugar de setInterval para mejor rendimiento y evitar parpadeos
   useEffect(() => {
@@ -319,7 +258,7 @@ const Testimonials = () => {
     return () => {
       animationFrameIds.forEach(id => cancelAnimationFrame(id));
     };
-  }, [isPaused, groupedTestimonials]);
+  }, [isPaused, groupedTestimonials, nextTestimonial]);
 
   // Componente de estrellas memoizado para evitar re-renders
   const StarRating = React.memo(({ count = 5, position = "right" }: { count?: number, position?: "right" | "left" }) => (
@@ -446,7 +385,7 @@ const ScrollArrow = React.memo(() => {
               aria-label={alt}
             />
             
-            {/* Imagen de respaldo que solo se muestra si la otra falla */}
+             {/* Imagen de respaldo que solo se muestra si la otra falla */}
             <div 
               className="fallback-image"
               style={{
@@ -503,7 +442,7 @@ const ScrollArrow = React.memo(() => {
 
   // Si no estamos en el navegador, renderizamos un contenedor vacío
   if (!isBrowser) {
-    return <div className="bg-white py-10 px-4 border border-black rounded-lg">Cargando testimonios...</div>;
+    return <div className="bg-white py-10 px-4 border border-black rounded-lg">Loading Testimonials...</div>;
   }
 
   return (
@@ -577,56 +516,6 @@ const ScrollArrow = React.memo(() => {
                   onTouchStart={() => setIsPaused({...isPaused, [category]: true})}
                   onTouchEnd={() => setTimeout(() => setIsPaused({...isPaused, [category]: false}), 5000)}
                 >
-                 {/* Botón de pausa/reanudar (versión mejorada para móvil y escritorio) */}
-                 <button
-  className="
-    absolute
-    top-4 
-    -right-2 sm:right-0 
-    z-10 bg-gray-100 bg-opacity-50 text-gray-800 p-0.5 scale-75 rounded-full 
-    hover:bg-opacity-30 transition-all duration-300 shadow-sm
-  "
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsPaused({
-      ...isPaused, 
-      [category as keyof typeof isPaused]: !isPaused[category as keyof typeof isPaused]
-    });
-  }}
-  // Agregar eventos táctiles específicos
-  onTouchStart={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }}
-  onTouchEnd={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsPaused({
-      ...isPaused, 
-      [category as keyof typeof isPaused]: !isPaused[category as keyof typeof isPaused]
-    });
-  }}
-  style={{ 
-    WebkitTapHighlightColor: 'transparent',
-    touchAction: 'manipulation',
-    padding: '8px', // Aumentar el área táctil
-    position: 'absolute', // Siempre absolute
-    top: '16px' // Valor fijo para colocarlo en la parte superior
-    // Eliminamos right del estilo en línea porque lo controlamos con Tailwind
-  }}
-  aria-label={isPaused[category as keyof typeof isPaused] ? "Reanudar carrusel" : "Pausar carrusel"}
->
-  {isPaused[category as keyof typeof isPaused] ? (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-    </svg>
-  ) : (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-    </svg>
-  )}
-</button>
 
   {/* Indicadores de página */}
   <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -840,6 +729,6 @@ const ScrollArrow = React.memo(() => {
       </div>
     </section>
   );
-};
+}
 
 export default Testimonials;
