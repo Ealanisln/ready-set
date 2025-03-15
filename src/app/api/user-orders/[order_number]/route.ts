@@ -43,7 +43,7 @@ type OnDemandOrder = Prisma.on_demandGetPayload<{
     };
   };
 }> & {
-  delivery_address?: Prisma.addressGetPayload<{}> | null;
+  delivery_address?: Prisma.addressGetPayload<object> | null;
 };
 
 type Order =

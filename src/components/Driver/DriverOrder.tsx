@@ -267,7 +267,7 @@ const OrderPage: React.FC = () => {
       }
     };
 
-    fetchOrder();
+    void fetchOrder();
   }, [pathname]);
 
   const updateDriverStatus = async (newStatus: string) => {

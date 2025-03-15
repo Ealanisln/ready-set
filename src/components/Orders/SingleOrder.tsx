@@ -146,7 +146,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
 
   // Fetch order details on mount
   useEffect(() => {
-    fetchOrderDetails();
+    void fetchOrderDetails();
   }, [fetchOrderDetails]);
 
   // Fetch drivers on mount
@@ -167,7 +167,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
       }
     };
 
-    fetchDrivers();
+    void fetchDrivers();
   }, []);
 
   const handleOpenDriverDialog = () => {

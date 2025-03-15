@@ -94,10 +94,11 @@ const AddressManager: React.FC<AddressManagerProps> = ({
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchAddresses();
-      fetchAllowedCounties();
-    }
-  }, [session?.user?.id, fetchAddresses, fetchAllowedCounties]);
+
+   void fetchAddresses();
+    void fetchAllowedCounties();
+  }
+}, [session?.user?.id, fetchAddresses, fetchAllowedCounties]);
 
   const handleAddAddress = useCallback(
     async (newAddress: Partial<Address>) => {
@@ -112,7 +113,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
 
         if (response.ok) {
           setShowAddForm(false);
-          fetchAddresses();
+          void fetchAddresses();
         } else {
           console.error("Failed to add address");
         }
