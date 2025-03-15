@@ -98,7 +98,7 @@ export default function Users() {
     }
   }, [session, isUserLoading, router]);
 
-  const handleDelete = async (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     try {
       const response = await fetch(`/api/user/delete-user?id=${userId}`, {
         method: "DELETE",
@@ -120,6 +120,8 @@ export default function Users() {
         description: "Failed to delete user",
         variant: "destructive",
       });
+      // Re-throw to be handled by the MainContent component
+      throw error;
     }
   };
 
@@ -146,7 +148,7 @@ export default function Users() {
           users={users}
           filter={filter}
           setFilter={setFilter}
-          onDelete={handleDelete}
+          onDelete={handleDeleteUser}
         />
       </div>
     </div>

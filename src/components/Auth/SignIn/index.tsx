@@ -5,7 +5,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import Loader from "@/components/Common/Loader";
 import { login, FormState } from "@/app/actions/login";
 import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
@@ -18,7 +18,7 @@ const Signin = ({
   // Check if user is already logged in
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [state, formAction] = useFormState<FormState, FormData>(login, {
+  const [state, formAction] = useActionState<FormState, FormData>(login, {
     error: "",
   });
 

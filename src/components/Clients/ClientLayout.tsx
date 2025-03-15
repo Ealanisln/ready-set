@@ -1,3 +1,5 @@
+// src/components/Clients/ClientLayout.tsx
+
 "use client";
 
 import { ThemeProvider } from "next-themes";
@@ -6,7 +8,8 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header/index";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import ToasterContext from "@/app/api/contex/ToasetContex";
+import ToasterContext from "@/app/api/contex/ToastContext";
+import toast from "react-hot-toast";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);

@@ -1,3 +1,5 @@
+// src/app/(site)/user/[id]/page.tsx
+
 "use client";
 
 import { useState, useEffect, useCallback, use } from "react";
@@ -24,12 +26,6 @@ import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
 import { useUploadFile } from "@/hooks/use-upload-file";
-import {
-  COUNTIES,
-  TIME_NEEDED,
-  CATERING_BROKERAGE,
-  PROVISIONS,
-} from "@/components/Auth/SignUp/ui/FormData";
 
 // Updated to match the db schema fields
 // Base database user interface
@@ -530,7 +526,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
                       />
                     </CardContent>
                   </Card>
-                  <PasswordChange />
+                  <PasswordChange
+                    onPasswordUpdate={(success, message) => {
+                      if (success) {
+                        toast.success(message);
+                      } else {
+                        toast.error(message);
+                      }
+                    }}
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 md:hidden">
