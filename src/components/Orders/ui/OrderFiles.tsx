@@ -124,7 +124,7 @@ export function OrderFilesManager({
       }
     };
 
-    fetchFiles();
+    void fetchFiles();
   }, [orderNumber, toast]);
 
   useEffect(() => {

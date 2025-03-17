@@ -71,7 +71,7 @@ const DriverDeliveries: React.FC = () => {
       }
     };
 
-    fetchDeliveries();
+    void fetchDeliveries();
   }, [page, limit]);
 
   const handleNextPage = () => setPage((prev) => prev + 1);

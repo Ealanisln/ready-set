@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import { withUt } from "uploadthing/tw";
+import tailgridsPlugin from "tailgrids/plugin";
 
 const config: Config = {
   darkMode: "class",
@@ -30,7 +31,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailgrids/plugin")],
+  plugins: [tailgridsPlugin],
 };
 
 export default withUt(config);

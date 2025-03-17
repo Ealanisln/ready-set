@@ -179,7 +179,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       }
     };
 
-    fetchUser();
+    void fetchUser();
   }, [params.id, setValue]);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
