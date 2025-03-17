@@ -159,19 +159,19 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       </div>
     </DialogHeader>
     <div className="mt-4 h-[70vh] min-h-[400px] w-full bg-white dark:bg-gray-900">
-      {showCalendar ? (
-        <iframe
-          src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-          className="h-full w-full rounded-md border-0"
-          title="Booking Calendar"
-        />
-      ) : (
-        <iframe
-          src={`/pdf/${pdfName}`}
-          className="h-full w-full rounded-md border-0"
-          title={`${title} PDF viewer`}
-        />
-      )}
+    {showCalendar ? (
+  <iframe
+    src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+    className="h-full w-full rounded-md border-0"
+    title="Booking Calendar"
+  />
+) : (
+  <iframe
+    src={`/pdf/${pdfName}#zoom=65&view=fit`}
+    className="h-full w-full rounded-md border-0"
+    title={`${title} PDF viewer`}
+  />
+)}
     </div>
   </DialogContent>
 </Dialog>
