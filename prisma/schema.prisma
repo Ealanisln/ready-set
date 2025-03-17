@@ -189,9 +189,9 @@ model file_upload {
   updatedAt         DateTime          @updatedAt
   cateringRequestId BigInt?
   onDemandId        BigInt?
-  entityType        String
-  entityId          String
-  category          String?
+  entityType        String            // Keep this for flexible relationships
+  entityId          String            // Keep this for flexible relationships
+  category          String?           // Good to have for organization
   cateringRequest   catering_request? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
   onDemand          on_demand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
   user              user?             @relation(fields: [userId], references: [id])
@@ -199,6 +199,7 @@ model file_upload {
   @@index([entityType, entityId])
   @@schema("public")
 }
+
 
 model form_submission {
   id                  String             @id @default(uuid())
