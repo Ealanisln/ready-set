@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as cron from 'node-cron';
 import { config } from 'dotenv';
+import { homedir } from 'os';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });
@@ -32,7 +33,7 @@ async function createBackup(): Promise<void> {
     const date = new Date().toISOString().split('T')[0];
     
     // Create backups directory in your home folder
-    const homeDir = process.env.HOME || require('os').homedir();
+    const homeDir = process.env.HOME || homedir();
     const backupDir = path.join(homeDir, 'db-backups');
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir);
@@ -90,14 +91,14 @@ switch (command) {
     // Schedule weekly backup (runs every Sunday at 00:00)
     cron.schedule('0 0 * * 0', () => {
       console.log('🔄 Running scheduled backup...');
-      createBackup();
+      void createBackup();
     });
     break;
 
   default:
     // Run single backup and exit
     console.log('📦 Running one-time backup...');
-    createBackup().then(() => {
+    void createBackup().then(() => {
       console.log('✨ Backup process completed');
       process.exit(0);
     });

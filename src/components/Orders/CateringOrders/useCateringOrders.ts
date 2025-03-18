@@ -45,7 +45,7 @@ const useCateringOrders = () => {
       }
     };
 
-    fetchOrders();
+    void fetchOrders();
   }, [page, limit, statusFilter]);
 
   const handlePageChange = useCallback((newPage: number) => {

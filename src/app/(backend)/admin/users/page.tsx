@@ -29,7 +29,7 @@ export default function Users() {
 
   useEffect(() => {
     if (session?.user?.type !== 'super_admin') {
-      router.push('/');
+      void router.push('/');
       return;
     }
 
@@ -54,7 +54,7 @@ export default function Users() {
       }
     };
 
-    fetchUsers();
+    void fetchUsers();
   }, [session, router, toast]);
 
   const handleDelete = async (userId: string) => {

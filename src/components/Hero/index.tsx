@@ -14,16 +14,16 @@ interface ButtonLinkProps {
   icon: React.ReactElement<LucideIcon>;
   title: string;
   description: string;
-  delay: number;
+  delay: number;  
 }
 
 // Motion component types
 type MotionDivProps = Omit<React.HTMLProps<HTMLDivElement>, keyof MotionProps> & MotionProps;
 
 // Custom motion components
-const MotionDiv: React.FC<MotionDivProps> = motion('div');
-const MotionHeader: React.FC<MotionDivProps> = motion('header');
-const MotionHeading: React.FC<MotionDivProps> = motion('h2');
+const MotionDiv = motion.div;
+const MotionHeader = motion.header;
+const MotionHeading = motion.h2;
 
 const ButtonLink: React.FC<ButtonLinkProps> = ({
   href,

@@ -1,7 +1,8 @@
 import ScrollUp from "@/components/Common/ScrollUp";
 import Hero from "@/components/Hero/index";
 import NewsletterForm from '../components/Resources/ui/NewsLetterForm';
-import { Metadata } from "next";
+import { Metadata } from "next/types";
+import Testimonials from "@/components/Testimonials";
 
 export const metadata: Metadata = {
   title: "Ready Set | Catering Delivery & Virtual Assistant Services",
@@ -65,6 +66,8 @@ export default function Home() {
     <main>
       <ScrollUp />
       <Hero />
+      <Testimonials />
+      <div className="my-12"></div>
       <NewsletterForm />
     </main>
   );

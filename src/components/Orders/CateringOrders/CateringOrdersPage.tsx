@@ -99,7 +99,7 @@ const CateringOrdersPage: React.FC = () => {
       }
     };
 
-    fetchOrders();
+    void fetchOrders();
   }, [page, statusFilter]);
 
   const handlePageChange = (newPage: number) => {

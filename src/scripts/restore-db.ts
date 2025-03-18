@@ -1,7 +1,7 @@
 // src/scripts/restore-db.ts
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
 
@@ -129,7 +129,7 @@ async function restoreDatabase() {
       try {
         await execAsync(`psql "${databaseUrl}" < "${tempFile}"`);
       } finally {
-        require('fs').unlinkSync(tempFile);
+        unlinkSync(tempFile);
       }
     }
 
@@ -163,4 +163,5 @@ async function restoreDatabase() {
   }
 }
 
-restoreDatabase();
+// Add void operator to prevent floating promise error
+void restoreDatabase();

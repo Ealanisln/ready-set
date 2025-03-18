@@ -1,13 +1,13 @@
 const env = process.env.NODE_ENV || 'development';
 const envFile = env === 'production' ? '.env.production' : '.env';
 import { spawn } from 'child_process';
+import { PrismaClient } from '@prisma/client';
 
 console.log(`Running in ${env} mode using ${envFile}`);
 
 const command = process.argv[2];
 
 async function verifyDatabaseConnection() {
-  const { PrismaClient } = require('@prisma/client');
   const prisma = new PrismaClient();
   try {
     await prisma.$connect();
@@ -23,7 +23,6 @@ async function verifyDatabaseConnection() {
 
 async function checkMigrationStatus() {
   try {
-    const { PrismaClient } = require('@prisma/client');
     const prisma = new PrismaClient();
     
     const migrations = await prisma.$queryRaw`
@@ -34,7 +33,7 @@ async function checkMigrationStatus() {
     `;
     console.log('📋 Recent migrations:', migrations);
     
-    const failedMigrations = await prisma.$queryRaw`
+    const failedMigrations = await prisma.$queryRaw<Array<{ migration_name: string; started_at: Date }>>`
       SELECT migration_name, started_at 
       FROM "_prisma_migrations" 
       WHERE finished_at IS NULL
@@ -54,7 +53,6 @@ async function checkMigrationStatus() {
 }
 
 async function runTests() {
-  const { PrismaClient } = require('@prisma/client');
   const prisma = new PrismaClient();
   
   try {
@@ -67,7 +65,7 @@ async function runTests() {
     console.log('✅ User model query test passed');
 
     // Test transactions
-    await prisma.$transaction(async (tx: Omit<typeof PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => {
+    await prisma.$transaction(async (tx) => {
       await tx.user.findFirst();
       console.log('✅ Transaction test passed');
     });
@@ -125,7 +123,7 @@ function spawnProcess(command: string[], options: any): Promise<number> {
 switch (command) {
   case 'generate':
     console.log('🔄 Generating Prisma Client...');
-    spawnProcess(['prisma', 'generate'], {
+    void spawnProcess(['prisma', 'generate'], {
       env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
     }).catch(error => {
       console.error('❌ Generation failed:', error);
@@ -136,7 +134,7 @@ switch (command) {
   case 'migrate':
     if (env === 'production') {
       console.log('🚀 Running production migration deploy...');
-      spawnProcess(['prisma', 'migrate', 'deploy'], {
+      void spawnProcess(['prisma', 'migrate', 'deploy'], {
         env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
       }).then(async (exitCode) => {
         if (exitCode === 0) {
@@ -157,7 +155,7 @@ switch (command) {
       });
     } else {
       console.log('🔄 Running development migration...');
-      spawnProcess(['prisma', 'migrate', 'dev'], {
+      void spawnProcess(['prisma', 'migrate', 'dev'], {
         env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
       }).catch(error => {
         console.error('❌ Migration failed:', error);
@@ -168,7 +166,7 @@ switch (command) {
 
   case 'studio':
     console.log('🔄 Starting Prisma Studio...');
-    spawnProcess(['prisma', 'studio'], {
+    void spawnProcess(['prisma', 'studio'], {
       env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
     }).catch(error => {
       console.error('❌ Studio failed to start:', error);
@@ -178,7 +176,7 @@ switch (command) {
 
   case 'verify':
     console.log('🔄 Running verification...');
-    verifyDatabaseConnection().then(async (connectionOk) => {
+    void verifyDatabaseConnection().then(async (connectionOk) => {
       if (connectionOk) {
         const statusOk = await checkMigrationStatus();
         const testsOk = await runTests();
@@ -194,7 +192,7 @@ switch (command) {
 
   case 'status':
     console.log('🔄 Checking migration status...');
-    spawnProcess(['prisma', 'migrate', 'status'], {
+    void spawnProcess(['prisma', 'migrate', 'status'], {
       env: { ...process.env, PRISMA_SCHEMA_FILE: envFile }
     }).catch(error => {
       console.error('❌ Status check failed:', error);
