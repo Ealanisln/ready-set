@@ -1,21 +1,17 @@
-// components/Analytics/LeadForensics.tsx
-import Script from 'next/script'
+import Script from 'next/script';
 
-export default function LeadForensics() {
+export default function MyPage() {
   return (
     <>
+      {/* Preload the script */}
+      <link rel="preload" href="https://www.perception-company.com/js/803213.js" as="script" />
+
+      {/* Load and execute the script */}
       <Script
         src="https://www.perception-company.com/js/803213.js"
-        strategy="afterInteractive"
-        type="text/javascript"
+        strategy="afterInteractive" // Ensures it runs after hydration
       />
-      <noscript>
-        <img 
-          src="https://www.perception-company.com/803213.png" 
-          style={{ display: 'none' }} 
-          alt=""
-        />
-      </noscript>
+      <h1>My Next.js Page</h1>
     </>
-  )
+  );
 }
