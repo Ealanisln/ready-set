@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FileDownIcon } from "lucide-react";
+import ResponsivePdfViewer from "./ResponsivePdfViewer";
 
 interface ServiceCardProps {
   title: string;
@@ -87,7 +88,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
   return (
     <div className="relative h-48 w-full md:h-56 lg:h-64 xl:h-72">
-      {/* Image Container remains the same */}
+      {/* Image Container */}
       <div className="absolute left-0 top-1/2 z-10 h-28 w-28 -translate-x-4 -translate-y-1/2 transition-all duration-300 md:h-32 md:w-32 md:-translate-x-6 lg:h-40 lg:w-40 lg:-translate-x-8 xl:h-48 xl:w-48 xl:-translate-x-12">
         <Image
           src={imageUrl}
@@ -134,47 +135,42 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
       {/* PDF Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-  <DialogContent className="mb-8 mt-16 sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-6">
-    <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
-      <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {title}
-      </DialogTitle>
-      <div className="mt-4 flex gap-4">
-        
-        <a
-          href={`/pdf/${pdfName}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-        >
-          <FileDownIcon className="h-4 w-4" />
-          <span>Download PDF</span>
-        </a>
-        <button
-          onClick={() => setShowCalendar(true)}
-          className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-        >
-          Book a discovery call
-        </button>
-      </div>
-    </DialogHeader>
-    <div className="mt-4 h-[70vh] min-h-[400px] w-full bg-white dark:bg-gray-900">
-    {showCalendar ? (
-  <iframe
-    src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-    className="h-full w-full rounded-md border-0"
-    title="Booking Calendar"
-  />
-) : (
-  <iframe
-    src={`/pdf/${pdfName}#zoom=65&view=fit`}
-    className="h-full w-full rounded-md border-0"
-    title={`${title} PDF viewer`}
-  />
-)}
-    </div>
-  </DialogContent>
-</Dialog>
+        <DialogContent className="mb-8 mt-16 sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-6">
+          <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
+            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {title}
+            </DialogTitle>
+            <div className="mt-4 flex gap-4">
+              <a
+                href={`/pdf/${pdfName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+              >
+                <FileDownIcon className="h-4 w-4" />
+                <span>Download PDF</span>
+              </a>
+              <button
+                onClick={() => setShowCalendar(true)}
+                className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+              >
+                Book a discovery call
+              </button>
+            </div>
+          </DialogHeader>
+          <div className="mt-4 h-[70vh] min-h-[400px] w-full bg-white dark:bg-gray-900">
+            {showCalendar ? (
+              <iframe
+                src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+                className="h-full w-full rounded-md border-0"
+                title="Booking Calendar"
+              />
+            ) : (
+              <ResponsivePdfViewer pdfName={pdfName} title={title} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
