@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import testimonials from './testimonials';
+import page from './page';
 
 const Testimonials = () => {
   interface Testimonial {
@@ -72,10 +72,10 @@ const Testimonials = () => {
 
   // Ahora el useMemo para agrupar testimonials solo se recalculará si cambia la referencia a testimonials
   const groupedTestimonials = useMemo(() => {
-    return testimonials.reduce((acc, testimonial) => {
-      const category = testimonial.category as keyof typeof acc;
+    return page.reduce((acc, page) => {
+      const category = page.category as keyof typeof acc;
       acc[category] = acc[category] || [];
-      acc[category].push(testimonial as Testimonial);
+      acc[category].push(page as Testimonial);
       return acc;
     }, {} as Record<Testimonial['category'], Testimonial[]>);
   }, []); // Esta dependencia ahora viene del import
@@ -383,7 +383,7 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="bg-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 border border-black rounded-lg">
+    <section className="bg-white py-10 sm:py-16 px-0 border-x-0 border-b-0 border-t border-black rounded-none w-full">
       <div className="max-w-7xl mx-auto">
         {/* Updated header section with dotted lines extending from title */}
         <div className="text-center mb-8 sm:mb-12 relative">

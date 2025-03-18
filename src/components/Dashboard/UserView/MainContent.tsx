@@ -163,7 +163,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   }, [toast]);
 
   useEffect(() => {
-    fetchUsers();
+    void fetchUsers();
   }, [fetchUsers]);
 
   // Reset to first page when filters change

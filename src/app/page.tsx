@@ -67,6 +67,7 @@ export default function Home() {
       <ScrollUp />
       <Hero />
       <Testimonials />
+      <div className="my-12"></div>
       <NewsletterForm />
     </main>
   );

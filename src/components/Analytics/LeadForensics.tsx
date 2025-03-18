@@ -1,22 +1,19 @@
-// src/components/Analytics/LeadForensicsTracker.tsx
-'use client'
-
+// components/Analytics/LeadForensics.tsx
 import Script from 'next/script'
 
-export default function LeadForensicsTracker() {
+export default function LeadForensics() {
   return (
     <>
       <Script
-        id="lead-forensics-script"
         src="https://www.perception-company.com/js/803213.js"
         strategy="afterInteractive"
-        onError={(e) => console.error('Lead Forensics script failed to load', e)}
+        type="text/javascript"
       />
       <noscript>
         <img 
           src="https://www.perception-company.com/803213.png" 
           style={{ display: 'none' }} 
-          alt="Lead Forensics tracking pixel" 
+          alt=""
         />
       </noscript>
     </>

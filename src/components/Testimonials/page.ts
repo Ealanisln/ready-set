@@ -1,4 +1,5 @@
-const testimonials = [
+
+const page = [
     {
       category: 'CLIENTS',
       name: 'Wendy Sellers',
@@ -57,4 +58,4 @@ const testimonials = [
     }, 
   ];
   
-  export default testimonials;
+  export default page;

@@ -112,7 +112,7 @@ const UserOrderDetail: React.FC = () => {
       }
     };
 
-    fetchOrder();
+    void fetchOrder();
   }, [pathname]);
 
   const formatAddress = (address: Address | null) => {

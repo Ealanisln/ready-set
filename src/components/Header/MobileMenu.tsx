@@ -292,7 +292,7 @@ const MobileMenuOverlay: React.FC<{
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <button
                       onClick={() => {
-                        signOut({ callbackUrl: "/", redirect: true });
+                        void signOut({ callbackUrl: "/", redirect: true });
                         navbarToggleHandler();
                       }}
                       className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"

@@ -16,7 +16,7 @@ export const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ planName }) => {
   const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   
   const handleCopyOrderId = () => {
-    navigator.clipboard.writeText(orderId);
+    void navigator.clipboard.writeText(orderId);
     toast({
       title: "Copied to clipboard",
       description: "Order ID has been copied to your clipboard",
