@@ -6,7 +6,6 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
-import LeadForensics from "@/components/Analytics/LeadForensics";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -30,7 +29,6 @@ export default function RootLayout({
         </ErrorBoundary>
         {/* {process.env.NODE_ENV === "development" && <VercelToolbar />} */}
         <Analytics />
-        <LeadForensics />
         <CookieConsentBanner
           metricoolHash="5e4d77df771777117a249111f4fc9683"
           gaMeasurementId="G-PHGL28W4NP"
