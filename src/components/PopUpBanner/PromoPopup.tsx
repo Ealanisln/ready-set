@@ -184,7 +184,7 @@ const ClientSidePromoPopup = () => {
                       variants={textVariants}
                       custom={3}
                     >
-                      Limited-time offer from March 1 to 15, 2025.{" "}
+                      Limited-time offer from March 15 to 31, 2025.{" "}
                     </motion.p>
                   </CardContent>
                 </Card>

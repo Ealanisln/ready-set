@@ -161,7 +161,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   // Initial fetch and refresh handling
   useEffect(() => {
-    fetchUser();
+    void fetchUser();
   }, [fetchUser, refreshTrigger]);
 
   // Watch for form changes
@@ -297,7 +297,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       setValue("type", newRole as User["type"]);
       toast.success("User role updated successfully!");
       setRefreshTrigger((prev) => prev + 1);
-      router.refresh();
+      void router.refresh();
     } catch (error) {
       console.error("Failed to update user role:", error);
       toast.error("Failed to update user role. Please try again.");
@@ -305,9 +305,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   };
 
   const handleDiscard = () => {
-    fetchUser();
+    void fetchUser();
     toast("Changes discarded", { icon: "🔄" });
-    router.push("/admin/users");
+    void router.push("/admin/users");
   };
 
   const handleBack = () => {

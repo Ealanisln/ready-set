@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 import { withUt } from "uploadthing/tw";
-// Add this import instead of using require()
 import tailgridsPlugin from "tailgrids/plugin";
 
 const config: Config = {
@@ -32,7 +31,6 @@ const config: Config = {
       },
     },
   },
-  // Use the imported plugin here instead of require()
   plugins: [tailgridsPlugin],
 };
 
