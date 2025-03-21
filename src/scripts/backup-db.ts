@@ -206,5 +206,5 @@ async function rotateBackups() {
 export { backupDatabase };
 
 if (process.argv[1] === import.meta.url.substring(7)) {
-  void backupDatabase();
+  backupDatabase();
 }

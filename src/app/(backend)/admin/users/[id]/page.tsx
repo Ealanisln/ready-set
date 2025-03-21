@@ -161,7 +161,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
 
   // Initial fetch and refresh handling
   useEffect(() => {
-    void fetchUser();
+     fetchUser();
   }, [fetchUser, refreshTrigger]);
 
   // Watch for form changes
@@ -305,9 +305,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   };
 
   const handleDiscard = () => {
-    void fetchUser();
+     fetchUser();
     toast("Changes discarded", { icon: "🔄" });
-    void router.push("/admin/users");
+     router.push("/admin/users");
   };
 
   const handleBack = () => {

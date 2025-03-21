@@ -15,277 +15,277 @@ const Testimonials = () => {
     image?: string;
   }
 
-  // Estado para controlar qué testimonio está activo en cada categoría
-  const [activeIndices, setActiveIndices] = useState({
-    CLIENTS: 0,
-    VENDORS: 0,
-    DRIVERS: 0,
-  });
+  // State to control which testimonial is active in each category
+const [activeIndices, setActiveIndices] = useState({
+  CLIENTS: 0,
+  VENDORS: 0,
+  DRIVERS: 0,
+});
 
-  // Estado para controlar si el autoplay está pausado
-  const [isPaused, setIsPaused] = useState({
-    CLIENTS: false,
-    VENDORS: false,
-    DRIVERS: false,
-  });
+// State to control if autoplay is paused
+const [isPaused, setIsPaused] = useState({
+  CLIENTS: false,
+  VENDORS: false,
+  DRIVERS: false,
+});
 
-  // Estado para controlar categoría activa en móvil
-  const [activeMobileCategory, setActiveMobileCategory] = useState<
-    'CLIENTS' | 'VENDORS' | 'DRIVERS'
-  >('CLIENTS');
+// State to control active category on mobile
+const [activeMobileCategory, setActiveMobileCategory] = useState<
+  'CLIENTS' | 'VENDORS' | 'DRIVERS'
+>('CLIENTS');
 
-  // Estado para detectar si estamos en el navegador
-  const [isBrowser, setIsBrowser] = useState(false);
+// State to detect if we're in the browser
+const [isBrowser, setIsBrowser] = useState(false);
 
-  // Estado para detectar si estamos en móvil
-  const [isMobile, setIsMobile] = useState(false);
+// State to detect if we're on mobile
+const [isMobile, setIsMobile] = useState(false);
 
-  // Estado para controlar si hay contenido que desborda - Memoizado para evitar re-renders
-  const [hasOverflow, setHasOverflow] = useState<{
-    CLIENTS: boolean[];
-    VENDORS: boolean[];
-    DRIVERS: boolean[];
-  }>({
-    CLIENTS: [],
-    VENDORS: [],
-    DRIVERS: [],
-  });
+// State to control if there is overflowing content - Memoized to avoid re-renders
+const [hasOverflow, setHasOverflow] = useState<{
+  CLIENTS: boolean[];
+  VENDORS: boolean[];
+  DRIVERS: boolean[];
+}>({
+  CLIENTS: [],
+  VENDORS: [],
+  DRIVERS: [],
+});
 
-  // Añade este efecto después de declarar todos tus estados
-  useEffect(() => {
-    // Este código solo se ejecuta en el cliente
-    setIsBrowser(true);
+// Add this effect after declaring all your states
+useEffect(() => {
+  // This code only runs on the client
+  setIsBrowser(true);
+  setIsMobile(window.innerWidth < 768);
+
+  // Add listener to detect window size changes
+  const handleResize = () => {
     setIsMobile(window.innerWidth < 768);
+  };
 
-    // Agregar listener para detectar cambios en el tamaño de ventana
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+// Refs for testimonial containers
+const cardRefs = useRef<{ [key: string]: (HTMLDivElement | null)[] }>({
+  CLIENTS: [],
+  VENDORS: [],
+  DRIVERS: [],
+});
 
-  // Refs para los contenedores de testimonios
-  const cardRefs = useRef<{ [key: string]: (HTMLDivElement | null)[] }>({
-    CLIENTS: [],
-    VENDORS: [],
-    DRIVERS: [],
-  });
+// Cache for preloaded images
+const preloadedImages = useRef<Set<string>>(new Set());
 
-  // Cache para imagenes precargadas
-  const preloadedImages = useRef<Set<string>>(new Set());
+// Now the useMemo to group testimonials will only recalculate if the testimonials reference changes
+const groupedTestimonials = useMemo(() => {
+  return page.reduce(
+    (acc, page) => {
+      const category = page.category as keyof typeof acc;
+      acc[category] = acc[category] || [];
+      acc[category].push(page as Testimonial);
+      return acc;
+    },
+    {} as Record<Testimonial['category'], Testimonial[]>,
+  );
+}, []); // This dependency now comes from the import
 
-  // Ahora el useMemo para agrupar testimonials solo se recalculará si cambia la referencia a testimonials
-  const groupedTestimonials = useMemo(() => {
-    return page.reduce(
-      (acc, page) => {
-        const category = page.category as keyof typeof acc;
-        acc[category] = acc[category] || [];
-        acc[category].push(page as Testimonial);
-        return acc;
-      },
-      {} as Record<Testimonial['category'], Testimonial[]>,
-    );
-  }, []); // Esta dependencia ahora viene del import
+const checkContentOverflow = useCallback(() => {
+  // Limit the frequency of state updates to avoid excessive re-renders
+  if ((window as any).overflowThrottleTimeout) {
+    clearTimeout((window as any).overflowThrottleTimeout);
+  }
 
-  const checkContentOverflow = useCallback(() => {
-    // Limitar la frecuencia de actualización del estado para evitar re-renders excesivos
-    if ((window as any).overflowThrottleTimeout) {
-      clearTimeout((window as any).overflowThrottleTimeout);
-    }
+  (window as any).overflowThrottleTimeout = setTimeout(() => {
+    const newHasOverflow = { ...hasOverflow };
 
-    (window as any).overflowThrottleTimeout = setTimeout(() => {
-      const newHasOverflow = { ...hasOverflow };
+    Object.keys(groupedTestimonials).forEach((category) => {
+      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+      const items = groupedTestimonials[categoryKey] || [];
 
-      Object.keys(groupedTestimonials).forEach((category) => {
-        const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
-        const items = groupedTestimonials[categoryKey] || [];
-
-        if (!cardRefs.current[categoryKey]) {
-          cardRefs.current[categoryKey] = [];
-        }
-
-        items.forEach((_, index) => {
-          const element = cardRefs.current[categoryKey][index];
-          if (element) {
-            const hasContentOverflow = element.scrollHeight > element.clientHeight;
-
-            // Inicializar el array si no existe
-            if (!newHasOverflow[categoryKey]) {
-              newHasOverflow[categoryKey] = [];
-            }
-
-            // Asignar el valor de overflow sólo si cambia
-            if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
-              newHasOverflow[categoryKey][index] = hasContentOverflow;
-            }
-          }
-        });
-      });
-
-      // Sólo actualizar el estado si hay cambios reales
-      const hasChanged = JSON.stringify(newHasOverflow) !== JSON.stringify(hasOverflow);
-      if (hasChanged) {
-        setHasOverflow(newHasOverflow);
+      if (!cardRefs.current[categoryKey]) {
+        cardRefs.current[categoryKey] = [];
       }
-    }, 300);
-  }, [groupedTestimonials, hasOverflow]);
 
-  // Revisar si hay overflow en cada testimonio activo
-  useEffect(() => {
-    // Verificar el overflow si estamos en el navegador
-    if (isBrowser) {
-      // Revisar después de un breve retraso para asegurarnos de que el contenido está renderizado
-      const timeoutId = setTimeout(checkContentOverflow, 300);
+      items.forEach((_, index) => {
+        const element = cardRefs.current[categoryKey][index];
+        if (element) {
+          const hasContentOverflow = element.scrollHeight > element.clientHeight;
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [groupedTestimonials, isBrowser, activeIndices, activeMobileCategory, checkContentOverflow]);
+          // Initialize the array if it doesn't exist
+          if (!newHasOverflow[categoryKey]) {
+            newHasOverflow[categoryKey] = [];
+          }
 
-  // Funciones para controlar la navegación
-  const nextTestimonial = useCallback(
-    (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
-      const items = groupedTestimonials[category] || [];
-      if (items.length === 0) return;
-
-      setActiveIndices((prev) => ({
-        ...prev,
-        [category]: (prev[category] + 1) % items.length,
-      }));
-    },
-    [groupedTestimonials, setActiveIndices],
-  );
-
-  const prevTestimonial = useCallback(
-    (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
-      const items = groupedTestimonials[category] || [];
-      if (items.length === 0) return;
-
-      setActiveIndices((prev) => ({
-        ...prev,
-        [category]: (prev[category] - 1 + items.length) % items.length,
-      }));
-    },
-    [groupedTestimonials, setActiveIndices],
-  );
-
-  // Usar requestAnimationFrame en lugar de setInterval para mejor rendimiento y evitar parpadeos
-  useEffect(() => {
-    let animationFrameIds: number[] = [];
-    let lastTimestamps: Record<string, number> = {};
-
-    // Función que coordina todas las animaciones
-    const animate = (timestamp: number) => {
-      // Procesar cada categoría
-      Object.keys(groupedTestimonials).forEach((category) => {
-        const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
-
-        // Inicializar timestamp si es necesario
-        if (!lastTimestamps[categoryKey]) {
-          lastTimestamps[categoryKey] = timestamp;
-        }
-
-        // Calcular tiempo transcurrido desde último cambio
-        const elapsed = timestamp - lastTimestamps[categoryKey];
-
-        // Cambiar cada 10 segundos (10000ms) si no está pausado
-        // Tiempo más largo para reducir cambios y posibles parpadeos
-        if (elapsed > 10000 && !isPaused[categoryKey]) {
-          nextTestimonial(categoryKey);
-          lastTimestamps[categoryKey] = timestamp;
+          // Assign the overflow value only if it changes
+          if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
+            newHasOverflow[categoryKey][index] = hasContentOverflow;
+          }
         }
       });
+    });
 
-      // Continuar la animación
-      const id = requestAnimationFrame(animate);
-      animationFrameIds.push(id);
-    };
+    // Only update the state if there are actual changes
+    const hasChanged = JSON.stringify(newHasOverflow) !== JSON.stringify(hasOverflow);
+    if (hasChanged) {
+      setHasOverflow(newHasOverflow);
+    }
+  }, 300);
+}, [groupedTestimonials, hasOverflow]);
 
-    // Iniciar la animación
+// Check if there's overflow in each active testimonial
+useEffect(() => {
+  // Verify overflow if we're in the browser
+  if (isBrowser) {
+    // Check after a brief delay to ensure content is rendered
+    const timeoutId = setTimeout(checkContentOverflow, 300);
+
+    return () => clearTimeout(timeoutId);
+  }
+}, [groupedTestimonials, isBrowser, activeIndices, activeMobileCategory, checkContentOverflow]);
+
+// Functions to control navigation
+const nextTestimonial = useCallback(
+  (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
+    const items = groupedTestimonials[category] || [];
+    if (items.length === 0) return;
+
+    setActiveIndices((prev) => ({
+      ...prev,
+      [category]: (prev[category] + 1) % items.length,
+    }));
+  },
+  [groupedTestimonials, setActiveIndices],
+);
+
+const prevTestimonial = useCallback(
+  (category: 'CLIENTS' | 'VENDORS' | 'DRIVERS') => {
+    const items = groupedTestimonials[category] || [];
+    if (items.length === 0) return;
+
+    setActiveIndices((prev) => ({
+      ...prev,
+      [category]: (prev[category] - 1 + items.length) % items.length,
+    }));
+  },
+  [groupedTestimonials, setActiveIndices],
+);
+
+// Use requestAnimationFrame instead of setInterval for better performance and to avoid flickering
+useEffect(() => {
+  let animationFrameIds: number[] = [];
+  let lastTimestamps: Record<string, number> = {};
+
+  // Function that coordinates all animations
+  const animate = (timestamp: number) => {
+    // Process each category
+    Object.keys(groupedTestimonials).forEach((category) => {
+      const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+
+      // Initialize timestamp if necessary
+      if (!lastTimestamps[categoryKey]) {
+        lastTimestamps[categoryKey] = timestamp;
+      }
+
+      // Calculate elapsed time since last change
+      const elapsed = timestamp - lastTimestamps[categoryKey];
+
+      // Change every 10 seconds (10000ms) if not paused
+      // Longer time to reduce changes and possible flickering
+      if (elapsed > 10000 && !isPaused[categoryKey]) {
+        nextTestimonial(categoryKey);
+        lastTimestamps[categoryKey] = timestamp;
+      }
+    });
+
+    // Continue the animation
     const id = requestAnimationFrame(animate);
     animationFrameIds.push(id);
+  };
 
-    // Limpieza al desmontar
-    return () => {
-      animationFrameIds.forEach((id) => cancelAnimationFrame(id));
-    };
-  }, [isPaused, groupedTestimonials, nextTestimonial]);
+  // Start the animation
+  const id = requestAnimationFrame(animate);
+  animationFrameIds.push(id);
 
-  // Componente de estrellas memoizado para evitar re-renders
-  const StarRating = React.memo(
-    ({ count = 5, position = 'right' }: { count?: number; position?: 'right' | 'left' }) => (
-      <div
-        className={`-mt-2 flex rounded-md bg-white px-0 py-0 sm:mt-0 ${position === 'left' ? 'justify-end' : 'justify-start'}`}
-      >
-        {[...Array(count)].map((_, i) => (
-          <svg
-            key={i}
-            className="h-8 w-8 text-yellow-400 sm:h-7 sm:w-7"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        ))}
-      </div>
-    ),
-  );
+  // Cleanup when unmounting
+  return () => {
+    animationFrameIds.forEach((id) => cancelAnimationFrame(id));
+  };
+}, [isPaused, groupedTestimonials, nextTestimonial]);
 
-  // Componente de flecha para indicar scroll mejorado
-  const ScrollArrow = React.memo(() => {
-    const [scrollPosition, setScrollPosition] = useState(0);
-    const [maxScroll, setMaxScroll] = useState(0);
-    const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
+// Memoized star component to avoid re-renders
+const StarRating = React.memo(
+  ({ count = 5, position = 'right' }: { count?: number; position?: 'right' | 'left' }) => (
+    <div
+      className={`-mt-2 flex rounded-md bg-white px-0 py-0 sm:mt-0 ${position === 'left' ? 'justify-end' : 'justify-start'}`}
+    >
+      {[...Array(count)].map((_, i) => (
+        <svg
+          key={i}
+          className="h-8 w-8 text-yellow-400 sm:h-7 sm:w-7"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  ),
+);
 
-    // Referencia para el elemento contenedor actual
-    const arrowRef = useRef<HTMLDivElement>(null);
+// Improved scroll arrow component
+const ScrollArrow = React.memo(() => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [maxScroll, setMaxScroll] = useState(0);
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
 
-    useEffect(() => {
-      // Encontrar el elemento padre con scroll (el card)
-      if (arrowRef.current) {
-        let parent = arrowRef.current.parentElement;
+  // Reference for the current container element
+  const arrowRef = useRef<HTMLDivElement>(null);
 
-        // Buscar el primer padre con overflow auto o scroll
-        while (parent && !['auto', 'scroll'].includes(getComputedStyle(parent).overflowY)) {
-          parent = parent.parentElement;
-        }
+  useEffect(() => {
+    // Find the parent element with scroll (the card)
+    if (arrowRef.current) {
+      let parent = arrowRef.current.parentElement;
 
-        setScrollElement(parent);
-
-        // Establecer el desplazamiento máximo disponible
-        if (parent) {
-          setMaxScroll(parent.scrollHeight - parent.clientHeight);
-        }
+      // Look for the first parent with overflow auto or scroll
+      while (parent && !['auto', 'scroll'].includes(getComputedStyle(parent).overflowY)) {
+        parent = parent.parentElement;
       }
-    }, []);
 
-    useEffect(() => {
-      if (!scrollElement) return;
+      setScrollElement(parent);
 
-      // Función para manejar el evento de scroll
-      const handleScroll = () => {
-        // Obtener posición actual de scroll
-        const currentPosition = scrollElement.scrollTop;
-        setScrollPosition(currentPosition);
+      // Set the maximum available scroll
+      if (parent) {
+        setMaxScroll(parent.scrollHeight - parent.clientHeight);
+      }
+    }
+  }, []);
 
-        // Actualizar máximo scroll (puede cambiar si el contenido cambia)
-        setMaxScroll(scrollElement.scrollHeight - scrollElement.clientHeight);
-      };
+  useEffect(() => {
+    if (!scrollElement) return;
 
-      // Ejecutar una vez al inicio para verificar el estado inicial
-      handleScroll();
+    // Function to handle the scroll event
+    const handleScroll = () => {
+      // Get current scroll position
+      const currentPosition = scrollElement.scrollTop;
+      setScrollPosition(currentPosition);
 
-      // Agregar el event listener
-      scrollElement.addEventListener('scroll', handleScroll);
+      // Update maximum scroll (can change if content changes)
+      setMaxScroll(scrollElement.scrollHeight - scrollElement.clientHeight);
+    };
 
-      // Limpiar el event listener cuando el componente se desmonte
-      return () => {
-        scrollElement.removeEventListener('scroll', handleScroll);
-      };
-    }, [scrollElement]);
+    // Run once at the beginning to verify initial state
+    handleScroll();
 
-    // Calcular la posición dinámica y opacidad de la flecha
+    // Add the event listener
+    scrollElement.addEventListener('scroll', handleScroll);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      scrollElement.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollElement]);
+
+    // Calculate the dynamic position and opacity of the arrow
     const arrowPosition = Math.min(80, 20 + (scrollPosition / maxScroll) * 60);
     const arrowOpacity = maxScroll > 0 ? 1 - (scrollPosition / maxScroll) * 1.3 : 0;
 
@@ -314,17 +314,17 @@ const Testimonials = () => {
     );
   });
 
-  // Componente de imagen de perfil con carga estática para evitar parpadeos
+  // Profile image component with static loading to avoid flickering
   const ProfileImage = React.memo(({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
-    // Simplificar la lógica de manejo de imágenes y usar placeholders de manera consistente
-    // Esto evita que el componente cambie de estado y cause re-renders
+    // Simplify image handling logic and use placeholders consistently
+    // This prevents the component from changing state and causing re-renders
 
     return (
       <div className="z-10 h-16 w-16 overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-lg sm:h-20 sm:w-20">
-        {/* Precargar imagen con visibilidad oculta para verificar si carga correctamente */}
+        {/* Preload image with hidden visibility to verify if it loads correctly */}
         {imageSrc && (
           <div className="relative h-full w-full">
-            {/* Usar estilos inline para evitar cambios de DOM que causen parpadeo */}
+            {/* Use inline styles to avoid DOM changes that cause flickering */}
             <div
               style={{
                 backgroundImage: `url(${imageSrc})`,
@@ -336,7 +336,7 @@ const Testimonials = () => {
               aria-label={alt}
             />
 
-            {/* Imagen de respaldo que solo se muestra si la otra falla */}
+            {/* Fallback image that only displays if the other fails */}
             <div
               className="fallback-image"
               style={{
@@ -355,7 +355,7 @@ const Testimonials = () => {
           </div>
         )}
 
-        {/* Si no hay imagen, mostrar placeholder */}
+        {/* If there's no image, show placeholder */}
         {!imageSrc && (
           <div
             style={{
@@ -372,7 +372,7 @@ const Testimonials = () => {
     );
   });
 
-  // Selector de categoría para móviles memoizado
+  // Memoized category selector for mobile
   const CategorySelector = React.memo(() => (
     <div className="my-6 flex flex-wrap justify-center gap-2 md:hidden">
       {Object.keys(groupedTestimonials).map((category) => (
@@ -391,7 +391,7 @@ const Testimonials = () => {
     </div>
   ));
 
-  // Si no estamos en el navegador, renderizamos un contenedor vacío
+  // If we're not in the browser, render an empty container
   if (!isBrowser) {
     return (
       <div className="rounded-lg border border-black bg-white px-4 py-10">
@@ -399,7 +399,6 @@ const Testimonials = () => {
       </div>
     );
   }
-
   return (
     <section
       id="testimonials"
@@ -433,16 +432,16 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Selector de categoría para móviles */}
+        {/* Category selector for mobile */}
         <CategorySelector />
 
-        {/* Espacio adicional entre selector y contenido en móvil */}
+        {/* Additional space between selector and content on mobile */}
         <div className="h-4 md:h-0"></div>
 
-        {/* Grid de tres columnas en desktop, una columna en móvil */}
+        {/* Three-column grid on desktop, single column on mobile */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {Object.entries(groupedTestimonials).map(([category, items]) => {
-            // En móvil, solo mostrar la categoría activa
+            // On mobile, only show the active category
             const isCategoryVisible = !isMobile || category === activeMobileCategory;
 
             return (
@@ -452,16 +451,16 @@ const Testimonials = () => {
                   isCategoryVisible ? 'block' : 'hidden md:block'
                 }`}
               >
-                {/* Contenedor con borde punteado */}
+                {/* Container with dotted border */}
                 <div className="relative border-2 border-dotted border-black p-4 pb-6 pt-10 sm:p-6 sm:pt-12">
-                  {/* Título de categoría */}
+                  {/* Category title */}
                   <div className="absolute -top-5 left-0 w-full text-center">
                     <h3 className="inline-block bg-white px-4 text-xl font-bold text-black sm:px-6 sm:text-2xl">
                       {category}
                     </h3>
                   </div>
 
-                  {/* Subtítulo */}
+                  {/* Subtitle */}
                   <div className="-mt-6 mb-14 text-center sm:-mt-9 sm:mb-16">
                     <p className="text-xs text-black sm:text-sm">
                       {category === 'CLIENTS' && 'Why Our Clients Love Us'}
@@ -470,7 +469,7 @@ const Testimonials = () => {
                     </p>
                   </div>
 
-                  {/* Carrusel manual */}
+                  {/* Manual carousel */}
                   <div
                     className="relative h-[350px] sm:h-[450px]"
                     onMouseEnter={() => setIsPaused({ ...isPaused, [category]: true })}
@@ -480,7 +479,7 @@ const Testimonials = () => {
                       setTimeout(() => setIsPaused({ ...isPaused, [category]: false }), 5000)
                     }
                   >
-                    {/* Indicadores de página */}
+                    {/* Page indicators */}
                     <div className="absolute -bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-2">
                       {items.map((_, idx: number) => (
                         <button
@@ -496,20 +495,20 @@ const Testimonials = () => {
                       ))}
                     </div>
 
-                    {/* Contenedor con animación usando Motion */}
+                    {/* Container with animation using Motion */}
                     <div className="h-full">
                       <AnimatePresence mode="wait">
                         {items.map((testimonial, index) => {
                           const isActive =
                             index === activeIndices[category as keyof typeof activeIndices];
-                          // Alternar el layout en móvil para consistencia
+                          // Alternate layout on mobile for consistency
                           const layoutStyle = isMobile ? index % 2 === 0 : index % 2 === 0;
 
-                          // Verificar si este testimonio tiene overflow
+                          // Check if this testimonial has overflow
                           const cardHasOverflow =
                             hasOverflow[category as keyof typeof hasOverflow]?.[index];
 
-                          // Solo mostramos el testimonio activo para la animación
+                          // Only show the active testimonial for animation
                           if (!isActive) return null;
 
                           return (
@@ -544,7 +543,7 @@ const Testimonials = () => {
                                 {layoutStyle ? (
                                   // Left-aligned card (odd indices - first card)
                                   <>
-                                    {/* Profile Image - Left positioned - Más pegada al card en móvil */}
+                                    {/* Profile Image - Left positioned - Closer to the card on mobile */}
                                     <motion.div
                                       className="absolute -top-4 left-4 z-10 sm:-top-8 sm:left-8"
                                       initial={{ scale: 0.8, opacity: 0 }}
@@ -560,7 +559,7 @@ const Testimonials = () => {
                                       />
                                     </motion.div>
 
-                                    {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                                    {/* Star Rating - Repositioned on mobile (lower) */}
                                     <motion.div
                                       className="absolute left-1/2 top-2 z-20 -translate-x-1/2 transform sm:-top-4 sm:left-[60%] sm:-translate-x-1/2"
                                       initial={{ y: -10, opacity: 0 }}
@@ -601,8 +600,8 @@ const Testimonials = () => {
                                         {testimonial.text}
                                       </p>
 
-                                      {/* Indicador de scroll si hay overflow (móvil y desktop) */}
-                                      {cardHasOverflow && (
+                                     {/* Scroll indicator if there's overflow (mobile and desktop) */}
+                                     {cardHasOverflow && (
                                         <motion.div
                                           initial={{ opacity: 0 }}
                                           animate={{
@@ -618,7 +617,7 @@ const Testimonials = () => {
                                 ) : (
                                   // Right-aligned card (even indices - second card)
                                   <>
-                                    {/* Profile Image - Right positioned - Más pegada al card en móvil */}
+                                    {/* Profile Image - Right positioned - Closer to the card on mobile */}
                                     <motion.div
                                       className="absolute -top-4 right-4 z-10 sm:-top-8 sm:right-8"
                                       initial={{ scale: 0.8, opacity: 0 }}
@@ -634,7 +633,7 @@ const Testimonials = () => {
                                       />
                                     </motion.div>
 
-                                    {/* Star Rating - Reposicionado en móvil (más abajo) */}
+                                    {/* Star Rating - Repositioned on mobile (lower) */}
                                     <motion.div
                                       className="absolute right-1/2 top-2 z-20 translate-x-1/2 transform sm:-top-4 sm:right-[60%] sm:translate-x-1/2"
                                       initial={{ y: -10, opacity: 0 }}
@@ -647,7 +646,7 @@ const Testimonials = () => {
                                       <StarRating count={5} />
                                     </motion.div>
 
-                                    {/* Card with testimonial - Padding ajustado en móvil */}
+                                    {/* Card with testimonial - Adjusted padding on mobile */}
                                     <motion.div
                                       ref={(el) => {
                                         if (!cardRefs.current[category]) {
@@ -675,7 +674,7 @@ const Testimonials = () => {
                                         {testimonial.text}
                                       </p>
 
-                                      {/* Indicador de scroll si hay overflow (móvil y desktop) */}
+                                      {/* Scroll indicator if there's overflow (mobile and desktop) */}
                                       {cardHasOverflow && (
                                         <motion.div
                                           initial={{ opacity: 0 }}

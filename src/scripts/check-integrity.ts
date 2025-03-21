@@ -127,4 +127,4 @@ async function checkDatabaseIntegrity() {
   }
 }
 
-void checkDatabaseIntegrity();
+checkDatabaseIntegrity();

@@ -81,7 +81,7 @@ const OrderStatusTable: React.FC<OrderStatusTableProps> = ({
       }
     };
 
-    void fetchOrders();
+    fetchOrders();
   }, [apiEndpoint, page, limit]);
 
   const handleNextPage = () => setPage((prev) => prev + 1);

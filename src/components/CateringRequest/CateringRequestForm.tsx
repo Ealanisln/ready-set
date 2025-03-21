@@ -155,7 +155,7 @@ const CateringRequestForm: React.FC = () => {
 
         // Note: We can't guarantee this cleanup will complete before the window closes
         // That's why we also need server-side cleanup for orphaned files
-        void cleanupUploadedFiles(uploadedFileKeys);
+         cleanupUploadedFiles(uploadedFileKeys);
       }
     };
 
@@ -165,7 +165,7 @@ const CateringRequestForm: React.FC = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       // Cleanup if component unmounts without submission
       if (uploadedFileKeys.length > 0 && !isSubmitting) {
-        void cleanupUploadedFiles(uploadedFileKeys);
+         cleanupUploadedFiles(uploadedFileKeys);
       }
     };
   }, [uploadedFileKeys, isSubmitting]);

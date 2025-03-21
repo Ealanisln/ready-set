@@ -68,7 +68,7 @@ const ClientOrders: React.FC = () => {
       }
     };
 
-    void fetchOrders();
+    fetchOrders();
   }, [page, limit]);
 
   const handleNextPage = () => setPage((prev) => prev + 1);

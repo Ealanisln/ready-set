@@ -75,7 +75,7 @@ export function SettingsUser() {
       }
     };
 
-    void fetchUser();
+    fetchUser();
   }, []);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
