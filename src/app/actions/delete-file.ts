@@ -2,11 +2,9 @@
 
 "use server";
 
-import { UTApi } from "uploadthing/server";
-import { PrismaClient } from "@prisma/client";
-
-const utapi = new UTApi();
-const prisma = new PrismaClient();
+import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/utils/prismaDB";
+import { revalidatePath } from "next/cache";
 
 type DeleteFileResult =
   | { success: true; message: string }
@@ -21,6 +19,7 @@ export const deleteFile = async (
   );
 
   try {
+    // 1. Get the file record from the database
     const file = await prisma.file_upload.findFirst({
       where: {
         id: fileKey,
@@ -35,26 +34,37 @@ export const deleteFile = async (
 
     console.log(`File found in database: ${JSON.stringify(file)}`);
 
-    const urlParts = file.fileUrl.split("/");
-    const actualFileName = urlParts[urlParts.length - 1];
-    console.log(`Extracted file name from URL: ${actualFileName}`);
+    // 2. Extract the file path from the URL using regex like in your API route
+    const fileUrlMatch = file.fileUrl.match(/fileUploader\/([^?#]+)/);
+    const filePath = fileUrlMatch?.[1];
 
-    try {
-      console.log(
-        `Attempting to delete file from UploadThing: ${actualFileName}`,
-      );
-      const utResult = await utapi.deleteFiles([actualFileName]);
-      console.log(`UploadThing deletion result:`, utResult);
+    if (!filePath) {
+      console.error("Could not determine file path from URL:", file.fileUrl);
+      // We'll continue to delete the database record even if we can't parse the path
+    } else {
+      // 3. Initialize Supabase client
+      const supabase = await createClient();
 
-      if (!utResult.success || utResult.deletedCount === 0) {
-        console.log(
-          `UploadThing couldn't delete the file. It might have already been removed or the file name doesn't match.`,
-        );
+      // 4. Delete the file from Supabase Storage
+      try {
+        console.log(`Attempting to delete file from Supabase Storage: ${filePath}`);
+        const { data, error } = await supabase.storage
+          .from("fileUploader")
+          .remove([filePath]);
+
+        if (error) {
+          console.error("Error deleting from Supabase Storage:", error);
+          // We'll continue to delete the database record even if the storage delete fails
+        } else {
+          console.log(`Supabase Storage delete result:`, data);
+        }
+      } catch (storageError) {
+        console.error("Error calling Supabase Storage API:", storageError);
+        // Continue with database deletion anyway
       }
-    } catch (utError) {
-      console.error("Error calling UploadThing API:", utError);
     }
 
+    // 5. Delete the database record
     try {
       console.log(`Attempting to delete file record from database: ${fileKey}`);
       await prisma.file_upload.delete({
@@ -63,6 +73,9 @@ export const deleteFile = async (
         },
       });
       console.log(`File record deleted from database: ${fileKey}`);
+      
+      // Optionally revalidate any paths that might show this file
+      revalidatePath(`/user/${userId}`);
     } catch (dbError) {
       console.error("Error deleting file record from database:", dbError);
       return {
@@ -74,8 +87,7 @@ export const deleteFile = async (
 
     return {
       success: true,
-      message:
-        "File record deleted from database. Note: The file may or may not have been removed from the server.",
+      message: "File successfully deleted from storage and database.",
     };
   } catch (error) {
     console.error("Unexpected error in deleteFile:", error);

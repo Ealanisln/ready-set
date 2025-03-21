@@ -25,7 +25,7 @@ import { createClient } from "@/utils/supabase/client";
 import UserFilesDisplay from "@/components/User/user-files-display";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
-import { useUploadFile } from "@/hooks/use-upload-file";
+import { UploadedFile, useUploadFile } from "@/hooks/use-upload-file";
 
 // Updated to match the db schema fields
 // Base database user interface
@@ -58,10 +58,13 @@ interface User {
   isTemporaryPassword?: boolean;
 }
 
-// Form-specific option type
-interface OptionType {
-  label: string;
-  value: string;
+interface UploadHook {
+  onUpload: (files: FileWithPath[]) => Promise<void>;
+  progresses: Record<string, number>;
+  isUploading: boolean;
+  category: string;
+  entityType: string;
+  entityId: string;
 }
 
 // Extended interface to include transformed array fields for form usage
@@ -117,8 +120,11 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       try {
         // Create the Supabase client directly and await it properly
         const supabase = await createClient();
-        const { data: { user: authUser }, error } = await supabase.auth.getUser();
-        
+        const {
+          data: { user: authUser },
+          error,
+        } = await supabase.auth.getUser();
+
         if (error || !authUser) {
           setAuthError("You must be logged in to view this page.");
           router.push("/sign-in");
@@ -136,14 +142,13 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     checkAuth();
   }, [router]);
 
-  // Update the useUploadFileHook to handle the proper return type
-  const useUploadFileHook = (category: string) => {
+  const useUploadFileHook = (category: string): UploadHook => {
     const {
       onUpload: originalOnUpload,
       progresses,
       isUploading,
     } = useUploadFile({
-      bucketName: "fileUploader", 
+      bucketName: "fileUploader",
       defaultUploadedFiles: [],
       userId: user?.id ?? "",
       maxFileCount: 1,
@@ -159,9 +164,15 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       entityId: params.id,
     });
 
-    // Wrap the onUpload function to return void instead of UploadThingFile[]
+    // Create a wrapper for onUpload that returns void instead of UploadedFile[]
     const onUpload = async (files: FileWithPath[]): Promise<void> => {
-      await originalOnUpload(files);
+      try {
+        await originalOnUpload(files);
+        // We don't need to return anything, as Promise<void> is expected
+      } catch (error) {
+        console.error(`Error uploading ${category}:`, error);
+        throw error; // Re-throw to allow proper error handling
+      }
     };
 
     return {
@@ -174,13 +185,14 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     };
   };
 
-  const uploadHooks = {
+  // Create the uploadHooks object with the proper typings
+  const uploadHooks: Record<string, UploadHook> = {
     driver_photo: useUploadFileHook("driver_photo"),
     insurance_photo: useUploadFileHook("insurance_photo"),
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
-  } as const;
+  };
 
   const {
     control,
@@ -220,25 +232,25 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         // Using our new API route - no need to check for user here
         // The API route will handle auth checking
         const response = await fetch(`/api/user/${params.id}`);
-        
+
         if (!response.ok) {
           const errorData = await response.json();
-          
+
           if (response.status === 401) {
             toast.error("Unauthorized. Please login as an admin.");
             router.push("/sign-in");
             return;
           }
-          
+
           if (response.status === 404) {
             toast.error("User not found.");
             router.push("/");
             return;
           }
-          
+
           throw new Error(errorData.error || "Failed to fetch user data");
         }
-        
+
         const data: User = await response.json();
 
         // Set form values with safer null handling to match schema
@@ -266,7 +278,10 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         // Transform string values to arrays of simple values (not objects)
         setValue("countiesServed", stringToValueArray(data.counties));
         setValue("timeNeeded", stringToValueArray(data.time_needed));
-        setValue("cateringBrokerage", stringToValueArray(data.catering_brokerage));
+        setValue(
+          "cateringBrokerage",
+          stringToValueArray(data.catering_brokerage),
+        );
         setValue("provisions", stringToValueArray(data.provide));
 
         // Keep the original string values for reference or backup
@@ -274,7 +289,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         setValue("time_needed", data.time_needed || "");
         setValue("catering_brokerage", data.catering_brokerage || "");
         setValue("provide", data.provide || "");
-        
+
         // Set the ID field explicitly
         setValue("id", data.id);
       } catch (error) {

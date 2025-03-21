@@ -2,11 +2,9 @@
 
 "use server";
 
-import { UTApi } from "uploadthing/server";
-import { PrismaClient } from "@prisma/client";
-
-const utapi = new UTApi();
-const prisma = new PrismaClient();
+import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/utils/prismaDB";
+import { revalidatePath } from "next/cache";
 
 type DeleteUserFilesResult = {
   success: boolean;
@@ -22,6 +20,9 @@ export const deleteUserFiles = async (userId: string): Promise<DeleteUserFilesRe
   const errors: string[] = [];
 
   try {
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
     // Fetch all files associated with the user
     const userFiles = await prisma.file_upload.findMany({
       where: {
@@ -33,21 +34,34 @@ export const deleteUserFiles = async (userId: string): Promise<DeleteUserFilesRe
 
     for (const file of userFiles) {
       try {
-        const urlParts = file.fileUrl.split("/");
-        const actualFileName = urlParts[urlParts.length - 1];
-        console.log(`Processing file: ${actualFileName}`);
+        // Extract the file path from the URL using regex
+        const fileUrlMatch = file.fileUrl.match(/fileUploader\/([^?#]+)/);
+        const filePath = fileUrlMatch?.[1];
+        
+        if (!filePath) {
+          console.error(`Could not determine file path from URL: ${file.fileUrl}`);
+          errors.push(`Could not determine file path for ${file.id}`);
+          // Continue with database deletion anyway
+        } else {
+          // Delete file from Supabase Storage
+          try {
+            console.log(`Attempting to delete file from Supabase Storage: ${filePath}`);
+            const { data, error } = await supabase.storage
+              .from("fileUploader")
+              .remove([filePath]);
 
-        // Delete file from UploadThing
-        try {
-          const utResult = await utapi.deleteFiles([actualFileName]);
-          console.log(`UploadThing deletion result for ${actualFileName}:`, utResult);
-
-          if (!utResult.success || utResult.deletedCount === 0) {
-            console.log(`UploadThing couldn't delete the file ${actualFileName}. It might have already been removed or the file name doesn't match.`);
+            if (error) {
+              console.error(`Error deleting from Supabase Storage for file ${file.id}:`, error);
+              errors.push(`Failed to delete file ${file.id} from storage: ${error.message}`);
+              // Continue with database deletion anyway
+            } else {
+              console.log(`Supabase Storage delete result for ${file.id}:`, data);
+            }
+          } catch (storageError) {
+            console.error(`Error calling Supabase Storage API for file ${file.id}:`, storageError);
+            errors.push(`Failed to delete file ${file.id} from storage: ${storageError instanceof Error ? storageError.message : String(storageError)}`);
+            // Continue with database deletion anyway
           }
-        } catch (utError) {
-          console.error(`Error calling UploadThing API for file ${actualFileName}:`, utError);
-          errors.push(`Failed to delete file ${actualFileName} from storage: ${utError instanceof Error ? utError.message : String(utError)}`);
         }
 
         // Delete file record from database
@@ -63,6 +77,13 @@ export const deleteUserFiles = async (userId: string): Promise<DeleteUserFilesRe
         console.error(`Error processing file ${file.id}:`, fileError);
         errors.push(`Failed to process file ${file.id}: ${fileError instanceof Error ? fileError.message : String(fileError)}`);
       }
+    }
+
+    // Revalidate any relevant paths
+    try {
+      revalidatePath(`/user/${userId}`);
+    } catch (revalidateError) {
+      console.error("Error revalidating path:", revalidateError);
     }
 
     const message = deletedCount > 0

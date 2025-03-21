@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const entityId = formData.get("entityId") as string;
     let entityType = (formData.get("entityType") as string) || "user"; // Default to "user" if not provided
     const category = (formData.get("category") as string) || "general"; // Default to "general" if not provided
-    
+
     // Get userId from form data if available (for client-provided userId)
     const formUserId = formData.get("userId") as string;
 
@@ -38,12 +38,17 @@ export async function POST(request: NextRequest) {
 
     // Determine the user ID (prioritize authenticated session, fall back to form data)
     const userId = session?.user?.id || formUserId;
-    
+
     if (!userId) {
-      console.log("No user ID available - both session and form data missing user ID");
+      console.log(
+        "No user ID available - both session and form data missing user ID",
+      );
       return NextResponse.json(
-        { error: "User ID is required. Please provide a userId or authenticate." },
-        { status: 400 }
+        {
+          error:
+            "User ID is required. Please provide a userId or authenticate.",
+        },
+        { status: 400 },
       );
     }
 
@@ -147,29 +152,34 @@ export async function POST(request: NextRequest) {
 
       // Check if user exists in database and create if not
       let userExists = null;
-      
+
       try {
         userExists = await prisma.user.findUnique({
           where: { id: userId },
-          select: { id: true }
+          select: { id: true },
         });
       } catch (userCheckError) {
         console.error("Error checking user existence:", userCheckError);
       }
-      
+
       // If user doesn't exist, create a minimal record to satisfy the foreign key constraint
       if (!userExists) {
-        console.log(`User with ID ${userId} not found in database. Creating minimal user record.`);
-        
+        console.log(
+          `User with ID ${userId} not found in database. Creating minimal user record.`,
+        );
+
         try {
           await prisma.user.create({
             data: {
               id: userId,
               // Add minimal required fields based on your schema
               email: session?.user?.email || `${userId}@placeholder.com`,
-              name: session?.user?.user_metadata?.name || session?.user?.email?.split('@')[0] || "Anonymous",
+              name:
+                session?.user?.user_metadata?.name ||
+                session?.user?.email?.split("@")[0] ||
+                "Anonymous",
               // Add other required fields with default/placeholder values
-            }
+            },
           });
           console.log(`Created minimal user record for ${userId}`);
         } catch (userCreateError) {
@@ -183,9 +193,17 @@ export async function POST(request: NextRequest) {
       let cateringRequestId = null;
       let onDemandId = null;
 
-      if (entityType === "catering_request" && entityId && !isNaN(Number(entityId))) {
+      if (
+        entityType === "catering_request" &&
+        entityId &&
+        !isNaN(Number(entityId))
+      ) {
         cateringRequestId = BigInt(entityId);
-      } else if (entityType === "on_demand" && entityId && !isNaN(Number(entityId))) {
+      } else if (
+        entityType === "on_demand" &&
+        entityId &&
+        !isNaN(Number(entityId))
+      ) {
         onDemandId = BigInt(entityId);
       }
 
@@ -258,7 +276,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE endpoint remains the same as in the previous version
 export async function DELETE(request: NextRequest) {
   console.log("File delete API endpoint called");
 
@@ -270,11 +287,11 @@ export async function DELETE(request: NextRequest) {
     } catch (parseError) {
       return NextResponse.json(
         { error: "Invalid request body - JSON parsing failed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { fileId } = body;
+    const { fileId, userId } = body;
 
     if (!fileId) {
       return NextResponse.json({ error: "Missing fileId" }, { status: 400 });
@@ -295,13 +312,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Check user authorization if session exists 
-    // Only enforce this check when a session exists, to allow programmatic deletion
-    if (session && session.user.id !== fileRecord.userId) {
-      // Optionally add admin role check here if needed
+    // Check user authorization if session exists
+    // Allow provided userId or session user, with an optional admin bypass
+    const isAuthorized =
+      !session || // No session means programmatic access
+      session.user.id === fileRecord.userId || // Own file
+      userId === fileRecord.userId || // Provided matching userId
+      (session.user.role &&
+        ["admin", "super_admin"].includes(session.user.role)); // Admin role
+
+    if (!isAuthorized) {
       return NextResponse.json(
         { error: "Unauthorized - you do not own this file" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -340,7 +363,10 @@ export async function DELETE(request: NextRequest) {
   } catch (error: any) {
     console.error("Error deleting file:", error);
     return NextResponse.json(
-      { error: "Failed to delete file", details: error.message || String(error) },
+      {
+        error: "Failed to delete file",
+        details: error.message || String(error),
+      },
       { status: 500 },
     );
   }
