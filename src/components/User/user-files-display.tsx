@@ -1,236 +1,177 @@
 // src/components/User/user-files-display.tsx
-import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
-import {
-  FileText,
-  Eye,
-  Image as ImageIcon,
-  ExternalLink,
-  X,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "@/components/ui/use-toast";
-import { deleteFile } from "@/app/actions/delete-file";
-import { getUserFiles, UserFile } from "@/app/actions/getUserFiles";
 
-interface TransformedFile {
-  key: string;
+import React, { useState, useEffect } from 'react';
+import { Trash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
+
+interface UserFile {
+  id: string;
   name: string;
   url: string;
-  type: "image" | "pdf" | string;
-  category: string;
+  type: string;
+  size: number;
+  category?: string;
+  uploadedAt: string;
 }
 
 interface UserFilesDisplayProps {
   userId: string;
-  refreshTrigger: number; 
+  refreshTrigger?: number;
 }
 
-const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({
-  userId,
-  refreshTrigger,
-}) => {
-  const [userFiles, setUserFiles] = useState<TransformedFile[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFilesDisplayProps) {
+  const [files, setFiles] = useState<UserFile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchUserFiles = async () => {
-      setIsLoading(true);
       try {
-        const files = await getUserFiles(userId);
-        const transformedFiles: TransformedFile[] = files.map((file) => ({
-          key: file.id,
-          name: file.fileName,
-          url: file.fileUrl,
-          type: file.fileType,
-          category: file.category ?? "Uncategorized", // Provide fallback for null
-        }));
-
-        setUserFiles(transformedFiles);
+        setLoading(true);
+        setError(null);
+        
+        // Prevent browser caching
+        const cacheKey = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const response = await fetch(`/api/users/files?userId=${userId}&t=${cacheKey}`, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch files: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && Array.isArray(data.files)) {
+          setFiles(data.files);
+        } else {
+          console.warn("Unexpected response format:", data);
+          setFiles([]);
+        }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred",
-        );
+        console.error("Error fetching user files:", err);
+        setError(err instanceof Error ? err.message : "Failed to load files");
+        setFiles([]);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-
-    fetchUserFiles();
+    
+    if (userId) {
+      fetchUserFiles();
+    }
   }, [userId, refreshTrigger]);
 
-  const handleRemoveFile = async (fileKey: string) => {
+  const handleDeleteFile = async (fileId: string) => {
+    if (isDeleting[fileId]) return;
+    
+    if (!confirm("Are you sure you want to delete this file?")) {
+      return;
+    }
+    
     try {
-      const result = await deleteFile(userId, fileKey);
-      if (result.success) {
-        setUserFiles((prevFiles) =>
-          prevFiles.filter((file) => file.key !== fileKey),
-        );
-        toast({
-          title: "File record removed",
-          description: result.message,
-        });
-      } else {
-        console.error("Error removing file:", result.message, result.error);
-        toast({
-          title: "Error",
-          description: result.error || result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (err) {
-      console.error("Unexpected error removing file:", err);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
+      setIsDeleting(prev => ({ ...prev, [fileId]: true }));
+      
+      const response = await fetch('/api/file-uploads', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileId }),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete file");
+      }
+      
+      // Remove the file from the local state
+      setFiles(prev => prev.filter(file => file.id !== fileId));
+      toast.success("File deleted successfully");
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      toast.error("Failed to delete file");
+    } finally {
+      setIsDeleting(prev => ({ ...prev, [fileId]: false }));
     }
   };
 
-  const renderFilePreview = (file: TransformedFile) => {
-    if (file.type === "image") {
-      return (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="h-20 w-20 p-0">
-              <Image
-                src={file.url}
-                alt={file.name}
-                width={80}
-                height={80}
-                objectFit="cover"
-                className="rounded-md"
-              />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[80vh] max-w-4xl">
-            <div
-              className="relative h-full w-full"
-              style={{ minHeight: "300px" }}
-            >
-              <Image
-                src={file.url}
-                alt={file.name}
-                layout="fill"
-                objectFit="contain"
-              />
-            </div>
-            <div className="mt-4 text-right">
-              <a
-                href={file.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-blue-600 hover:text-blue-800"
-              >
-                Open full size
-                <ExternalLink size={16} className="ml-1" />
-              </a>
-            </div>
-          </DialogContent>
-        </Dialog>
-      );
-    } else if (file.type === "pdf") {
-      return (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="h-20 w-20 p-2">
-              <FileText size={32} />
-              <Eye size={20} className="ml-2" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="h-[80vh] max-w-4xl p-0">
-            <div className="flex h-full flex-col">
-              <iframe
-                src={`${file.url}#toolbar=0`}
-                title={file.name}
-                className="flex-grow border-none"
-              />
-              <div className="border-t bg-white p-4">
-                <a
-                  href={file.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
-                >
-                  Open in new tab
-                  <ExternalLink size={16} className="ml-1" />
-                </a>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      );
-    }
-    return (
-      <div className="flex h-20 w-20 items-center justify-center rounded-md bg-gray-100">
-        <ImageIcon size={32} className="text-gray-400" />
-      </div>
-    );
+  // Format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  // Group files by category
+  const filesByCategory = files.reduce<Record<string, UserFile[]>>((acc, file) => {
+    const category = file.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(file);
+    return acc;
+  }, {});
+
+  if (loading) {
+    return <div className="text-center py-4">Loading files...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-500 py-4">Error: {error}</div>;
+  }
+
+  if (files.length === 0) {
+    return <div className="text-center py-4">No files uploaded yet</div>;
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>User Files</CardTitle>
-        <CardDescription>
-          View and manage the users uploaded files here
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {userFiles.length > 0 ? (
-          <ul className="space-y-4">
-            {userFiles.map((file) => (
-              <li
-                key={file.key}
-                className="flex items-center space-x-4 rounded-md border p-2"
-              >
-                <div className="h-20 w-20 flex-shrink-0">
-                  {renderFilePreview(file)}
-                </div>
-                <div className="min-w-0 flex-grow">
-                  <p className="truncate text-sm font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">{file.type}</p>
-                  <p className="text-xs text-gray-400">
-                    Category: {file.category}
-                  </p>
+    <div className="space-y-6">
+      {Object.entries(filesByCategory).map(([category, categoryFiles]) => (
+        <div key={category} className="space-y-2">
+          <h3 className="text-lg font-medium capitalize">{category}</h3>
+          <div className="divide-y divide-gray-200">
+            {categoryFiles.map(file => (
+              <div key={file.id} className="py-3 flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center">
+                    <a 
+                      href={file.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:underline truncate"
+                    >
+                      {file.name}
+                    </a>
+                  </div>
+                  <div className="mt-1 flex text-sm text-gray-500 space-x-2">
+                    <span>{formatFileSize(file.size)}</span>
+                    <span>•</span>
+                    <span>{new Date(file.uploadedAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => handleRemoveFile(file.key)}
-                  className="text-red-500 hover:bg-red-100 hover:text-red-700"
+                  size="sm"
+                  onClick={() => handleDeleteFile(file.id)}
+                  disabled={isDeleting[file.id]}
+                  className="text-red-500 hover:text-red-700"
                 >
-                  <X size={20} />
+                  <Trash className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
                 </Button>
-              </li>
+              </div>
             ))}
-          </ul>
-        ) : (
-          <div className="py-4 text-center">
-            <p>No files uploaded yet.</p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      ))}
+    </div>
   );
-};
-
-export default UserFilesDisplay;
+}

@@ -8,33 +8,12 @@ import { SelectField } from "./FormFields/SelectField";
 import { HostSection } from "./HostSection";
 import { AddressSection } from "./AddressSection";
 import { CateringFormData, Address } from "@/types/catering";
-import { useUploadFile } from "@/hooks/use-upload-file";
-import { X } from "lucide-react";
-import { FileWithPath } from "react-dropzone";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient, Session } from "@supabase/supabase-js";
 
 interface ExtendedCateringFormData extends CateringFormData {
-  attachments?: UploadThingFile[];
+  // Removed attachments property
 }
-
-// Define a type for the upload result
-type UploadResult = {
-  key: string;
-  name: string;
-  url: string;
-};
-
-// Use UploadThing's file type
-type UploadThingFile = {
-  key: string;
-  name: string;
-  url: string;
-  size: number;
-  type: string;
-  serverData: unknown;
-  customId?: string | null;
-};
 
 const BROKERAGE_OPTIONS = [
   { value: "Foodee", label: "Foodee" },
@@ -54,7 +33,6 @@ const CateringRequestForm: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedFileKeys, setUploadedFileKeys] = useState<string[]>([]);
 
   // Initialize Supabase client
   useEffect(() => {
@@ -114,7 +92,7 @@ const CateringRequestForm: React.FC = () => {
           isRestaurant: false,
           isShared: false,
         },
-        attachments: [],
+        // Removed attachments default
       },
     });
 
@@ -156,102 +134,10 @@ const CateringRequestForm: React.FC = () => {
   }, []);
 
   const needHost = watch("need_host");
-  const {
-    onUpload,
-    uploadedFiles,
-    progresses,
-    isUploading,
-    tempEntityId,
-    updateEntityId,
-  } = useUploadFile("fileUploader", {
-    maxFileCount: 5,
-    maxFileSize: 10 * 1024 * 1024,
-    allowedFileTypes: [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ],
-    category: "catering",
-    entityType: "catering_request",
-    userId: session?.user?.id,
-    entityId: "your-entity-id-here"
-  });
-
-  // Cleanup function for uploaded files
-  const cleanupUploadedFiles = async (fileKeys: string[]) => {
-    try {
-      await fetch("/api/uploadthing/cleanup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ fileKeys }),
-      });
-    } catch (error) {
-      console.error("Error cleaning up files:", error);
-    }
-  };
-
-  // Handle window/tab close
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (uploadedFileKeys.length > 0 && !isSubmitting) {
-        // Show browser's default "Changes you made may not be saved" dialog
-        e.preventDefault();
-        e.returnValue = "";
-        // Note: We can't guarantee this cleanup will complete before the window closes
-        // That's why we also need server-side cleanup for orphaned files
-        cleanupUploadedFiles(uploadedFileKeys);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      // Cleanup if component unmounts without submission
-      if (uploadedFileKeys.length > 0 && !isSubmitting) {
-        cleanupUploadedFiles(uploadedFileKeys);
-      }
-    };
-  }, [uploadedFileKeys, isSubmitting]);
-
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    if (!event.target.files?.length) return;
-    const files = Array.from(event.target.files) as FileWithPath[];
-    try {
-      const result = await onUpload(files);
-      // No need to check if result exists since onUpload will either return array or throw
-      const newFileKeys = result.map((file) => file.key);
-      setUploadedFileKeys((prev) => [...prev, ...newFileKeys]);
-      setValue("attachments", result);
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload files. Please try again.");
-    }
-  };
-
-  const removeFile = async (fileToRemove: UploadThingFile) => {
-    // Remove from UI immediately
-    const updatedFiles = (uploadedFiles || []).filter(
-      (file) => file.key !== fileToRemove.key,
-    ) as UploadThingFile[];
-    setValue("attachments", updatedFiles);
-    // Remove from tracked keys
-    setUploadedFileKeys((prev) =>
-      prev.filter((key) => key !== fileToRemove.key),
-    );
-    // Clean up the removed file
-    await cleanupUploadedFiles([fileToRemove.key]);
-  };
 
   const onSubmit = async (data: ExtendedCateringFormData) => {
     console.log("Starting catering form submission:", { 
-      formData: { ...data, attachments: data.attachments?.length } 
+      formData: data
     });
   
     if (!session?.user?.id) {
@@ -266,8 +152,7 @@ const CateringRequestForm: React.FC = () => {
     try {
       console.log("Preparing order payload", {
         orderType: "catering",
-        tipAmount: data.tip ? parseFloat(data.tip) : undefined,
-        attachmentCount: data.attachments?.length
+        tipAmount: data.tip ? parseFloat(data.tip) : undefined
       });
   
       const response = await fetch("/api/orders", {
@@ -276,12 +161,8 @@ const CateringRequestForm: React.FC = () => {
         body: JSON.stringify({
           ...data,
           order_type: "catering",
-          tip: data.tip ? parseFloat(data.tip) : undefined,
-          attachments: data.attachments?.map((file) => ({
-            key: file.key,
-            name: file.name,
-            url: file.url,
-          })),
+          tip: data.tip ? parseFloat(data.tip) : undefined
+          // Removed attachments from payload
         }),
       });
   
@@ -303,38 +184,18 @@ const CateringRequestForm: React.FC = () => {
   
       const order = await response.json();
       console.log("Order created successfully", { 
-        orderId: order.id,
-        hasAttachments: uploadedFiles.length > 0 
+        orderId: order.id
       });
   
-      // Update file associations
-      if (uploadedFiles.length > 0) {
-        try {
-          console.log("Updating file associations", { 
-            orderId: order.id,
-            fileCount: uploadedFiles.length 
-          });
-          await updateEntityId(order.id.toString());
-          console.log("File associations updated successfully");
-        } catch (updateError) {
-          console.error("Error updating file associations:", {
-            error: updateError,
-            orderId: order.id,
-            fileCount: uploadedFiles.length
-          });
-          // Continue with form submission even if file update fails
-        }
-      }
-  
-      setUploadedFileKeys([]);
       reset();
       console.log("Form reset and submission completed successfully");
       toast.success("Catering request submitted successfully!");
     } catch (error) {
       console.error("Submission error:", {
         error,
-        formData: { ...data, attachments: data.attachments?.length }
+        formData: data
       });
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred");
       toast.error("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -544,57 +405,6 @@ const CateringRequestForm: React.FC = () => {
         rows={3}
         optional
       />
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700">
-          Attachments
-        </label>
-        <div className="space-y-2">
-          <input
-            type="file"
-            onChange={handleFileUpload}
-            multiple
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-            className="block w-full text-sm text-gray-500
-              file:mr-4 file:rounded-md file:border-0
-              file:bg-blue-50 file:px-4
-              file:py-2 file:text-sm
-              file:font-medium file:text-blue-700
-              hover:file:bg-blue-100
-              disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isUploading || isSubmitting}
-          />
-          <p className="text-xs text-gray-500">
-            Maximum 5 files. Supported formats: PDF, Word, JPEG, PNG, WebP. Max
-            size: 10MB per file.
-          </p>
-        </div>
-        {/* Uploaded Files List */}
-        <div className="space-y-2">
-          {uploadedFiles?.map((file: UploadThingFile) => (
-            <div
-              key={file.key}
-              className="flex items-center justify-between rounded-md border border-gray-200 p-2"
-            >
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">{file.name}</span>
-                {progresses && progresses[file.name] !== undefined && (
-                  <span className="text-xs text-gray-500">
-                    {Math.round(progresses[file.name])}%
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => removeFile(file)}
-                className="text-gray-400 hover:text-gray-600"
-                disabled={isUploading || isSubmitting}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
       <button
         type="submit"
         disabled={isSubmitting}

@@ -108,35 +108,33 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const supabase = createClient();
 
-  // Get the current user session using Supabase
-  // Get the current user session using Supabase
+  // Get the current user session directly using Supabase client
   useEffect(() => {
-    const getUser = async () => {
+    const checkAuth = async () => {
       try {
-        // Create and await the Supabase client inside the function
+        // Create the Supabase client directly and await it properly
         const supabase = await createClient();
-
-        // Now you can safely use the auth property
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
+        const { data: { user: authUser }, error } = await supabase.auth.getUser();
+        
+        if (error || !authUser) {
+          setAuthError("You must be logged in to view this page.");
           router.push("/sign-in");
           return;
         }
 
-        setUser(user);
+        setUser(authUser);
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error checking auth:", error);
+        setAuthError("Authentication failed. Please sign in again.");
         router.push("/sign-in");
       }
     };
 
-    getUser();
-  }, [router]); // Remove supabase from the dependency array
+    checkAuth();
+  }, [router]);
 
   // Update the useUploadFileHook to handle the proper return type
   const useUploadFileHook = (category: string) => {
@@ -144,7 +142,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       onUpload: originalOnUpload,
       progresses,
       isUploading,
-    } = useUploadFile("fileUploader", {
+    } = useUploadFile({
+      bucketName: "fileUploader", 
       defaultUploadedFiles: [],
       userId: user?.id ?? "",
       maxFileCount: 1,
@@ -214,38 +213,32 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     return str.split(",").map((item: string) => item.trim());
   };
 
-  // Helper function to convert comma-separated string to array of option objects
-  const stringToOptionsArray = (
-    str: string | undefined,
-    optionsArray: readonly { label: string; value: string }[],
-  ): OptionType[] => {
-    if (!str) return [];
-
-    const values = str.split(",").map((item: string) => item.trim());
-    return values.map((value: string) => {
-      // Try to find the matching option in the predefined array
-      const matchingOption = optionsArray.find(
-        (option: OptionType) => option.value === value,
-      );
-      // Return the matching option if found, otherwise create a new option
-      return matchingOption || { label: value, value: value };
-    });
-  };
-
+  // Fetch user data from our new API route
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Make sure we have the authenticated user before fetching user details
-        if (!user) return;
-
-        const response = await fetch(`/api/users/${params.id}`);
+        // Using our new API route - no need to check for user here
+        // The API route will handle auth checking
+        const response = await fetch(`/api/user/${params.id}`);
+        
         if (!response.ok) {
+          const errorData = await response.json();
+          
           if (response.status === 401) {
             toast.error("Unauthorized. Please login as an admin.");
+            router.push("/sign-in");
             return;
           }
-          throw new Error("Failed to fetch user");
+          
+          if (response.status === 404) {
+            toast.error("User not found.");
+            router.push("/");
+            return;
+          }
+          
+          throw new Error(errorData.error || "Failed to fetch user data");
         }
+        
         const data: User = await response.json();
 
         // Set form values with safer null handling to match schema
@@ -271,13 +264,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         setValue("isTemporaryPassword", data.isTemporaryPassword || false);
 
         // Transform string values to arrays of simple values (not objects)
-        // This matches what CheckboxGroup expects for the checked state
         setValue("countiesServed", stringToValueArray(data.counties));
         setValue("timeNeeded", stringToValueArray(data.time_needed));
-        setValue(
-          "cateringBrokerage",
-          stringToValueArray(data.catering_brokerage),
-        );
+        setValue("cateringBrokerage", stringToValueArray(data.catering_brokerage));
         setValue("provisions", stringToValueArray(data.provide));
 
         // Keep the original string values for reference or backup
@@ -285,15 +274,19 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         setValue("time_needed", data.time_needed || "");
         setValue("catering_brokerage", data.catering_brokerage || "");
         setValue("provide", data.provide || "");
+        
+        // Set the ID field explicitly
+        setValue("id", data.id);
       } catch (error) {
         console.error("Error fetching user:", error);
+        toast.error("Failed to load user data. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [params.id, setValue, user]);
+  }, [params.id, setValue, router]);
 
   const onSubmit: SubmitHandler<UserFormValues> = async (data) => {
     try {
@@ -348,9 +341,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
         submitData.provide = data.provide;
       }
 
-      // Ensure we're matching the expected fields in the schema
-      // This is important for the PUT API call to work correctly
-      const response = await fetch(`/api/users/${params.id}`, {
+      // Use our new API route for updating
+      const response = await fetch(`/api/user/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
@@ -409,6 +401,17 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const handleUploadSuccess = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
   }, []);
+
+  if (authError) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="rounded-lg bg-red-50 p-6 shadow-md">
+          <h2 className="mb-2 text-lg font-semibold text-red-700">Error</h2>
+          <p className="text-red-600">{authError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

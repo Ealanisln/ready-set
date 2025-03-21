@@ -2,9 +2,12 @@
 
 import React from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
+import { FileWithPath } from "react-dropzone";
+import { Badge } from "@/components/ui/badge";
+import { Info } from "lucide-react";
 
 interface UploadHook {
-  onUpload: (files: File[]) => Promise<void>;
+  onUpload: (files: FileWithPath[]) => Promise<void>;
   progresses: Record<string, number>;
   isUploading: boolean;
   category: string;
@@ -25,38 +28,80 @@ interface UserProfileUploadsProps {
 }
 
 const driverUploadFields = [
-  { name: "driver_photo", label: "Driver Photo" },
-  { name: "insurance_photo", label: "Insurance Photo" },
-  { name: "vehicle_photo", label: "Vehicle Photo" },
-  { name: "license_photo", label: "Driver License Photo" },
+  { 
+    name: "driver_photo", 
+    label: "Driver Photo",
+    description: "Upload a clear photo of yourself for identification purposes."
+  },
+  { 
+    name: "insurance_photo", 
+    label: "Insurance Photo",
+    description: "Upload your current vehicle insurance documentation."
+  },
+  { 
+    name: "vehicle_photo", 
+    label: "Vehicle Photo",
+    description: "Upload a photo of your delivery vehicle."
+  },
+  { 
+    name: "license_photo", 
+    label: "Driver License Photo",
+    description: "Upload a photo of your valid driver's license."
+  },
 ];
 
-const generalUploadFields = [{ name: "general_files", label: "User Files" }];
+const generalUploadFields = [
+  { 
+    name: "general_files", 
+    label: "User Files",
+    description: "Upload any relevant documentation for your account."
+  }
+];
 
 const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
   uploadHooks,
   userType,
   onUploadSuccess,
 }) => {
-  const uploadFields =
-    userType === "driver" ? driverUploadFields : generalUploadFields;
+  // Select the appropriate upload fields based on user type
+  const uploadFields = userType === "driver" 
+    ? driverUploadFields 
+    : generalUploadFields;
 
-  const handleUpload = async (hook: UploadHook, files: File[]) => {
-    await hook.onUpload(files);
-    onUploadSuccess(); // Notify parent on upload success
+  const handleUpload = async (hook: UploadHook, files: FileWithPath[]) => {
+    try {
+      await hook.onUpload(files);
+      onUploadSuccess(); // Notify parent on upload success
+    } catch (error) {
+      console.error("Error in upload:", error);
+      // Error handling is managed by the hook itself
+    }
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {uploadFields.map((field) => {
         const hook = uploadHooks[field.name];
         if (!hook) return null; // Skip if hook is not provided
 
         return (
-          <div key={field.name} className="mb-4">
-            <h3 className="mb-2 text-lg font-semibold">{field.label}</h3>
+          <div key={field.name} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-medium">{field.label}</h3>
+              <Badge variant="secondary" className="text-xs font-normal">
+                {hook.category.replace(/_/g, ' ')}
+              </Badge>
+            </div>
+            
+            {field.description && (
+              <div className="flex items-start gap-2 text-sm text-muted-foreground mb-2">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>{field.description}</p>
+              </div>
+            )}
+            
             <FileUploader
-              onUpload={(files) => handleUpload(hook, files)}
+              onUpload={(files) => handleUpload(hook, files as FileWithPath[])}
               progresses={hook.progresses}
               isUploading={hook.isUploading}
               accept={{
@@ -72,6 +117,11 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
           </div>
         );
       })}
+      
+      <div className="text-xs text-muted-foreground mt-4">
+        <p>Supported file types: Images (JPG, PNG, GIF) and PDF</p>
+        <p>Maximum file size: 3MB</p>
+      </div>
     </div>
   );
 };

@@ -208,5 +208,7 @@ export const config = {
     "/client/:path*",
     "/driver/:path*",
     "/helpdesk/:path*",
+    // Exclude user profile routes from redirection
+    "/((?!user|api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

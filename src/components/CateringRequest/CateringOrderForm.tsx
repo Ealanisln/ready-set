@@ -1,9 +1,12 @@
+// src/components/CateringRequest/CateringOrderForm.tsx as reference
+
 import React, { useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import AddressManager, { Address } from "../AddressManager";
+import AddressManager from "../AddressManager";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient, User, Session, AuthChangeEvent } from "@supabase/supabase-js";
+import { Address } from "@/types/address";
 
 interface FormData {
   order_type: "catering" | "on_demand";

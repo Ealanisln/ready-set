@@ -18,21 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { COUNTIES } from "@/components/Auth/SignUp/ui/FormData";
-
-interface Address {
-  id: string;
-  county: string;
-  name: string;
-  street1: string;
-  street2: string | null;
-  city: string;
-  state: string;
-  zip: string;
-  locationNumber: string | null;
-  parkingLoading: string | null;
-  isRestaurant: boolean;
-  isShared: boolean;
-}
+import { Address } from "@/types/address";
 
 interface AddressModalProps {
   onAddressUpdated: () => void;
@@ -58,7 +44,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
       Object.entries(addressToEdit).forEach(([key, value]) => {
         setValue(key as keyof Address, value);
       });
-      setSelectedCounty(addressToEdit.county);
+      setSelectedCounty(addressToEdit.county || "");
     } else {
       reset({
         isRestaurant: false,
@@ -119,7 +105,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-950 border shadow-lg">
         <DialogHeader>
           <DialogTitle>
             {addressToEdit ? "Edit Address" : "Add Address"}

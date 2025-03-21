@@ -25,7 +25,8 @@ const DriverSignupUploads: React.FC<DriverSignupUploadsProps> = ({
       onUpload: originalOnUpload,
       progresses,
       isUploading,
-    } = useUploadFile("fileUploader", {
+    } = useUploadFile({
+      bucketName: "fileUploader", // This replaces the first "fileUploader" argument
       defaultUploadedFiles: [],
       userId: userId,
       maxFileCount: 1,

@@ -1,9 +1,10 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
-import AddressManager, { Address } from "../AddressManager";
+import AddressManager from "../AddressManager";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
+import { Address } from "@/types/address";
 
 interface OnDemandFormData {
   brokerage: string;

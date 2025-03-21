@@ -1,4 +1,4 @@
-// components/OrderFilesManager/index.tsx
+// components/Orders/ui/OrderFiles/index.tsx
 import React, { useEffect, useState } from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
 import UploadedFilesViewer from "@/components/Uploader/uploaded-files-viewer";
@@ -14,6 +14,7 @@ import { OrderType } from "@/types/order";
 import { FileUpload } from "@/types/file";
 import { useToast } from "@/components/ui/use-toast";
 import FileViewer from "@/components/FileViewer/file-viewer";
+import { FileWithPath } from "react-dropzone";
 
 interface OrderFilesManagerProps {
   orderNumber: string;
@@ -34,36 +35,39 @@ export function OrderFilesManager({
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const { toast } = useToast();
 
-  const { onUpload, uploadedFiles, progresses, isUploading } = useUploadFile(
-    "fileUploader",
-    {
-      defaultUploadedFiles: initialFiles.map((file) => ({
-        key: file.id,
-        name: file.fileName,
-        url: file.fileUrl,
-        size: file.fileSize,
-        type: file.fileType || "",
-        serverData: {
-          entityType: file.entityType,
-          entityId: file.entityId,
-          category: file.category,
-        },
-      })),
-      category: orderType,
-      entityType: orderType,
-      entityId: orderId,
-      maxFileCount: 10,
-      maxFileSize: 4 * 1024 * 1024,
-      allowedFileTypes: [
-        "image/*",
-        "application/pdf",
-        ".doc",
-        ".docx",
-        ".xls",
-        ".xlsx",
-      ],
-    },
-  );
+  // Updated to use single object parameter
+  const { 
+    onUpload, 
+    uploadedFiles, 
+    progresses, 
+    isUploading 
+  } = useUploadFile({
+    bucketName: "fileUploader",
+    defaultUploadedFiles: initialFiles.map((file) => ({
+      key: file.id,
+      name: file.fileName,
+      url: file.fileUrl,
+      size: file.fileSize,
+      type: file.fileType || "",
+      entityId: file.entityId,
+      category: file.category,
+    })),
+    category: orderType,
+    entityType: orderType,
+    entityId: orderId,
+    maxFileCount: 10,
+    maxFileSize: 4 * 1024 * 1024,
+    allowedFileTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+  });
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -174,7 +178,8 @@ export function OrderFilesManager({
     }
   };
 
-  const handleUpload = async (files: File[]): Promise<void> => {
+  // Updated handleUpload function to use FileWithPath
+  const handleUpload = async (files: FileWithPath[]): Promise<void> => {
     try {
       console.log("Starting upload for files:", files);
       await onUpload(files);
@@ -236,7 +241,11 @@ export function OrderFilesManager({
             maxFileCount={10}
             multiple={true}
           />
-          <UploadedFilesViewer files={allFiles} isLoading={isLoading} />
+          <UploadedFilesViewer 
+            files={allFiles} 
+            isLoading={isLoading} 
+            onFileClick={handleFileClick}
+          />
         </CardContent>
       </Card>
 

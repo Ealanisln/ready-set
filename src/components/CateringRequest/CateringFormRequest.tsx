@@ -8,11 +8,11 @@ import { SelectField } from "./FormFields/SelectField";
 import { HostSection } from "./HostSection";
 import { AddressSection } from "./AddressSection";
 import { CateringFormData, Address } from "@/types/catering";
+import { useUploadFile, UploadedFile } from "@/hooks/use-upload-file";
+import { X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient, Session } from "@supabase/supabase-js";
-import { X } from "lucide-react";
-import { useSupabaseUpload, UploadedFile } from "@/hooks/use-supabase-upload";
 
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadedFile[];
@@ -36,6 +36,7 @@ const CateringRequestForm: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileKeys, setFileKeys] = useState<string[]>([]);
 
   // Initialize Supabase client
   useEffect(() => {
@@ -102,33 +103,6 @@ const CateringRequestForm: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Setup Supabase file upload hook
-  const {
-    uploadedFiles,
-    isUploading,
-    progresses,
-    tempEntityId,
-    onUpload,
-    updateEntityId,
-    deleteFile
-  } = useSupabaseUpload({
-    bucketName: 'catering-files',
-    folder: 'uploads',
-    maxFileCount: 5,
-    maxFileSize: 10 * 1024 * 1024, // 10MB
-    allowedFileTypes: [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ],
-    entityType: "catering_request",
-    userId: session?.user?.id,
-    entityId: "temp-" + Date.now().toString()
-  });
-
   // Fetch Supabase session when client is initialized
   useEffect(() => {
     if (!supabase) return;
@@ -165,19 +139,41 @@ const CateringRequestForm: React.FC = () => {
 
   const needHost = watch("need_host");
   
-  // Set attachments when uploadedFiles change
-  useEffect(() => {
-    setValue('attachments', uploadedFiles);
-  }, [uploadedFiles, setValue]);
+  const {
+    onUpload,
+    uploadedFiles,
+    progresses,
+    isUploading,
+    tempEntityId,
+    updateEntityId,
+    deleteFile,
+  } = useUploadFile({
+    maxFileCount: 5,
+    maxFileSize: 10 * 1024 * 1024,
+    allowedFileTypes: [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    bucketName: "fileUploader",
+    category: "catering",
+    entityType: "catering_request",
+    userId: session?.user?.id,
+  });
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (!event.target.files?.length) return;
     const files = Array.from(event.target.files) as FileWithPath[];
-    
     try {
-      await onUpload(files);
+      const result = await onUpload(files);
+      const newFileKeys = result.map((file) => file.key);
+      setFileKeys((prev) => [...prev, ...newFileKeys]);
+      setValue("attachments", result);
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload files. Please try again.");
@@ -186,7 +182,18 @@ const CateringRequestForm: React.FC = () => {
 
   const removeFile = async (fileToRemove: UploadedFile) => {
     try {
+      // First remove from storage and database
       await deleteFile(fileToRemove.key);
+      
+      // Update UI
+      const updatedFiles = (uploadedFiles || []).filter(
+        (file) => file.key !== fileToRemove.key,
+      );
+      setValue("attachments", updatedFiles);
+      
+      // Update tracked keys
+      setFileKeys((prev) => prev.filter((key) => key !== fileToRemove.key));
+      
       toast.success("File removed successfully");
     } catch (error) {
       console.error("Error removing file:", error);
@@ -271,6 +278,7 @@ const CateringRequestForm: React.FC = () => {
         }
       }
   
+      setFileKeys([]);
       reset();
       console.log("Form reset and submission completed successfully");
       toast.success("Catering request submitted successfully!");
@@ -279,6 +287,7 @@ const CateringRequestForm: React.FC = () => {
         error,
         formData: { ...data, attachments: data.attachments?.length }
       });
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred");
       toast.error("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -521,7 +530,7 @@ const CateringRequestForm: React.FC = () => {
             >
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">{file.name}</span>
-                {progresses && progresses[file.name] !== undefined && progresses[file.name] < 100 && (
+                {progresses && progresses[file.name] !== undefined && (
                   <span className="text-xs text-gray-500">
                     {Math.round(progresses[file.name])}%
                   </span>

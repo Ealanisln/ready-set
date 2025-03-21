@@ -1,6 +1,3 @@
-// src/types/order.ts
-import { UploadThingFile } from "@/hooks/use-upload-file";
-
 // Enum types from Prisma schema
 export enum DriverStatus {
   assigned = "assigned",
@@ -30,6 +27,22 @@ export enum NeedHost {
   no = "no"
 }
 
+// Define the FileUpload type based on the Prisma schema
+export interface FileUpload {
+  id: string;
+  userId?: string | null;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+  uploadedAt: Date;
+  updatedAt: Date;
+  cateringRequestId?: number | null;
+  onDemandId?: number | null;
+  entityType: string;
+  entityId: string;
+  category?: string | null;
+}
 
 export interface Driver {
   id: string;
@@ -98,7 +111,7 @@ interface BaseOrder {
   address: Address;
   delivery_address: Address;
   dispatch: Dispatch[];
-  fileUploads?: UploadThingFile[];
+  fileUploads?: FileUpload[]; // Changed from UploadThingFile to FileUpload
 }
 
 // Update the interfaces

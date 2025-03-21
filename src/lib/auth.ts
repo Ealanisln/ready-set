@@ -73,3 +73,31 @@ export async function getUserRole(userId: string) {
   const { data } = await supabase.auth.getUser();
   return data?.user?.user_metadata?.role || null;
 }
+
+
+export async function getCurrentUser() {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase.auth.getUser();
+  
+  if (error || !data?.user) {
+    console.error("Error fetching current user:", error);
+    return null;
+  }
+  
+  // Get additional user data from profiles table if needed
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("auth_user_id", data.user.id)
+    .single();
+    
+  // Return combined user data
+  return {
+    id: data.user.id,
+    email: data.user.email,
+    role: profile?.type || data.user.user_metadata?.role || "client",
+    profile: profile || null,
+    // Add any other user properties you need
+  };
+}

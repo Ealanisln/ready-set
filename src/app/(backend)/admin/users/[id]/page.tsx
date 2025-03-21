@@ -1,3 +1,5 @@
+// src/app/(backend)/admin/users/[id]/page.tsx
+
 "use client";
 
 import { useState, useEffect, useCallback, use, useMemo } from "react";
@@ -24,7 +26,6 @@ import UserFilesDisplay from "@/components/User/user-files-display";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import UserProfileUploads from "@/components/Uploader/user-profile-uploads";
 import { FileWithPath } from "react-dropzone";
-import { UserType } from "@/components/Auth/SignUp/FormSchemas";
 import { useUser } from "@/contexts/UserContext";
 
 interface User {
@@ -382,15 +383,13 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       handleDiscard();
     }
   };
-
   const useUploadFileHook = (category: string) => {
-    const {
-      onUpload: originalOnUpload,
-      progresses,
-      isUploading,
-    } = useUploadFile("fileUploader", {
+    // For debugging - log params to ensure we have the correct values
+    console.log("useUploadFileHook called with:", { category, userId: params?.id });
+    
+    const uploadHook = useUploadFile({
       defaultUploadedFiles: [],
-      userId: params?.id ?? "",
+      userId: session?.user?.id ?? "", // Use actual authenticated user ID
       maxFileCount: 1,
       maxFileSize: 3 * 1024 * 1024,
       allowedFileTypes: [
@@ -401,24 +400,32 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       ],
       category: category,
       entityType: "user",
-      entityId: params.id,
+      entityId: params.id, // The ID of the user being edited
     });
-
+  
     const onUpload = async (files: FileWithPath[]): Promise<void> => {
-      await originalOnUpload(files);
-      handleUploadSuccess();
+      console.log("Starting upload for user:", params.id, "with category:", category);
+      try {
+        await uploadHook.onUpload(files);
+        console.log("Upload completed successfully");
+        handleUploadSuccess();
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast.error("File upload failed. Please try again.");
+      }
     };
-
+  
     return {
       onUpload,
-      progresses,
-      isUploading,
+      progresses: uploadHook.progresses,
+      isUploading: uploadHook.isUploading,
       category,
       entityType: "user",
       entityId: params.id,
     };
   };
-
+  
+  // Then you can continue to use it exactly as before:
   const uploadHooks = {
     driver_photo: useUploadFileHook("driver_photo"),
     insurance_photo: useUploadFileHook("insurance_photo"),
