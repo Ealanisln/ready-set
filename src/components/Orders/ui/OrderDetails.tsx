@@ -1,19 +1,12 @@
-import React from "react";
 import { Separator } from "@/components/ui/separator";
 import { Order, isCateringRequest, isOnDemand } from "@/types/order";
+import { formatCurrency, withCurrencySymbol } from "@/utils/currency";
 
 interface OrderDetailsProps {
   order: Order;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
-  // Helper function to format currency
-  const formatCurrency = (value: number | string | null): string => {
-    if (value === null || value === undefined) return "0.00";
-    const numValue = typeof value === "string" ? parseFloat(value) : value;
-    return numValue.toFixed(2);
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -81,11 +74,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
         <div>
           <div className="mb-2 grid grid-cols-2 gap-2">
             <div className="font-semibold">
-              Total: ${formatCurrency(order.order_total)}
+              Total: {withCurrencySymbol(formatCurrency(order.order_total))}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div>Tip: ${formatCurrency(order.tip)}</div>
+            <div>Tip: {withCurrencySymbol(formatCurrency(order.tip))}</div>
           </div>
         </div>
         {isCateringRequest(order) && order.brokerage && (

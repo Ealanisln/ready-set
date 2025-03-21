@@ -288,15 +288,15 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     <main className="container mx-auto space-y-6 p-6">
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <Card>
-          <OrderHeader
-            orderNumber={order.order_number}
-            date={order.date}
-            driverInfo={driverInfo}
-            onAssignDriver={handleOpenDriverDialog}
-            orderType={order.order_type as OrderType}
-            orderId={order.id}
-            onDeleteSuccess={onDeleteSuccess}
-          />
+        <OrderHeader
+  orderNumber={order.order_number}
+  date={order.date} // This can now safely be null
+  driverInfo={driverInfo}
+  onAssignDriver={handleOpenDriverDialog}
+  orderType={order.order_type as OrderType}
+  orderId={order.id}
+  onDeleteSuccess={onDeleteSuccess}
+/>
           <Separator />
 
           <CardContent className="space-y-6">

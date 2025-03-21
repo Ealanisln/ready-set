@@ -1,3 +1,5 @@
+// src/components/Orders/ui/OrderHeader.tsx
+
 import React, { useState } from "react";
 import { MoreVertical, Truck, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,11 +26,11 @@ import toast from "react-hot-toast";
 
 interface OrderHeaderProps {
   orderNumber: string;
-  date: string | Date;
+  date: string | Date | null; // Updated to allow null
   driverInfo: Driver | null;
   onAssignDriver: () => void;
   orderType: OrderType;
-  orderId: string | number;
+  orderId: string | number | bigint; // Updated to accept bigint
   onDeleteSuccess: () => void;
 }
 
@@ -43,7 +45,9 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const formatDate = (date: string | Date): string => {
+  const formatDate = (date: string | Date | null): string => {
+    if (!date) return "N/A";
+    
     if (typeof date === "string") {
       return new Date(date).toLocaleDateString();
     }
@@ -58,7 +62,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
     try {
       const apiOrderType = getApiOrderType(orderType);
       const response = await fetch(
-        `/api/orders/delete?orderId=${orderId}&orderType=${apiOrderType}`,
+        `/api/orders/delete?orderId=${orderId.toString()}&orderType=${apiOrderType}`,
         {
           method: "DELETE",
         },

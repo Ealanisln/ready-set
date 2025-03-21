@@ -1,4 +1,5 @@
-import React from "react";
+// src/components/Orders/DriverStatus.tsx
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -14,41 +15,41 @@ import { DriverStatus, OrderStatus } from "@/types/order";
 
 interface Driver {
   id: string;
-  name: string | null;
-  email: string | null;
-  contact_number: string | null;
+  name?: string | null;
+  email?: string | null;
+  contact_number?: string | null;
 }
 
 interface DriverStatusCardProps {
   order: {
-    id: number; // Changed from string to number to match BaseOrder
-    status: OrderStatus; // Use the enum type
-    driver_status: DriverStatus | null; // Use the enum type
+    id: number | bigint; 
+    status: OrderStatus;
+    driver_status?: DriverStatus | null;
     user_id: string;
-    pickup_time: string | Date; // Match BaseOrder type
-    arrival_time: string | Date; // Match BaseOrder type
-    complete_time: string | Date | null; // Match BaseOrder type
-    updated_at: string | Date; // Match BaseOrder type
+    pickup_time?: string | Date | null;
+    arrival_time?: string | Date | null;
+    complete_time?: string | Date | null;
+    updated_at: string | Date;
   };
   driverInfo: Driver | null;
-  updateDriverStatus: (newStatus: DriverStatus) => Promise<void>; // Use enum type
+  updateDriverStatus: (newStatus: DriverStatus) => Promise<void>;
 }
 
-// Update the status maps to use the enum
+// Update the status maps to use the enum with UPPERCASE keys
 const driverStatusMap: Record<DriverStatus, string> = {
-  [DriverStatus.assigned]: "🚗 Assigned",
-  [DriverStatus.arrived_at_vendor]: "🏪 At Vendor",
-  [DriverStatus.en_route_to_client]: "🚚 On the Way",
-  [DriverStatus.arrived_to_client]: "🏁 Arrived",
-  [DriverStatus.completed]: "✅ Completed",
+  [DriverStatus.ASSIGNED]: "🚗 Assigned",
+  [DriverStatus.ARRIVED_AT_VENDOR]: "🏪 At Vendor",
+  [DriverStatus.EN_ROUTE_TO_CLIENT]: "🚚 On the Way",
+  [DriverStatus.ARRIVED_TO_CLIENT]: "🏁 Arrived",
+  [DriverStatus.COMPLETED]: "✅ Completed",
 };
 
 const driverStatusProgress: Record<DriverStatus, number> = {
-  [DriverStatus.assigned]: 0,
-  [DriverStatus.arrived_at_vendor]: 25,
-  [DriverStatus.en_route_to_client]: 50,
-  [DriverStatus.arrived_to_client]: 75,
-  [DriverStatus.completed]: 100,
+  [DriverStatus.ASSIGNED]: 0,
+  [DriverStatus.ARRIVED_AT_VENDOR]: 25,
+  [DriverStatus.EN_ROUTE_TO_CLIENT]: 50,
+  [DriverStatus.ARRIVED_TO_CLIENT]: 75,
+  [DriverStatus.COMPLETED]: 100,
 };
 
 export const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
@@ -56,14 +57,14 @@ export const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
   driverInfo,
   updateDriverStatus,
 }) => {
-  const getProgressValue = (status: DriverStatus | null) => {
-    return driverStatusProgress[status || "assigned"] || 0;
+  const getProgressValue = (status: DriverStatus | null | undefined) => {
+    return status ? driverStatusProgress[status] : 0;
   };
 
-  const getDisplayStatus = (status: DriverStatus | null) => {
+  const getDisplayStatus = (status: DriverStatus | null | undefined) => {
     return status
-      ? driverStatusMap[status] || status
-      : driverStatusMap["assigned"];
+      ? driverStatusMap[status]
+      : driverStatusMap[DriverStatus.ASSIGNED];
   };
 
   return (
@@ -102,21 +103,21 @@ export const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
             </div>
             <div className="space-y-2 py-4">
               <div className="flex flex-col items-center justify-center">
-                <span className="mb-2 text-xl font-medium">Drive Status</span>
+                <span className="mb-2 text-xl font-medium">Driver Status</span>
                 <Badge
                   variant="outline"
                   className={cn("px-4 py-2 text-lg font-medium", {
                     "border-yellow-300 bg-yellow-100 text-yellow-800":
-                      order.driver_status === DriverStatus.assigned ||
+                      order.driver_status === DriverStatus.ASSIGNED ||
                       !order.driver_status,
                     "border-blue-300 bg-blue-100 text-blue-800":
-                      order.driver_status === DriverStatus.arrived_at_vendor,
+                      order.driver_status === DriverStatus.ARRIVED_AT_VENDOR,
                     "border-green-300 bg-green-100 text-green-800":
-                      order.driver_status === DriverStatus.en_route_to_client,
+                      order.driver_status === DriverStatus.EN_ROUTE_TO_CLIENT,
                     "border-purple-300 bg-purple-100 text-purple-800":
-                      order.driver_status === DriverStatus.arrived_to_client,
+                      order.driver_status === DriverStatus.ARRIVED_TO_CLIENT,
                     "border-gray-300 bg-gray-100 text-gray-800":
-                      order.driver_status === DriverStatus.completed,
+                      order.driver_status === DriverStatus.COMPLETED,
                   })}
                 >
                   {getDisplayStatus(order.driver_status)}

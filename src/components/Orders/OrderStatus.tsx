@@ -27,13 +27,13 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
-      case OrderStatus.active:
+      case OrderStatus.ACTIVE:
         return "bg-blue-500 hover:bg-blue-600";
-      case OrderStatus.assigned:
+      case OrderStatus.ASSIGNED:
         return "bg-yellow-500 hover:bg-yellow-600";
-      case OrderStatus.cancelled:
+      case OrderStatus.CANCELLED:
         return "bg-red-500 hover:bg-red-600";
-      case OrderStatus.completed:
+      case OrderStatus.COMPLETED:
         return "bg-green-500 hover:bg-green-600";
       default:
         return "bg-gray-500 hover:bg-gray-600";
@@ -42,13 +42,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
-      case OrderStatus.active:
+      case OrderStatus.ACTIVE:
         return <Clock className="mr-1 h-4 w-4" />;
-      case OrderStatus.assigned:
+      case OrderStatus.ASSIGNED:
         return <Truck className="mr-1 h-4 w-4" />;
-      case OrderStatus.cancelled:
+      case OrderStatus.CANCELLED:
         return <XCircle className="mr-1 h-4 w-4" />;
-      case OrderStatus.completed:
+      case OrderStatus.COMPLETED:
         return <CheckCircle className="mr-1 h-4 w-4" />;
       default:
         return null;
@@ -68,7 +68,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 interface OrderStatusProps {
   orderType: OrderType;
   initialStatus: OrderStatus;
-  orderId: string | number;
+  orderId: string | number | bigint; // Updated to accept bigint
   onStatusChange?: (newStatus: OrderStatus) => void;
 }
 
@@ -87,7 +87,7 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
     }
     toast({
       title: "Status Updated",
-      description: `Order ${orderId} status changed to ${newStatus}`,
+      description: `Order ${orderId.toString()} status changed to ${newStatus}`,
     });
   };
 
@@ -101,7 +101,7 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
         <CardTitle className="text-lg">
           {getOrderTypeDisplay(orderType)}
         </CardTitle>
-        <CardDescription>Order ID: {orderId}</CardDescription>
+        <CardDescription>Order ID: {orderId.toString()}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center justify-between">
@@ -120,7 +120,7 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
             <SelectContent>
               {Object.values(OrderStatus).map((statusValue) => (
                 <SelectItem key={statusValue} value={statusValue}>
-                  {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+                  {statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()}
                 </SelectItem>
               ))}
             </SelectContent>

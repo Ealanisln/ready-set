@@ -1,3 +1,5 @@
+// src/components/Orders/OnDemandOrders.tsx
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -29,19 +31,22 @@ import {
 import { Package2, AlertCircle, Plus } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { OrderStatus } from "@/types/order"; // Import the actual OrderStatus enum
 
+// Updated interface to better match Prisma schema
 interface Order {
-  id: string;
+  id: string | number | bigint;
   user_id: string;
   order_number: string;
-  brokerage?: string;
-  status: string;
-  date: string;
-  order_total: string | number;
-  client_attention: string;
+  brokerage?: string | null;
+  status: OrderStatus;
+  date: string | Date | null;
+  order_total?: string | number | null;
+  client_attention?: string | null;
 }
 
-type OrderStatus = 'all' | 'active' | 'assigned' | 'cancelled' | 'completed';
+// Define filter type (lowercase for UI purposes)
+type StatusFilterType = 'all' | 'active' | 'assigned' | 'cancelled' | 'completed';
 
 const statusStyles = {
   active: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
@@ -51,7 +56,9 @@ const statusStyles = {
 };
 
 const getStatusStyle = (status: string) => {
-  return statusStyles[status as keyof typeof statusStyles] || "bg-gray-100 text-gray-800 hover:bg-gray-200";
+  // Convert status to lowercase for styling lookup
+  const statusKey = status.toLowerCase();
+  return statusStyles[statusKey as keyof typeof statusStyles] || "bg-gray-100 text-gray-800 hover:bg-gray-200";
 };
 
 const LoadingSkeleton = () => (
@@ -69,7 +76,7 @@ const OnDemandOrdersPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const [statusFilter, setStatusFilter] = useState<OrderStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilterType>("all");
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
@@ -109,9 +116,34 @@ const OnDemandOrdersPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStatusFilter = (status: OrderStatus) => {
+  const handleStatusFilter = (status: StatusFilterType) => {
     setStatusFilter(status);
     setPage(1);
+  };
+
+  // Safely format a date that might be null
+  const formatDate = (dateValue: string | Date | null) => {
+    if (!dateValue) return "N/A";
+    
+    return new Date(dateValue).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Safely format currency value
+  const formatCurrency = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "$0.00";
+    
+    const numericValue = typeof value === "string" 
+      ? parseFloat(value) 
+      : value;
+      
+    return `$${numericValue.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
   };
 
   return (
@@ -137,7 +169,7 @@ const OnDemandOrdersPage: React.FC = () => {
           <Tabs 
             defaultValue="all" 
             className="space-y-4"
-            onValueChange={(value) => handleStatusFilter(value as OrderStatus)}
+            onValueChange={(value) => handleStatusFilter(value as StatusFilterType)}
           >
             <TabsList className="grid grid-cols-5 gap-4 bg-muted/50 p-1">
               <TabsTrigger value="all" className="data-[state=active]:bg-white">
@@ -180,7 +212,7 @@ const OnDemandOrdersPage: React.FC = () => {
                     </TableHeader>
                     <TableBody>
                       {orders.map((order) => (
-                        <TableRow key={order.id} className="hover:bg-muted/50">
+                        <TableRow key={order.id.toString()} className="hover:bg-muted/50">
                           <TableCell>
                             <Link
                               href={`/admin/on-demand-orders/${order.order_number}`}
@@ -190,19 +222,15 @@ const OnDemandOrdersPage: React.FC = () => {
                             </Link>
                           </TableCell>
                           <TableCell>
-                            <Badge className={getStatusStyle(order.status)}>
-                              {order.status}
+                            <Badge className={getStatusStyle(order.status.toString())}>
+                              {order.status.toString()}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {new Date(order.date).toLocaleDateString(undefined, {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                            {formatDate(order.date)}
                           </TableCell>
                           <TableCell>
-                            <span className="font-medium">{order.client_attention}</span>
+                            <span className="font-medium">{order.client_attention || "N/A"}</span>
                             {order.brokerage && (
                               <span className="text-sm text-muted-foreground block">
                                 {order.brokerage}
@@ -210,15 +238,7 @@ const OnDemandOrdersPage: React.FC = () => {
                             )}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            ${typeof order.order_total === "string"
-                              ? parseFloat(order.order_total).toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                                })
-                              : order.order_total.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                                })}
+                            {formatCurrency(order.order_total)}
                           </TableCell>
                         </TableRow>
                       ))}

@@ -35,6 +35,17 @@ export function OrderFilesManager({
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const { toast } = useToast();
 
+  // Create an array of file data for the useUploadFile hook
+  const safeInitialFiles = initialFiles.map((file) => ({
+    key: file.id,
+    name: file.fileName,
+    url: file.fileUrl,
+    size: file.fileSize,
+    type: file.fileType || "",
+    entityId: file.entityId,
+    category: file.category || orderType,
+  }));
+
   // Updated to use single object parameter
   const { 
     onUpload, 
@@ -43,15 +54,7 @@ export function OrderFilesManager({
     isUploading 
   } = useUploadFile({
     bucketName: "fileUploader",
-    defaultUploadedFiles: initialFiles.map((file) => ({
-      key: file.id,
-      name: file.fileName,
-      url: file.fileUrl,
-      size: file.fileSize,
-      type: file.fileType || "",
-      entityId: file.entityId,
-      category: file.category,
-    })),
+    defaultUploadedFiles: safeInitialFiles,
     category: orderType,
     entityType: orderType,
     entityId: orderId,
@@ -95,25 +98,24 @@ export function OrderFilesManager({
           throw new Error("Invalid response format");
         }
 
-        const processedFiles = filesArray.map(
-          (file: any): FileUpload => ({
+        const processedFiles = filesArray.map((file: any): FileUpload => {
+          // Ensure all required fields are present with proper types
+          return {
             id: file.id || "",
             fileName: file.fileName || "",
-            fileType: file.fileType,
-            fileSize: file.fileSize || 0,
+            fileType: file.fileType || null,
+            fileSize: typeof file.fileSize === 'number' ? file.fileSize : 0,
             fileUrl: file.fileUrl || "",
-            entityType: file.entityType || "",
-            entityId: file.entityId || "",
-            category: file.category,
+            entityType: file.entityType || orderType,
+            entityId: file.entityId || orderId,
+            category: file.category, // Optional field
             uploadedAt: new Date(file.uploadedAt || Date.now()),
-            updatedAt: new Date(
-              file.updatedAt || file.uploadedAt || Date.now(),
-            ),
-            userId: file.userId,
-            cateringRequestId: file.cateringRequestId,
-            onDemandId: file.onDemandId,
-          }),
-        );
+            updatedAt: new Date(file.updatedAt || file.uploadedAt || Date.now()),
+            userId: file.userId, // Optional field
+            cateringRequestId: typeof file.cateringRequestId === 'number' ? file.cateringRequestId : undefined,
+            onDemandId: typeof file.onDemandId === 'number' ? file.onDemandId : undefined,
+          };
+        });
 
         setAllFiles(processedFiles);
       } catch (error) {
@@ -129,7 +131,7 @@ export function OrderFilesManager({
     };
 
     fetchFiles();
-  }, [orderNumber, toast]);
+  }, [orderNumber, orderId, orderType, toast]);
 
   useEffect(() => {
     if (uploadedFiles.length > 0) {
@@ -139,6 +141,7 @@ export function OrderFilesManager({
         const newFiles = [...prev];
 
         uploadedFiles.forEach((newFile) => {
+          // Create a FileUpload object that matches your schema
           const convertedFile: FileUpload = {
             id: newFile.key,
             fileName: newFile.name,
@@ -147,9 +150,10 @@ export function OrderFilesManager({
             fileUrl: newFile.url,
             entityType: orderType,
             entityId: orderId,
-            category: orderType,
+            category: newFile.category || orderType,
             uploadedAt: new Date(),
             updatedAt: new Date(),
+            // Optional fields can be left undefined
           };
 
           const existingIndex = newFiles.findIndex(
@@ -191,7 +195,9 @@ export function OrderFilesManager({
       console.error("Upload error:", error);
       toast({
         title: "Error",
-        description: "Failed to upload files. Please try again.",
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to upload files. Please try again.",
         variant: "destructive",
       });
       throw error;

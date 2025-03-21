@@ -1,9 +1,8 @@
-// CustomerInfo.tsx
 import React from 'react';
 
 interface CustomerInfoProps {
-  name: string | null;
-  email: string | null;
+  name?: string | null;  // Updated to make it optional
+  email?: string | null; // Updated to make it optional
 }
 
 const CustomerInfo: React.FC<CustomerInfoProps> = ({ name, email }) => {

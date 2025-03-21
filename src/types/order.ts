@@ -1,30 +1,35 @@
+// src/types/order.ts
+
+import { Decimal } from 'decimal.js';
+
 // Enum types from Prisma schema
 export enum DriverStatus {
-  assigned = "assigned",
-  arrived_at_vendor = "arrived_at_vendor",
-  en_route_to_client = "en_route_to_client",
-  arrived_to_client = "arrived_to_client",
-  completed = "completed"
+  ASSIGNED = "assigned",
+  ARRIVED_AT_VENDOR = "arrived_at_vendor",
+  EN_ROUTE_TO_CLIENT = "en_route_to_client",
+  ARRIVED_TO_CLIENT = "arrived_to_client",
+  COMPLETED = "completed"
 }
 
 export enum OrderStatus {
-  active = 'active',
-  assigned = 'assigned',
-  cancelled = 'cancelled',
-  completed = 'completed'
+  ACTIVE = 'active',
+  ASSIGNED = 'assigned',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed'
 }
 
-export type OrderType = 'catering' | 'on_demand';  
+// Define literal type based on the discriminator field we'll use
+export type OrderType = 'catering' | 'on_demand';
 
 export enum VehicleType {
-  Car = "Car",
-  Van = "Van",
-  Truck = "Truck"
+  CAR = "Car",
+  VAN = "Van",
+  TRUCK = "Truck"
 }
 
 export enum NeedHost {
-  yes = "yes",
-  no = "no"
+  YES = "yes",
+  NO = "no"
 }
 
 // Define the FileUpload type based on the Prisma schema
@@ -37,8 +42,8 @@ export interface FileUpload {
   fileUrl: string;
   uploadedAt: Date;
   updatedAt: Date;
-  cateringRequestId?: number | null;
-  onDemandId?: number | null;
+  cateringRequestId?: bigint | null;
+  onDemandId?: bigint | null;
   entityType: string;
   entityId: string;
   category?: string | null;
@@ -46,13 +51,13 @@ export interface FileUpload {
 
 export interface Driver {
   id: string;
-  name: string | null;
-  email: string | null;
-  contact_number: string | null;
+  name?: string | null;
+  email?: string | null;
+  contact_number?: string | null;
 }
 
 export interface Address {
-  id: string; // Changed to string based on Prisma schema (cuid)
+  id: string;
   name?: string | null;
   street1: string;
   street2?: string | null;
@@ -70,62 +75,69 @@ export interface Address {
 }
 
 export interface User {
-  name: string | null;
-  email: string | null;
+  id: string;
+  name?: string | null;
+  email?: string | null;
 }
 
 export interface Dispatch {
   id: string;
-  cateringRequestId?: number | null;
-  onDemandId?: number | null;
+  cateringRequestId?: bigint | null;
+  on_demandId?: bigint | null;  
   driverId?: string | null;
   userId?: string | null;
   createdAt: Date;
   updatedAt: Date;
-  driver: Driver;
+  driver?: Driver | null;
 }
+
+// Using PrismaDecimal type to better handle Prisma's Decimal
+export type PrismaDecimal = Decimal | { toFixed: (digits?: number) => string };
 
 // Base interface for shared properties between order types
 interface BaseOrder {
-  id: number; // Changed to BigInt/number based on Prisma schema
-  guid: string | null;
+  id: bigint;
+  guid?: string | null;
   user_id: string;
   address_id: string;
   delivery_address_id: string;
   order_number: string;
-  date: string | Date;
-  pickup_time: string | Date;
-  arrival_time: string | Date;
-  complete_time: string | Date | null;
-  client_attention: string | null;
-  pickup_notes: string | null;
-  special_notes: string | null;
-  image: string | null;
+  date: Date | null;
+  pickup_time: Date | null;
+  arrival_time: Date | null;
+  complete_time?: Date | null;
+  client_attention: string;
+  pickup_notes?: string | null;
+  special_notes?: string | null;
+  image?: string | null;
   status: OrderStatus;
-  order_total: string | number | null;  
-  tip: string | number | null;  
-  driver_status: DriverStatus | null;
-  created_at: string | Date;
-  updated_at: string | Date;
+  order_total?: PrismaDecimal | null;
+  tip?: PrismaDecimal | null;
+  driver_status?: DriverStatus | null;
+  created_at: Date;
+  updated_at: Date;
   user: User;
   address: Address;
   delivery_address: Address;
   dispatch: Dispatch[];
-  fileUploads?: FileUpload[]; // Changed from UploadThingFile to FileUpload
+  fileUploads?: FileUpload[];
+  
+  // Discriminator field to determine the type at runtime
+  order_type: OrderType;
 }
 
 // Update the interfaces
 export interface CateringRequest extends BaseOrder {
-  order_type: "catering";  // changed from "catering_request"
+  order_type: 'catering';
   brokerage?: string | null;
   headcount?: string | null;
-  need_host?: NeedHost;
+  need_host: NeedHost;
   hours_needed?: string | null;
   number_of_host?: string | null;
 }
 
 export interface OnDemand extends BaseOrder {
-  order_type: "on_demand";
+  order_type: 'on_demand';
   item_delivered?: string | null;
   vehicle_type: VehicleType;
   hours_needed?: string | null;
@@ -138,11 +150,21 @@ export interface OnDemand extends BaseOrder {
 // Union type for all order types
 export type Order = CateringRequest | OnDemand;
 
-// Update the type guards
+// Type guards
 export function isCateringRequest(order: Order): order is CateringRequest {
-  return order.order_type === "catering";  // changed from "catering_request"
+  return order.order_type === 'catering';
 }
 
 export function isOnDemand(order: Order): order is OnDemand {
-  return order.order_type === "on_demand";
+  return order.order_type === 'on_demand';
+}
+
+// Type-safe order factory function
+export function createOrder(type: 'catering', data: Omit<CateringRequest, 'order_type'>): CateringRequest;
+export function createOrder(type: 'on_demand', data: Omit<OnDemand, 'order_type'>): OnDemand;
+export function createOrder(type: OrderType, data: any): Order {
+  return {
+    ...data,
+    order_type: type
+  };
 }
