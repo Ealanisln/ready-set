@@ -65,7 +65,7 @@ const UserFilesDisplay: React.FC<UserFilesDisplayProps> = ({
       }
     };
 
-    void fetchUserFiles();
+    fetchUserFiles();
   }, [userId, refreshTrigger]);
 
   const handleRemoveFile = async (fileKey: string) => {

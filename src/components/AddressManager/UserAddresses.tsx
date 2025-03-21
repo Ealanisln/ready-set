@@ -58,7 +58,7 @@ const UserAddresses: React.FC = () => {
   }, [session]);
 
   useEffect(() => {
-    void fetchAddresses();
+     fetchAddresses();
   }, [fetchAddresses]);
 
   const handleDeleteAddress = async (addressId: string) => {
@@ -86,7 +86,7 @@ const UserAddresses: React.FC = () => {
   };
 
   const handleAddressUpdated = useCallback(() => {
-    void fetchAddresses();
+     fetchAddresses();
     setAddressToEdit(null);
     setIsModalOpen(false);
   }, [fetchAddresses]);

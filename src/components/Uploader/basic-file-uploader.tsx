@@ -88,7 +88,7 @@ export function FileUploader(props: FileUploaderProps) {
         const target =
           updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`;
 
-        void toast.promise(onUpload(updatedFiles), {
+        toast.promise(onUpload(updatedFiles), {
           loading: `Uploading ${target}...`,
           success: () => {
             setFiles([]);

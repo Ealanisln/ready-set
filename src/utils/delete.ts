@@ -37,4 +37,4 @@ async function deleteFakeData() {
 }
 
 // Run the deleteFakeData function
-void deleteFakeData()
+deleteFakeData()
