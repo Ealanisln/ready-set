@@ -45,48 +45,35 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
   if (authResponse) return authResponse;
   
   try {
+    // Log the user ID we're trying to fetch
+    console.log("Fetching user with ID:", userId);
+    
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        contact_name: true,
-        email: true,
-        contact_number: true,
-        type: true,
-        company_name: true,
-        website: true,
-        street1: true,
-        street2: true,
-        city: true,
-        state: true,
-        zip: true,
-        parking_loading: true,
-        counties: true,
-        time_needed: true,
-        catering_brokerage: true,
-        frequency: true,
-        provide: true,
-        head_count: true,
-        status: true,
-      },
     });
     
     if (!user) {
+      console.log("User not found with ID:", userId);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+    
+    console.log("Found user:", user);
     
     // Process the user data to match the component's expectations
     const processedUser = {
       ...user,
-      displayName: user.type === "driver" ? user.name : user.contact_name,
-      countiesServed: user.counties ? user.counties.split(", ") : [],
-      timeNeeded: user.time_needed ? user.time_needed.split(", ") : [],
+      // Only set displayName if name or contact_name exist
+      displayName: user.contact_name || user.name || "",
+      countiesServed: user.counties ? user.counties.split(",").map(s => s.trim()) : [],
+      timeNeeded: user.time_needed ? user.time_needed.split(",").map(s => s.trim()) : [],
       cateringBrokerage: user.catering_brokerage
-        ? user.catering_brokerage.split(", ")
+        ? user.catering_brokerage.split(",").map(s => s.trim())
         : [],
-      provisions: user.provide ? user.provide.split(", ") : [],
+      provisions: user.provide ? user.provide.split(",").map(s => s.trim()) : [],
+      location_number: user.location_number || "", // Make sure this field is included
     };
+    
+    console.log("Processed user for response:", processedUser);
     
     return NextResponse.json(processedUser);
   } catch (error: unknown) {
@@ -111,40 +98,39 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
   
   try {
     const data = await request.json();
+    console.log("Received update data:", data);
+    
     let processedData: any = { ...data };
     
     // Map fields to match Prisma schema
     if (processedData.countiesServed) {
-      processedData.counties = processedData.countiesServed.join(", ");
+      processedData.counties = processedData.countiesServed.join(",");
       delete processedData.countiesServed;
     }
     
     if (processedData.timeNeeded) {
-      processedData.time_needed = processedData.timeNeeded.join(", ");
+      processedData.time_needed = processedData.timeNeeded.join(",");
       delete processedData.timeNeeded;
     }
     
     if (processedData.cateringBrokerage) {
       processedData.catering_brokerage =
-        processedData.cateringBrokerage.join(", ");
+        processedData.cateringBrokerage.join(",");
       delete processedData.cateringBrokerage;
     }
     
     if (processedData.provisions) {
-      processedData.provide = processedData.provisions.join(", ");
+      processedData.provide = processedData.provisions.join(",");
       delete processedData.provisions;
     }
     
     if (processedData.displayName) {
       if (processedData.type === "vendor") {
-        processedData.name = processedData.displayName;
-        delete processedData.contact_name;
+        processedData.contact_name = processedData.displayName;
       } else if (processedData.type === "client") {
         processedData.contact_name = processedData.displayName;
-        delete processedData.name;
       } else if (processedData.type === "driver") {
         processedData.name = processedData.displayName;
-        delete processedData.contact_name;
       }
       delete processedData.displayName;
     }
@@ -180,6 +166,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
       }
     });
     
+    console.log("Processed data for update:", processedData);
+    
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
@@ -188,7 +176,21 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
       },
     });
     
-    return NextResponse.json(updatedUser);
+    console.log("Updated user:", updatedUser);
+    
+    // Process the user data to match the component's expectations for the response
+    const processedUser = {
+      ...updatedUser,
+      displayName: updatedUser.contact_name || updatedUser.name || "",
+      countiesServed: updatedUser.counties ? updatedUser.counties.split(",").map(s => s.trim()) : [],
+      timeNeeded: updatedUser.time_needed ? updatedUser.time_needed.split(",").map(s => s.trim()) : [],
+      cateringBrokerage: updatedUser.catering_brokerage
+        ? updatedUser.catering_brokerage.split(",").map(s => s.trim())
+        : [],
+      provisions: updatedUser.provide ? updatedUser.provide.split(",").map(s => s.trim()) : [],
+    };
+    
+    return NextResponse.json(processedUser);
   } catch (error: unknown) {
     console.error("Error updating user:", error);
     let errorMessage = "Failed to update user";

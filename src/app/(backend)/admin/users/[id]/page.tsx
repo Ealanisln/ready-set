@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, use, useMemo } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -30,35 +30,35 @@ import { useUser } from "@/contexts/UserContext";
 
 interface User {
   id: string;
-  name?: string;
-  contact_name?: string;
-  email: string;
-  contact_number: string;
+  name?: string | null;
+  contact_name?: string | null;
+  email: string | null;
+  contact_number: string | null;
   type: "driver" | "vendor" | "client" | "helpdesk" | "admin" | "super_admin";
-  company_name?: string;
-  website?: string;
-  street1: string;
-  street2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  parking_loading?: string;
+  company_name?: string | null;
+  website?: string | null;
+  street1?: string | null;
+  street2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  location_number?: string | null;
+  parking_loading?: string | null;
   countiesServed?: string[];
-  counties?: string;
+  counties?: string | null;
   timeNeeded?: string[];
-  time_needed?: string;
+  time_needed?: string | null;
   cateringBrokerage?: string[];
-  catering_brokerage?: string;
-  frequency?: string;
+  catering_brokerage?: string | null;
+  frequency?: string | null;
   provisions?: string[];
-  provide?: string;
-  head_count?: string;
+  provide?: string | null;
+  head_count?: string | null;
   status?: "active" | "pending" | "deleted";
 }
 
 interface UserFormValues extends User {
   displayName: string;
-  head_count?: string;
 }
 
 export default function EditUser(props: { params: Promise<{ id: string }> }) {
@@ -75,12 +75,12 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
   const userId = params.id;
 
   // Helper function to convert comma-separated string to array of values
-  const stringToValueArray = useCallback((str: string | undefined): string[] => {
+  const stringToValueArray = useCallback((str: string | undefined | null): string[] => {
     if (!str) return [];
     return str.split(',').map((item: string) => item.trim());
   }, []);
 
-  // Form setup with default values
+  // Form setup with default values ensuring no null values
   const {
     control,
     handleSubmit,
@@ -90,45 +90,36 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     formState: { errors, isDirty },
   } = useForm<UserFormValues>({
     defaultValues: {
-      countiesServed: [],
-      timeNeeded: [],
-      cateringBrokerage: [],
-      frequency: "",
-      provisions: [],
-      displayName: "",
-      head_count: "",
-    },
-  });
-
-  // Important: Watch all form values
-  const watchedValues = watch();
-
-  // Memoize the default form values
-  const defaultFormValues = useMemo(
-    () => ({
       id: "",
       displayName: "",
       email: "",
       contact_number: "",
       type: "client" as const,
       street1: "",
+      street2: "",
       city: "",
       state: "",
       zip: "",
       company_name: "",
       website: "",
-      street2: "",
+      location_number: "",
       parking_loading: "",
       countiesServed: [] as string[],
+      counties: "",
       timeNeeded: [] as string[],
+      time_needed: "",
       cateringBrokerage: [] as string[],
+      catering_brokerage: "",
       frequency: "",
       provisions: [] as string[],
+      provide: "",
       head_count: "",
       status: "pending" as const,
-    }),
-    []
-  );
+    },
+  });
+
+  // Important: Watch all form values
+  const watchedValues = watch();
 
   // Fetch user data
   const fetchUser = useCallback(async () => {
@@ -154,26 +145,48 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       const data = await response.json();
       console.log("Raw API data:", data);
 
-      const formData = {
-        ...defaultFormValues,
-        ...data,
-        displayName: data.displayName || data.contact_name || data.name || "",
-        
-        // Properly convert string values to arrays for checkbox groups
-        countiesServed: data.counties ? stringToValueArray(data.counties) : [],
-        timeNeeded: data.time_needed ? stringToValueArray(data.time_needed) : [],
-        cateringBrokerage: data.catering_brokerage ? stringToValueArray(data.catering_brokerage) : [],
-        provisions: data.provide ? stringToValueArray(data.provide) : [],
-        
-        // Ensure other fields aren't null
-        company_name: data.company_name || "",
-        website: data.website || "",
-        street2: data.street2 || "",
-        parking_loading: data.parking_loading || "",
-      };
+      // Apply safer null handling by setting each field individually
+      // This is more reliable than using reset() with a composite object
+      setValue("id", data.id || "");
+      setValue("displayName", data.displayName || data.contact_name || data.name || "");
+      setValue("name", data.name || "");
+      setValue("email", data.email || "");
+      setValue("contact_number", data.contact_number || "");
+      setValue("company_name", data.company_name || "");
+      setValue("contact_name", data.contact_name || "");
+      setValue("website", data.website || "");
+      setValue("street1", data.street1 || "");
+      setValue("street2", data.street2 || "");
+      setValue("city", data.city || "");
+      setValue("state", data.state || "");
+      setValue("zip", data.zip || "");
+      setValue("location_number", data.location_number || "");
+      setValue("parking_loading", data.parking_loading || "");
+      setValue("type", data.type);
+      setValue("status", data.status || "pending");
+      setValue("frequency", data.frequency || "");
+      setValue("head_count", data.head_count || "");
 
-      console.log("Transformed form data:", formData);
-      reset(formData);
+      // Transform string values to arrays
+      setValue("countiesServed", data.countiesServed || stringToValueArray(data.counties));
+      setValue("timeNeeded", data.timeNeeded || stringToValueArray(data.time_needed));
+      setValue("cateringBrokerage", data.cateringBrokerage || stringToValueArray(data.catering_brokerage));
+      setValue("provisions", data.provisions || stringToValueArray(data.provide));
+
+      // Keep the original string values for reference
+      setValue("counties", data.counties || "");
+      setValue("time_needed", data.time_needed || "");
+      setValue("catering_brokerage", data.catering_brokerage || "");
+      setValue("provide", data.provide || "");
+
+      // Debug log to see if values are being set
+      console.log("Form values set", {
+        name: data.name,
+        contact_name: data.contact_name,
+        email: data.email,
+        type: data.type
+      });
+      
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -181,7 +194,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false);
     }
-  }, [userId, reset, defaultFormValues, stringToValueArray, isUserLoading]);
+  }, [userId, setValue, stringToValueArray, isUserLoading]);
 
   // Initial fetch and refresh handling - wait for user context to initialize
   useEffect(() => {
@@ -225,11 +238,8 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       // Set the display name based on user type
       if (data.type === "driver" || data.type === "helpdesk") {
         submitData.name = displayName;
-        delete submitData.contact_name;
-        delete submitData.company_name;
       } else if (data.type === "vendor" || data.type === "client") {
         submitData.contact_name = displayName;
-        delete submitData.name;
       }
 
       if (data.type === "client") {
@@ -256,22 +266,9 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       const updatedUser = await response.json();
       console.log("Updated user response:", updatedUser);
 
-      const formData = {
-        ...defaultFormValues,
-        ...updatedUser,
-        displayName: updatedUser.contact_name || updatedUser.name || "",
-        
-        // Convert strings back to arrays for form
-        countiesServed: updatedUser.counties ? stringToValueArray(updatedUser.counties) : [],
-        timeNeeded: updatedUser.time_needed ? stringToValueArray(updatedUser.time_needed) : [],
-        cateringBrokerage: updatedUser.catering_brokerage ? stringToValueArray(updatedUser.catering_brokerage) : [],
-        provisions: updatedUser.provide ? stringToValueArray(updatedUser.provide) : [],
-      };
-
-      reset(formData);
-      setHasUnsavedChanges(false);
+      // After successful update, refresh the form data
+      fetchUser();
       toast.success("User saved successfully!");
-      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Failed to save user. Please try again.");
@@ -383,6 +380,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
       handleDiscard();
     }
   };
+  
   const useUploadFileHook = (category: string) => {
     // For debugging - log params to ensure we have the correct values
     console.log("useUploadFileHook called with:", { category, userId: params?.id });
@@ -425,7 +423,7 @@ export default function EditUser(props: { params: Promise<{ id: string }> }) {
     };
   };
   
-  // Then you can continue to use it exactly as before:
+  // Upload hooks
   const uploadHooks = {
     driver_photo: useUploadFileHook("driver_photo"),
     insurance_photo: useUploadFileHook("insurance_photo"),

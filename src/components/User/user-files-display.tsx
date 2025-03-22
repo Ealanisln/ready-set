@@ -82,7 +82,10 @@ export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFil
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ fileId }),
+        body: JSON.stringify({ 
+          fileId,
+          userId // Pass the userId from props to the API
+        }),
       });
       
       if (!response.ok) {
@@ -95,7 +98,7 @@ export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFil
       toast.success("File deleted successfully");
     } catch (err) {
       console.error("Error deleting file:", err);
-      toast.error("Failed to delete file");
+      toast.error(err instanceof Error ? err.message : "Failed to delete file");
     } finally {
       setIsDeleting(prev => ({ ...prev, [fileId]: false }));
     }
