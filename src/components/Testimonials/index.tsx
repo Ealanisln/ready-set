@@ -314,6 +314,46 @@ const ScrollArrow = React.memo(() => {
     );
   });
 
+  // Mobile navigation component for testimonials
+  const MobileNavigation = React.memo(
+    ({
+      category,
+      currentIndex,
+      totalItems,
+      onPrev,
+      onNext,
+    }: {
+      category: 'CLIENTS' | 'VENDORS' | 'DRIVERS';
+      currentIndex: number;
+      totalItems: number;
+      onPrev: () => void;
+      onNext: () => void;
+    }) => (
+      <div className="absolute bottom-[-5px] left-0 right-0 z-10 flex justify-center">
+        <div className="flex space-x-2">
+          <button
+            onClick={onPrev}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95"
+            aria-label="Previous testimonial"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={onNext}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95"
+            aria-label="Next testimonial"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    )
+  );
+  
   // Profile image component with static loading to avoid flickering
   const ProfileImage = React.memo(({ imageSrc, alt }: { imageSrc?: string; alt: string }) => {
     // Simplify image handling logic and use placeholders consistently
@@ -494,6 +534,16 @@ const ScrollArrow = React.memo(() => {
                         />
                       ))}
                     </div>
+
+                    {isMobile && (
+                    <MobileNavigation
+                      category={category as 'CLIENTS' | 'VENDORS' | 'DRIVERS'}
+                      currentIndex={activeIndices[category as keyof typeof activeIndices]}
+                      totalItems={items.length}
+                      onPrev={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
+                      onNext={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
+                    />
+                  )}
 
                     {/* Container with animation using Motion */}
                     <div className="h-full">
