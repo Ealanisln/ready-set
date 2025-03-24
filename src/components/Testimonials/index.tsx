@@ -328,30 +328,45 @@ const ScrollArrow = React.memo(() => {
       totalItems: number;
       onPrev: () => void;
       onNext: () => void;
-    }) => (
-      <div className="absolute bottom-[-5px] left-0 right-0 z-10 flex justify-center">
-        <div className="flex space-x-2">
-          <button
-            onClick={onPrev}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95"
-            aria-label="Previous testimonial"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={onNext}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95"
-            aria-label="Next testimonial"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+    }) => {
+      // Controladores de eventos táctiles unificados
+      const handlePrev = (e?: React.SyntheticEvent) => {
+        e?.preventDefault();
+        onPrev();
+      };
+  
+      const handleNext = (e?: React.SyntheticEvent) => {
+        e?.preventDefault();
+        onNext();
+      };
+  
+      return (
+        <div className="absolute bottom-[-5px] left-0 right-0 z-10 flex justify-center">
+          <div className="flex space-x-2">
+            <button
+              onClick={handlePrev}
+              onTouchStart={handlePrev}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95 touch-manipulation"
+              aria-label="Previous testimonial"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={handleNext}
+              onTouchStart={handleNext}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 border border-white/10 text-white/80 backdrop-blur-[2px] transition-all hover:bg-black/50 active:scale-95 touch-manipulation"
+              aria-label="Next testimonial"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-    )
+      );
+    }
   );
   
   // Profile image component with static loading to avoid flickering
@@ -519,23 +534,7 @@ const ScrollArrow = React.memo(() => {
                       setTimeout(() => setIsPaused({ ...isPaused, [category]: false }), 5000)
                     }
                   >
-                    {/* Page indicators */}
-                    <div className="absolute -bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-2">
-                      {items.map((_, idx: number) => (
-                        <button
-                          key={idx}
-                          className={`h-2 w-2 rounded-full transition-colors sm:h-3 sm:w-3 ${
-                            idx === activeIndices[category as keyof typeof activeIndices]
-                              ? 'bg-yellow-400'
-                              : 'bg-gray-300'
-                          }`}
-                          onClick={() => setActiveIndices({ ...activeIndices, [category]: idx })}
-                          aria-label={`Go to testimonial ${idx + 1}`}
-                        />
-                      ))}
-                    </div>
-
-                    {isMobile && (
+                    
                     <MobileNavigation
                       category={category as 'CLIENTS' | 'VENDORS' | 'DRIVERS'}
                       currentIndex={activeIndices[category as keyof typeof activeIndices]}
@@ -543,7 +542,7 @@ const ScrollArrow = React.memo(() => {
                       onPrev={() => prevTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
                       onNext={() => nextTestimonial(category as 'CLIENTS' | 'VENDORS' | 'DRIVERS')}
                     />
-                  )}
+                
 
                     {/* Container with animation using Motion */}
                     <div className="h-full">

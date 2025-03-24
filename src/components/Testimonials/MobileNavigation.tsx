@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 interface MobileNavigationProps {
   category: 'CLIENTS' | 'VENDORS' | 'DRIVERS';
@@ -9,16 +9,29 @@ interface MobileNavigationProps {
   onNext: () => void;
 }
 
-// Componente de navegación móvil para testimoniales
 const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(
   ({ category, currentIndex, totalItems, onPrev, onNext }) => {
-    const isMobile = true;
-    // No mostrar navegación si hay un solo elemento o no es móvil
-    if (totalItems <= 1 || !isMobile) return null;
+    // Handlers con useCallback
+    const handlePrev = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onPrev();
+      console.log(`Navegando al anterior desde índice ${currentIndex}`);
+    }, [onPrev, currentIndex]);
+
+    const handleNext = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onNext();
+      console.log(`Navegando al siguiente desde índice ${currentIndex}`);
+    }, [onNext, currentIndex]);
+
+    // No renderizar si solo hay un item
+    if (totalItems <= 1) return null;
 
     return (
       <motion.div
-        className="absolute -bottom-8 left-0 z-30 flex w-full justify-center gap-1 md:hidden"
+        className="absolute -bottom-8 left-0 z-30 flex w-full justify-center gap-1"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: 1, 
@@ -28,8 +41,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(
       >
         {/* Botón Anterior */}
         <button
-          onClick={onPrev}
-          className="flex h-6 w-6 items-center justify-center rounded-full bg-transparent border border-white/15 text-white/80 backdrop-blur-sm transition-all hover:bg-white/5 active:scale-95"
+          onClick={handlePrev}
+          className="flex h-6 w-6 items-center justify-center rounded-full bg-black/40 border border-white/15 text-white/80 backdrop-blur-sm transition-all hover:bg-white/5 active:scale-95 touch-action-manipulation"
           aria-label={`Ir al testimonio anterior de ${category}`}
         >
           <svg
@@ -49,14 +62,14 @@ const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(
         </button>
 
         {/* Indicador de posición */}
-        <div className="flex items-center text-xs font-medium bg-transparent border border-white/15 px-2 py-0.5 rounded backdrop-blur-sm text-white/80">
+        <div className="flex items-center text-xs font-medium bg-black/40 border border-white/15 px-2 py-0.5 rounded backdrop-blur-sm text-white/80">
           {currentIndex + 1} / {totalItems}
         </div>
 
         {/* Botón Siguiente */}
         <button
-          onClick={onNext}
-          className="flex h-6 w-6 items-center justify-center rounded-full bg-transparent border border-yellow-400/15 text-yellow-400/80 backdrop-blur-sm transition-all hover:bg-yellow-400/5 active:scale-95"
+          onClick={handleNext}
+          className="flex h-6 w-6 items-center justify-center rounded-full bg-black/40 border border-yellow-400/15 text-yellow-400/80 backdrop-blur-sm transition-all hover:bg-yellow-400/5 active:scale-95 touch-action-manipulation"
           aria-label={`Ir al siguiente testimonio de ${category}`}
         >
           <svg
@@ -78,5 +91,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(
     );
   }
 );
+
+MobileNavigation.displayName = 'MobileNavigation';
 
 export default MobileNavigation;
