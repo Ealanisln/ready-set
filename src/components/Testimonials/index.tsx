@@ -341,7 +341,7 @@ const ScrollArrow = React.memo(() => {
       };
   
       return (
-        <div className="absolute bottom-[-5px] left-0 right-0 z-10 flex justify-center">
+        <div className="absolute bottom-[-30px] left-0 right-0 z-10 flex justify-center">
           <div className="flex space-x-2">
             <button
               onClick={handlePrev}
