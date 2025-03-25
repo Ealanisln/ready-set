@@ -18,14 +18,14 @@ const ResponsivePdfViewer = ({ pdfName, title }: ResponsivePdfViewerProps) => {
   useEffect(() => {
     const updateBaseZoom = () => {
       if (window.innerWidth < 768) {
-        setBaseZoom(120); // Mobile default
+        setBaseZoom(90); // Mobile default
       } else {
         setBaseZoom(65); // Desktop default
       }
     };
     
     updateBaseZoom();
-    setCurrentZoom(window.innerWidth < 768 ? 120 : 65);
+    setCurrentZoom(window.innerWidth < 768 ? 90 : 65);
     
     window.addEventListener("resize", updateBaseZoom);
     return () => window.removeEventListener("resize", updateBaseZoom);
@@ -70,34 +70,7 @@ const ResponsivePdfViewer = ({ pdfName, title }: ResponsivePdfViewerProps) => {
   };
   
   return (
-    <div className="relative h-full w-full flex flex-col">
-      {/* Zoom controls */}
-      <div className="flex items-center justify-end mb-2 gap-2 p-2 bg-amber-100 rounded-t-md">
-        <span className="text-sm font-medium mr-2">Zoom: {currentZoom}%</span>
-        <button 
-          onClick={zoomOut}
-          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
-          disabled={currentZoom <= 20}
-          aria-label="Zoom out"
-        >
-          <ZoomOut className="h-5 w-5 text-amber-900" />
-        </button>
-        <button 
-          onClick={resetZoom}
-          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
-          aria-label="Reset zoom"
-        >
-          <RotateCcw className="h-5 w-5 text-amber-900" />
-        </button>
-        <button 
-          onClick={zoomIn}
-          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
-          disabled={currentZoom >= 300}
-          aria-label="Zoom in"
-        >
-          <ZoomIn className="h-5 w-5 text-amber-900" />
-        </button>
-      </div>
+    <div className="relative w-full h-full flex flex-col">
       
       {/* Loading indicator */}
       {loading && (
