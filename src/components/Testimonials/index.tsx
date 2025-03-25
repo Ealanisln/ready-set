@@ -329,7 +329,7 @@ const ScrollArrow = React.memo(() => {
       onPrev: () => void;
       onNext: () => void;
     }) => {
-      // Controladores de eventos táctiles unificados
+      
       const handlePrev = (e?: React.SyntheticEvent) => {
         e?.preventDefault();
         onPrev();
@@ -341,7 +341,7 @@ const ScrollArrow = React.memo(() => {
       };
   
       return (
-        <div className="absolute bottom-[-30px] left-0 right-0 z-10 flex justify-center">
+        <div className="absolute bottom-[-20px] left-0 right-0 z-10 flex justify-center">
           <div className="flex space-x-2">
             <button
               onClick={handlePrev}
@@ -526,7 +526,7 @@ const ScrollArrow = React.memo(() => {
 
                   {/* Manual carousel */}
                   <div
-                    className="relative h-[350px] sm:h-[450px]"
+                    className="relative h-[400px] sm:h-[500px]"
                     onMouseEnter={() => setIsPaused({ ...isPaused, [category]: true })}
                     onMouseLeave={() => setIsPaused({ ...isPaused, [category]: false })}
                     onTouchStart={() => setIsPaused({ ...isPaused, [category]: true })}
