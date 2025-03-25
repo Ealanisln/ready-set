@@ -135,39 +135,50 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
     {/* PDF Modal */}
 <Dialog open={isOpen} onOpenChange={setIsOpen}>
-  <DialogContent className="mb-4 mt-4 sm:max-w-[95%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-2 sm:p-6">
-    <DialogHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
-      <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {title}
-      </DialogTitle>
-      <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:gap-4">
-        <a
-          href={`/pdf/${pdfName}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-        >
-          <FileDownIcon className="h-4 w-4" />
-          <span>Download PDF</span>
-        </a>
-        <button
-          onClick={() => setShowCalendar(true)}
-          className="inline-flex justify-center rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-        >
-          Book a discovery call
-        </button>
+  <DialogContent className="mb-4 mt-16 sm:max-w-[95%] md:max-w-[90%] lg:max-w-[85%] xl:max-w-[80%] 
+    bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 
+    p-0 overflow-visible">
+    <div className="flex flex-col h-full">
+      {/* Header with fixed height */}
+      <DialogHeader className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="flex flex-col">
+          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </DialogTitle>
+          
+          {/* Buttons container with more space */}
+          <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <a
+              href={`/pdf/${pdfName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-300 px-4 py-2 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500"
+            >
+              <FileDownIcon className="h-4 w-4" />
+              <span>Download PDF</span>
+            </a>
+            <button
+              onClick={() => setShowCalendar(true)}
+              className="inline-flex items-center justify-center rounded-full bg-amber-300 px-4 py-2 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500"
+            >
+              Book a discovery call
+            </button>
+          </div>
+        </div>
+      </DialogHeader>
+      
+      {/* Content area with flexible height */}
+      <div className="flex-grow p-4 overflow-auto h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] min-h-[300px] w-full bg-white dark:bg-gray-900">
+        {showCalendar ? (
+          <iframe
+            src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+            className="h-full w-full rounded-md border-0"
+            title="Booking Calendar"
+          />
+        ) : (
+          <ResponsivePdfViewer pdfName={pdfName} title={title} />
+        )}
       </div>
-    </DialogHeader>
-    <div className="mt-3 h-[70vh] sm:h-[80vh] min-h-[400px] w-full bg-white dark:bg-gray-900 px-1 sm:px-4">
-      {showCalendar ? (
-        <iframe
-          src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-          className="h-full w-full rounded-md border-0"
-          title="Booking Calendar"
-        />
-      ) : (
-        <ResponsivePdfViewer pdfName={pdfName} title={title} />
-      )}
     </div>
   </DialogContent>
 </Dialog>
