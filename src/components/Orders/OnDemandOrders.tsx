@@ -101,7 +101,7 @@ const OnDemandOrdersPage: React.FC = () => {
       }
     };
 
-    void fetchOrders();
+    fetchOrders();
   }, [page, limit, statusFilter]);
 
   const handlePageChange = (newPage: number) => {

@@ -71,7 +71,7 @@ export function DashboardHome() {
       }
     };
 
-    void fetchData();
+    fetchData();
   }, []);
 
   if (loading || metricsLoading) {

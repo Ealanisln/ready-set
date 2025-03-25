@@ -35,11 +35,11 @@ const ResetPassword = ({ token }: { token: string }) => {
         }
       } catch (error: any) {
         toast.error(error?.response?.data);
-        void router.push("/forgot-password");
+         router.push("/forgot-password");
       }
     };
 
-    void verifyToken();
+     verifyToken();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

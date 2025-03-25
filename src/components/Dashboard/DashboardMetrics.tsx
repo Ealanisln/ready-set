@@ -33,7 +33,7 @@ export function useDashboardMetrics() {
       }
     };
 
-    void fetchMetrics();
+    fetchMetrics();
   }, []);
 
   return { metrics, loading, error };

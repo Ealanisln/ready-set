@@ -1,13 +1,2 @@
-# Archivos de configuración
+# .eslintignore
 postcss.config.js
-
-
-# Carpetas generadas
-node_modules
-.next
-dist
-build
-out
-
-# Otros archivos que quieras ignorar
-*.d.ts
