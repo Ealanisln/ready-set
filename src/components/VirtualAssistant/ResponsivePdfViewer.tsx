@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
 interface ResponsivePdfViewerProps {
   pdfName: string;
@@ -8,52 +9,111 @@ interface ResponsivePdfViewerProps {
 }
 
 const ResponsivePdfViewer = ({ pdfName, title }: ResponsivePdfViewerProps) => {
-  const [viewerParams, setViewerParams] = useState("view=Fit");
+  const [baseZoom, setBaseZoom] = useState(65); // Starting zoom level
+  const [currentZoom, setCurrentZoom] = useState(65);
   const [loading, setLoading] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
+  // Calculate the appropriate base zoom based on screen size
   useEffect(() => {
-    // Función para actualizar parámetros basados en el ancho de la pantalla
-    const updateViewerParams = () => {
+    const updateBaseZoom = () => {
       if (window.innerWidth < 768) {
-        // Dispositivos móviles - ajuste completo con un zoom específico para móviles
-        setViewerParams("view=Fit&zoom=120");
+        setBaseZoom(120); // Mobile default
       } else {
-        // Tablets y escritorio - valor de zoom específico
-        setViewerParams("zoom=65&view=Fit");
+        setBaseZoom(65); // Desktop default
       }
     };
     
-    // Configuración inicial
-    updateViewerParams();
+    updateBaseZoom();
+    setCurrentZoom(window.innerWidth < 768 ? 120 : 65);
     
-    // Escuchar cambios de tamaño de pantalla
-    window.addEventListener("resize", updateViewerParams);
-    
-    // Limpiar listener al desmontar
-    return () => window.removeEventListener("resize", updateViewerParams);
+    window.addEventListener("resize", updateBaseZoom);
+    return () => window.removeEventListener("resize", updateBaseZoom);
   }, []);
+
+  // Generate the view parameters with current zoom
+  const getViewParams = () => {
+    return `view=Fit&zoom=${currentZoom}`;
+  };
   
-  // Manejar el evento de carga del iframe
+  // Handle iframe load event
   const handleIframeLoad = () => {
     setLoading(false);
   };
   
+  // Zoom in function - increase by 20%
+  const zoomIn = () => {
+    const newZoom = Math.min(currentZoom + 20, 300); // Max zoom 300%
+    setCurrentZoom(newZoom);
+    refreshIframe(newZoom);
+  };
+  
+  // Zoom out function - decrease by 20%
+  const zoomOut = () => {
+    const newZoom = Math.max(currentZoom - 20, 20); // Min zoom 20%
+    setCurrentZoom(newZoom);
+    refreshIframe(newZoom);
+  };
+  
+  // Reset zoom to base level
+  const resetZoom = () => {
+    setCurrentZoom(baseZoom);
+    refreshIframe(baseZoom);
+  };
+  
+  // Refresh the iframe with new zoom level
+  const refreshIframe = (zoom: number) => {
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      iframe.src = `/pdf/${pdfName}#view=Fit&zoom=${zoom}`;
+    }
+  };
+  
   return (
-    <div className="relative h-full w-full">
-      {/* Indicador de carga */}
+    <div className="relative h-full w-full flex flex-col">
+      {/* Zoom controls */}
+      <div className="flex items-center justify-end mb-2 gap-2 p-2 bg-amber-100 rounded-t-md">
+        <span className="text-sm font-medium mr-2">Zoom: {currentZoom}%</span>
+        <button 
+          onClick={zoomOut}
+          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
+          disabled={currentZoom <= 20}
+          aria-label="Zoom out"
+        >
+          <ZoomOut className="h-5 w-5 text-amber-900" />
+        </button>
+        <button 
+          onClick={resetZoom}
+          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
+          aria-label="Reset zoom"
+        >
+          <RotateCcw className="h-5 w-5 text-amber-900" />
+        </button>
+        <button 
+          onClick={zoomIn}
+          className="p-1 rounded-full bg-white hover:bg-amber-200 transition-colors"
+          disabled={currentZoom >= 300}
+          aria-label="Zoom in"
+        >
+          <ZoomIn className="h-5 w-5 text-amber-900" />
+        </button>
+      </div>
+      
+      {/* Loading indicator */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-amber-50 z-10 rounded-md">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
         </div>
       )}
       
-      {/* Contenedor del PDF con fondo ámbar claro */}
+      {/* PDF container */}
       <div 
-        className="h-full w-full rounded-md overflow-hidden bg-amber-50"
+        className="flex-1 w-full rounded-b-md overflow-hidden bg-amber-50"
         style={{ backgroundColor: "#FFF8E1" }}
       >
         <iframe
-          src={`/pdf/${pdfName}#${viewerParams}`}
+          ref={iframeRef}
+          src={`/pdf/${pdfName}#${getViewParams()}`}
           className="h-full w-full border-0 bg-amber-50"
           title={`${title} PDF viewer`}
           onLoad={handleIframeLoad}
@@ -64,14 +124,12 @@ const ResponsivePdfViewer = ({ pdfName, title }: ResponsivePdfViewerProps) => {
         />
       </div>
       
-      {/* Estilos globales para asegurar que el fondo sea consistente */}
+      {/* Styles */}
       <style jsx global>{`
-        /* Estilo global para el contenedor del PDF */
         iframe[title="${title} PDF viewer"] {
           background-color: #FFF8E1 !important;
         }
         
-        /* Específico para móviles */
         @media (max-width: 767px) {
           iframe[title="${title} PDF viewer"] {
             background-color: #FFF8E1 !important;

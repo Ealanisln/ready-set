@@ -133,44 +133,44 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
       </Card>
 
-      {/* PDF Modal */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="mb-8 mt-16 sm:max-w-[90%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-6">
-          <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              {title}
-            </DialogTitle>
-            <div className="mt-4 flex gap-4">
-              <a
-                href={`/pdf/${pdfName}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-              >
-                <FileDownIcon className="h-4 w-4" />
-                <span>Download PDF</span>
-              </a>
-              <button
-                onClick={() => setShowCalendar(true)}
-                className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
-              >
-                Book a discovery call
-              </button>
-            </div>
-          </DialogHeader>
-          <div className="mt-4 h-[70vh] min-h-[400px] w-full bg-white dark:bg-gray-900">
-            {showCalendar ? (
-              <iframe
-                src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
-                className="h-full w-full rounded-md border-0"
-                title="Booking Calendar"
-              />
-            ) : (
-              <ResponsivePdfViewer pdfName={pdfName} title={title} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+     {/* PDF Modal */}
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+  <DialogContent className="mb-8 mt-16 sm:max-w-[95%] md:max-w-[75%] lg:max-w-[90%] bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+    <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
+      <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        {title}
+      </DialogTitle>
+      <div className="mt-4 flex gap-4">
+        <a
+          href={`/pdf/${pdfName}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+        >
+          <FileDownIcon className="h-4 w-4" />
+          <span>Download PDF</span>
+        </a>
+        <button
+          onClick={() => setShowCalendar(true)}
+          className="rounded-full bg-amber-300 px-4 py-1.5 text-sm font-medium text-black transition-colors duration-300 hover:bg-yellow-500 md:px-5 md:py-2 lg:px-6 lg:py-2 xl:px-8 xl:text-base"
+        >
+          Book a discovery call
+        </button>
+      </div>
+    </DialogHeader>
+    <div className="mt-4 h-[80vh] min-h-[500px] w-full bg-white dark:bg-gray-900 sm:px-4">
+      {showCalendar ? (
+        <iframe
+          src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true"
+          className="h-full w-full rounded-md border-0"
+          title="Booking Calendar"
+        />
+      ) : (
+        <ResponsivePdfViewer pdfName={pdfName} title={title} />
+      )}
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 };
