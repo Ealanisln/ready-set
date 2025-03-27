@@ -144,13 +144,6 @@ const NavBar = () => {
               >
                 Customers
               </Link>
-              <Link
-                href="/admin/legacy"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={closeSheet}
-              >
-                Legacy Data
-              </Link>
               {/* <Link
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
@@ -220,18 +213,6 @@ const NavBar = () => {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">Users</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/admin/legacy"
-                    className="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-                  >
-                    <ArchiveIcon className="h-5 w-5" />
-                    <span className="sr-only">Legacy Data</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Legacy Data</TooltipContent>
               </Tooltip>
               {/* <Tooltip>
                 <TooltipTrigger asChild>

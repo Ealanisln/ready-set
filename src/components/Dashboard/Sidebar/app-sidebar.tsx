@@ -82,13 +82,7 @@ export function AppSidebar() {
       href: "/admin/users",
       icon: Users,
       isActive: pathname.includes("/admin/users"),
-    },
-    {
-      title: "Legacy Data",
-      href: "/admin/legacy",
-      icon: ArchiveIcon,
-      isActive: pathname.includes("/admin/legacy"),
-    },
+    }
   ];
 
   return (
