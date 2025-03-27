@@ -4,7 +4,6 @@
 
 import React, { useState, useEffect } from "react";
 import { 
-  Activity, 
   ClipboardList, 
   Users, 
   Clock, 
@@ -22,6 +21,12 @@ import Link from "next/link";
 import { User, CateringOrder } from "@/types/user";
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
+
+// Interface for API responses
+interface UsersApiResponse {
+  users: User[];
+  totalPages: number;
+}
 
 // Modern Metric Card Component
 const ModernMetricCard: React.FC<{
@@ -73,7 +78,7 @@ const ActionCard: React.FC = () => (
             Create new order
           </Button>
         </Link>
-        <Link href="/admin/users/new-user" className="block w-full">
+        <Link href="/admin/users/new" className="block w-full">
           <Button 
             className="w-full border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition-all duration-200"
             variant="outline"
@@ -259,11 +264,10 @@ export function ModernDashboardHome() {
           throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
         }
         
-        const [ordersData, usersData] = await Promise.all([
-          ordersResponse.json() as Promise<CateringOrder[]>,
-          usersResponse.json() as Promise<User[]>,
-        ]);
+        const ordersData = await ordersResponse.json();
+        const usersData = await usersResponse.json() as UsersApiResponse;
         
+        // Fix: Extract users array from the response
         setRecentOrders(ordersData);
         
         const activeOrdersList = ordersData.filter((order: CateringOrder) => 
@@ -271,7 +275,8 @@ export function ModernDashboardHome() {
         );
         setActiveOrders(activeOrdersList);
         
-        setUsers(usersData);
+        // Use the users array from the response
+        setUsers(usersData.users || []);
         setLoading(false);
         
       } catch (error) {

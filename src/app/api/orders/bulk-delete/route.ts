@@ -1,29 +1,42 @@
+// src/app/api/your-route-path/bulk-delete-orders/route.ts
+// Adjust the path above as needed
+
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server"; // Assumes this is your server client helper
 import { prisma } from "@/utils/prismaDB";
-import { storage } from "@/utils/supabaseStorage";
+import { storage } from "@/utils/supabase/storage"; // Import the new storage utility
 
 export async function POST(req: NextRequest) {
   try {
-    // Initialize Supabase client
+    // Initialize Supabase client (for auth check primarily)
+    // Note: The storage utility will create its own client instance internally
     const supabase = await createClient();
-    
-    // Get user session from Supabase
-    const { data: { user } } = await supabase.auth.getUser();
 
-    // Check if user is authenticated and is admin
+    // Get user session from Supabase
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Check if user is authenticated
     if (!user || !user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if user has admin privileges in your application's profile table
     const userData = await prisma.profiles.findUnique({
       where: { auth_user_id: user.id },
       select: { type: true },
     });
 
-    // Only allow admins or super_admins to delete orders
-    if (!userData || (userData.type !== 'admin' && userData.type !== 'super_admin')) {
-      return NextResponse.json({ message: "Forbidden - Admin permissions required" }, { status: 403 });
+    // Only allow admins or super_admins
+    if (
+      !userData ||
+      (userData.type !== "admin" && userData.type !== "super_admin")
+    ) {
+      return NextResponse.json(
+        { message: "Forbidden - Admin permissions required" },
+        { status: 403 },
+      );
     }
 
     // Get order numbers from request body
@@ -31,8 +44,11 @@ export async function POST(req: NextRequest) {
 
     if (!Array.isArray(orderNumbers) || orderNumbers.length === 0) {
       return NextResponse.json(
-        { message: "Invalid request format. Expected an array of order numbers." },
-        { status: 400 }
+        {
+          message:
+            "Invalid request format. Expected an array of order numbers.",
+        },
+        { status: 400 },
       );
     }
 
@@ -41,121 +57,219 @@ export async function POST(req: NextRequest) {
       failed: [] as { orderNumber: string; reason: string }[],
     };
 
+    const BUCKET_NAME = "order-files"; // Define bucket name clearly
+
     // Process each order
     for (const orderNumber of orderNumbers) {
       try {
-        // Step 1: Identify order type
-        let orderType: 'catering' | 'on_demand' | null = null;
+        // Step 1: Identify order type and ID
+        let orderType: "catering" | "on_demand" | null = null;
         let orderId: bigint | null = null;
 
-        // Check if it's a catering request
         const cateringRequest = await prisma.catering_request.findUnique({
           where: { order_number: orderNumber },
-          select: { id: true }
+          select: { id: true },
         });
 
         if (cateringRequest) {
-          orderType = 'catering';
+          orderType = "catering";
           orderId = cateringRequest.id;
         } else {
-          // Check if it's an on-demand order
           const onDemandOrder = await prisma.on_demand.findUnique({
             where: { order_number: orderNumber },
-            select: { id: true }
+            select: { id: true },
           });
-
           if (onDemandOrder) {
-            orderType = 'on_demand';
+            orderType = "on_demand";
             orderId = onDemandOrder.id;
           }
         }
 
         if (!orderType || !orderId) {
-          results.failed.push({ 
-            orderNumber, 
-            reason: "Order not found" 
+          results.failed.push({
+            orderNumber,
+            reason: "Order not found in database",
           });
-          continue;
+          continue; // Skip to the next order number
         }
 
-        // Step 2: Find all file uploads for this order
+        // Step 2: Find all file uploads linked to this order
         const fileUploads = await prisma.file_upload.findMany({
-          where: orderType === 'catering' 
-            ? { cateringRequestId: orderId } 
-            : { onDemandId: orderId }
+          where:
+            orderType === "catering"
+              ? { cateringRequestId: orderId }
+              : { onDemandId: orderId },
         });
 
-        // Step 3: Start a transaction to ensure atomicity
+        // Step 3: Start a transaction for atomic database operations
         await prisma.$transaction(async (tx) => {
-          // Step 4: Delete file uploads from storage
+          // Step 4: Delete associated files from Supabase Storage
+          console.log(
+            `Processing files for order ${orderNumber}. Found ${fileUploads.length} files.`,
+          );
           for (const file of fileUploads) {
-            // Extract the filename from the URL
-            const filePathMatch = file.fileUrl.match(/\/([^/]+)$/);
-            if (filePathMatch && filePathMatch[1]) {
-              const filePath = filePathMatch[1];
-              
-              // Delete from Supabase Storage
+            let filePath = ""; // The path within the bucket
+
+            // --- CRITICAL: File Path Extraction ---
+            // Attempt to extract the path from a full Supabase URL.
+            // Assumes URL like: https://<proj>.supabase.co/storage/v1/object/public/order-files/path/to/file.ext
+            // Adjust this logic based on the EXACT format of `file.fileUrl` in your database!
+            try {
+              if (!file.fileUrl) {
+                console.warn(
+                  `File record ${file.id} for order ${orderNumber} has no fileUrl.`,
+                );
+                continue; // Skip if no URL
+              }
+              const url = new URL(file.fileUrl);
+              const pathParts = url.pathname.split("/");
+              // Find the index of the part *after* the bucket name
+              const bucketNameIndex = pathParts.indexOf(BUCKET_NAME);
+
+              if (
+                bucketNameIndex !== -1 &&
+                bucketNameIndex + 1 < pathParts.length
+              ) {
+                // Join all parts *after* the bucket name
+                filePath = pathParts.slice(bucketNameIndex + 1).join("/");
+                console.log(
+                  `Extracted path: ${filePath} from URL: ${file.fileUrl}`,
+                );
+              } else {
+                // Fallback: Maybe the stored URL *is* just the path, or only the filename?
+                // Using the original regex as a less reliable fallback.
+                const simpleMatch = file.fileUrl.match(/\/([^/]+)$/);
+                if (simpleMatch && simpleMatch[1]) {
+                  filePath = simpleMatch[1]; // WARNING: This might just be the filename!
+                  console.warn(
+                    `Using fallback path extraction (likely just filename): ${filePath} for URL: ${file.fileUrl}. Verify this is correct!`,
+                  );
+                } else {
+                  console.error(
+                    `Could not extract valid file path for bucket ${BUCKET_NAME} from URL: ${file.fileUrl}`,
+                  );
+                }
+              }
+            } catch (e) {
+              console.error(
+                `Error parsing fileUrl "${file.fileUrl}" for order ${orderNumber}:`,
+                e,
+              );
+              // Decide if you want to continue or fail the transaction
+              continue; // Skipping this file due to URL parse error
+            }
+            // --- End File Path Extraction ---
+
+            if (filePath) {
+              // Delete from Supabase Storage using the new utility
               try {
-                const { error } = await storage
-                  .from('order-files')
-                  .remove([filePath]);
-                  
-                if (error) {
-                  console.error(`Error deleting file ${filePath} from storage:`, error);
-                  // Continue with other deletions even if one fails
+                console.log(
+                  `Attempting to delete file from storage: ${filePath}`,
+                );
+                // *** Use the imported storage utility ***
+                // Note: This uses the request's user context. Storage Policies MUST allow deletion.
+                const bucket = await storage.from(BUCKET_NAME); // Await the async 'from'
+                const { error: storageError } = await bucket.remove([filePath]); // Call remove
+
+                if (storageError) {
+                  console.error(
+                    `Storage Error deleting ${filePath} (Order ${orderNumber}):`,
+                    storageError.message,
+                  );
+                  // Decide how to handle storage errors. Should it stop the whole process?
+                  // Throwing an error here would rollback the Prisma transaction.
+                  // For now, we log it and continue deleting DB records, leaving the file potentially orphaned.
+                  // throw new Error(`Failed to delete file ${filePath} from storage: ${storageError.message}`);
+                } else {
+                  console.log(
+                    `Successfully deleted file ${filePath} from storage (Order ${orderNumber}).`,
+                  );
                 }
               } catch (err) {
-                console.error(`Failed to delete file ${filePath}:`, err);
+                // Catch errors from the storage utility call itself (e.g., network issues)
+                console.error(
+                  `Exception during storage deletion for ${filePath} (Order ${orderNumber}):`,
+                  err,
+                );
+                // Again, decide if this should rollback the transaction
+                // throw err;
               }
+            } else {
+              console.warn(
+                `Skipping storage deletion for file record ${file.id} (Order ${orderNumber}) due to missing/unparsable path from URL: ${file.fileUrl}`,
+              );
             }
-          }
+          } // End loop through files
 
           // Step 5: Delete all dispatches related to the order
+          console.log(
+            `Deleting dispatches for order ${orderNumber} (ID: ${orderId}, Type: ${orderType})`,
+          );
           await tx.dispatch.deleteMany({
-            where: orderType === 'catering' 
-              ? { cateringRequestId: orderId } 
-              : { on_demandId: orderId }
+            where:
+              orderType === "catering"
+                ? { cateringRequestId: orderId }
+                : { on_demandId: orderId },
           });
 
-          // Step 6: Delete all file uploads from database
+          // Step 6: Delete all file upload records from the database
+          console.log(`Deleting file_upload records for order ${orderNumber}`);
           await tx.file_upload.deleteMany({
-            where: orderType === 'catering' 
-              ? { cateringRequestId: orderId } 
-              : { onDemandId: orderId }
+            where:
+              orderType === "catering"
+                ? { cateringRequestId: orderId }
+                : { onDemandId: orderId },
           });
 
           // Step 7: Delete the order itself
-          if (orderType === 'catering') {
+          console.log(`Deleting order record for ${orderNumber}`);
+          if (orderType === "catering") {
             await tx.catering_request.delete({
-              where: { id: orderId }
+              where: { id: orderId },
             });
           } else {
+            // 'on_demand'
             await tx.on_demand.delete({
-              where: { id: orderId }
+              where: { id: orderId },
             });
           }
-        });
 
+          console.log(
+            `Successfully processed database deletions within transaction for order ${orderNumber}.`,
+          );
+        }); // End Prisma transaction
+
+        // If transaction was successful
         results.deleted.push(orderNumber);
+        console.log(
+          `Order ${orderNumber} and associated data/files marked for deletion successfully.`,
+        );
       } catch (error) {
-        console.error(`Error deleting order ${orderNumber}:`, error);
-        results.failed.push({ 
-          orderNumber, 
-          reason: error instanceof Error ? error.message : "Unknown error" 
+        // Catch errors during processing of a single order (including transaction failures)
+        console.error(`Error processing order ${orderNumber}:`, error);
+        results.failed.push({
+          orderNumber,
+          reason:
+            error instanceof Error ? error.message : "Unknown processing error",
         });
+        // Continue to the next order number even if one fails
       }
-    }
+    } // End loop through orderNumbers
 
+    console.log("Bulk deletion process completed.", results);
     return NextResponse.json({
-      message: `${results.deleted.length} orders deleted, ${results.failed.length} failed`,
-      results
+      message: `Bulk deletion attempted. ${results.deleted.length} orders processed for deletion, ${results.failed.length} failed. Check logs and results for details.`,
+      results,
     });
-    
   } catch (error) {
-    console.error("Error in bulk order deletion:", error);
+    // Catch broad errors (e.g., request parsing, initial auth check)
+    console.error("Fatal Error in bulk order deletion API:", error);
     return NextResponse.json(
-      { message: "Error in bulk order deletion", error: (error as Error).message },
-      { status: 500 }
+      {
+        message: "Error occurred during bulk order deletion process.",
+        error: error instanceof Error ? error.message : "Unknown server error",
+      },
+      { status: 500 },
     );
   }
 }

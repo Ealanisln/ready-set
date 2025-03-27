@@ -1,3 +1,5 @@
+// src/components/Dashboard/ProfileCard.tsx
+
 "use client";
 
 import React from "react";

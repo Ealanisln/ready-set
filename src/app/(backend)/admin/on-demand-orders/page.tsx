@@ -1,18 +1,34 @@
-import { BreadcrumbNavigation } from "@/components/Dashboard";
-import OnDemandOrders from "@/components/Orders/OnDemandOrders";
-import React from "react";
+// src/app/(backend)/admin/catering-orders/page.tsx
 
-const OnDemandPage = () => {
+import React from "react";
+import { Metadata } from "next";
+import { PageHeader } from "@/components/Dashboard/ui/PageHeader"; // Adjust import path if needed
+import OnDemandOrdersPage from "@/components/Orders/OnDemand/OnDemandOrders";
+
+export const metadata: Metadata = {
+  title: "Catering Orders | Admin Dashboard",
+  description: "Manage and track all catering orders across the platform",
+};
+
+const Orders = () => {
   return (
-    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <BreadcrumbNavigation />
-        </header>
-        <OnDemandOrders />
+    // This outer div might not be strictly necessary if the layout handles background
+    // Keeping it simple here.
+    <div className="flex w-full flex-col"> 
+      {/* Wrapper for header, giving it specific padding */}
+      <div className="p-6 pb-0"> 
+        <PageHeader
+          breadcrumbs={[
+            { label: "Dashboard", href: "/admin" },
+            // { label: "Orders", href: "/admin/orders" }, // Removed intermediate step if not needed
+            { label: "On demand Orders", href: "/admin/on-demand-orders", active: true },
+          ]}
+        />
       </div>
+      {/* Render the main page content component */}
+      <OnDemandOrdersPage />
     </div>
   );
 };
 
-export default OnDemandPage;
+export default Orders;
