@@ -1,4 +1,5 @@
-// MetricCard.tsx
+// src/components/Dashboard/ui/MetricCard.tsx
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';

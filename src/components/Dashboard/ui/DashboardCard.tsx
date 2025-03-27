@@ -1,4 +1,5 @@
-// DashboardCard.tsx
+// src/components/Dashboard/ui/DashboardCard.tsx
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -1,247 +1,209 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
+import React from "react";
 import {
-  Users,
-  PawPrint,
-  AlertCircle,
-  PlusCircle,
-  Dog,
-  History,
-  Package,
-  Calendar,
-  Pill,
-  Syringe,
-  CircleDollarSign,
-  ClipboardList,
+  ArchiveIcon,
+  Gauge,
+  Home,
   Settings,
-  LogOut,
+  Truck,
+  Users,
+  Zap,
+  ChevronDown,
+  Plus,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { NavMain } from "@/components/Dashboard/Sidebar/nav-main";
-import { NavUser } from "@/components/Dashboard/Sidebar/nav-user";
-import { TeamSwitcher } from "@/components/Dashboard/Sidebar/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
-  SidebarRail,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-const data = {
-  user: {
-    name: "Admin",
-    email: "admin@example.com",
-    avatar: "/avatars/admin.jpg",
-  },
-  teams: [
-    {
-      name: "Vet Family",
-      logo: Dog,
-      plan: "Administrador",
-    },
-  ],
-  navMain: [
-    {
-      title: "Clientes",
-      url: "/admin/clientes",
-      icon: Users,
-      items: [
-        {
-          title: "Ver todos",
-          url: "/admin/clientes",
-          icon: Users,
-        },
-        {
-          title: "Agregar nuevo",
-          url: "/admin/clientes/nuevo-cliente",
-          icon: PlusCircle,
-        },
-      ],
-    },
-    {
-      title: "Mascotas",
-      url: "/admin/mascotas",
-      icon: PawPrint,
-      items: [
-        {
-          title: "Ver todas",
-          url: "/admin/mascotas",
-          icon: PawPrint,
-        },
-        {
-          title: "Historial Médico",
-          url: "/admin/mascotas/historial",
-          icon: ClipboardList,
-        },
-      ],
-    },
-    {
-      title: "Inventario",
-      url: "/admin/inventario",
-      icon: Package,
-      items: [
-        {
-          title: "Productos",
-          url: "/admin/inventario",
-          icon: Package,
-        },
-        {
-          title: "Medicamentos",
-          url: "/admin/inventario/medicamentos",
-          icon: Pill,
-        },
-        {
-          title: "Vacunas",
-          url: "/admin/inventario/vacunas",
-          icon: Syringe,
-        },
-      ],
-    },
-    // {
-    //   title: "Agenda",
-    //   url: "/admin/agenda",
-    //   icon: Calendar,
-    //   items: [
-    //     {
-    //       title: "Citas",
-    //       url: "/admin/agenda/citas",
-    //       icon: Calendar,
-    //     },
-    //     {
-    //       title: "Pagos",
-    //       url: "/admin/agenda/pagos",
-    //       icon: CircleDollarSign,
-    //     },
-    //   ],
-    // },
-  ],
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useUser } from "@/contexts/UserContext";
+
+type SidebarNavItem = {
+  title: string;
+  href: string;
+  icon: React.ElementType;
+  isActive?: boolean;
 };
 
-const AddMedicalRecordButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button">
->((props, ref) => (
-  <SidebarMenuButton
-    ref={ref}
-    tooltip="Agregar Historial Médico"
-    className="transition-colors duration-200 hover:bg-[#47b3b6]/10 hover:text-[#47b3b6] group-data-[collapsible=icon]:justify-center"
-    {...props}
-  >
-    <PlusCircle className="h-4 w-4" />
-    <span className="group-data-[collapsible=icon]:hidden">
-      Agregar Historial Médico
-    </span>
-  </SidebarMenuButton>
-));
-AddMedicalRecordButton.displayName = "AddMedicalRecordButton";
+export function AppSidebar() {
+  const pathname = usePathname();
+  const { user } = useUser();
 
-const HistoricalArchiveButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button">
->((props, ref) => (
-  <SidebarMenuButton
-    ref={ref}
-    asChild
-    tooltip="Archivo Histórico"
-    className="transition-colors duration-200 hover:bg-[#47b3b6]/10 hover:text-[#47b3b6] group-data-[collapsible=icon]:justify-center"
-  >
-    <Link href="/admin/archivo-historico">
-      <History className="h-4 w-4" />
-      <span className="group-data-[collapsible=icon]:hidden">
-        Archivo Histórico
-      </span>
-    </Link>
-  </SidebarMenuButton>
-));
-HistoricalArchiveButton.displayName = "HistoricalArchiveButton";
+  // Main navigation items
+  const mainNavItems: SidebarNavItem[] = [
+    {
+      title: "Dashboard",
+      href: "/admin",
+      icon: Home,
+      isActive: pathname === "/admin",
+    },
+    {
+      title: "Catering Orders",
+      href: "/admin/catering-orders",
+      icon: Truck,
+      isActive: pathname.includes("/admin/catering-orders"),
+    },
+    {
+      title: "On-demand Orders",
+      href: "/admin/on-demand-orders",
+      icon: Zap,
+      isActive: pathname.includes("/admin/on-demand-orders"),
+    },
+    {
+      title: "Users",
+      href: "/admin/users",
+      icon: Users,
+      isActive: pathname.includes("/admin/users"),
+    },
+    {
+      title: "Legacy Data",
+      href: "/admin/legacy",
+      icon: ArchiveIcon,
+      isActive: pathname.includes("/admin/legacy"),
+    },
+  ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-r-[#47b3b6]/20 bg-gradient-to-b from-white to-blue-50"
-      {...props}
-    >
-      <SidebarHeader className="border-b border-[#47b3b6]/20">
-        <TeamSwitcher teams={data.teams} />
+    <Sidebar>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/admin">
+                <Gauge className="h-5 w-5" />
+                <span>Ready Set</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="py-4">
-        {/* Removemos las props que causaban el error */}
-        <NavMain items={data.navMain} />
-        <style jsx global>{`
-          /* Estilos globales para los elementos del NavMain */
-          .sidebar-menu-button {
-            @apply transition-colors duration-200 hover:bg-[#47b3b6]/10 hover:text-[#47b3b6];
-          }
-          .sidebar-menu-button[data-active="true"] {
-            @apply bg-[#47b3b6]/15 font-medium text-[#47b3b6];
-          }
-          .sidebar-menu {
-            @apply space-y-1;
-          }
-        `}</style>
-        <SidebarMenu className="mt-6 px-2">
-          <SidebarMenuItem></SidebarMenuItem>
-          <SidebarMenuItem>
-            <HistoricalArchiveButton />
-          </SidebarMenuItem>
-        </SidebarMenu>
+
+      <SidebarSeparator />
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.isActive}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <Collapsible defaultOpen className="group/collapsible">
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger>
+                Quick Actions
+                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <SidebarGroupAction>
+              <Plus /> <span className="sr-only">Add Action</span>
+            </SidebarGroupAction>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link href="/admin/catering-orders/new">
+                        <Truck className="h-5 w-5" />
+                        <span>New Order</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link href="/admin/users/new-user">
+                        <Users className="h-5 w-5" />
+                        <span>New User</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-[#47b3b6]/20">
-        <SidebarMenu className="px-2">
+
+      <SidebarFooter>
+        <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Configuración"
-              className="transition-colors duration-200 hover:bg-[#47b3b6]/10 hover:text-[#47b3b6] group-data-[collapsible=icon]:justify-center"
-            >
-              <Link href="/admin/configuracion">
-                <Settings className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Configuración
-                </span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Reportar un problema"
-              className="transition-colors duration-200 hover:bg-[#47b3b6]/10 hover:text-[#47b3b6] group-data-[collapsible=icon]:justify-center"
-            >
-              <Link href="mailto:emmanuel@alanis.dev">
-                <AlertCircle className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Reportar un problema
-                </span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Cerrar Sesión"
-              className="transition-colors duration-200 hover:bg-red-100 hover:text-red-600 group-data-[collapsible=icon]:justify-center"
-            >
-              <Link href="/api/auth/logout">
-                <LogOut className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Cerrar Sesión
-                </span>
-              </Link>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <Avatar className="h-6 w-6">
+                    {/* FIX: Access avatarUrl from user_metadata */}
+                    <AvatarImage src={user?.user_metadata?.avatarUrl} />
+                    {/* FIX: Access name from user_metadata for fallback */}
+                    <AvatarFallback>
+                      {user?.user_metadata?.name?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* FIX: Access name from user_metadata for display */}
+                  <span>{user?.user_metadata?.name || "User"}</span>
+                  <ChevronDown className="ml-auto h-4 w-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => console.log("Sign out clicked")}
+                >
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
-        {/* Removemos la prop className del NavUser */}
-        <NavUser user={data.user} />
       </SidebarFooter>
-      <SidebarRail className="bg-[#47b3b6]/5" />
     </Sidebar>
   );
 }
+
+export default AppSidebar;

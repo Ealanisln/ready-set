@@ -90,7 +90,7 @@
     "dotenv-cli": "^8.0.0",
     "embla-carousel-autoplay": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
-    "framer-motion": "^11.15.0",
+    "framer-motion": "^11.18.2",
     "glob": "11.0.0",
     "googleapis": "^144.0.0",
     "gray-matter": "^4.0.3",

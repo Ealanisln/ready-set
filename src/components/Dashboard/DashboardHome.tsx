@@ -1,18 +1,237 @@
+// src/components/Dashboard/DashboardHome.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, ClipboardList, Users } from "lucide-react";
-import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
-import { MetricCard } from "./ui/MetricCard";
-import { RecentOrdersTable } from "./ui/RecentOrders";
-import { RecentUsersTable } from "./ui/RecentUsersTable";
-import { DashboardCard } from "./ui/DashboardCard";
+import { 
+  Activity, 
+  ClipboardList, 
+  Users, 
+  Clock, 
+  TrendingUp, 
+  BarChart4, 
+  Calendar, 
+  ChevronRight,
+  Menu,
+  Search,
+  Bell 
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { User, CateringOrder } from "@/types/user"; // Import the shared types
+import { User, CateringOrder } from "@/types/user";
+import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
+import { LoadingDashboard } from "../ui/loading";
 
-export function DashboardHome() {
+// Modern Metric Card Component
+const ModernMetricCard: React.FC<{
+  title: string;
+  value: string | number;
+  icon: React.ElementType;
+  change: string;
+  trend?: "up" | "down" | "neutral";
+  accent?: string;
+}> = ({ title, value, icon: Icon, change, trend = "neutral", accent = "bg-blue-500" }) => {
+  // Determine trend color and icon
+  const trendConfig = {
+    up: { color: "text-green-500", icon: <TrendingUp className="h-3 w-3" /> },
+    down: { color: "text-red-500", icon: <TrendingUp className="h-3 w-3 transform rotate-180" /> },
+    neutral: { color: "text-gray-500", icon: null }
+  };
+
+  return (
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+      <div className={`h-1 ${accent}`}></div>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className={`rounded-full p-3 ${accent.replace('bg-', 'bg-opacity-10 text-')}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="flex items-center space-x-1">
+            <p className={`text-xs ${trendConfig[trend].color}`}>{change}</p>
+            {trendConfig[trend].icon}
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="text-3xl font-bold">{value}</p>
+          <p className="text-sm text-gray-500 mt-1">{title}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Action Card Component
+const ActionCard: React.FC = () => (
+  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div className="h-1 bg-yellow-400"></div>
+    <CardContent className="p-6">
+      <h3 className="text-sm font-medium text-gray-500 mb-4">Quick Actions</h3>
+      <div className="space-y-3">
+        <Link href="/catering-request" className="block w-full">
+          <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-white transition-all duration-200">
+            Create new order
+          </Button>
+        </Link>
+        <Link href="/admin/users/new-user" className="block w-full">
+          <Button 
+            className="w-full border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition-all duration-200"
+            variant="outline"
+          >
+            Create new user
+          </Button>
+        </Link>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Status Badge Component
+const StatusBadge: React.FC<{status: string}> = ({ status }) => {
+  const config: Record<string, { bg: string, text: string }> = {
+    active: { bg: "bg-purple-100", text: "text-purple-700" },
+    pending: { bg: "bg-yellow-100", text: "text-yellow-700" },
+    confirmed: { bg: "bg-blue-100", text: "text-blue-700" },
+    in_progress: { bg: "bg-indigo-100", text: "text-indigo-700" },
+    completed: { bg: "bg-green-100", text: "text-green-700" },
+    cancelled: { bg: "bg-red-100", text: "text-red-700" }
+  };
+
+  const style = config[status.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-700" };
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+// User Type Badge Component
+const UserTypeBadge: React.FC<{type: string}> = ({ type }) => {
+  const config: Record<string, { bg: string, text: string }> = {
+    admin: { bg: "bg-purple-100", text: "text-purple-700" },
+    super_admin: { bg: "bg-indigo-100", text: "text-indigo-700" },
+    vendor: { bg: "bg-blue-100", text: "text-blue-700" },
+    client: { bg: "bg-green-100", text: "text-green-700" },
+    driver: { bg: "bg-yellow-100", text: "text-yellow-700" },
+    helpdesk: { bg: "bg-orange-100", text: "text-orange-700" }
+  };
+
+  const style = config[type.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-700" };
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {type.charAt(0).toUpperCase() + type.slice(1)}
+    </span>
+  );
+};
+
+// Recent Orders Table Component
+const ModernOrdersTable: React.FC<{orders: CateringOrder[]}> = ({ orders }) => (
+  <div className="overflow-hidden">
+    {orders.length > 0 ? (
+      <div className="min-w-full divide-y divide-gray-200">
+        <div className="bg-gray-50">
+          <div className="grid grid-cols-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div>Order</div>
+            <div>Type</div>
+            <div>Status</div>
+            <div>Total</div>
+          </div>
+        </div>
+        <div className="bg-white divide-y divide-gray-200">
+          {orders.map((order) => (
+            <div key={order.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+              <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                <Link href={`/admin/catering-orders/${order.order_number}`}>
+                  {order.order_number}
+                </Link>
+              </div>
+              <div className="text-sm text-gray-500">{order.order_type || "Catering"}</div>
+              <div><StatusBadge status={order.status} /></div>
+              <div className="text-sm font-medium text-gray-900">
+                ${typeof order.order_total === 'number' 
+                  ? order.order_total.toFixed(2) 
+                  : parseFloat(order.order_total as string).toFixed(2)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+        <ClipboardList className="h-10 w-10 text-gray-300 mb-2" />
+        <p>No active orders at this moment</p>
+      </div>
+    )}
+  </div>
+);
+
+// Recent Users Table Component
+const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
+  <div className="overflow-hidden">
+    {users.length > 0 ? (
+      <div className="min-w-full divide-y divide-gray-200">
+        <div className="bg-gray-50">
+          <div className="grid grid-cols-3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div>Name</div>
+            <div>Email</div>
+            <div>Type</div>
+          </div>
+        </div>
+        <div className="bg-white divide-y divide-gray-200">
+          {users.map((user) => (
+            <div key={user.id} className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+              <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                <Link href={`/admin/users/${user.id}`}>
+                  {user.name || user.contact_name || "Unnamed User"}
+                </Link>
+              </div>
+              <div className="text-sm text-gray-500">{user.email}</div>
+              <div><UserTypeBadge type={user.type} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+        <Users className="h-10 w-10 text-gray-300 mb-2" />
+        <p>No users found</p>
+      </div>
+    )}
+  </div>
+);
+
+// Modern Dashboard Card Component
+const ModernDashboardCard: React.FC<{
+  title: string;
+  children: React.ReactNode;
+  linkText: string;
+  linkHref: string;
+  icon?: React.ElementType;
+}> = ({ title, children, linkText, linkHref, icon: Icon }) => (
+  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+      <div className="flex items-center space-x-2">
+        {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+        <h3 className="font-medium">{title}</h3>
+      </div>
+      <Link 
+        href={linkHref} 
+        className="text-sm text-blue-600 hover:text-blue-800 flex items-center group"
+      >
+        {linkText}
+        <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" />
+      </Link>
+    </div>
+    <CardContent className="p-0">
+      {children}
+    </CardContent>
+  </Card>
+);
+
+// Redesigned DashboardHome Component
+export function ModernDashboardHome() {
   const [recentOrders, setRecentOrders] = useState<CateringOrder[]>([]);
   const [activeOrders, setActiveOrders] = useState<CateringOrder[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -30,41 +249,29 @@ export function DashboardHome() {
         const ordersResponse = await fetch("/api/orders/catering-orders?recentOnly=true");
         const usersResponse = await fetch("/api/users");
         
-        // Log response status
-        console.log("Orders response status:", ordersResponse.status);
-        console.log("Users response status:", usersResponse.status);
-        
         if (!ordersResponse.ok) {
           const errorText = await ordersResponse.text();
-          console.error("Orders API error:", errorText);
           throw new Error(`Orders API failed: ${ordersResponse.status} - ${errorText}`);
         }
         
         if (!usersResponse.ok) {
           const errorText = await usersResponse.text();
-          console.error("Users API error:", errorText);
           throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
         }
         
-        // Process the responses and extract the data with proper typing
         const [ordersData, usersData] = await Promise.all([
           ordersResponse.json() as Promise<CateringOrder[]>,
           usersResponse.json() as Promise<User[]>,
         ]);
         
-        // Set the state with the fetched data
         setRecentOrders(ordersData);
         
-        // Filter active orders with proper typing
         const activeOrdersList = ordersData.filter((order: CateringOrder) => 
           ['active', 'pending', 'confirmed', 'in_progress'].includes(order.status)
         );
         setActiveOrders(activeOrdersList);
         
-        // Set users data
         setUsers(usersData);
-        
-        // Turn off loading state
         setLoading(false);
         
       } catch (error) {
@@ -77,84 +284,126 @@ export function DashboardHome() {
     fetchData();
   }, []);
 
+  // Modern loading spinner
   if (loading || metricsLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-yellow-400 border-t-transparent"></div>
-          <p className="text-lg font-semibold text-yellow-700">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingDashboard />;
   }
 
+  // Modern error display
   if (error || metricsError) {
     return (
       <div className="flex h-screen items-center justify-center bg-red-50">
-        <div className="rounded-lg bg-white p-6 shadow-lg">
-          <p className="text-red-600">Error: {error || metricsError}</p>
+        <div className="rounded-lg bg-white p-8 shadow-lg max-w-md">
+          <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100">
+            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 className="mb-2 text-xl font-semibold text-center text-gray-900">Error Loading Dashboard</h3>
+          <p className="text-sm text-center text-red-600">{error || metricsError}</p>
+          <div className="mt-6 text-center">
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Calculate percentage changes for metrics
+  const activeOrdersPercentage = ((activeOrders.length / (recentOrders.length || 1)) * 100).toFixed(1);
+  
+  // Modern dashboard layout
   return (
-    <div className="flex min-h-screen w-full flex-col sm:pl-14">
-      <main className="flex flex-1 flex-col gap-6 p-6">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            title="Active Orders"
-            value={activeOrders.length}
-            icon={ClipboardList}
-            change={`${((activeOrders.length / recentOrders.length) * 100).toFixed(1)}% of total orders`}
-          />
-          <MetricCard
-            title="Deliveries Requests"
-            value={`+${metrics.deliveriesRequests}`}
-            icon={Users}
-            change="+180.1% from last month"
-          />
-          <MetricCard
-            title="Total Vendors"
-            value={`+${metrics.totalVendors}`}
-            icon={Activity}
-            change="+180.1% from last month"
-          />
-          <Card className="h-[140px] flex flex-col justify-center">
-            <CardContent className="space-y-3">
-              <Link href="/catering-request" className="block w-full">
-                <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-white">
-                  Create new order
-                </Button>
-              </Link>
-              <Link href="/admin/users/new-user" className="block w-full">
-                <Button 
-                  className="w-full border-yellow-400 text-yellow-700 hover:bg-yellow-50"
-                  variant="outline"
-                >
-                  Create new user
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+    <div className="flex min-h-screen w-full flex-col bg-gray-50">
+      {/* Top navigation bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative rounded-md shadow-sm hidden md:block">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+                placeholder="Search..."
+              />
+            </div>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+            </Button>
+          </div>
         </div>
-        <div className="grid gap-6 md:gap-8 lg:grid-cols-2">
-          <DashboardCard
+      </div>
+
+      {/* Main content */}
+      <main className="flex-1 px-6 py-8">
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">Overview</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <ModernMetricCard
+              title="Active Orders"
+              value={activeOrders.length}
+              icon={ClipboardList}
+              change={`${activeOrdersPercentage}% of total`}
+              trend={Number(activeOrdersPercentage) > 50 ? "up" : "neutral"}
+              accent="bg-blue-500"
+            />
+            <ModernMetricCard
+              title="Delivery Requests"
+              value={metrics.deliveriesRequests}
+              icon={Clock}
+              change="+180.1% from last month"
+              trend="up"
+              accent="bg-purple-500"
+            />
+            <ModernMetricCard
+              title="Total Vendors"
+              value={metrics.totalVendors}
+              icon={BarChart4}
+              change="+180.1% from last month"
+              trend="up"
+              accent="bg-green-500"
+            />
+            <ActionCard />
+          </div>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2">
+          <ModernDashboardCard
             title="Active Catering Orders"
-            linkText="View All Catering Orders"
+            linkText="View All Orders"
             linkHref="/admin/catering-orders"
+            icon={Calendar}
           >
-            <RecentOrdersTable orders={activeOrders} />
-          </DashboardCard>
-          <DashboardCard
+            <ModernOrdersTable orders={activeOrders} />
+          </ModernDashboardCard>
+          
+          <ModernDashboardCard
             title="Recent Users"
             linkText="View All Users"
             linkHref="/admin/users"
+            icon={Users}
           >
-            <RecentUsersTable users={users.slice(0, 5)} />
-          </DashboardCard>
+            <ModernUsersTable users={users.slice(0, 5)} />
+          </ModernDashboardCard>
         </div>
       </main>
     </div>
   );
 }
+
+// Export the component as default
+export default ModernDashboardHome;

@@ -1,14 +1,28 @@
-import { BreadcrumbNavigation } from "@/components/Dashboard";
-import CateringOrdersPage  from "@/components/Orders/CateringOrders/CateringOrdersPage";
+// src/app/(backend)/admin/catering-orders/page.tsx
+
 import React from "react";
+import { Metadata } from "next";
+import CateringOrdersPage from "@/components/Orders/CateringOrders/CateringOrdersPage";
+import { PageHeader } from "@/components/Dashboard/ui/PageHeader";
+
+export const metadata: Metadata = {
+  title: "Catering Orders | Admin Dashboard",
+  description: "Manage and track all catering orders across the platform",
+};
 
 const Orders = () => {
   return (
-    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <BreadcrumbNavigation />
-        </header>
+    <div className="flex min-h-screen w-full flex-col bg-gradient-to-b from-slate-50 to-white">
+      <div className="flex flex-col gap-6 p-6">
+        <PageHeader
+          title="Catering Orders"
+          description="Manage and track all catering orders across the platform"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/admin" },
+            { label: "Orders", href: "/admin/orders" },
+            { label: "Catering", href: "/admin/catering-orders", active: true },
+          ]}
+        />
         <CateringOrdersPage />
       </div>
     </div>
@@ -16,4 +30,3 @@ const Orders = () => {
 };
 
 export default Orders;
-

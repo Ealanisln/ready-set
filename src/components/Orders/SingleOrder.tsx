@@ -288,15 +288,15 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     <main className="container mx-auto space-y-6 p-6">
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <Card>
-        <OrderHeader
-  orderNumber={order.order_number}
-  date={order.date} // This can now safely be null
-  driverInfo={driverInfo}
-  onAssignDriver={handleOpenDriverDialog}
-  orderType={order.order_type as OrderType}
-  orderId={order.id}
-  onDeleteSuccess={onDeleteSuccess}
-/>
+          <OrderHeader
+            orderNumber={order.order_number}
+            date={order.date} // This can now safely be null
+            driverInfo={driverInfo}
+            onAssignDriver={handleOpenDriverDialog}
+            orderType={order.order_type as OrderType}
+            orderId={order.id}
+            onDeleteSuccess={onDeleteSuccess}
+          />
           <Separator />
 
           <CardContent className="space-y-6">
@@ -310,9 +310,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
             <Separator />
 
             <OrderDetails order={order} />
-            
+
             <Separator />
-            
+
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {order.address && (
                 <AddressInfo address={order.address} title="Pickup Address" />
@@ -326,11 +326,11 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
             </div>
 
             <Separator />
-            
+
             <CustomerInfo name={order.user?.name} email={order.user?.email} />
-            
+
             <Separator />
-            
+
             <AdditionalInfo
               clientAttention={order.client_attention}
               pickupNotes={order.pickup_notes}
