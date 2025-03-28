@@ -92,13 +92,22 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Get user role if user exists
-  let userRole = null;
-  if (user) {
-    try {
-      console.log("Attempting to fetch user role for user ID:", user.id);
+ // Modified role check in middleware
+let userRole = null;
+if (user) {
+  try {
+    // First check user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("type")
+      .eq("id", user.id)
+      .single();
 
-      // First check profiles table with auth_user_id
+    if (userData) {
+      userRole = userData.type;
+      console.log("Found role in user table:", userRole);
+    } else {
+      // Fallback to profiles table
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("type")
@@ -109,37 +118,13 @@ export async function middleware(request: NextRequest) {
         userRole = profile.type;
         console.log("Found role in profiles table:", userRole);
       } else {
-        console.log("Profile not found in database:", error?.message);
-        console.log("Raw profile query result:", profile);
-
-        // Try to get user metadata
-        console.log("User metadata:", user.user_metadata);
-        if (user.user_metadata?.role) {
-          userRole = user.user_metadata.role;
-          console.log("Found role in user metadata:", userRole);
-        } else {
-          console.log("No role found in user metadata");
-
-          // If user has no profile and is authenticated, redirect to complete profile
-          // But only if they're not already on the complete-profile page
-          if (request.nextUrl.pathname !== "/auth/callback") {
-            const baseUrl = new URL(request.url).origin;
-            const redirectUrl = new URL("/complete-profile", baseUrl);
-            const redirectResponse = NextResponse.redirect(redirectUrl);
-
-            // Copy cookies to the redirect response
-            supabaseResponse.cookies.getAll().forEach((cookie) => {
-              redirectResponse.cookies.set(cookie.name, cookie.value);
-            });
-
-            return redirectResponse;
-          }
-        }
+        console.log("No user role found in any table");
       }
-    } catch (error) {
-      console.error("Error fetching user role - Full error:", error);
     }
+  } catch (error) {
+    console.error("Error fetching user role:", error);
   }
+}
 
   // For debugging only
   if (user && !userRole) {

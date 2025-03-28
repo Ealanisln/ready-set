@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Add usePathname
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import SingleOrder from "@/components/Orders/SingleOrder";
 import {
@@ -14,6 +14,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Home, ClipboardList } from "lucide-react";
 
 const OrderPage = () => {
   const [orderNumber, setOrderNumber] = useState("");
@@ -29,33 +31,51 @@ const OrderPage = () => {
   }, [pathname]);
 
   const handleDeleteSuccess = () => {
-    router.push("/admin/");
+    router.push("/admin/catering-orders");
   };
 
   return (
-    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/admin/">Dashboard</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/admin/catering-orders">Catering orders</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Order {orderNumber}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
+    <div className="bg-slate-50 flex min-h-screen w-full flex-col">
+      <div className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm">
+        <Button
+          onClick={() => router.push("/admin/catering-orders")}
+          variant="ghost"
+          size="icon"
+          className="mr-2 h-9 w-9 text-slate-500 hover:text-amber-600"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span className="sr-only">Back to orders</span>
+        </Button>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/admin/" className="flex items-center">
+                  <Home className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/admin/catering-orders" className="flex items-center">
+                  <ClipboardList className="h-4 w-4 mr-1" />
+                  Catering Orders
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="font-medium text-amber-600">
+                Order {orderNumber}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      
+      <div className="flex-1">
         <SingleOrder onDeleteSuccess={handleDeleteSuccess} />
       </div>
     </div>

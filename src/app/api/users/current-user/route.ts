@@ -22,7 +22,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // First try to get the user from the profiles table
+    // First try to get user from the user table (same as middleware)
+    try {
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { 
+          id: true,
+          type: true,
+          email: true,
+          name: true,
+          company_name: true,
+          status: true
+          // Add any other fields you need
+        }
+      });
+
+      if (userData) {
+        console.log(`[${requestId}] Found user in user table:`, userData);
+        return NextResponse.json(userData);
+      }
+    } catch (prismaError) {
+      console.error(`[${requestId}] Error fetching from Prisma:`, prismaError);
+    }
+
+    // If not found in user table, fall back to profiles table
     let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('type, auth_user_id')
@@ -31,6 +54,24 @@ export async function GET(request: Request) {
 
     if (profile) {
       console.log(`[${requestId}] Found user in profiles table:`, profile);
+      
+      // Optional: Sync the user record here to match profiles
+      try {
+        await prisma.user.upsert({
+          where: { id: user.id },
+          update: { type: profile.type },
+          create: { 
+            id: user.id,
+            email: user.email,
+            type: profile.type,
+            status: 'active'
+          }
+        });
+        console.log(`[${requestId}] Synchronized user record from profiles table`);
+      } catch (syncError) {
+        console.error(`[${requestId}] Error syncing user record:`, syncError);
+      }
+      
       return NextResponse.json({
         id: user.id,
         email: user.email,
@@ -38,28 +79,28 @@ export async function GET(request: Request) {
       });
     }
     
-    // If not found in profiles, check the user table
-    try {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { 
-          id: true,
-          type: true,
-          email: true 
-        }
-      });
-
-      if (userData) {
-        console.log(`[${requestId}] Found user in prisma table:`, userData);
-        return NextResponse.json(userData);
-      }
-    } catch (prismaError) {
-      console.error(`[${requestId}] Error fetching from Prisma:`, prismaError);
-    }
-
     // If we still can't find a role, check user metadata
     if (user.user_metadata && (user.user_metadata.type || user.user_metadata.role)) {
       console.log(`[${requestId}] Using role from user metadata:`, user.user_metadata);
+      
+      // Optional: Create user record from metadata
+      try {
+        const userType = user.user_metadata.type || user.user_metadata.role;
+        await prisma.user.upsert({
+          where: { id: user.id },
+          update: { type: userType },
+          create: { 
+            id: user.id,
+            email: user.email,
+            type: userType,
+            status: 'active'
+          }
+        });
+        console.log(`[${requestId}] Created user record from metadata`);
+      } catch (createError) {
+        console.error(`[${requestId}] Error creating user record:`, createError);
+      }
+      
       return NextResponse.json({
         id: user.id,
         email: user.email,

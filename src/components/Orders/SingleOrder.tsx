@@ -1,8 +1,12 @@
 // src/components/Orders/SingleOrder.tsx
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion"; // Added for animations
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ClipboardList, AlertCircle, Truck, User, Calendar, MapPin, FileText } from "lucide-react"; // Added more icons
 import toast from "react-hot-toast";
 import { DriverStatusCard } from "./DriverStatus";
 import OrderHeader from "./ui/OrderHeader";
@@ -15,6 +19,7 @@ import OrderStatusCard from "./OrderStatus";
 import { usePathname } from "next/navigation";
 import { OrderFilesManager } from "./ui/OrderFiles";
 import { Driver, Order, OrderStatus, OrderType } from "@/types/order";
+import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
 
 interface FileUpload {
   id: string;
@@ -35,6 +40,56 @@ interface FileUpload {
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
 }
+
+// Added status config similar to CateringOrdersPage
+const statusConfig = {
+  active: { className: "bg-amber-100 text-amber-800 hover:bg-amber-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+  assigned: { className: "bg-blue-100 text-blue-800 hover:bg-blue-200", icon: <Truck className="h-3 w-3 mr-1" /> },
+  cancelled: { className: "bg-red-100 text-red-800 hover:bg-red-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+  completed: { className: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200", icon: <ClipboardList className="h-3 w-3 mr-1" /> },
+};
+
+const getStatusConfig = (status: string) => {
+  return statusConfig[status as keyof typeof statusConfig] || { className: "bg-gray-100 text-gray-800 hover:bg-gray-200", icon: null };
+};
+
+// Added loading skeleton for better UX
+const OrderSkeleton: React.FC = () => (
+  <div className="space-y-6 p-4 w-full max-w-5xl mx-auto">
+    <Card>
+      <CardHeader className="p-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-[200px]" />
+          <Skeleton className="h-10 w-[150px]" />
+        </div>
+      </CardHeader>
+      <Separator />
+      <CardContent className="space-y-6 p-6">
+        <Skeleton className="h-24 w-full" />
+        <Separator />
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-[140px]" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
+        <Separator />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        <Separator />
+        <Skeleton className="h-20 w-full" />
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="pt-6">
+        <Skeleton className="h-40 w-full" />
+      </CardContent>
+    </Card>
+  </div>
+);
 
 const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -265,32 +320,90 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="ml-4 text-lg font-semibold">
-          Loading order details for {orderNumber}...
-        </p>
-      </div>
-    );
+    return <OrderSkeleton />;
   }
 
   if (!order) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="ml-4 text-lg font-semibold">
-          Order not found: {orderNumber}
-        </p>
+        <Card className="w-full max-w-md p-6 text-center">
+          <CardContent className="flex flex-col items-center justify-center py-10">
+            <div className="mb-4 rounded-full bg-slate-100 p-3">
+              <AlertCircle className="h-8 w-8 text-slate-400" />
+            </div>
+            <h2 className="mb-2 text-2xl font-bold text-slate-800">Order Not Found</h2>
+            <p className="mb-6 text-slate-500">
+              We couldn't find order: <span className="font-medium">{orderNumber}</span>
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => window.history.back()}
+              className="gap-2"
+            >
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <main className="container mx-auto space-y-6 p-6">
+    <motion.main
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="container mx-auto space-y-6 p-6"
+    >
       <div className="mx-auto w-full max-w-5xl space-y-6">
-        <Card>
+        {/* Order Status Overview Card */}
+        <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
+          <CardHeader className="p-6 border-b bg-slate-50">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                    Order {order.order_number}
+                  </h1>
+                  {order.status && (
+                    <Badge className={`${getStatusConfig(order.status as string).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>
+                      {getStatusConfig(order.status as string).icon}
+                      {order.status}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center mt-1 text-slate-500">
+                  <Calendar className="h-4 w-4 mr-1.5" />
+                  {order.date ? (
+                    <span className="text-sm">
+                      {new Date(order.date).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  ) : (
+                    <span className="text-sm italic">No date specified</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm transition-all hover:shadow-md"
+                  onClick={handleOpenDriverDialog}
+                >
+                  <Truck className="mr-2 h-4 w-4" />
+                  {isDriverAssigned ? "Update Driver" : "Assign Driver"}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+
           <OrderHeader
             orderNumber={order.order_number}
-            date={order.date} // This can now safely be null
+            date={order.date} 
             driverInfo={driverInfo}
             onAssignDriver={handleOpenDriverDialog}
             orderType={order.order_type as OrderType}
@@ -299,48 +412,87 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           />
           <Separator />
 
-          <CardContent className="space-y-6">
-            <OrderStatusCard
-              orderType={order.order_type as OrderType}
-              initialStatus={order.status as OrderStatus}
-              orderId={order.id}
-              onStatusChange={handleOrderStatusChange}
-            />
+          <CardContent className="space-y-6 p-6">
+            <div className="bg-slate-50 rounded-lg p-4 border">
+              <OrderStatusCard
+                orderType={order.order_type as OrderType}
+                initialStatus={order.status as OrderStatus}
+                orderId={order.id}
+                onStatusChange={handleOrderStatusChange}
+              />
+            </div>
 
             <Separator />
 
-            <OrderDetails order={order} />
+            <div className="bg-white p-4 rounded-lg border">
+              <h3 className="text-lg font-semibold mb-4 text-slate-800 flex items-center">
+                <ClipboardList className="h-5 w-5 mr-2 text-amber-500" />
+                Order Details
+              </h3>
+              <OrderDetails order={order} />
+            </div>
 
             <Separator />
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {order.address && (
-                <AddressInfo address={order.address} title="Pickup Address" />
+                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
+                    <MapPin className="h-5 w-5 mr-2 text-amber-500" />
+                    Pickup Address
+                  </h3>
+                  <AddressInfo address={order.address} title="" />
+                </div>
               )}
               {order.delivery_address && (
-                <AddressInfo
-                  address={order.delivery_address}
-                  title="Delivery Address"
-                />
+                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
+                    <MapPin className="h-5 w-5 mr-2 text-amber-500" />
+                    Delivery Address
+                  </h3>
+                  <AddressInfo address={order.delivery_address} title="" />
+                </div>
               )}
             </div>
 
             <Separator />
 
-            <CustomerInfo name={order.user?.name} email={order.user?.email} />
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
+                <User className="h-5 w-5 mr-2 text-amber-500" />
+                Customer Information
+              </h3>
+              <CustomerInfo 
+                name={order.user?.name} 
+                email={order.user?.email} 
+                phone={order.user?.contact_number} 
+              />
+            </div>
 
             <Separator />
 
-            <AdditionalInfo
-              clientAttention={order.client_attention}
-              pickupNotes={order.pickup_notes}
-              specialNotes={order.special_notes}
-            />
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-amber-500" />
+                Additional Information
+              </h3>
+              <AdditionalInfo
+                clientAttention={order.client_attention}
+                pickupNotes={order.pickup_notes}
+                specialNotes={order.special_notes}
+              />
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        {/* Files Card */}
+        <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
+          <CardHeader className="border-b bg-slate-50 p-6">
+            <CardTitle className="text-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+              Order Files
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
             <OrderFilesManager
               orderNumber={order.order_number}
               orderType={order.order_type as OrderType}
@@ -350,8 +502,14 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        {/* Driver Card */}
+        <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
+          <CardHeader className="border-b bg-slate-50 p-6">
+            <CardTitle className="text-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+              Driver Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
             <DriverStatusCard
               order={{
                 id: order.id,
@@ -379,7 +537,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
         onDriverSelection={handleDriverSelection}
         onAssignOrEditDriver={handleAssignOrEditDriver}
       />
-    </main>
+    </motion.main>
   );
 };
 

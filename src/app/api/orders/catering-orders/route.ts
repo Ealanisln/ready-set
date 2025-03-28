@@ -1,3 +1,5 @@
+// src/app/api/orders/catering-orders/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { PrismaClient } from "@prisma/client";

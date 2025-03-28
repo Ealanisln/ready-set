@@ -78,6 +78,7 @@ export interface User {
   id: string;
   name?: string | null;
   email?: string | null;
+  contact_number?: string | null; // Added from Prisma schema
 }
 
 export interface Dispatch {
@@ -106,7 +107,7 @@ interface BaseOrder {
   pickup_time: Date | null;
   arrival_time: Date | null;
   complete_time?: Date | null;
-  client_attention: string;
+  client_attention?: string | null; // Made optional to match Prisma schema
   pickup_notes?: string | null;
   special_notes?: string | null;
   image?: string | null;

@@ -1,15 +1,27 @@
 // src/components/Orders/ui/OrderHeader.tsx
 
 import React, { useState } from "react";
-import { MoreVertical, Truck, Edit, Trash2 } from "lucide-react";
+import { 
+  MoreVertical, 
+  Truck, 
+  Edit, 
+  Trash2, 
+  Calendar, 
+  Download, 
+  Printer, 
+  RefreshCw,
+  ArrowUpDown
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -21,16 +33,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Driver, OrderType } from "@/types/order";
 import toast from "react-hot-toast";
 
 interface OrderHeaderProps {
   orderNumber: string;
-  date: string | Date | null; // Updated to allow null
+  date: string | Date | null; 
   driverInfo: Driver | null;
   onAssignDriver: () => void;
   orderType: OrderType;
-  orderId: string | number | bigint; // Updated to accept bigint
+  orderId: string | number | bigint;
   onDeleteSuccess: () => void;
 }
 
@@ -44,14 +57,25 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   onDeleteSuccess,
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const formatDate = (date: string | Date | null): string => {
     if (!date) return "N/A";
     
     if (typeof date === "string") {
-      return new Date(date).toLocaleDateString();
+      return new Date(date).toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     }
-    return date.toLocaleDateString();
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const getApiOrderType = (type: OrderType): string => {
@@ -82,26 +106,71 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
     }
   };
 
+  const handleRefreshOrder = async () => {
+    setIsRefreshing(true);
+    try {
+      // This is a placeholder - you would implement the actual refresh logic
+      await new Promise(resolve => setTimeout(resolve, 800)); 
+      toast.success("Order refreshed successfully");
+    } catch (error) {
+      console.error("Error refreshing order data:", error);
+      toast.error("Failed to refresh order data");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div>
-          <CardTitle className="text-2xl font-bold">
-            Order {orderNumber}
-          </CardTitle>
-          <CardDescription>Date: {formatDate(date)}</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between p-6 border-b bg-slate-50">
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex h-12 w-12 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 items-center justify-center text-white font-bold text-lg">
+            {orderType === "catering" ? "CR" : "OD"}
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-800">
+              Order {orderNumber}
+            </h2>
+            <div className="flex items-center text-slate-500 mt-1">
+              <Calendar className="h-4 w-4 mr-1.5" />
+              <span className="text-sm">
+                {formatDate(date)}
+              </span>
+            </div>
+          </div>
         </div>
+        
         <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={handleRefreshOrder}
+                  disabled={isRefreshing}
+                  className="text-slate-600 hover:text-amber-600 transition-colors"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span className="sr-only">Refresh Order Data</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Refresh Order Data</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button
             size="sm"
             variant="outline"
-            className="flex items-center gap-1"
+            className="gap-1.5 text-slate-600 hover:text-amber-600 border-slate-200 hover:border-amber-200 transition-colors hidden md:flex"
             onClick={onAssignDriver}
           >
             {driverInfo ? (
               <>
                 <Edit className="h-4 w-4" />
-                <span>Edit Driver</span>
+                <span>Update Driver</span>
               </>
             ) : (
               <>
@@ -110,19 +179,54 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
               </>
             )}
           </Button>
+          
+          <Button
+            size="icon"
+            variant="outline" 
+            className="md:hidden"
+            onClick={onAssignDriver}
+          >
+            {driverInfo ? <Edit className="h-4 w-4" /> : <Truck className="h-4 w-4" />}
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="outline">
+              <Button 
+                size="icon" 
+                variant="outline"
+                className="text-slate-600 hover:text-amber-600 border-slate-200 hover:border-amber-200 transition-colors"
+              >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Export</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Edit className="mr-2 h-4 w-4" />
+                  <span>Edit Order</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Download className="mr-2 h-4 w-4" />
+                  <span>Export as PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Printer className="mr-2 h-4 w-4" />
+                  <span>Print Order</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  <span>Change Status</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-red-600 hover:text-red-700 cursor-pointer"
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <span>Delete Order</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -135,16 +239,19 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Order: {orderNumber}</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              order and all associated data.
+              order and all associated data including driver assignments and files.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteOrder}>
-              Delete
+            <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteOrder}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete Order
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -35,12 +35,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
     }
     
+    // Update in the user table
     const updatedUser = await prisma.user.update({
       where: { id: String(userId) },
       data: { type: newRole as users_type },
     });
+
+    // IMPORTANT: Also update in the profiles table that middleware checks
+    const { data: updatedProfile, error } = await supabase
+      .from("profiles")
+      .update({ type: newRole })
+      .eq("auth_user_id", userId);
+      
+    if (error) {
+      console.error("Error updating profile:", error);
+      return NextResponse.json({ 
+        message: 'User updated but profile update failed', 
+        user: updatedUser,
+        error: error.message 
+      }, { status: 500 });
+    }
     
-    return NextResponse.json(updatedUser);
+    // Also update user metadata in auth.users if needed
+    // This is optional but provides another layer of role information
+    const { error: metadataError } = await supabase.auth.admin.updateUserById(
+      userId,
+      { user_metadata: { role: newRole } }
+    );
+
+    if (metadataError) {
+      console.error("Error updating user metadata:", metadataError);
+    }
+    
+    return NextResponse.json({ 
+      message: 'User role updated successfully',
+      user: updatedUser
+    });
   } catch (error) {
     console.error('Error updating user role:', error);
     return NextResponse.json({ message: 'Error updating user role' }, { status: 500 });
