@@ -1,7 +1,6 @@
 // src/app/api/addresses/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/utils/prismaDB";
 import { AddressFormData } from "@/types/address";

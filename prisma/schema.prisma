@@ -4,8 +4,8 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   // Optional directUrl for Neon's connection pooling in production
-  directUrl = env("DATABASE_DIRECT_URL")
-  schemas   = ["auth", "public"]
+  // directUrl = env("DATABASE_DIRECT_URL")
+  schemas   = ["public"]
 }
 
 generator client {

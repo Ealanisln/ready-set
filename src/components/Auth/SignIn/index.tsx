@@ -5,10 +5,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useActionState } from "react";
 import Loader from "@/components/Common/Loader";
-import { login, FormState } from "@/app/actions/login";
-import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
+import { authClient } from "@/lib/auth-client";
 
 const Signin = ({
   searchParams,
@@ -18,19 +16,11 @@ const Signin = ({
   // Check if user is already logged in
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [state, formAction] = useActionState<FormState, FormData>(login, {
-    error: "",
-  });
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { createClient } = await import("@/utils/supabase/client");
-        const supabase = await createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
+        const { data: session } = await authClient.getSession();
         if (session) {
           setIsLoggedIn(true);
           // Redirect to dashboard or home page
@@ -55,22 +45,13 @@ const Signin = ({
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [loginMethod, setLoginMethod] = useState<"password" | "magic">(
-    "password",
-  );
+  const [loginMethod, setLoginMethod] = useState<"password" | "magic">("password");
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     magicLinkEmail: "",
     general: "",
   });
-
-  useEffect(() => {
-    if (state?.error) {
-      setErrors((prev) => ({ ...prev, general: state.error || "" }));
-      setLoading(false);
-    }
-  }, [state]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,11 +60,34 @@ const Signin = ({
     setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
   };
 
-  const handleMagicLinkEmailChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleMagicLinkEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMagicLinkEmail(e.target.value.toLowerCase());
     setErrors((prev) => ({ ...prev, magicLinkEmail: "", general: "" }));
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrors({ email: "", password: "", magicLinkEmail: "", general: "" });
+
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        setErrors((prev) => ({ ...prev, general: error.message || "An error occurred" }));
+        return;
+      }
+
+      // Redirect on successful sign in
+      window.location.href = "/";
+    } catch (error: any) {
+      setErrors((prev) => ({ ...prev, general: error.message || "An error occurred during sign in" }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendMagicLink = async (e: React.FormEvent) => {
@@ -105,42 +109,32 @@ const Signin = ({
     setMagicLinkLoading(true);
 
     try {
-      const { createClient } = await import("@/utils/supabase/client");
-      const supabase = await createClient();
-
-      const { data, error: queryError } = await supabase
-        .from("user")
-        .select("email")
-        .eq("email", magicLinkEmail)
-        .single();
-
-      if (queryError || !data) {
-        setErrors((prev) => ({
-          ...prev,
-          magicLinkEmail:
-            "Email not found. Please check your email or sign up.",
-        }));
-        setMagicLinkLoading(false);
-        return;
-      }
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email: magicLinkEmail,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email: magicLinkEmail,
+          callbackURL: `${window.location.origin}/auth/callback`,
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        setErrors((prev) => ({
+          ...prev,
+          magicLinkEmail: error.message || "Unable to send magic link",
+        }));
+        return;
+      }
 
       setMagicLinkSent(true);
     } catch (error: any) {
       console.error("Magic link error:", error);
       setErrors((prev) => ({
         ...prev,
-        magicLinkEmail:
-          "Unable to send magic link. Please check your email and try again.",
+        magicLinkEmail: "Unable to send magic link. Please try again.",
       }));
     } finally {
       setMagicLinkLoading(false);
@@ -160,9 +154,7 @@ const Signin = ({
           <div className="flex h-64 items-center justify-center">
             <div className="text-center">
               <Loader />
-              <p className="mt-4 text-gray-600 dark:text-gray-400">
-                Loading...
-              </p>
+              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
             </div>
           </div>
         </div>
@@ -238,11 +230,7 @@ const Signin = ({
               </div>
 
               {loginMethod === "password" ? (
-                <form
-                  action={formAction}
-                  noValidate
-                  onSubmit={() => setLoading(true)}
-                >
+                <form onSubmit={handleSignIn} noValidate>
                   <div className="mb-[22px]">
                     <input
                       type="email"
@@ -373,7 +361,18 @@ const Signin = ({
                   </div>
 
                   <div className="mb-5">
-                    <GoogleAuthButton />
+                    <button
+                      onClick={() => authClient.signIn.social({ provider: "google" })}
+                      className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-5 py-3 text-base text-dark transition duration-300 ease-in-out hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                    >
+                      <Image
+                        src="/images/icons/google.svg"
+                        alt="Google"
+                        width={20}
+                        height={20}
+                      />
+                      Sign in with Google
+                    </button>
                   </div>
                 </>
               )}

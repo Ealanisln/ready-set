@@ -1,103 +1,37 @@
-// src/lib/auth.ts
-import { createClient } from "@/utils/supabase/server";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { magicLink } from "better-auth/plugins";
+import { PrismaClient } from "@prisma/client";
 
-export async function syncOAuthProfile(userId: string, metadata: any) {
-  // This function can be called after OAuth authentication to check if a profile needs to be created
-  const supabase = await createClient();
+const prisma = new PrismaClient();
 
-  // Check if profile already exists
-  const { data: existingProfile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("auth_user_id", userId)
-    .single();
+export const auth = betterAuth({
+    database: prismaAdapter(prisma, {
+        provider: "postgresql",
+    }),
+    emailAndPassword: {
+        enabled: true,
+        autoSignIn: true,
+    },
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
+    },
+    secret: process.env.BETTER_AUTH_SECRET as string,
+    baseUrl: process.env.BETTER_AUTH_URL as string,
+    plugins: [
+        magicLink({
+            sendMagicLink: async ({ email, token, url }, request) => {
+                // TODO: Implement your email sending logic here
+                console.log(`Magic link for ${email}: ${url}`);
+            },
+            expiresIn: 300,
+            disableSignUp: false
+        })
+    ]
+});
 
-  if (existingProfile) {
-    // Profile already exists, no need to create
-    return { success: true, newProfile: false, profile: existingProfile };
-  }
-
-  // Get the OAuth provider information
-  const { data } = await supabase.auth.getUser();
-  const providerData = data?.user?.app_metadata?.provider;
-
-  if (!providerData) {
-    // Not an OAuth user, let them complete profile manually
-    return { success: false, newProfile: true, message: "Not an OAuth user" };
-  }
-
-  // For OAuth users, we can auto-create a basic profile with default role of 'client'
-  // This is optional - you can remove this and force all users to complete their profile
-  const { error } = await supabase.from("profiles").insert({
-    auth_user_id: userId,
-    name: metadata.full_name || metadata.name,
-    image: metadata.avatar_url || metadata.picture,
-    type: "client", // Default role, they can change it later
-    status: "pending",
-  });
-
-  if (error) {
-    console.error("Error creating profile:", error);
-    return { success: false, error };
-  }
-
-  return { success: true, newProfile: true };
-}
-
-export async function updateUserRole(userId: string, role: string) {
-  const supabase = await createClient();
-
-  // Update user metadata with role
-  await supabase.auth.updateUser({
-    data: { role },
-  });
-
-  return { success: true };
-}
-
-export async function getUserRole(userId: string) {
-  const supabase = await createClient();
-
-  // First check in profiles table
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("type")
-    .eq("auth_user_id", userId)
-    .single();
-
-  if (profile?.type) {
-    return profile.type;
-  }
-
-  // If not in profiles, check user metadata
-  const { data } = await supabase.auth.getUser();
-  return data?.user?.user_metadata?.role || null;
-}
-
-
-export async function getCurrentUser() {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase.auth.getUser();
-  
-  if (error || !data?.user) {
-    console.error("Error fetching current user:", error);
-    return null;
-  }
-  
-  // Get additional user data from profiles table if needed
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("auth_user_id", data.user.id)
-    .single();
-    
-  // Return combined user data
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    role: profile?.type || data.user.user_metadata?.role || "client",
-    profile: profile || null,
-    // Add any other user properties you need
-  };
-}
+// Use the auth handler directly for magic link operations
+export const magicLinkHandler = auth.handler;

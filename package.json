@@ -81,6 +81,7 @@
     "@vercel/postgres": "^0.10.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "better-auth": "^1.2.5",
     "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -133,6 +134,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.2.5",
     "@next/bundle-analyzer": "^15.1.6",
     "@octokit/request": "8.4.1",
     "@prisma/client": "6.3.0",
@@ -148,7 +150,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/prismjs": "^1.26.5",
     "@types/react": "19.0.8",
-    "@types/react-dom": "19.0.3",
+    "@types/react-dom": "19.1.1",
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
