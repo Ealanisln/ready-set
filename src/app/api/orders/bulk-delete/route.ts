@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user has admin privileges in your application's user table
-    const userData = await prisma.user.findUnique({
-      where: { id: user.id },
+    // Check if user has admin privileges in your application's profile table
+    const userData = await prisma.profiles.findUnique({
+      where: { auth_user_id: user.id },
       select: { type: true },
     });
 

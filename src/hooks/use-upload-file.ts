@@ -149,7 +149,6 @@ export function useUploadFile({
           formData.append("entityType", entityType || "");
           formData.append("category", category || "general");
           formData.append("bucketName", bucketName || "fileUploader");
-          formData.append("userId", userId || "temp_application_user");
 
           newProgresses[file.name] = 10;
           setProgresses(newProgresses);
@@ -221,7 +220,6 @@ export function useUploadFile({
       entityId,
       uploadedFiles,
       bucketName,
-      userId,
     ],
   );
 

@@ -38,16 +38,6 @@ export async function GET(request: NextRequest) {
       orderBy: {
         uploadedAt: "desc",
       },
-      select: {
-        id: true,
-        fileName: true,
-        fileUrl: true,
-        fileType: true,
-        fileSize: true,
-        entityId: true,
-        category: true,
-        uploadedAt: true,
-      }
     });
 
     console.log('Found files:', files);

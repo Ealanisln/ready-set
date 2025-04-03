@@ -42,11 +42,6 @@ function safelyConvertToBigInt(
   }
 }
 
-// Helper function to determine if a user ID is temporary
-function isTemporaryUserId(userId: string): boolean {
-  return userId === "temp_user" || userId.startsWith("temp_");
-}
-
 export async function handleUploadComplete({
   metadata,
   file,
@@ -87,8 +82,6 @@ export async function handleUploadComplete({
         category: metadata.category,
         uploadedAt: new Date(),
         updatedAt: new Date(),
-        // Mark as temporary if it's a temporary user ID
-        isTemporary: isTemporaryUserId(metadata.userId),
       },
     });
 

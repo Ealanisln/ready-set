@@ -110,6 +110,40 @@ export async function registerUser(formData: FormData) {
       },
     });
 
+    // 3. Create profile record in auth.profiles table
+    await prisma.profiles.create({
+      data: {
+        auth_user_id: userId,
+        guid: userData.guid,
+        name,
+        image: userData.image,
+        type: userType as any, // Cast to enum type
+        company_name: userData.company_name,
+        contact_name: userData.contact_name,
+        contact_number: userData.contact_number,
+        website: userData.website,
+        street1: userData.street1,
+        street2: userData.street2,
+        city: userData.city,
+        state: userData.state,
+        zip: userData.zip,
+        location_number: userData.location_number,
+        parking_loading: userData.parking_loading,
+        counties: userData.counties,
+        time_needed: userData.time_needed,
+        catering_brokerage: userData.catering_brokerage,
+        frequency: userData.frequency,
+        provide: userData.provide,
+        head_count: userData.head_count,
+        status: "pending",
+        side_notes: userData.side_notes,
+        confirmation_code: userData.confirmation_code,
+        created_at: new Date(),
+        updated_at: new Date(),
+        is_temporary_password: false,
+      },
+    });
+
     // Handle email confirmation flow
     if (authData.session) {
       // Email confirmation is disabled, user is logged in
@@ -173,6 +207,33 @@ export async function adminCreateUser(userData: {
         ...Object.fromEntries(
           Object.entries(userData).filter(
             ([key]) => !["email", "password", "name", "userType"].includes(key),
+          ),
+        ),
+      },
+    });
+
+    // 3. Create profile record in auth.profiles table
+    await prisma.profiles.create({
+      data: {
+        auth_user_id: userId,
+        name: userData.name,
+        type: userData.userType as any, // Cast to enum type
+        status: userData.status || "active",
+        created_at: new Date(),
+        updated_at: new Date(),
+        is_temporary_password: userData.isTemporaryPassword || false,
+        // Add other fields from userData, similar to above
+        ...Object.fromEntries(
+          Object.entries(userData).filter(
+            ([key]) =>
+              ![
+                "email",
+                "password",
+                "name",
+                "userType",
+                "status",
+                "isTemporaryPassword",
+              ].includes(key),
           ),
         ),
       },
