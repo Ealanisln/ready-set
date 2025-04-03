@@ -189,17 +189,19 @@ model file_upload {
   updatedAt         DateTime          @updatedAt
   cateringRequestId BigInt?
   onDemandId        BigInt?
-  entityType        String            // Keep this for flexible relationships
-  entityId          String            // Keep this for flexible relationships
-  category          String?           // Good to have for organization
+  jobApplicationId  String?
+  entityType        String // Keep this for flexible relationships
+  entityId          String // Keep this for flexible relationships
+  category          String? // Good to have for organization
+  isTemporary       Boolean           @default(false)
   cateringRequest   catering_request? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
   onDemand          on_demand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
+  jobApplication    job_application?  @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
   user              user?             @relation(fields: [userId], references: [id])
 
   @@index([entityType, entityId])
   @@schema("public")
 }
-
 
 model form_submission {
   id                  String             @id @default(uuid())
@@ -234,8 +236,6 @@ model lead_capture {
   @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model audit_log_entries {
   instance_id String?   @db.Uuid
   id          String    @id @db.Uuid
@@ -247,8 +247,6 @@ model audit_log_entries {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model flow_state {
   id                     String                @id @db.Uuid
   user_id                String?               @db.Uuid
@@ -270,8 +268,6 @@ model flow_state {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model identities {
   provider_id     String
   user_id         String    @db.Uuid
@@ -280,7 +276,7 @@ model identities {
   last_sign_in_at DateTime? @db.Timestamptz(6)
   created_at      DateTime? @db.Timestamptz(6)
   updated_at      DateTime? @db.Timestamptz(6)
-  email           String?   @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
+  email           String?
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -290,8 +286,6 @@ model identities {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model instances {
   id              String    @id @db.Uuid
   uuid            String?   @db.Uuid
@@ -302,8 +296,6 @@ model instances {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model mfa_amr_claims {
   session_id            String   @db.Uuid
   created_at            DateTime @db.Timestamptz(6)
@@ -316,8 +308,6 @@ model mfa_amr_claims {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model mfa_challenges {
   id                     String      @id @db.Uuid
   factor_id              String      @db.Uuid
@@ -332,8 +322,6 @@ model mfa_challenges {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model mfa_factors {
   id                   String           @id @db.Uuid
   user_id              String           @db.Uuid
@@ -356,8 +344,6 @@ model mfa_factors {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model one_time_tokens {
   id         String              @id @db.Uuid
   user_id    String              @db.Uuid
@@ -374,8 +360,6 @@ model one_time_tokens {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model refresh_tokens {
   instance_id String?   @db.Uuid
   id          BigInt    @id @default(autoincrement())
@@ -396,9 +380,6 @@ model refresh_tokens {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model saml_providers {
   id                String        @id @db.Uuid
   sso_provider_id   String        @db.Uuid
@@ -415,9 +396,6 @@ model saml_providers {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model saml_relay_states {
   id              String        @id @db.Uuid
   sso_provider_id String        @db.Uuid
@@ -436,16 +414,12 @@ model saml_relay_states {
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model schema_migrations {
   version String @id @db.VarChar(255)
 
   @@schema("auth")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model sessions {
   id             String           @id @db.Uuid
   user_id        String           @db.Uuid
@@ -468,10 +442,6 @@ model sessions {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model sso_domains {
   id              String        @id @db.Uuid
   sso_provider_id String        @db.Uuid
@@ -484,10 +454,6 @@ model sso_domains {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model sso_providers {
   id                String              @id @db.Uuid
   resource_id       String?
@@ -500,10 +466,6 @@ model sso_providers {
   @@schema("auth")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
   instance_id                 String?           @db.Uuid
   id                          String            @id @db.Uuid
@@ -531,7 +493,7 @@ model users {
   phone_change                String?           @default("")
   phone_change_token          String?           @default("") @db.VarChar(255)
   phone_change_sent_at        DateTime?         @db.Timestamptz(6)
-  confirmed_at                DateTime?         @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  confirmed_at                DateTime?         @db.Timestamptz(6)
   email_change_token_current  String?           @default("") @db.VarChar(255)
   email_change_confirm_status Int?              @default(0) @db.SmallInt
   banned_until                DateTime?         @db.Timestamptz(6)
@@ -635,7 +597,6 @@ model user {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_id_mapping {
   old_cuid String @id
   new_uuid String @db.Uuid
@@ -754,4 +715,39 @@ enum one_time_token_type {
   phone_change_token
 
   @@schema("auth")
+}
+
+enum application_status {
+  pending
+  approved
+  rejected
+
+  @@schema("public")
+}
+
+model job_application {
+  id                String             @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  position          String
+  addressStreet     String
+  addressCity       String
+  addressState      String
+  addressZip        String
+  education         String
+  workExperience    String
+  skills            String
+  coverLetter       String?
+  resumeUrl         String
+  driversLicenseUrl String?
+  insuranceUrl      String?
+  vehicleRegUrl     String?
+  status            application_status @default(pending)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  fileUploads       file_upload[]
+
+  @@schema("public")
 }

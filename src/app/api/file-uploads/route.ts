@@ -37,20 +37,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getSession();
 
     // Determine the user ID (prioritize authenticated session, fall back to form data)
-    const userId = session?.user?.id || formUserId;
-
-    if (!userId) {
-      console.log(
-        "No user ID available - both session and form data missing user ID",
-      );
-      return NextResponse.json(
-        {
-          error:
-            "User ID is required. Please provide a userId or authenticate.",
-        },
-        { status: 400 },
-      );
-    }
+    const userId = session?.user?.id || formUserId || "temp_application_user";
 
     // Log parameters for debugging
     console.log("Upload parameters:", {
@@ -106,6 +93,8 @@ export async function POST(request: NextRequest) {
       filePath = `catering/${entityId || userId}/${fileName}`;
     } else if (entityType === "on_demand") {
       filePath = `on_demand/${entityId || userId}/${fileName}`;
+    } else if (entityType === "job_application") {
+      filePath = `job_applications/${category}/${entityId || userId}/${fileName}`;
     } else {
       // Default to user files path
       filePath = `${userType}/${entityId || userId}/${fileName}`;
@@ -182,10 +171,19 @@ export async function POST(request: NextRequest) {
             },
           });
           console.log(`Created minimal user record for ${userId}`);
-        } catch (userCreateError) {
-          console.error("Failed to create user record:", userCreateError);
-          // If we can't create a user, we'll still try to continue with the file upload
-          // The database might reject it, but let's try
+        } catch (userCreateError: any) {
+          console.error("Failed to create necessary user record:", userCreateError);
+          // If we can't create a user, we cannot proceed with the file upload due to FK constraints.
+          return NextResponse.json(
+            {
+              error: "Failed to create necessary user record for file upload",
+              details: userCreateError.message || String(userCreateError),
+              // We know the file was uploaded, including URL might help debugging/manual cleanup
+              fileUploaded: true,
+              fileUrl: publicUrl,
+            },
+            { status: 500 },
+          );
         }
       }
 
@@ -193,17 +191,9 @@ export async function POST(request: NextRequest) {
       let cateringRequestId = null;
       let onDemandId = null;
 
-      if (
-        entityType === "catering_request" &&
-        entityId &&
-        !isNaN(Number(entityId))
-      ) {
+      if (entityType === "catering_request" && entityId && !isNaN(Number(entityId))) {
         cateringRequestId = BigInt(entityId);
-      } else if (
-        entityType === "on_demand" &&
-        entityId &&
-        !isNaN(Number(entityId))
-      ) {
+      } else if (entityType === "on_demand" && entityId && !isNaN(Number(entityId))) {
         onDemandId = BigInt(entityId);
       }
 
@@ -222,6 +212,7 @@ export async function POST(request: NextRequest) {
           category,
           cateringRequestId,
           onDemandId,
+          isTemporary: userId.startsWith('temp_') || userId === 'temp_application_user',
         },
       });
 
