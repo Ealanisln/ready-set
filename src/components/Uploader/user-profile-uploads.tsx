@@ -4,7 +4,7 @@ import React from "react";
 import { FileUploader } from "@/components/Uploader/file-uploader";
 import { FileWithPath } from "react-dropzone";
 import { Badge } from "@/components/ui/badge";
-import { Info } from "lucide-react";
+import { Upload } from "lucide-react";
 
 interface UploadHook {
   onUpload: (files: FileWithPath[]) => Promise<void>;
@@ -25,7 +25,7 @@ interface UserProfileUploadsProps {
     | "helpdesk"
     | "super_admin";
   onUploadSuccess: () => void;
-  isUserProfile?: boolean; // Add this prop to the interface
+  isUserProfile?: boolean;
 }
 
 const driverUploadFields = [
@@ -63,9 +63,8 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
   uploadHooks,
   userType,
   onUploadSuccess,
-  isUserProfile = false, // Add default value
+  isUserProfile = false
 }) => {
-  // Select the appropriate upload fields based on user type
   const uploadFields = userType === "driver" 
     ? driverUploadFields 
     : generalUploadFields;
@@ -73,45 +72,32 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
   const handleUpload = async (hook: UploadHook, files: FileWithPath[]) => {
     try {
       await hook.onUpload(files);
-      onUploadSuccess(); // Notify parent on upload success
+      onUploadSuccess();
     } catch (error) {
       console.error("Error in upload:", error);
-      // Error handling is managed by the hook itself
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {uploadFields.map((field) => {
         const hook = uploadHooks[field.name];
-        if (!hook) return null; // Skip if hook is not provided
+        if (!hook) return null;
 
         return (
-          <div key={field.name} className="space-y-2">
+          <div key={field.name} className="space-y-3 p-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-medium">{field.label}</h3>
+              <h3 className="text-sm font-medium">{field.label}</h3>
               <Badge variant="secondary" className="text-xs font-normal">
                 {hook.category.replace(/_/g, ' ')}
               </Badge>
               
-              {/* Conditional rendering based on isUserProfile */}
               {isUserProfile && field.name !== "general_files" && (
                 <Badge variant="outline" className="ml-auto text-xs">
                   Required
                 </Badge>
               )}
             </div>
-            
-            {field.description && (
-              <div className="flex items-start gap-2 text-sm text-muted-foreground mb-2">
-                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <p>
-                  {isUserProfile && field.name === "license_photo" 
-                    ? "Please ensure your license is valid and not expired." 
-                    : field.description}
-                </p>
-              </div>
-            )}
             
             <FileUploader
               onUpload={(files) => handleUpload(hook, files as FileWithPath[])}
@@ -121,27 +107,22 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
                 "image/*": [],
                 "application/pdf": [],
               }}
-              maxSize={3 * 1024 * 1024} // 3MB
+              maxSize={3 * 1024 * 1024}
               maxFileCount={1}
               category={hook.category}
               entityType={hook.entityType}
               entityId={hook.entityId}
-            />
+            >
+              <div className="text-center py-6">
+                <Upload className="mx-auto h-8 w-8 text-muted-foreground/60" />
+                <p className="mt-2 text-sm font-medium text-muted-foreground">
+                  Drag and drop or click to browse
+                </p>
+              </div>
+            </FileUploader>
           </div>
         );
       })}
-      
-      <div className="text-xs text-muted-foreground mt-4">
-        <p>Supported file types: Images (JPG, PNG, GIF) and PDF</p>
-        <p>Maximum file size: 3MB</p>
-        
-        {/* Additional instructions for user profile */}
-        {isUserProfile && userType === "driver" && (
-          <p className="text-amber-600 mt-1">
-            Driver documents must be approved before you can accept deliveries
-          </p>
-        )}
-      </div>
     </div>
   );
 };

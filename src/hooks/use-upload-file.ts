@@ -1,5 +1,5 @@
 // src/hooks/use-upload-file.ts
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -46,9 +46,8 @@ export function useUploadFile({
     useState<UploadedFile[]>(defaultUploadedFiles);
   const [isUploading, setIsUploading] = useState(false);
   const [progresses, setProgresses] = useState<Record<string, number>>({});
-  const [tempEntityId, setTempEntityId] = useState<string>(
-    initialEntityId || uuidv4(),
-  );
+  const [entityId, setEntityId] = useState<string>(initialEntityId || "");
+  const [tempEntityId, setTempEntityId] = useState<string>("");
 
   // Initialize Supabase client if not already initialized
   const initSupabase = useCallback(async () => {
@@ -65,6 +64,49 @@ export function useUploadFile({
     }
     return supabase;
   }, [supabase]);
+
+  // Fetch existing files
+  const fetchExistingFiles = useCallback(async () => {
+    if (!entityId) return;
+
+    try {
+      const params = new URLSearchParams({
+        entityId,
+        entityType: entityType || "user",
+      });
+      if (category) {
+        params.append("category", category);
+      }
+
+      console.log('Fetching files with params:', params.toString());
+      const response = await fetch(`/api/file-uploads/get?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error("Failed to fetch files");
+      }
+
+      const data = await response.json();
+      console.log('Fetched files data:', data);
+      
+      if (data.success && data.files) {
+        console.log('Setting uploaded files:', data.files);
+        setUploadedFiles(data.files);
+      }
+    } catch (error) {
+      console.error("Error fetching existing files:", error);
+    }
+  }, [entityId, entityType, category]);
+
+  // Initialize Supabase client and fetch existing files
+  useEffect(() => {
+    const init = async () => {
+      await initSupabase();
+      await fetchExistingFiles();
+    };
+    init();
+  }, [initSupabase, fetchExistingFiles]);
 
   // Handle file uploads to Supabase Storage and register in database via API
   const onUpload = useCallback(
@@ -103,7 +145,7 @@ export function useUploadFile({
           // Create FormData for API upload
           const formData = new FormData();
           formData.append("file", file);
-          formData.append("entityId", tempEntityId || "");
+          formData.append("entityId", entityId || "");
           formData.append("entityType", entityType || "");
           formData.append("category", category || "general");
           formData.append("bucketName", bucketName || "fileUploader");
@@ -175,7 +217,7 @@ export function useUploadFile({
       maxFileSize,
       allowedFileTypes,
       progresses,
-      tempEntityId,
+      entityId,
       uploadedFiles,
       bucketName,
     ],
@@ -186,7 +228,7 @@ export function useUploadFile({
     async (newEntityId: string) => {
       try {
         console.log(
-          `Updating entity ID from ${tempEntityId} to ${newEntityId}`,
+          `Updating entity ID from ${entityId} to ${newEntityId}`,
         );
 
         // Make an API call to update the entity IDs
@@ -196,7 +238,7 @@ export function useUploadFile({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            oldEntityId: tempEntityId,
+            oldEntityId: entityId,
             newEntityId,
             entityType,
           }),
@@ -215,14 +257,14 @@ export function useUploadFile({
           })),
         );
 
-        setTempEntityId(newEntityId);
+        setEntityId(newEntityId);
         return true;
       } catch (error) {
         console.error("Error updating entity ID:", error);
         return false;
       }
     },
-    [tempEntityId, entityType],
+    [entityId, entityType],
   );
 
   // Delete a file from Supabase storage and database
@@ -340,6 +382,7 @@ export function useUploadFile({
     uploadedFiles,
     isUploading,
     progresses,
+    entityId,
     tempEntityId,
     onUpload,
     updateEntityId,

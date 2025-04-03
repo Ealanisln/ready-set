@@ -222,6 +222,7 @@ export const useUserData = (
       onUpload,
       progresses: uploadHook.progresses,
       isUploading: uploadHook.isUploading,
+      uploadedFiles: uploadHook.uploadedFiles,
       category,
       entityType: "user",
       entityId: userId,

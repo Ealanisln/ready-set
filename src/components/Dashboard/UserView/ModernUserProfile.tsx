@@ -1,6 +1,6 @@
 // src/components/Dashboard/UserView/ModernUserProfile.tsx
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
 import { Save, XCircle, ChevronLeft, AlertOctagon } from "lucide-react";
@@ -15,7 +15,7 @@ import UserDocumentsCard from "./Sidebar/UserDocumentsCard";
 import UserArchiveCard from "./Sidebar/UserArchiveCard";
 import { useUserForm } from "./hooks/useUserForm";
 import { useUserData } from "./hooks/useUserData";
-import { User, UserFormValues } from "./types";
+import { UserFormValues } from "./types";
 
 interface ModernUserProfileProps {
   userId: string;
@@ -82,7 +82,7 @@ export default function ModernUserProfile({ userId }: ModernUserProfileProps) {
     vehicle_photo: useUploadFileHook("vehicle_photo"),
     license_photo: useUploadFileHook("license_photo"),
     general_files: useUploadFileHook("general_files"),
-  } as const;
+  };
 
   // Loading states
   if (isUserLoading) {

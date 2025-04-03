@@ -34,7 +34,7 @@ export default function UserProfile({
 
 // Auth context - get the current user ID if not provided as prop
 const { session, isLoading: isUserLoading } = useUser();
-const userId = propUserId || session?.user?.id;
+const userId = propUserId || session?.user?.id || "";
 
 console.log("User ID from props or session:", userId);
 
@@ -128,7 +128,7 @@ useEffect(() => {
   } as const;
 
   // Loading states
-  if (isUserLoading || !userId) {
+  if (isUserLoading && !session) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex items-center space-x-4">
@@ -182,7 +182,7 @@ useEffect(() => {
                 uploadHooks={uploadHooks}
                 userType={watchedValues.type ?? "client"}
                 setRefreshTrigger={setRefreshTrigger}
-                isUserProfile={true} // New prop to disable admin-specific features
+                isUserProfile={true}
               />
             </div>
           </div>

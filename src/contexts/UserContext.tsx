@@ -55,8 +55,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Initialize Supabase
   useEffect(() => {
     const initSupabase = async () => {
+      console.log("Initializing Supabase client...");
       try {
         const client = await createClient();
+        console.log("Supabase client initialized successfully");
         setSupabase(client);
       } catch (err) {
         console.error("Failed to initialize Supabase client:", err);
@@ -70,40 +72,51 @@ export function UserProvider({ children }: { children: ReactNode }) {
   
   // Load session data
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      console.log("Waiting for Supabase client...");
+      return;
+    }
     
+    console.log("Setting up auth state...");
     let mounted = true;
     let authListener: any = null;
     
     const setupAuth = async () => {
       try {
+        console.log("Getting initial session...");
         // Get initial session
         const { data } = await supabase.auth.getSession();
         
         if (!mounted) return;
         
         const currentSession = data?.session;
+        console.log("Initial session:", currentSession ? "Found" : "Not found");
         setSession(currentSession);
         setUser(currentSession?.user || null);
         
         // Only fetch role if we have a user
         if (currentSession?.user) {
+          console.log("Fetching user role...");
           await fetchUserRole(currentSession.user);
         } else {
+          console.log("No user session, setting loading to false");
           setIsLoading(false);
         }
         
         // Set up auth listener
+        console.log("Setting up auth state listener...");
         const { data: listener } = supabase.auth.onAuthStateChange(
           async (_event: string, newSession: Session | null) => {
             if (!mounted) return;
             
+            console.log("Auth state changed:", _event);
             setSession(newSession);
             setUser(newSession?.user || null);
             
             // Reset role if user signs out
             if (!newSession?.user) {
               setUserRole(null);
+              setIsLoading(false);
               return;
             }
             
@@ -123,6 +136,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
       }
     };
+    
+    setupAuth();
     
     // Helper to fetch user role
     const fetchUserRole = async (user: User) => {
@@ -206,8 +221,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
       }
     };
-    
-    setupAuth();
     
     return () => {
       mounted = false;

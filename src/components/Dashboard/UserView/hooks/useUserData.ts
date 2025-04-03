@@ -189,7 +189,7 @@ export const useUserData = (
   const useUploadFileHook = (category: string) => {
     const uploadHook = useUploadFile({
       defaultUploadedFiles: [],
-      userId: session?.user?.id ?? "",
+      userId: userId,
       maxFileCount: 1,
       maxFileSize: 3 * 1024 * 1024,
       allowedFileTypes: [
@@ -217,6 +217,7 @@ export const useUserData = (
       onUpload,
       progresses: uploadHook.progresses,
       isUploading: uploadHook.isUploading,
+      uploadedFiles: uploadHook.uploadedFiles,
       category,
       entityType: "user",
       entityId: userId,

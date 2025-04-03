@@ -1,5 +1,8 @@
 // src/components/User/UserProfile/types.ts
 
+import { FileWithPath } from "react-dropzone";
+import { UploadedFile } from "@/hooks/use-upload-file";
+
 export interface User {
     id: string;
     name?: string | null;
@@ -58,6 +61,7 @@ export interface User {
     onUpload: (files: any[]) => Promise<void>;
     progresses: Record<string, number>;
     isUploading: boolean;
+    uploadedFiles: UploadedFile[];
     category: string;
     entityType: string;
     entityId: string;

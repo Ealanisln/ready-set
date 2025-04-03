@@ -56,13 +56,13 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
     // Map the files to a more user-friendly format
     const formattedFiles = files.map(file => ({
       id: file.id,
-      name: file.fileName,
-      url: file.fileUrl,
-      type: file.fileType,
-      size: file.fileSize,
+      fileName: file.fileName,
+      fileUrl: file.fileUrl,
+      fileType: file.fileType,
+      fileSize: file.fileSize,
       category: file.category,
       uploadedAt: file.uploadedAt,
-      uploadedBy: file.userId
+      userId: file.userId
     }));
     
     return NextResponse.json(formattedFiles);

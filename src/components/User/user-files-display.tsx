@@ -7,10 +7,10 @@ import toast from 'react-hot-toast';
 
 interface UserFile {
   id: string;
-  name: string;
-  url: string;
-  type: string;
-  size: number;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
   category?: string;
   uploadedAt: string;
 }
@@ -28,27 +28,30 @@ export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFil
 
   useEffect(() => {
     const fetchUserFiles = async () => {
+      console.log('Fetching files for userId:', userId);
       try {
         setLoading(true);
         setError(null);
         
-        // Prevent browser caching
-        const cacheKey = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        const response = await fetch(`/api/users/files?userId=${userId}&t=${cacheKey}`, {
+        const response = await fetch(`/api/users/${userId}/files`, {
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache'
           }
         });
         
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
           throw new Error(`Failed to fetch files: ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();
+        console.log('API Response data:', data);
         
-        if (data.success && Array.isArray(data.files)) {
-          setFiles(data.files);
+        if (Array.isArray(data)) {
+          console.log('Setting files:', data);
+          setFiles(data);
         } else {
           console.warn("Unexpected response format:", data);
           setFiles([]);
@@ -58,12 +61,17 @@ export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFil
         setError(err instanceof Error ? err.message : "Failed to load files");
         setFiles([]);
       } finally {
+        console.log('Setting loading to false');
         setLoading(false);
       }
     };
     
     if (userId) {
+      console.log('Starting fetch for userId:', userId);
       fetchUserFiles();
+    } else {
+      console.log('No userId provided, skipping fetch');
+      setLoading(false);
     }
   }, [userId, refreshTrigger]);
 
@@ -146,16 +154,16 @@ export default function UserFilesDisplay({ userId, refreshTrigger = 0 }: UserFil
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center">
                     <a 
-                      href={file.url} 
+                      href={file.fileUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="font-medium text-blue-600 hover:underline truncate"
                     >
-                      {file.name}
+                      {file.fileName}
                     </a>
                   </div>
                   <div className="mt-1 flex text-sm text-gray-500 space-x-2">
-                    <span>{formatFileSize(file.size)}</span>
+                    <span>{formatFileSize(file.fileSize)}</span>
                     <span>•</span>
                     <span>{new Date(file.uploadedAt).toLocaleDateString()}</span>
                   </div>

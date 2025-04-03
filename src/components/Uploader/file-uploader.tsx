@@ -18,6 +18,7 @@ interface FileUploaderProps {
   category?: string;
   entityType?: string;
   entityId?: string;
+  children?: React.ReactNode;
 }
 
 export function FileUploader({
@@ -34,6 +35,7 @@ export function FileUploader({
   category,
   entityType,
   entityId,
+  children,
 }: FileUploaderProps) {
   const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +105,7 @@ export function FileUploader({
       <div
         {...getRootProps()}
         className={cn(
-          "border-2 border-dashed rounded-md p-6 cursor-pointer transition-colors",
+          "border-2 border-dashed rounded-md cursor-pointer transition-colors",
           isDragActive
             ? "border-primary/70 bg-primary/5"
             : "border-border hover:border-primary/50 hover:bg-muted/50",
@@ -111,15 +113,17 @@ export function FileUploader({
         )}
       >
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center justify-center text-center space-y-2">
-          <Upload className="h-10 w-10 text-muted-foreground" />
-          <div className="text-sm">
-            <p className="font-medium">
-              {isDragActive ? "Drop the files here" : "Drag and drop files here"}
-            </p>
-            <p className="text-muted-foreground">or click to browse</p>
+        {children || (
+          <div className="flex flex-col items-center justify-center text-center space-y-2 p-6">
+            <Upload className="h-10 w-10 text-muted-foreground" />
+            <div className="text-sm">
+              <p className="font-medium">
+                {isDragActive ? "Drop the files here" : "Drag and drop files here"}
+              </p>
+              <p className="text-muted-foreground">or click to browse</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {error && (
