@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { client, urlFor } from "@/sanity/lib/client";
 import BackArrow from "@/components/Common/Back";
 import React from "react";
-import Image from "next/image";
 import Logo from "@/components/ui/logo";
 import type { Metadata } from "next";
 import { DownloadButtonWrapper } from "./DownloadButtonWrapper";

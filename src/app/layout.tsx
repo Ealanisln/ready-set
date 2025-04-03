@@ -7,6 +7,7 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
+import { UserProvider } from "@/contexts/UserContext"; // Add this import
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -41,7 +42,9 @@ export default function RootLayout({
       </head>
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          <ClientLayout>{children}</ClientLayout>
+          <UserProvider> {/* Wrap everything in UserProvider */}
+            <ClientLayout>{children}</ClientLayout>
+          </UserProvider>
         </ErrorBoundary>
         {/* {process.env.NODE_ENV === "development" && <VercelToolbar />} */}
         <Analytics />

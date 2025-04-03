@@ -25,6 +25,7 @@ interface UserProfileUploadsProps {
     | "helpdesk"
     | "super_admin";
   onUploadSuccess: () => void;
+  isUserProfile?: boolean; // Add this prop to the interface
 }
 
 const driverUploadFields = [
@@ -62,6 +63,7 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
   uploadHooks,
   userType,
   onUploadSuccess,
+  isUserProfile = false, // Add default value
 }) => {
   // Select the appropriate upload fields based on user type
   const uploadFields = userType === "driver" 
@@ -91,12 +93,23 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
               <Badge variant="secondary" className="text-xs font-normal">
                 {hook.category.replace(/_/g, ' ')}
               </Badge>
+              
+              {/* Conditional rendering based on isUserProfile */}
+              {isUserProfile && field.name !== "general_files" && (
+                <Badge variant="outline" className="ml-auto text-xs">
+                  Required
+                </Badge>
+              )}
             </div>
             
             {field.description && (
               <div className="flex items-start gap-2 text-sm text-muted-foreground mb-2">
                 <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <p>{field.description}</p>
+                <p>
+                  {isUserProfile && field.name === "license_photo" 
+                    ? "Please ensure your license is valid and not expired." 
+                    : field.description}
+                </p>
               </div>
             )}
             
@@ -121,6 +134,13 @@ const UserProfileUploads: React.FC<UserProfileUploadsProps> = ({
       <div className="text-xs text-muted-foreground mt-4">
         <p>Supported file types: Images (JPG, PNG, GIF) and PDF</p>
         <p>Maximum file size: 3MB</p>
+        
+        {/* Additional instructions for user profile */}
+        {isUserProfile && userType === "driver" && (
+          <p className="text-amber-600 mt-1">
+            Driver documents must be approved before you can accept deliveries
+          </p>
+        )}
       </div>
     </div>
   );

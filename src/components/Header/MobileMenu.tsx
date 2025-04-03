@@ -1,3 +1,5 @@
+// src/components/Header/MobileMenu.tsx
+
 "use client";
 
 import Link from "next/link";
@@ -30,7 +32,7 @@ interface MobileMenuProps {
   navbarToggleHandler: () => void;
   user: User | null;
   pathUrl: string;
-  getTextColorClasses: () => string;
+  getTextColorClasses: () => string; // This function determines the base text color
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -42,7 +44,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   navbarToggleHandler,
   user,
   pathUrl,
-  getTextColorClasses,
+  getTextColorClasses, // Use the passed function
 }) => {
   const router = useRouter();
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
@@ -72,9 +74,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     try {
       setIsSigningOut(true);
       navbarToggleHandler(); // Close mobile menu
-      
+
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       } else {
@@ -104,11 +106,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <li key={menuItem.id} className="group relative">
             {menuItem.submenu ? (
               <>
+                {/* MODIFIED: Removed hardcoded text-dark, dark:text-white, lg:text-white etc. */}
                 <button
                   onClick={() => handleSubmenu(index)}
-                  className={`flex cursor-pointer items-center justify-between py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 lg:text-white lg:dark:text-white ${
-                    openIndex === index ? "text-primary dark:text-primary" : ""
-                  } ${getTextColorClasses()}`}
+                  className={`flex cursor-pointer items-center justify-between py-2 text-base group-hover:text-primary dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 ${ // Base layout/hover styles
+                    openIndex === index ? "text-primary dark:text-primary" : "" // Active/Open state color
+                  } ${getTextColorClasses()}`} // Dynamic color based on route/sticky
                 >
                   {menuItem.title}
                   <span className="pl-3">
@@ -126,15 +129,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   }`}
                 >
                   <div className="relative grid gap-2 rounded-sm lg:grid-cols-1">
+                     {/* Submenu items retain their specific styling */}
                     {menuItem.submenu.map((submenuItem) => (
                       <Link
                         href={submenuItem.path || "#"}
                         key={submenuItem.id}
                         onClick={closeNavbarOnNavigate}
                         target={submenuItem.newTab ? "_blank" : "_self"}
-                        className={`block rounded py-2.5 text-sm text-dark hover:text-primary dark:text-white/70 dark:hover:text-white lg:px-3 ${
+                        className={`block rounded py-2.5 text-sm text-dark hover:text-primary dark:text-white/70 dark:hover:text-white lg:px-3 ${ // Submenu specific styles
                           pathUrl === submenuItem.path
-                            ? "text-primary dark:text-white"
+                            ? "text-primary dark:text-white" // Active submenu item color
                             : ""
                         }`}
                       >
@@ -145,15 +149,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 </div>
               </>
             ) : (
+               // MODIFIED: Removed hardcoded text-dark, dark:text-white, lg:text-white etc.
               <Link
                 href={menuItem.path || "#"}
                 onClick={closeNavbarOnNavigate}
                 target={menuItem.newTab ? "_blank" : "_self"}
-                className={`block py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 lg:text-white lg:dark:text-white ${
+                className={`block py-2 text-base group-hover:text-primary dark:group-hover:text-primary lg:mr-0 lg:inline-flex lg:py-6 lg:px-0 ${ // Base layout/hover styles
                   pathUrl === menuItem.path
-                    ? "text-primary dark:text-primary"
+                    ? "text-primary dark:text-primary" // Active state color
                     : ""
-                } ${getTextColorClasses()}`}
+                } ${getTextColorClasses()}`} // Dynamic color based on route/sticky
               >
                 {menuItem.title}
               </Link>
@@ -166,10 +171,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       <div className="flex flex-col gap-2 border-t border-stroke pt-3 dark:border-dark-3 lg:hidden">
         {user ? (
           <>
+            {/* These buttons have their own styling, often independent of navbar text color */}
             <Link
               href={`/user/${user.id}`}
               onClick={closeNavbarOnNavigate}
-              className="rounded-md px-6 py-3 text-base font-medium text-dark dark:text-white"
+              className="rounded-md px-6 py-3 text-base font-medium text-dark dark:text-white" // Standard mobile link style
             >
               {user.name}
             </Link>
@@ -177,9 +183,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               onClick={handleSignOut}
               disabled={isSigningOut || !supabase}
               className={`rounded-md ${
-                isSigningOut || !supabase 
-                  ? "bg-blue-400" 
-                  : "bg-blue-500 hover:bg-blue-600"
+                isSigningOut || !supabase
+                  ? "bg-blue-400" // Disabled/loading state
+                  : "bg-blue-500 hover:bg-blue-600" // Standard button style
               } px-6 py-3 text-base font-medium text-white transition-colors`}
             >
               {isSigningOut ? "Signing Out..." : !supabase ? "Connecting..." : "Sign Out"}
@@ -187,17 +193,18 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </>
         ) : (
           <>
+            {/* These buttons have their own styling */}
             <Link
               href="/sign-in"
               onClick={closeNavbarOnNavigate}
-              className="rounded-md bg-body-color/10 px-6 py-3 text-base font-medium text-dark dark:bg-white/10 dark:text-white"
+              className="rounded-md bg-body-color/10 px-6 py-3 text-base font-medium text-dark dark:bg-white/10 dark:text-white" // Standard mobile link style
             >
               Sign In
             </Link>
             <Link
               href="/sign-up"
               onClick={closeNavbarOnNavigate}
-              className="rounded-md bg-blue-500 px-6 py-3 text-base font-medium text-white"
+              className="rounded-md bg-blue-500 px-6 py-3 text-base font-medium text-white" // Standard mobile button style
             >
               Sign Up
             </Link>
