@@ -129,35 +129,59 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create user in Supabase
-    // Note: Supabase will automatically return an error if the email already exists
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.toLowerCase(),
-      password: password,
-      options: {
-        // Set up email confirmation redirect if needed
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-        // Include user metadata
-        data: {
-          userType,
-          name: userType === "driver" || userType === "helpdesk"
-            ? (body as DriverFormData | HelpDeskFormData).name
-            : (body as VendorFormData | ClientFormData).contact_name,
-          company: userType !== "driver" && userType !== "helpdesk"
-            ? (body as VendorFormData | ClientFormData).company
-            : "",
+    // Create user in Supabase with retry mechanism
+    console.log('Attempting to create Supabase user with email:', email.toLowerCase());
+    
+    let authData: { user: any } | null = null;
+    let authError;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      const result = await supabase.auth.signUp({
+        email: email.toLowerCase(),
+        password: password,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+          data: {
+            userType,
+            name: userType === "driver" || userType === "helpdesk"
+              ? (body as DriverFormData | HelpDeskFormData).name
+              : (body as VendorFormData | ClientFormData).contact_name,
+            company: userType !== "driver" && userType !== "helpdesk"
+              ? (body as VendorFormData | ClientFormData).company
+              : "",
+          }
         }
+      });
+      
+      authData = result.data;
+      authError = result.error;
+      
+      if (!authError) break;
+      
+      console.log(`Retry attempt ${retryCount + 1} of ${maxRetries}`);
+      retryCount++;
+      
+      if (retryCount < maxRetries) {
+        // Wait for 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    });
+    }
 
     if (authError) {
+      console.error('Supabase auth error after retries:', {
+        message: authError.message,
+        status: authError.status,
+        name: authError.name
+      });
       return NextResponse.json(
         { error: "Failed to create user in authentication system", details: authError.message },
         { status: 500 }
       );
     }
 
-    if (!authData.user) {
+    if (!authData?.user) {
       return NextResponse.json(
         { error: "Failed to create user account", details: "No user data returned" },
         { status: 500 }
