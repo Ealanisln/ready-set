@@ -20,7 +20,7 @@ export const deleteFile = async (
 
   try {
     // 1. Get the file record from the database
-    const file = await prisma.file_upload.findFirst({
+    const file = await prisma.fileUpload.findFirst({
       where: {
         id: fileKey,
         userId: userId,
@@ -67,7 +67,7 @@ export const deleteFile = async (
     // 5. Delete the database record
     try {
       console.log(`Attempting to delete file record from database: ${fileKey}`);
-      await prisma.file_upload.delete({
+      await prisma.fileUpload.delete({
         where: {
           id: fileKey,
         },

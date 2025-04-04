@@ -1,9 +1,6 @@
-import { createAuthClient } from "better-auth/client";
-import { magicLinkClient } from "better-auth/client/plugins";
+import { createClient } from '@supabase/supabase-js'
 
-export const authClient = createAuthClient({
-    baseURL: process.env.BETTER_AUTH_URL,
-    plugins: [
-        magicLinkClient()
-    ]
-}); 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const authClient = createClient(supabaseUrl, supabaseAnonKey) 

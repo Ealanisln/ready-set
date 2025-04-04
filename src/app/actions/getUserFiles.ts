@@ -30,7 +30,7 @@ export async function getUserFiles(entityId: string) {
     console.log('Query parameters:', { entityId, entityType: 'user' });
 
     // Try to find files with both entityId and entityType
-    const userFiles = await prisma.file_upload.findMany({
+    const userFiles = await prisma.fileUpload.findMany({
       where: {
         entityId: entityId,
         entityType: 'user', // Add the entityType filter

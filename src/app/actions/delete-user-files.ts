@@ -24,7 +24,7 @@ export const deleteUserFiles = async (userId: string): Promise<DeleteUserFilesRe
     const supabase = await createClient();
     
     // Fetch all files associated with the user
-    const userFiles = await prisma.file_upload.findMany({
+    const userFiles = await prisma.fileUpload.findMany({
       where: {
         userId: userId,
       },
@@ -65,7 +65,7 @@ export const deleteUserFiles = async (userId: string): Promise<DeleteUserFilesRe
         }
 
         // Delete file record from database
-        await prisma.file_upload.delete({
+        await prisma.fileUpload.delete({
           where: {
             id: file.id,
           },

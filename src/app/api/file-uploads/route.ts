@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     // For debugging - log the URL
     console.log("Generated public URL:", publicUrl);
 
-    // Create record in the file_upload table
+    // Create record in the fileUpload table
     try {
       console.log("Creating database record with fields:", {
         userId,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       let userExists = null;
 
       try {
-        userExists = await prisma.user.findUnique({
+        userExists = await prisma.profile.findUnique({
           where: { id: userId },
           select: { id: true },
         });
@@ -169,16 +169,12 @@ export async function POST(request: NextRequest) {
         );
 
         try {
-          await prisma.user.create({
+          await prisma.profile.create({
             data: {
               id: userId,
-              // Add minimal required fields based on your schema
+              user_id: userId,
               email: session?.user?.email || `${userId}@placeholder.com`,
-              name:
-                session?.user?.user_metadata?.name ||
-                session?.user?.email?.split("@")[0] ||
-                "Anonymous",
-              // Add other required fields with default/placeholder values
+              name: session?.user?.user_metadata?.name || session?.user?.email?.split("@")[0] || "Anonymous",
             },
           });
           console.log(`Created minimal user record for ${userId}`);
@@ -208,7 +204,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Create the database record using Prisma with explicit timestamp handling
-      const fileUpload = await prisma.file_upload.create({
+      const fileUpload = await prisma.fileUpload.create({
         data: {
           userId,
           fileName: file.name,
@@ -304,7 +300,7 @@ export async function DELETE(request: NextRequest) {
     } = await supabase.auth.getSession();
 
     // Get the file record from the database
-    const fileRecord = await prisma.file_upload.findUnique({
+    const fileRecord = await prisma.fileUpload.findUnique({
       where: { id: fileId },
     });
 
@@ -352,7 +348,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete from database
-    await prisma.file_upload.delete({
+    await prisma.fileUpload.delete({
       where: { id: fileId },
     });
 
