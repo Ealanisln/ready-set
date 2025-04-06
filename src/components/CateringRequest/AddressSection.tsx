@@ -19,7 +19,7 @@ interface AddressSectionProps {
           Delivery Address
         </label>
         <Controller
-          name="delivery_address"
+          name="deliveryAddressId"
           control={control}
           rules={{ required: "Delivery Address is required" }}
           render={({ field, fieldState: { error } }) => (

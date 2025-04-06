@@ -7,12 +7,12 @@ export async function GET(request: NextRequest, props: { params: Promise<{ order
   const { orderId } = params;
 
   try {
-    // Fetch the dispatch with the specific cateringRequestId or on_demandId
+    // Fetch the dispatch with the specific cateringRequestId or onDemandId
     const dispatch = await prisma.dispatch.findFirst({
       where: {
         OR: [
-          { cateringRequestId: BigInt(orderId) },
-          { on_demandId: BigInt(orderId) }
+          { cateringRequestId: orderId },
+          { onDemandId: orderId }
         ]
       },
       include: {
@@ -21,11 +21,11 @@ export async function GET(request: NextRequest, props: { params: Promise<{ order
             id: true,
             name: true,
             email: true,
-            contact_number: true,
+            contactNumber: true,
           },
         },
         cateringRequest: true,
-        on_demand: true,
+        onDemand: true,
       },
     });
 
@@ -35,23 +35,23 @@ export async function GET(request: NextRequest, props: { params: Promise<{ order
 
     // Determine which type of order it is
     const orderType = dispatch.cateringRequestId ? 'catering' : 'onDemand';
-    const order = orderType === 'catering' ? dispatch.cateringRequest : dispatch.on_demand;
+    const order = orderType === 'catering' ? dispatch.cateringRequest : dispatch.onDemand;
 
     return NextResponse.json({
       id: dispatch.id,
       orderType,
-      orderId: orderType === 'catering' ? dispatch.cateringRequestId?.toString() : dispatch.on_demandId?.toString(),
+      orderId: orderType === 'catering' ? dispatch.cateringRequestId?.toString() : dispatch.onDemandId?.toString(),
       driverId: dispatch.driverId,
       driver: dispatch.driver ? {
         id: dispatch.driver.id,
         name: dispatch.driver.name,
         email: dispatch.driver.email,
-        contactNumber: dispatch.driver.contact_number,
+        contactNumber: dispatch.driver.contactNumber,
       } : null,
       order: order ? {
         id: order.id.toString(),
-        orderNumber: order.order_number,
-        date: order.date,
+        orderNumber: order.orderNumber,
+        pickupDateTime: order.pickupDateTime,
         status: order.status,
       } : null,
       createdAt: dispatch.createdAt,

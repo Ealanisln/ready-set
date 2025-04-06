@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server"; // Assumes this is your server client helper
 import { prisma } from "@/utils/prismaDB";
 import { storage } from "@/utils/supabase/storage"; // Import the new storage utility
+import { UserType } from "@prisma/client"; // Import the UserType enum
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,15 +24,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has admin privileges in your application's profile table
-    const userData = await prisma.profiles.findUnique({
-      where: { auth_user_id: user.id },
+    const userData = await prisma.profile.findUnique({
+      where: { id: user.id },
       select: { type: true },
     });
 
     // Only allow admins or super_admins
     if (
       !userData ||
-      (userData.type !== "admin" && userData.type !== "super_admin")
+      (userData.type !== UserType.ADMIN && userData.type !== UserType.SUPER_ADMIN)
     ) {
       return NextResponse.json(
         { message: "Forbidden - Admin permissions required" },
@@ -64,10 +65,10 @@ export async function POST(req: NextRequest) {
       try {
         // Step 1: Identify order type and ID
         let orderType: "catering" | "on_demand" | null = null;
-        let orderId: bigint | null = null;
+        let orderId: string | null = null;
 
-        const cateringRequest = await prisma.catering_request.findUnique({
-          where: { order_number: orderNumber },
+        const cateringRequest = await prisma.cateringRequest.findUnique({
+          where: { orderNumber: orderNumber },
           select: { id: true },
         });
 
@@ -75,8 +76,8 @@ export async function POST(req: NextRequest) {
           orderType = "catering";
           orderId = cateringRequest.id;
         } else {
-          const onDemandOrder = await prisma.on_demand.findUnique({
-            where: { order_number: orderNumber },
+          const onDemandOrder = await prisma.onDemand.findUnique({
+            where: { orderNumber: orderNumber },
             select: { id: true },
           });
           if (onDemandOrder) {
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Step 2: Find all file uploads linked to this order
-        const fileUploads = await prisma.file_upload.findMany({
+        const fileUploads = await prisma.fileUpload.findMany({
           where:
             orderType === "catering"
               ? { cateringRequestId: orderId }
@@ -209,12 +210,12 @@ export async function POST(req: NextRequest) {
             where:
               orderType === "catering"
                 ? { cateringRequestId: orderId }
-                : { on_demandId: orderId },
+                : { onDemandId: orderId },
           });
 
           // Step 6: Delete all file upload records from the database
-          console.log(`Deleting file_upload records for order ${orderNumber}`);
-          await tx.file_upload.deleteMany({
+          console.log(`Deleting fileUpload records for order ${orderNumber}`);
+          await tx.fileUpload.deleteMany({
             where:
               orderType === "catering"
                 ? { cateringRequestId: orderId }
@@ -224,12 +225,12 @@ export async function POST(req: NextRequest) {
           // Step 7: Delete the order itself
           console.log(`Deleting order record for ${orderNumber}`);
           if (orderType === "catering") {
-            await tx.catering_request.delete({
+            await tx.cateringRequest.delete({
               where: { id: orderId },
             });
           } else {
             // 'on_demand'
-            await tx.on_demand.delete({
+            await tx.onDemand.delete({
               where: { id: orderId },
             });
           }

@@ -51,3 +51,5 @@ backups/*
 .env.production.local
 .env*
 !.env.example
+
+/backups

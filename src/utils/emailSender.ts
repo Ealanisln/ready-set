@@ -1,5 +1,5 @@
 import sgMail from "@sendgrid/mail";
-import { Prisma, driver_status } from "@prisma/client";
+import { DriverStatus } from "../types/order";
 
 type PrismaAddress = {
   id: string;
@@ -32,12 +32,12 @@ interface BaseOrder {
   pickup_time: Date | null;
   arrival_time: Date | null;
   complete_time?: Date | null;
-  order_total: number | string | Prisma.Decimal | null;
+  order_total: number | string | null;
   client_attention: string | null;
   pickup_notes?: string | null;
   special_notes?: string | null;
   status?: string | null;
-  driver_status?: driver_status | null;
+  driver_status?: DriverStatus | null;
 }
 
 interface CateringOrder extends BaseOrder {
@@ -83,14 +83,14 @@ export async function sendOrderEmail(order: CateringOrder | OnDemandOrder) {
     return `${address.street1}${address.street2 ? ", " + address.street2 : ""}, ${address.city}, ${address.state} ${address.zip}`;
   };
 
-  const formatOrderTotal = (total: number | string | Prisma.Decimal | null) => {
+  const formatOrderTotal = (total: number | string | null) => {
     if (!total) return "0.00";
     const numericTotal = typeof total === 'number' 
       ? total 
       : typeof total === 'string' 
         ? parseFloat(total)
-        : parseFloat(total.toString());
-    return numericTotal.toFixed(2);
+        : null;
+    return numericTotal ? numericTotal.toFixed(2) : "0.00";
   };
 
   let body = `

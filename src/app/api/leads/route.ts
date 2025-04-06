@@ -34,23 +34,23 @@ export async function POST(req: NextRequest) {
     const validatedData = FormSchema.parse(data);
 
     // Store lead in database (only the fields that exist in the model)
-    const lead = await prisma.lead_capture.upsert({
+    const lead = await prisma.leadCapture.upsert({
       where: {
         email: validatedData.email,
       },
       update: {
-        first_name: validatedData.firstName,
-        last_name: validatedData.lastName,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
         industry: validatedData.industry,
-        newsletter_consent: validatedData.newsletterConsent,
+        newsletterConsent: validatedData.newsletterConsent,
         // Remove the fields that don't exist in the database schema
       },
       create: {
-        first_name: validatedData.firstName,
-        last_name: validatedData.lastName,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
         email: validatedData.email,
         industry: validatedData.industry,
-        newsletter_consent: validatedData.newsletterConsent,
+        newsletterConsent: validatedData.newsletterConsent,
         // Remove the fields that don't exist in the database schema
       },
     });

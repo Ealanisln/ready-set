@@ -35,11 +35,11 @@ export async function PUT(request: NextRequest) {
     // First, try to handle the temporary entity ID update
 
     // Check if there are files with the old entityId
-    const fileRecords = await prisma.file_upload.findMany({
+    const fileRecords = await prisma.fileUpload.findMany({
       where: {
-        entityId: oldEntityId,
-        entityType: entityType || undefined,
-        userId: session.user.id, // Security check - only update own files
+        userId: session.user.id,
+        cateringRequestId: oldEntityId,
+        onDemandId: null
       },
       select: {
         id: true,
@@ -54,11 +54,11 @@ export async function PUT(request: NextRequest) {
     if (fileRecords.length === 0) {
       // If no files found with old entityId, try looking for files with the new entityId
       // This handles the case where files may have already been associated with the new ID
-      const newIdFileRecords = await prisma.file_upload.findMany({
+      const newIdFileRecords = await prisma.fileUpload.findMany({
         where: {
-          entityId: newEntityId,
-          entityType: entityType || undefined,
           userId: session.user.id,
+          cateringRequestId: newEntityId,
+          onDemandId: null
         },
         select: {
           id: true,
@@ -90,14 +90,14 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update all matching file records
-    const updateResult = await prisma.file_upload.updateMany({
+    const updateResult = await prisma.fileUpload.updateMany({
       where: {
-        entityId: oldEntityId,
-        entityType: entityType || undefined,
-        userId: session.user.id, // Security check - only update own files
+        userId: session.user.id,
+        cateringRequestId: oldEntityId,
+        onDemandId: null
       },
       data: {
-        entityId: newEntityId,
+        cateringRequestId: newEntityId
       },
     });
 
@@ -107,14 +107,14 @@ export async function PUT(request: NextRequest) {
         const newIdNumeric = parseInt(newEntityId);
 
         if (!isNaN(newIdNumeric)) {
-          await prisma.file_upload.updateMany({
+          await prisma.fileUpload.updateMany({
             where: {
-              entityId: newEntityId,
-              entityType: "catering_request",
               userId: session.user.id,
+              cateringRequestId: newEntityId,
+              onDemandId: null
             },
             data: {
-              cateringRequestId: newIdNumeric,
+              cateringRequestId: newEntityId
             },
           });
           console.log(`Updated cateringRequestId to ${newIdNumeric} for files`);
@@ -131,14 +131,14 @@ export async function PUT(request: NextRequest) {
         const newIdNumeric = parseInt(newEntityId);
 
         if (!isNaN(newIdNumeric)) {
-          await prisma.file_upload.updateMany({
+          await prisma.fileUpload.updateMany({
             where: {
-              entityId: newEntityId,
-              entityType: "on_demand",
               userId: session.user.id,
+              cateringRequestId: null,
+              onDemandId: newEntityId
             },
             data: {
-              onDemandId: newIdNumeric,
+              onDemandId: newEntityId
             },
           });
           console.log(`Updated onDemandId to ${newIdNumeric} for files`);

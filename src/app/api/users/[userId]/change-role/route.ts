@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ user
     }
 
     // Update the user's role in the database
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.profile.update({
       where: { id: userId },
       data: { type: newRole },
     });

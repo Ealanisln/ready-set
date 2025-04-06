@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma, users_status } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { validateAdminRole } from "@/middleware/authMiddleware";
 import sgMail from "@sendgrid/mail";
 import { createClient } from "@/utils/supabase/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/utils/prismaDB";
+import { Prisma, UserType, UserStatus } from "@prisma/client";
 
 interface AdminRegistrationRequest {
   name: string;
@@ -23,7 +22,6 @@ interface AdminRegistrationRequest {
 const sendRegistrationEmail = async (
   email: string,
   temporaryPassword: string,
-  passwordResetToken: string,
 ) => {
   sgMail.setApiKey(process.env.SEND_API_KEY || "");
 
@@ -33,9 +31,8 @@ const sendRegistrationEmail = async (
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
       <p>For security reasons, you will be required to change your password upon your first login.</p>
-      <p>Please click on the following link to log in and change your password:</p>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/change-password?token=${passwordResetToken}">Change Password</a>
-      <p>This link will expire in 24 hours.</p>
+      <p>Please click on the following link to log in:</p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/login">Login</a>
       <p>If you did not request this account, please ignore this email.</p>
     `;
 
@@ -75,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.profile.findUnique({
       where: { email: body.email.toLowerCase() },
     });
 
@@ -116,27 +113,24 @@ export async function POST(request: Request) {
     }
 
     // Create user in your database with the Supabase UUID as the ID
-    const userData: Prisma.userCreateInput = {
-      id: authData.user.id, // Use the Supabase user ID
+    const userData: Prisma.ProfileCreateInput = {
+      id: authData.user.id,
       email: body.email.toLowerCase(),
       name: body.name,
-      contact_number: body.phoneNumber,
-      password: hashedPassword,
-      type: body.userType,
-      status: users_status.pending,
+      contactNumber: body.phoneNumber,
+      type: body.userType.toUpperCase() as UserType,
+      status: UserStatus.PENDING,
       street1: body.street1,
       street2: body.street2,
       city: body.city,
       state: body.state,
       zip: body.zip,
       isTemporaryPassword: true,
-      passwordResetToken,
-      passwordResetTokenExp,
-      created_at: new Date(),
-      updated_at: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    const newUser = await prisma.user.create({
+    const newUser = await prisma.profile.create({
       data: userData,
     });
 
@@ -178,7 +172,6 @@ export async function POST(request: Request) {
       await sendRegistrationEmail(
         newUser.email,
         temporaryPassword,
-        passwordResetToken,
       );
     }
 

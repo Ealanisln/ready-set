@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, users_type } from '@prisma/client';
 import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/utils/prismaDB";
+import { UserType } from "@/types/user";
 
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,27 +18,27 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the current user's details from the database to check type
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.profile.findUnique({
       where: { id: user.id },
       select: { type: true }
     });
 
     // Check if the user is a super_admin
-    if (currentUser?.type !== "super_admin") {
+    if (currentUser?.type?.toString() !== UserType.SUPER_ADMIN) {
       return NextResponse.json({ message: "Unauthorized - only super admins can change user roles" }, { status: 403 });
     }
 
     const { userId, newRole } = await request.json();
     
     // Validate that newRole is a valid users_type
-    if (!Object.values(users_type).includes(newRole as users_type)) {
+    if (!Object.values(UserType).includes(newRole)) {
       return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
     }
     
     // Update in the user table
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.profile.update({
       where: { id: String(userId) },
-      data: { type: newRole as users_type },
+      data: { type: newRole },
     });
 
     // IMPORTANT: Also update in the profiles table that middleware checks

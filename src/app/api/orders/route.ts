@@ -2,19 +2,52 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { sendOrderEmail } from "@/utils/emailSender";
 import { createClient } from "@/utils/supabase/server";
+import { CateringNeedHost, OrderStatus, VehicleType } from "@/types/order";
 
 const prisma = new PrismaClient();
 
 // Define types for our order objects
-type CateringOrder = Prisma.catering_requestGetPayload<{
-  include: { user: { select: { name: true; email: true } } };
+type PrismaCateringOrder = Prisma.CateringRequestGetPayload<{
+  include: {
+    user: { select: { name: true; email: true } };
+    pickupAddress: true;
+    deliveryAddress: true;
+  };
 }>;
 
-type OnDemandOrder = Prisma.on_demandGetPayload<{
-  include: { user: { select: { name: true; email: true } } };
+type PrismaOnDemandOrder = Prisma.OnDemandGetPayload<{
+  include: {
+    user: { select: { name: true; email: true } };
+    pickupAddress: true;
+    deliveryAddress: true;
+  };
 }>;
 
-type Order = CateringOrder | OnDemandOrder;
+type EmailBaseOrder = {
+  order_type: string;
+  address: any;
+  delivery_address: any;
+  order_number: string;
+  date: Date | null;
+  pickup_time: Date | null;
+  arrival_time: Date | null;
+  order_total: string;
+  client_attention: string | null;
+};
+
+type EmailCateringOrder = EmailBaseOrder & {
+  headcount: string | null;
+  hours_needed: string | null;
+  number_of_host: string | null;
+};
+
+type EmailOnDemandOrder = EmailBaseOrder & {
+  item_delivered: string | null;
+  vehicle_type: string | null;
+};
+
+type PrismaOrder = PrismaCateringOrder | PrismaOnDemandOrder;
+type EmailOrder = EmailCateringOrder | EmailOnDemandOrder;
 
 export async function GET(req: NextRequest) {
   // Create a Supabase client for server-side authentication
@@ -34,29 +67,37 @@ export async function GET(req: NextRequest) {
   const skip = (page - 1) * limit;
 
   try {
-    let cateringOrders: CateringOrder[] = [];
-    let onDemandOrders: OnDemandOrder[] = [];
+    let cateringOrders: PrismaCateringOrder[] = [];
+    let onDemandOrders: PrismaOnDemandOrder[] = [];
 
     if (type === "all" || type === "catering" || !type) {
-      cateringOrders = await prisma.catering_request.findMany({
+      cateringOrders = await prisma.cateringRequest.findMany({
         skip,
         take: limit,
-        orderBy: { created_at: "desc" },
-        include: { user: { select: { name: true, email: true } } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: { select: { name: true, email: true } },
+          pickupAddress: true,
+          deliveryAddress: true,
+        },
       });
     }
 
     if (type === "all" || type === "on_demand" || !type) {
-      onDemandOrders = await prisma.on_demand.findMany({
+      onDemandOrders = await prisma.onDemand.findMany({
         skip,
         take: limit,
-        orderBy: { created_at: "desc" },
-        include: { user: { select: { name: true, email: true } } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: { select: { name: true, email: true } },
+          pickupAddress: true,
+          deliveryAddress: true,
+        },
       });
     }
 
-    const allOrders: Order[] = [...cateringOrders, ...onDemandOrders]
-      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+    const allOrders = [...cateringOrders, ...onDemandOrders]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
 
     const serializedOrders = allOrders.map((order) => ({
@@ -141,14 +182,13 @@ export async function POST(req: NextRequest) {
 
     // Use a transaction to ensure atomicity
     const result = await prisma.$transaction(async (txPrisma) => {
-      // Check for existing order number within both catering_request and on_demand tables
-      const existingCateringRequest =
-        await txPrisma.catering_request.findUnique({
-          where: { order_number: order_number },
-        });
+      // Check for existing order number within both cateringRequest and onDemand tables
+      const existingCateringRequest = await txPrisma.cateringRequest.findUnique({
+        where: { orderNumber: order_number },
+      });
 
-      const existingOnDemandRequest = await txPrisma.on_demand.findUnique({
-        where: { order_number: order_number },
+      const existingOnDemandRequest = await txPrisma.onDemand.findUnique({
+        where: { orderNumber: order_number },
       });
 
       if (existingCateringRequest || existingOnDemandRequest) {
@@ -156,17 +196,19 @@ export async function POST(req: NextRequest) {
       }
 
       // Parse dates
-      let parsedDate, parsedPickupTime, parsedArrivalTime, parsedCompleteTime;
-      try {
-        parsedDate = new Date(date);
-        parsedPickupTime = new Date(`1970-01-01T${pickup_time}`);
-        parsedArrivalTime = new Date(`1970-01-01T${arrival_time}`);
-        parsedCompleteTime = complete_time
-          ? new Date(`1970-01-01T${complete_time}`)
-          : null;
-      } catch (error) {
-        throw new Error("Invalid date format");
-      }
+      let parsedDate = new Date(date);
+      let parsedPickupDateTime = new Date(parsedDate.setHours(
+        new Date(`1970-01-01T${pickup_time}`).getHours(),
+        new Date(`1970-01-01T${pickup_time}`).getMinutes()
+      ));
+      let parsedArrivalDateTime = new Date(parsedDate.setHours(
+        new Date(`1970-01-01T${arrival_time}`).getHours(),
+        new Date(`1970-01-01T${arrival_time}`).getMinutes()
+      ));
+      let parsedCompleteDateTime = complete_time ? new Date(parsedDate.setHours(
+        new Date(`1970-01-01T${complete_time}`).getHours(),
+        new Date(`1970-01-01T${complete_time}`).getMinutes()
+      )) : null;
 
       // Parse numbers
       const parsedOrderTotal = parseFloat(order_total);
@@ -261,86 +303,93 @@ export async function POST(req: NextRequest) {
         deliveryAddressId = newDeliveryAddress.id;
       }
 
-      let newOrder;
+      let newOrder: PrismaOrder;
       if (order_type === "catering") {
-        newOrder = await txPrisma.catering_request.create({
-          data: {
-            user_id: user.id,
-            address_id: addressId,
-            delivery_address_id: deliveryAddressId,
-            brokerage,
-            order_number,
-            date: parsedDate,
-            pickup_time: parsedPickupTime,
-            arrival_time: parsedArrivalTime,
-            complete_time: parsedCompleteTime,
-            headcount: headcount ? String(headcount) : null,
-            need_host: need_host === "yes" ? "yes" : "no",
-            hours_needed: hours_needed ? String(hours_needed) : null,
-            number_of_host: number_of_host ? String(number_of_host) : null,
-            client_attention,
-            pickup_notes,
-            special_notes,
-            order_total: parsedOrderTotal,
-            tip: parsedTip,
-            status: "active",
-          },
+        const cateringData = {
+          userId: user.id,
+          pickupAddressId: addressId,
+          deliveryAddressId: deliveryAddressId,
+          brokerage,
+          orderNumber: order_number,
+          pickupDateTime: parsedPickupDateTime,
+          arrivalDateTime: parsedArrivalDateTime,
+          completeDateTime: parsedCompleteDateTime,
+          headcount: headcount ? parseInt(headcount) : null,
+          needHost: need_host === "yes" ? CateringNeedHost.YES : CateringNeedHost.NO,
+          hoursNeeded: hours_needed ? parseFloat(hours_needed) : null,
+          numberOfHosts: number_of_host ? parseInt(number_of_host) : null,
+          clientAttention: client_attention,
+          pickupNotes: pickup_notes,
+          specialNotes: special_notes,
+          orderTotal: parsedOrderTotal,
+          tip: parsedTip,
+          status: OrderStatus.ACTIVE,
+        };
+        
+        newOrder = await txPrisma.cateringRequest.create({
+          data: cateringData,
           include: {
-            address: true,
-            delivery_address: true,
-            user: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-          },
-        });
-      } else if (order_type === "on_demand") {
-        newOrder = await txPrisma.on_demand.create({
-          data: {
-            user_id: user.id,
-            address_id: addressId,
-            delivery_address_id: deliveryAddressId,
-            order_number,
-            date: parsedDate,
-            pickup_time: parsedPickupTime,
-            arrival_time: parsedArrivalTime,
-            complete_time: parsedCompleteTime,
-            hours_needed: hours_needed ? String(hours_needed) : null,
-            item_delivered,
-            vehicle_type,
-            client_attention,
-            pickup_notes,
-            special_notes,
-            order_total: parsedOrderTotal,
-            tip: parsedTip,
-            length,
-            width,
-            height,
-            weight,
-            status: "active",
-          },
-          include: {
-            user: {
-              select: {
-                name: true,
-                email: true,
-              }
-            },
-            address: true,
-            delivery_address: true,
+            user: { select: { name: true, email: true } },
+            pickupAddress: true,
+            deliveryAddress: true,
           },
         });
       } else {
-        throw new Error("Invalid order type");
+        const onDemandData = {
+          userId: user.id,
+          pickupAddressId: addressId,
+          deliveryAddressId: deliveryAddressId,
+          orderNumber: order_number,
+          pickupDateTime: parsedPickupDateTime,
+          arrivalDateTime: parsedArrivalDateTime,
+          completeDateTime: parsedCompleteDateTime,
+          hoursNeeded: hours_needed ? parseFloat(hours_needed) : null,
+          itemDelivered: item_delivered,
+          vehicleType: vehicle_type as VehicleType,
+          clientAttention: client_attention,
+          pickupNotes: pickup_notes,
+          specialNotes: special_notes,
+          orderTotal: parsedOrderTotal,
+          tip: parsedTip,
+          length: length ? parseFloat(length) : null,
+          width: width ? parseFloat(width) : null,
+          height: height ? parseFloat(height) : null,
+          weight: weight ? parseFloat(weight) : null,
+          status: OrderStatus.ACTIVE,
+        };
+
+        newOrder = await txPrisma.onDemand.create({
+          data: onDemandData,
+          include: {
+            user: { select: { name: true, email: true } },
+            pickupAddress: true,
+            deliveryAddress: true,
+          },
+        });
       }
 
-      // Send email notification
-      await sendOrderEmail({
+      // Send email notification with type information
+      const emailData = {
         ...newOrder,
-        order_type, 
-      });
+        order_type,
+        address: newOrder.pickupAddress,
+        delivery_address: newOrder.deliveryAddress,
+        order_number: newOrder.orderNumber,
+        date: newOrder.pickupDateTime,
+        pickup_time: newOrder.pickupDateTime,
+        arrival_time: newOrder.arrivalDateTime,
+        order_total: String(newOrder.orderTotal),
+        client_attention: newOrder.clientAttention,
+        // Convert numeric fields to strings for email
+        headcount: 'headcount' in newOrder ? String(newOrder.headcount) : undefined,
+        hours_needed: newOrder.hoursNeeded ? String(newOrder.hoursNeeded) : undefined,
+        number_of_host: 'numberOfHosts' in newOrder ? String(newOrder.numberOfHosts) : undefined,
+        item_delivered: 'itemDelivered' in newOrder ? newOrder.itemDelivered : undefined,
+        vehicle_type: 'vehicleType' in newOrder ? newOrder.vehicleType : undefined
+      };
+
+      await sendOrderEmail(emailData);
+      
       return newOrder;
     });
 

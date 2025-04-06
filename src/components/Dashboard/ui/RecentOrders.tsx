@@ -48,21 +48,17 @@ export const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({ orders }) 
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/admin/catering-orders/${order.order_number}`} className="hover:underline">
-                      {order.order_number}
+                    <Link href={`/admin/catering-orders/${order.orderNumber}`} className="hover:underline">
+                      {order.orderNumber}
                     </Link>
                   </TableCell>
-                  <TableCell>{order.order_type || "Catering"}</TableCell>
+                  <TableCell>Catering</TableCell>
                   <TableCell>
                     <Badge variant={getBadgeVariant(order.status)}>
                       {order.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    ${typeof order.order_total === 'number' 
-                      ? order.order_total.toFixed(2) 
-                      : parseFloat(order.order_total as string).toFixed(2)}
-                  </TableCell>
+                  <TableCell>${order.orderTotal?.toFixed(2) || "0.00"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

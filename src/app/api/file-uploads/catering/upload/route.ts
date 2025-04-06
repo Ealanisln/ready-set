@@ -119,19 +119,17 @@ export async function POST(request: NextRequest) {
       let cateringRequestId = null;
       
       if (!isNaN(Number(entityId))) {
-        cateringRequestId = BigInt(entityId);
+        cateringRequestId = BigInt(entityId).toString();
       }
       
       // Create the database record using Prisma
-      const fileUpload = await prisma.file_upload.create({
+      const fileUpload = await prisma.fileUpload.create({
         data: {
           userId,
           fileName: file.name,
           fileType: file.type,
           fileSize: file.size,
           fileUrl: publicUrl,
-          entityType,
-          entityId,
           category,
           cateringRequestId
         }

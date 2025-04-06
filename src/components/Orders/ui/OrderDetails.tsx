@@ -20,32 +20,32 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
                   <span className="font-medium">{order.headcount}</span>
                 </div>
               )}
-              {order.need_host && (
+              {order.needHost && (
                 <div>
                   Need Host:{" "}
-                  <span className="font-medium">{order.need_host}</span>
+                  <span className="font-medium">{order.needHost}</span>
                 </div>
               )}
-              {order.number_of_host && (
+              {order.numberOfHosts && (
                 <div>
                   Number of Hosts:{" "}
-                  <span className="font-medium">{order.number_of_host}</span>
+                  <span className="font-medium">{order.numberOfHosts}</span>
                 </div>
               )}
             </>
           )}
           {isOnDemand(order) && (
             <>
-              {order.item_delivered && (
+              {order.itemDelivered && (
                 <div>
                   Item Delivered:{" "}
-                  <span className="font-medium">{order.item_delivered}</span>
+                  <span className="font-medium">{order.itemDelivered}</span>
                 </div>
               )}
-              {order.vehicle_type && (
+              {order.vehicleType && (
                 <div>
                   Vehicle Type:{" "}
-                  <span className="font-medium">{order.vehicle_type}</span>
+                  <span className="font-medium">{order.vehicleType}</span>
                 </div>
               )}
               {order.length && order.width && order.height && (
@@ -61,10 +61,10 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
               )}
             </>
           )}
-          {order.hours_needed && (
+          {order.hoursNeeded && (
             <div>
               Hours Needed:{" "}
-              <span className="font-medium">{order.hours_needed}</span>
+              <span className="font-medium">{order.hoursNeeded}</span>
             </div>
           )}
         </div>
@@ -74,7 +74,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
         <div>
           <div className="mb-2 grid grid-cols-2 gap-2">
             <div className="font-semibold">
-              Total: {withCurrencySymbol(formatCurrency(order.order_total))}
+              Total: {withCurrencySymbol(formatCurrency(order.orderTotal))}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">

@@ -20,22 +20,7 @@ import { usePathname } from "next/navigation";
 import { OrderFilesManager } from "./ui/OrderFiles";
 import { Driver, Order, OrderStatus, OrderType } from "@/types/order";
 import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
-
-interface FileUpload {
-  id: string;
-  fileName: string;
-  fileType: string | null;
-  fileSize: number;
-  fileUrl: string;
-  entityType: string;
-  entityId: string;
-  category?: string;
-  uploadedAt: Date;
-  updatedAt: Date;
-  userId?: string;
-  cateringRequestId?: number;
-  onDemandId?: number;
-}
+import { FileUpload } from '@/types/file';
 
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
@@ -244,7 +229,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
         body: JSON.stringify({
           orderId: order.id,
           driverId: selectedDriver,
-          orderType: order.order_type,
+          order_type: order.order_type,
         }),
       });
 
@@ -273,24 +258,20 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     if (!order) return;
 
     try {
-      const response = await fetch(`/api/orders/${order.order_number}`, {
+      const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ driver_status: newStatus }),
+        body: JSON.stringify({ driverStatus: newStatus }),
       });
 
       if (response.ok) {
         const updatedOrder = await response.json();
         setOrder(updatedOrder);
-        toast.success("Driver status updated successfully!");
-      } else {
-        throw new Error("Failed to update driver status");
       }
     } catch (error) {
       console.error("Error updating driver status:", error);
-      toast.error("Failed to update driver status. Please try again.");
     }
   };
 
@@ -298,7 +279,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     if (!order) return;
 
     try {
-      const response = await fetch(`/api/orders/${order.order_number}`, {
+      const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -309,13 +290,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
       if (response.ok) {
         const updatedOrder = await response.json();
         setOrder(updatedOrder);
-        toast.success("Order status updated successfully!");
-      } else {
-        throw new Error("Failed to update order status");
       }
     } catch (error) {
       console.error("Error updating order status:", error);
-      toast.error("Failed to update order status. Please try again.");
     }
   };
 
@@ -363,7 +340,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                    Order {order.order_number}
+                    Order {order.orderNumber}
                   </h1>
                   {order.status && (
                     <Badge className={`${getStatusConfig(order.status as string).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>
@@ -374,9 +351,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
                 </div>
                 <div className="flex items-center mt-1 text-slate-500">
                   <Calendar className="h-4 w-4 mr-1.5" />
-                  {order.date ? (
+                  {order.pickupDateTime ? (
                     <span className="text-sm">
-                      {new Date(order.date).toLocaleDateString(undefined, {
+                      {new Date(order.pickupDateTime).toLocaleDateString(undefined, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -402,11 +379,11 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           </CardHeader>
 
           <OrderHeader
-            orderNumber={order.order_number}
-            date={order.date} 
+            orderNumber={order.orderNumber}
+            date={order.pickupDateTime || null} 
             driverInfo={driverInfo}
             onAssignDriver={handleOpenDriverDialog}
-            orderType={order.order_type as OrderType}
+            order_type={order.order_type}
             orderId={order.id}
             onDeleteSuccess={onDeleteSuccess}
           />
@@ -415,8 +392,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           <CardContent className="space-y-6 p-6">
             <div className="bg-slate-50 rounded-lg p-4 border">
               <OrderStatusCard
-                orderType={order.order_type as OrderType}
-                initialStatus={order.status as OrderStatus}
+                order_type={order.order_type}
+                initialStatus={order.status}
                 orderId={order.id}
                 onStatusChange={handleOrderStatusChange}
               />
@@ -435,22 +412,22 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
             <Separator />
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {order.address && (
+              {order.pickupAddress && (
                 <div className="bg-white p-4 rounded-lg border shadow-sm">
                   <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
                     <MapPin className="h-5 w-5 mr-2 text-amber-500" />
                     Pickup Address
                   </h3>
-                  <AddressInfo address={order.address} title="" />
+                  <AddressInfo address={order.pickupAddress} title="" />
                 </div>
               )}
-              {order.delivery_address && (
+              {order.deliveryAddress && (
                 <div className="bg-white p-4 rounded-lg border shadow-sm">
                   <h3 className="text-lg font-semibold mb-3 text-slate-800 flex items-center">
                     <MapPin className="h-5 w-5 mr-2 text-amber-500" />
                     Delivery Address
                   </h3>
-                  <AddressInfo address={order.delivery_address} title="" />
+                  <AddressInfo address={order.deliveryAddress} title="" />
                 </div>
               )}
             </div>
@@ -465,7 +442,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
               <CustomerInfo 
                 name={order.user?.name} 
                 email={order.user?.email} 
-                phone={order.user?.contact_number} 
+                phone={order.user?.contactNumber} 
               />
             </div>
 
@@ -477,9 +454,9 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
                 Additional Information
               </h3>
               <AdditionalInfo
-                clientAttention={order.client_attention}
-                pickupNotes={order.pickup_notes}
-                specialNotes={order.special_notes}
+                clientAttention={order.clientAttention}
+                pickupNotes={order.pickupNotes}
+                specialNotes={order.specialNotes}
               />
             </div>
           </CardContent>
@@ -494,8 +471,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           </CardHeader>
           <CardContent className="p-6">
             <OrderFilesManager
-              orderNumber={order.order_number}
-              orderType={order.order_type as OrderType}
+              orderNumber={order.orderNumber}
+              order_type={order.order_type}
               orderId={order.id.toString()}
               initialFiles={files}
             />
@@ -512,14 +489,14 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           <CardContent className="p-6">
             <DriverStatusCard
               order={{
-                id: order.id,
+                id: Number(order.id),
                 status: order.status,
-                driver_status: order.driver_status,
-                user_id: order.user_id,
-                pickup_time: order.pickup_time,
-                arrival_time: order.arrival_time,
-                complete_time: order.complete_time,
-                updated_at: order.updated_at,
+                driver_status: order.driverStatus,
+                user_id: order.userId,
+                pickup_time: order.pickupDateTime,
+                arrival_time: order.arrivalDateTime,
+                complete_time: order.completeDateTime,
+                updated_at: order.updatedAt,
               }}
               driverInfo={driverInfo}
               updateDriverStatus={updateDriverStatus}

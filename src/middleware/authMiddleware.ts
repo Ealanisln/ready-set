@@ -1,6 +1,6 @@
 // src/middleware/authMiddleware.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, $Enums } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
@@ -18,12 +18,12 @@ export async function validateAdminRole(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const dbUser = await prisma.user.findUnique({
+    const dbUser = await prisma.profile.findUnique({
       where: { email: user.email },
       select: { type: true },
     });
 
-    if (!dbUser || (dbUser.type !== 'admin' && dbUser.type !== 'super_admin')) {
+    if (!dbUser || (dbUser.type !== $Enums.UserType.ADMIN && dbUser.type !== $Enums.UserType.SUPER_ADMIN)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

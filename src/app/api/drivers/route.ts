@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/utils/prismaDB';
 
 export async function GET() {
-  const drivers = await prisma.user.findMany({
+  const drivers = await prisma.profile.findMany({
     where: {
-      type: 'driver'
+      type: 'DRIVER'
     }
   });
   return NextResponse.json(drivers);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserType } from '@prisma/client';
 import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
@@ -17,12 +17,12 @@ export async function DELETE(req: NextRequest) {
 
     // Check if the user is a super admin
     // You'll need to retrieve user type from your database or from Supabase user metadata
-    const userData = await prisma.user.findUnique({
+    const userData = await prisma.profile.findUnique({
       where: { id: user.id },
       select: { type: true }
     });
 
-    if (!userData || userData.type !== "super_admin") {
+    if (!userData || userData.type !== UserType.SUPER_ADMIN) {
       return NextResponse.json({ error: "Unauthorized. Only super admins can delete orders." }, { status: 403 });
     }
 
@@ -54,21 +54,21 @@ export async function DELETE(req: NextRequest) {
       });
 
       // Delete associated file uploads
-      const deletedFileUploads = await tx.file_upload.deleteMany({
+      const deletedFileUploads = await tx.fileUpload.deleteMany({
         where: {
-          [orderType === 'catering' ? 'cateringRequestId' : 'onDemandId']: orderIdNumber,
+          [orderType === 'catering' ? 'cateringRequestId' : 'onDemandId']: orderIdNumber.toString(),
         },
       });
 
       // Delete the order
       let deletedOrder;
       if (orderType === 'catering') {
-        deletedOrder = await tx.catering_request.delete({
-          where: { id: orderIdNumber },
+        deletedOrder = await tx.cateringRequest.delete({
+          where: { id: orderIdNumber.toString() },
         });
       } else {
-        deletedOrder = await tx.on_demand.delete({
-          where: { id: orderIdNumber },
+        deletedOrder = await tx.onDemand.delete({
+          where: { id: orderIdNumber.toString() },
         });
       }
 

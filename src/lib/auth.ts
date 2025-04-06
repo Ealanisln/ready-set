@@ -166,3 +166,9 @@ export async function getUserRole(userId: string): Promise<string | null> {
   console.log(`Role not found in profile or auth metadata for user ${userId}.`);
   return null; // Return null if role is not found in either location
 }
+
+export async function getCurrentUser() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}

@@ -6,6 +6,7 @@ import {
   FormType,
 } from "@/components/Logistics/QuoteRequest/types";
 import { v4 as uuidv4 } from "uuid";
+import { $Enums } from "@prisma/client";
 
 enum FormSubmissionType {
   food = "food",
@@ -59,35 +60,33 @@ export class FormSubmissionService {
         ...specifications
       } = data.formData;
 
-      const submission = await prisma.form_submission.create({
+      const submission = await prisma.formSubmission.create({
         data: {
           id: uuidv4(),
-          updated_at: new Date(), // Changed to snake_case
-
-          form_type: formTypeMap[data.formType.toLowerCase()], // Changed to snake_case
-          company_name: normalizeValue(companyName), // Changed to snake_case
-          contact_name: normalizeValue(contactName), // Changed to snake_case
+          updatedAt: new Date(),
+          formType: data.formType.toLowerCase() as $Enums.FormType,
+          companyName: normalizeValue(companyName),
+          contactName: normalizeValue(contactName),
           email: normalizeValue(email),
           phone: normalizeValue(phone),
           website: normalizeValue(website),
           counties: Array.isArray(counties) ? counties : [],
           frequency:
             "frequency" in specifications ? specifications.frequency : "N/A",
-          pickup_address: pickupAddress || {
-            // Changed to snake_case
+          pickupAddress: pickupAddress || {
             street: "",
             city: "",
             state: "",
             zip: "",
           },
-          additional_comments: normalizeValue(additionalComments), // Changed to snake_case
+          additionalComments: normalizeValue(additionalComments),
           specifications: JSON.stringify(specifications),
         },
       });
 
       console.log("Created submission:", {
         id: submission.id,
-        form_type: submission.form_type, // Changed to snake_case
+        formType: submission.formType,
         specifications:
           typeof submission.specifications === "string"
             ? JSON.parse(submission.specifications)

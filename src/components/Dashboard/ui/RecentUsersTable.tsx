@@ -51,7 +51,7 @@ export const RecentUsersTable: React.FC<RecentUsersTableProps> = ({ users }) => 
           <TableRow key={user.id}>
             <TableCell className="font-medium">
               <Link href={`/admin/users/${user.id}`} className="hover:underline">
-                {user.name || user.contact_name || "Unnamed User"}
+                {user.name || user.contactName || "Unnamed User"}
               </Link>
             </TableCell>
             <TableCell>{user.email}</TableCell>

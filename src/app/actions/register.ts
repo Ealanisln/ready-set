@@ -3,245 +3,262 @@
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { headers } from "next/headers";
+// Import UserType and UserStatus directly from Prisma
+import { UserType, UserStatus } from "@prisma/client"; // Import Prisma's enums
 
-// Helper function for redirects
+// Helper function for redirects (keep as is)
 const encodedRedirect = (
-  type: "success" | "error",
-  path: string,
-  message: string,
+    type: "success" | "error",
+    path: string,
+    message: string,
 ) => {
-  const searchParams = new URLSearchParams();
-  searchParams.set(type, message);
-  return { redirect: `${path}?${searchParams.toString()}` };
+    const searchParams = new URLSearchParams();
+    searchParams.set(type, message);
+    return { redirect: `${path}?${searchParams.toString()}` };
 };
 
 export async function registerUser(formData: FormData) {
-  // Extract basic auth data
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
-  const name = formData.get("name")?.toString();
-  const userType = formData.get("userType")?.toString();
-  const headersList = await headers();
-  const origin = headersList.get("origin");
+    // Extract basic auth data
+    const email = formData.get("email")?.toString();
+    const password = formData.get("password")?.toString();
+    const name = formData.get("name")?.toString();
+    const userType = formData.get("userType")?.toString(); // e.g., 'VENDOR', 'CLIENT'
+    const headCountStr = formData.get("head_count")?.toString(); // Get as string first
 
-  if (!email || !password || !name || !userType) {
-    return encodedRedirect(
-      "error",
-      "/auth/signup",
-      "All required fields must be provided",
+    const headersList = await headers();
+    const origin = headersList.get("origin");
+
+    if (!email || !password || !name || !userType) {
+        return encodedRedirect(
+            "error",
+            "/auth/signup",
+            "All required fields must be provided",
+        );
+    }
+
+    // Validate userType against the enum values
+    const isValidUserType = Object.values(UserType).includes(userType as UserType);
+    if (!isValidUserType) {
+        return encodedRedirect(
+            "error",
+            "/auth/signup",
+            `Invalid user type provided: ${userType}`,
+        );
+    }
+
+    // Extract *other* user data
+    const otherUserData = {
+        guid: formData.get("guid")?.toString() || null,
+        company_name: formData.get("company_name")?.toString() || null,
+        contact_name: formData.get("contact_name")?.toString() || null,
+        contact_number: formData.get("contact_number")?.toString() || null,
+        website: formData.get("website")?.toString() || null,
+        street1: formData.get("street1")?.toString() || null,
+        street2: formData.get("street2")?.toString() || null,
+        city: formData.get("city")?.toString() || null,
+        state: formData.get("state")?.toString() || null,
+        zip: formData.get("zip")?.toString() || null,
+        location_number: formData.get("location_number")?.toString() || null,
+        parking_loading: formData.get("parking_loading")?.toString() || null,
+        counties: formData.get("counties")?.toString() || null, // Consider parsing if JSON/array
+        time_needed: formData.get("time_needed")?.toString() || null, // Consider parsing
+        catering_brokerage: formData.get("catering_brokerage")?.toString() || null, // Consider parsing
+        frequency: formData.get("frequency")?.toString() || null,
+        provide: formData.get("provide")?.toString() || null, // Consider parsing
+        side_notes: formData.get("side_notes")?.toString() || null,
+        confirmation_code: formData.get("confirmation_code")?.toString() || null,
+        image: formData.get("image")?.toString() || null,
+    };
+
+    // Filter out null values from other data
+    const filteredOtherData = Object.fromEntries(
+        Object.entries(otherUserData).filter(([_, value]) => value !== null)
     );
-  }
 
-  // Extract all possible user data from your schema
-  const userData = {
-    guid: formData.get("guid")?.toString() || null,
-    company_name: formData.get("company_name")?.toString() || null,
-    contact_name: formData.get("contact_name")?.toString() || null,
-    contact_number: formData.get("contact_number")?.toString() || null,
-    website: formData.get("website")?.toString() || null,
-    street1: formData.get("street1")?.toString() || null,
-    street2: formData.get("street2")?.toString() || null,
-    city: formData.get("city")?.toString() || null,
-    state: formData.get("state")?.toString() || null,
-    zip: formData.get("zip")?.toString() || null,
-    location_number: formData.get("location_number")?.toString() || null,
-    parking_loading: formData.get("parking_loading")?.toString() || null,
-    counties: formData.get("counties")?.toString() || null,
-    time_needed: formData.get("time_needed")?.toString() || null,
-    catering_brokerage: formData.get("catering_brokerage")?.toString() || null,
-    frequency: formData.get("frequency")?.toString() || null,
-    provide: formData.get("provide")?.toString() || null,
-    head_count: formData.get("head_count")?.toString() || null,
-    side_notes: formData.get("side_notes")?.toString() || null,
-    confirmation_code: formData.get("confirmation_code")?.toString() || null,
-    image: formData.get("image")?.toString() || null,
-  };
-
-  // Filter out null values to avoid unnecessary database writes
-  const filteredUserData = Object.fromEntries(
-    Object.entries(userData).filter(([_, value]) => value !== null),
-  );
-
-  try {
-    // Create Supabase client
-    const supabase = await createClient();
-
-    // 1. Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-        data: {
-          name,
-          user_type: userType,
-        },
-      },
-    });
-
-    if (authError) {
-      console.error(authError.code + " " + authError.message);
-      return encodedRedirect("error", "/auth/signup", authError.message);
+    // Parse head_count separately - FIX for Error 1
+    let headCountNum: number | undefined = undefined;
+    if (headCountStr) {
+        const parsed = parseInt(headCountStr, 10);
+        if (!isNaN(parsed)) {
+            headCountNum = parsed;
+        } else {
+            console.warn("Could not parse head_count to number:", headCountStr);
+            // Decide how to handle: error out, ignore, etc.
+            // return encodedRedirect("error", "/auth/signup", `Invalid head count value: ${headCountStr}`);
+        }
     }
 
-    // Get the user ID from Supabase Auth
-    const userId = authData.user?.id;
+    try {
+        const supabase = await createClient();
 
-    if (!userId) {
-      return encodedRedirect(
-        "error",
-        "/auth/signup",
-        "User ID not returned from Supabase Auth",
-      );
+        // 1. Create user in Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: `${origin}/auth/callback`,
+                data: { name, user_type: userType },
+            },
+        });
+
+        if (authError) {
+            console.error("Supabase Auth Error:", authError.code, authError.message);
+            // Provide more specific user feedback if possible
+            if (authError.message.includes("User already registered")) {
+                 return encodedRedirect("error", "/auth/signup", "An account with this email already exists.");
+            }
+            return encodedRedirect("error", "/auth/signup", `Auth error: ${authError.message}`);
+        }
+
+        const userId = authData.user?.id;
+        if (!userId) {
+            return encodedRedirect("error", "/auth/signup", "User registration succeeded but no ID was returned.");
+        }
+
+        // 2. Create user record in Prisma Profile table
+        const user = await prisma.profile.create({
+            data: {
+                id: userId, // Link to auth.users table
+                email,
+                name,
+                // FIX for Error 2: Use the validated string, casting to Prisma's UserType.
+                type: userType as UserType,
+                // Use the Prisma enum member directly
+                status: UserStatus.PENDING, // Use Prisma enum member
+                isTemporaryPassword: false,
+                // Spread other filtered data
+                ...filteredOtherData,
+                // Explicitly set parsed head_count (will override if present in spread) - FIX for Error 1
+                ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
+                // Let Prisma handle timestamps if columns have @default(now()) / @updatedAt
+                // created_at: new Date(),
+                // updated_at: new Date(),
+            },
+        });
+
+        if (authData.session) {
+            return { success: true, user, session: authData.session };
+        } else {
+            return encodedRedirect(
+                "success", "/auth/signup", "Thanks for signing up! Please check your email for a verification link."
+            );
+        }
+    } catch (error) {
+        console.error("Registration Process Error:", error);
+        let errorMessage = "An unexpected error occurred during registration.";
+        // Check for Prisma unique constraint violation (example)
+        if (error instanceof Error && (error as any).code === 'P2002') {
+             // More specific check possible if you know the constraint name/fields
+             errorMessage = "An account with this email or other unique identifier already exists.";
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        return encodedRedirect("error", "/auth/signup", errorMessage);
     }
-
-    // 2. Create user record in public.user table
-    const user = await prisma.user.create({
-      data: {
-        id: userId,
-        email,
-        name,
-        type: userType as any, // Cast to enum type
-        status: "pending", // Default from your enum
-        isTemporaryPassword: false, // Default value
-        created_at: new Date(),
-        updated_at: new Date(),
-        ...filteredUserData,
-      },
-    });
-
-    // 3. Create profile record in auth.profiles table
-    await prisma.profiles.create({
-      data: {
-        auth_user_id: userId,
-        guid: userData.guid,
-        name,
-        image: userData.image,
-        type: userType as any, // Cast to enum type
-        company_name: userData.company_name,
-        contact_name: userData.contact_name,
-        contact_number: userData.contact_number,
-        website: userData.website,
-        street1: userData.street1,
-        street2: userData.street2,
-        city: userData.city,
-        state: userData.state,
-        zip: userData.zip,
-        location_number: userData.location_number,
-        parking_loading: userData.parking_loading,
-        counties: userData.counties,
-        time_needed: userData.time_needed,
-        catering_brokerage: userData.catering_brokerage,
-        frequency: userData.frequency,
-        provide: userData.provide,
-        head_count: userData.head_count,
-        status: "pending",
-        side_notes: userData.side_notes,
-        confirmation_code: userData.confirmation_code,
-        created_at: new Date(),
-        updated_at: new Date(),
-        is_temporary_password: false,
-      },
-    });
-
-    // Handle email confirmation flow
-    if (authData.session) {
-      // Email confirmation is disabled, user is logged in
-      return { success: true, user, session: authData.session };
-    } else {
-      // Email confirmation is enabled
-      return encodedRedirect(
-        "success",
-        "/auth/signup",
-        "Thanks for signing up! Please check your email for a verification link.",
-      );
-    }
-  } catch (error) {
-    console.error("Registration error:", error);
-    return encodedRedirect("error", "/auth/signup", (error as Error).message);
-  }
 }
+
 
 // For users signing up from the admin panel
 export async function adminCreateUser(userData: {
-  email: string;
-  password: string;
-  name: string;
-  userType: string;
-  // Add other fields as needed based on your schema
-  [key: string]: any;
+    email: string;
+    password: string;
+    name: string;
+    userType: string; // Expecting 'VENDOR', 'CLIENT', etc.
+    status?: string; // Optional: Expecting 'active', 'pending', etc.
+    isTemporaryPassword?: boolean;
+    head_count?: string | number; // Allow string or number input
+    // Add other fields as needed based on your schema
+    [key: string]: any;
 }) {
-  try {
-    const supabase = await createClient();
+    try {
+        // Validate required fields more explicitly
+        if (!userData.email || !userData.password || !userData.name || !userData.userType) {
+            throw new Error("Missing required fields for admin user creation (email, password, name, userType).");
+        }
 
-    // 1. Create user in Supabase Auth with admin privileges
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: userData.password,
-        email_confirm: true, // Auto-confirm the email
-        user_metadata: {
-          name: userData.name,
-          user_type: userData.userType,
-        },
-        app_metadata: {
-          role: userData.userType,
-        },
-      });
+        const adminUserType = userData.userType;
 
-    if (authError) throw authError;
+        // --- Validation & Resolution for Status ---
+        let resolvedStatus: UserStatus;
+        if (userData.status) {
+            // Convert potential input string ('active', 'pending', 'ACTIVE', 'PENDING') to uppercase enum key
+            const statusKey = String(userData.status).toUpperCase() as keyof typeof UserStatus;
+            // Check if the uppercase key exists in the Prisma UserStatus enum
+            if (!(statusKey in UserStatus)) {
+                 throw new Error(`Invalid status provided: ${userData.status}. Expected one of ${Object.keys(UserStatus).join(', ')}`);
+            }
+            resolvedStatus = UserStatus[statusKey]; // Get the corresponding enum member
+        } else {
+            resolvedStatus = UserStatus.ACTIVE; // Default to ACTIVE using Prisma enum member
+        }
+        // --- End Validation ---
 
-    const userId = authData.user.id;
+        const supabase = await createClient();
 
-    // 2. Create user record in public.user table
-    const user = await prisma.user.create({
-      data: {
-        id: userId,
-        email: userData.email,
-        name: userData.name,
-        type: userData.userType as any, // Cast to enum type
-        status: userData.status || "active", // Admin-created users can be active by default
-        created_at: new Date(),
-        updated_at: new Date(),
-        // Add other fields from userData
-        ...Object.fromEntries(
-          Object.entries(userData).filter(
-            ([key]) => !["email", "password", "name", "userType"].includes(key),
-          ),
-        ),
-      },
-    });
+        // 1. Create user in Supabase Auth
+        const { data: authData, error: authError } =
+            await supabase.auth.admin.createUser({
+                email: userData.email,
+                password: userData.password,
+                email_confirm: true,
+                user_metadata: { name: userData.name, user_type: adminUserType },
+            });
 
-    // 3. Create profile record in auth.profiles table
-    await prisma.profiles.create({
-      data: {
-        auth_user_id: userId,
-        name: userData.name,
-        type: userData.userType as any, // Cast to enum type
-        status: userData.status || "active",
-        created_at: new Date(),
-        updated_at: new Date(),
-        is_temporary_password: userData.isTemporaryPassword || false,
-        // Add other fields from userData, similar to above
-        ...Object.fromEntries(
-          Object.entries(userData).filter(
-            ([key]) =>
-              ![
-                "email",
-                "password",
-                "name",
-                "userType",
-                "status",
-                "isTemporaryPassword",
-              ].includes(key),
-          ),
-        ),
-      },
-    });
+        if (authError) throw authError; // Let the catch block handle
 
-    return { success: true, user };
-  } catch (error) {
-    console.error("Admin user creation error:", error);
-    return { success: false, error: (error as Error).message };
-  }
+        const userId = authData.user.id;
+
+        // FIX for Errors 4 & 5: Prepare profileData by *excluding* specific keys
+        const profileSpecificKeys = ['email', 'password', 'name', 'userType', 'status', 'isTemporaryPassword', 'head_count'];
+        const otherProfileData = Object.fromEntries(
+            Object.entries(userData).filter(([key]) => !profileSpecificKeys.includes(key))
+        );
+
+        // Parse head_count - FIX for Error 1 (consistency)
+        let headCountNum: number | undefined = undefined;
+        if (userData.head_count !== null && userData.head_count !== undefined) {
+            const parsed = parseInt(String(userData.head_count), 10); // Convert to string first in case it's already a number
+            if (!isNaN(parsed)) {
+                headCountNum = parsed;
+            } else {
+                console.warn("Admin Creation: Could not parse head_count:", userData.head_count);
+                // Decide if this is an error or just ignore
+                // throw new Error(`Invalid head count value provided: ${userData.head_count}`);
+            }
+        }
+
+        // 2. Create user record in Prisma Profile table
+        const user = await prisma.profile.create({
+            data: {
+                id: userId, // Link to auth user
+                email: userData.email,
+                name: userData.name,
+                // FIX for Error 2/6: Assign validated type string, cast to Prisma's UserType
+                type: adminUserType as UserType,
+                // Assign the resolved Prisma enum member
+                status: resolvedStatus,
+                isTemporaryPassword: userData.isTemporaryPassword ?? false,
+                // Spread the *filtered* other data
+                ...otherProfileData,
+                 // Explicitly set parsed head_count - FIX for Error 1
+                 ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
+                // Let Prisma handle timestamps if configured
+                // created_at: new Date(),
+                // updated_at: new Date(),
+            },
+        });
+
+        return { success: true, user };
+    } catch (error) {
+        console.error("Admin user creation error:", error);
+        let errorMessage = "Failed to create user via admin panel.";
+         // Check for Prisma unique constraint violation
+        if (error instanceof Error && (error as any).code === 'P2002') {
+            errorMessage = "An account with this email or other unique identifier already exists.";
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        // Ensure a serializable error is returned if needed by the caller
+        return { success: false, error: errorMessage };
+    }
 }

@@ -4,19 +4,19 @@ import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
-type CateringRequest = Prisma.catering_requestGetPayload<{
+type CateringRequest = Prisma.CateringRequestGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
-    delivery_address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: {
           select: {
             id: true;
             name: true;
             email: true;
-            contact_number: true;
+            contactNumber: true;
           };
         };
       };
@@ -24,26 +24,25 @@ type CateringRequest = Prisma.catering_requestGetPayload<{
   };
 }>;
 
-type OnDemandOrder = Prisma.on_demandGetPayload<{
+type OnDemandOrder = Prisma.OnDemandGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: {
           select: {
             id: true;
             name: true;
             email: true;
-            contact_number: true;
+            contactNumber: true;
           };
         };
       };
     };
   };
-}> & {
-  delivery_address?: Prisma.addressGetPayload<{}> | null;
-};
+}>;
 
 type Order =
   | (CateringRequest & { order_type: "catering" })
@@ -75,20 +74,20 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
     let order: Order | null = null;
 
     // Try to find catering request
-    const cateringRequest = await prisma.catering_request.findUnique({
-      where: { order_number },
+    const cateringRequest = await prisma.cateringRequest.findUnique({
+      where: { orderNumber: order_number },
       include: {
         user: { select: { name: true, email: true } },
-        address: true,
-        delivery_address: true,
-        dispatch: {
+        pickupAddress: true,
+        deliveryAddress: true,
+        dispatches: {
           include: {
             driver: {
               select: {
                 id: true,
                 name: true,
                 email: true,
-                contact_number: true,
+                contactNumber: true,
               },
             },
           },
@@ -103,19 +102,20 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
       };
     } else {
       // If not found, try to find on-demand order
-      const onDemandOrder = await prisma.on_demand.findUnique({
-        where: { order_number },
+      const onDemandOrder = await prisma.onDemand.findUnique({
+        where: { orderNumber: order_number },
         include: {
           user: { select: { name: true, email: true } },
-          address: true,
-          dispatch: {
+          pickupAddress: true,
+          deliveryAddress: true,
+          dispatches: {
             include: {
               driver: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
-                  contact_number: true,
+                  contactNumber: true,
                 },
               },
             },
@@ -124,15 +124,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
       });
 
       if (onDemandOrder) {
-        // Fetch the delivery address if delivery_address_id exists
-        let delivery_address = null;
-        if (onDemandOrder.delivery_address_id) {
-          delivery_address = await prisma.address.findUnique({
-            where: { id: onDemandOrder.delivery_address_id },
-          });
-        }
-
-        order = { ...onDemandOrder, delivery_address, order_type: "on_demand" };
+        order = { ...onDemandOrder, order_type: "on_demand" };
       }
     }
 

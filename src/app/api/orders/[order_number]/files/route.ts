@@ -37,16 +37,16 @@ export async function GET(
     
     // Try to fetch the catering request
     console.log("Fetching catering request for", orderNumber);
-    const cateringRequest = await prisma.catering_request.findUnique({
-      where: { order_number: orderNumber },
+    const cateringRequest = await prisma.cateringRequest.findUnique({
+      where: { orderNumber: orderNumber },
       select: { id: true }
     });
     
     // Try to fetch the on-demand request if catering request not found
     if (!cateringRequest) {
       console.log("Catering request not found, trying on_demand");
-      const onDemandRequest = await prisma.on_demand.findUnique({
-        where: { order_number: orderNumber },
+      const onDemandRequest = await prisma.onDemand.findUnique({
+        where: { orderNumber: orderNumber },
         select: { id: true }
       });
       
@@ -61,10 +61,9 @@ export async function GET(
       console.log("Found on_demand order:", onDemandRequest);
       
       // Fetch files for on_demand
-      const files = await prisma.file_upload.findMany({
+      const files = await prisma.fileUpload.findMany({
         where: {
-          entityType: 'on_demand',
-          entityId: onDemandRequest.id.toString()
+          onDemandId: onDemandRequest.id.toString()
         },
         orderBy: {
           uploadedAt: 'desc'
@@ -78,10 +77,9 @@ export async function GET(
     console.log("Found catering request:", cateringRequest);
     
     // Fetch files for catering_request
-    const files = await prisma.file_upload.findMany({
+    const files = await prisma.fileUpload.findMany({
       where: {
-        entityType: 'catering_request',
-        entityId: cateringRequest.id.toString()
+        cateringRequestId: cateringRequest.id.toString()
       },
       orderBy: {
         uploadedAt: 'desc'

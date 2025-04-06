@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma, users_status, users_type } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/utils/prismaDB";
+import { Prisma, UserType as PrismaUserType } from "@prisma/client";
+import { UserType, UserStatus } from "@/types/user";
 
-const prisma = new PrismaClient();
 
 interface BaseFormData {
   email: string;
   password: string;  // Required for registration
   phoneNumber: string;
-  userType: users_type;
+  userType: UserType;
   street1: string;
   street2?: string;
   city: string;
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
     // Then we'll handle potential conflicts with Supabase during user creation
 
     // Check for existing user in Prisma
-    const existInPrisma = await prisma.user.findUnique({
+    const existInPrisma = await prisma.profile.findUnique({
       where: {
         email: email.toLowerCase(),
       },
@@ -192,29 +193,26 @@ export async function POST(request: Request) {
     const supabaseUserId = authData.user.id;
 
     // Prepare user data for Prisma
-    const userData: Prisma.userCreateInput = {
-      id: supabaseUserId, // Use Supabase UUID as the user ID in Prisma
+    const userData: Prisma.ProfileCreateInput = {
+      id: supabaseUserId,
       email: email.toLowerCase(),
-      password: "", // No need to store the password in Prisma anymore
-      contact_number: phoneNumber,
-      type: userType as users_type,
-      name:
-        userType === "driver" || userType === "helpdesk"
+      contactNumber: phoneNumber,
+      type: userType.toUpperCase() as PrismaUserType,
+      name: userType === UserType.DRIVER || userType === UserType.HELPDESK
           ? (body as DriverFormData | HelpDeskFormData).name
           : (body as VendorFormData | ClientFormData).contact_name,
-      company_name:
-        userType !== "driver" && userType !== "helpdesk"
+      companyName: userType !== UserType.DRIVER && userType !== UserType.HELPDESK
           ? (body as VendorFormData | ClientFormData).company
           : undefined,
-      status: users_status.pending,
+      status: 'PENDING',
       street1: body.street1,
       street2: body.street2,
       city: body.city,
       state: body.state,
       zip: body.zip,
-      created_at: new Date(),
-      updated_at: new Date(),
       isTemporaryPassword: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
 
       // Conditional fields for vendor and client
       ...(userType !== "driver" && userType !== "helpdesk" && {
@@ -255,7 +253,7 @@ export async function POST(request: Request) {
     };
 
     // Create the user in Prisma
-    const newUser = await prisma.user.create({
+    const newUser = await prisma.profile.create({
       data: userData,
     });
 
@@ -269,7 +267,7 @@ export async function POST(request: Request) {
         state: body.state,
         zip: body.zip,
         county:
-          userType === "vendor" || userType === "client"
+          userType === UserType.VENDOR || userType === UserType.CLIENT
             ? (body as VendorFormData | ClientFormData).countiesServed?.[0]
             : undefined,
         locationNumber: "location_number" in body ? body.location_number : undefined,
@@ -277,7 +275,7 @@ export async function POST(request: Request) {
           "parking" in body
             ? (body as VendorFormData | ClientFormData).parking
             : undefined,
-        isRestaurant: userType === "vendor",
+        isRestaurant: userType === UserType.VENDOR,
         isShared: false,
         createdBy: newUser.id,
       },

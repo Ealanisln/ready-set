@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient();
 
     // Check if user exists in Prisma
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.profile.findUnique({
       where: { email },
     });
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     // If Supabase confirms the user or requires email confirmation
     if (authData.user) {
       // Create user in Prisma
-      const user = await prisma.user.create({
+      const user = await prisma.profile.create({
         data: {
           id: authData.user.id,
           email,

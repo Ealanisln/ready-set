@@ -321,11 +321,12 @@ export async function DELETE(request: NextRequest) {
  */
 async function checkIfUserIsAdmin(userId: string): Promise<boolean> {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.profile.findUnique({
       where: { id: userId },
     });
 
-    return user?.type === "admin" || user?.type === "super_admin";
+    // Compare against the uppercase string literals from Prisma schema
+    return user ? (user.type === "ADMIN" || user.type === "SUPER_ADMIN") : false;
   } catch (error) {
     console.error("Error checking admin status:", error);
     return false;

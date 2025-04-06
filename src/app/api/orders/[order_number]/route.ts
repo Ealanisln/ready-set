@@ -4,19 +4,19 @@ import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma } from "@prisma/client";
 
-type CateringRequest = Prisma.catering_requestGetPayload<{
+type CateringRequest = Prisma.CateringRequestGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
-    delivery_address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: {
           select: {
             id: true;
             name: true;
             email: true;
-            contact_number: true;
+            contactNumber: true;
           };
         };
       };
@@ -25,18 +25,19 @@ type CateringRequest = Prisma.catering_requestGetPayload<{
   };
 }>;
 
-type OnDemandOrder = Prisma.on_demandGetPayload<{
+type OnDemandOrder = Prisma.OnDemandGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: {
           select: {
             id: true;
             name: true;
             email: true;
-            contact_number: true;
+            contactNumber: true;
           };
         };
       };
@@ -46,8 +47,8 @@ type OnDemandOrder = Prisma.on_demandGetPayload<{
 }>;
 
 type Order = 
-  | (CateringRequest & { order_type: "catering" })
-  | (OnDemandOrder & { order_type: "on_demand" });
+  | (CateringRequest & { orderType: "catering" })
+  | (OnDemandOrder & { orderType: "onDemand" });
 
 function serializeOrder(data: any): any {
   return JSON.parse(JSON.stringify(data, (_, value) =>
@@ -55,7 +56,7 @@ function serializeOrder(data: any): any {
   ));
 }
 
-export async function GET(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ orderNumber: string }> }) {
   const params = await props.params;
   try {
     // Initialize Supabase client
@@ -69,25 +70,25 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { order_number } = params;
+    const { orderNumber } = params;
 
     let order: Order | null = null;
 
     // Try to find catering request
-    const cateringRequest = await prisma.catering_request.findUnique({
-      where: { order_number },
+    const cateringRequest = await prisma.cateringRequest.findUnique({
+      where: { orderNumber },
       include: {
         user: { select: { name: true, email: true } },
-        address: true,
-        delivery_address: true,
-        dispatch: {
+        pickupAddress: true,
+        deliveryAddress: true,
+        dispatches: {
           include: {
             driver: {
               select: {
                 id: true,
                 name: true,
                 email: true,
-                contact_number: true,
+                contactNumber: true,
               },
             },
           },
@@ -97,22 +98,23 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
     });
 
     if (cateringRequest) {
-      order = { ...cateringRequest, order_type: "catering" };
+      order = { ...cateringRequest, orderType: "catering" };
     } else {
       // If not found, try to find on-demand order
-      const onDemandOrder = await prisma.on_demand.findUnique({
-        where: { order_number },
+      const onDemandOrder = await prisma.onDemand.findUnique({
+        where: { orderNumber },
         include: {
           user: { select: { name: true, email: true } },
-          address: true,
-          dispatch: {
+          pickupAddress: true,
+          deliveryAddress: true,
+          dispatches: {
             include: {
               driver: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
-                  contact_number: true,
+                  contactNumber: true,
                 },
               },
             },
@@ -122,7 +124,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
       });
 
       if (onDemandOrder) {
-        order = { ...onDemandOrder, order_type: "on_demand" };
+        order = { ...onDemandOrder, orderType: "onDemand" };
       }
     }
 
@@ -141,7 +143,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ order_num
   }
 }
 
-export async function PATCH(req: NextRequest, props: { params: Promise<{ order_number: string }> }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ orderNumber: string }> }) {
   const params = await props.params;
   try {
     // Initialize Supabase client
@@ -155,11 +157,11 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ order_n
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { order_number } = params;
+    const { orderNumber } = params;
     const body = await req.json();
-    const { status, driver_status } = body;
+    const { status, driverStatus } = body;
 
-    if (!status && !driver_status) {
+    if (!status && !driverStatus) {
       return NextResponse.json(
         { message: "No update data provided" },
         { status: 400 },
@@ -169,29 +171,29 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ order_n
     let updatedOrder: Order | null = null;
 
     // Try updating catering request
-    const cateringRequest = await prisma.catering_request.findUnique({
-      where: { order_number },
+    const cateringRequest = await prisma.cateringRequest.findUnique({
+      where: { orderNumber },
     });
 
     if (cateringRequest) {
-      const updated = await prisma.catering_request.update({
-        where: { order_number },
+      const updated = await prisma.cateringRequest.update({
+        where: { orderNumber },
         data: {
           ...(status && { status: status as any }),
-          ...(driver_status && { driver_status: driver_status as any }),
+          ...(driverStatus && { driverStatus: driverStatus as any }),
         },
         include: {
           user: { select: { name: true, email: true } },
-          address: true,
-          delivery_address: true,
-          dispatch: {
+          pickupAddress: true,
+          deliveryAddress: true,
+          dispatches: {
             include: {
               driver: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
-                  contact_number: true,
+                  contactNumber: true,
                 },
               },
             },
@@ -199,26 +201,27 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ order_n
           fileUploads: true,
         },
       });
-      updatedOrder = { ...updated, order_type: "catering" };
+      updatedOrder = { ...updated, orderType: "catering" };
     } else {
       // If not found, try updating on-demand order
-      const updated = await prisma.on_demand.update({
-        where: { order_number },
+      const updated = await prisma.onDemand.update({
+        where: { orderNumber },
         data: {
           ...(status && { status: status as any }),
-          ...(driver_status && { driver_status: driver_status as any }),
+          ...(driverStatus && { driverStatus: driverStatus as any }),
         },
         include: {
           user: { select: { name: true, email: true } },
-          address: true,
-          dispatch: {
+          pickupAddress: true,
+          deliveryAddress: true,
+          dispatches: {
             include: {
               driver: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
-                  contact_number: true,
+                  contactNumber: true,
                 },
               },
             },
@@ -226,7 +229,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ order_n
           fileUploads: true,
         },
       });
-      updatedOrder = { ...updated, order_type: "on_demand" };
+      updatedOrder = { ...updated, orderType: "onDemand" };
     }
 
     if (updatedOrder) {

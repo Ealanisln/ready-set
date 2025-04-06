@@ -13,4 +13,5 @@ export interface FileUpload {
     userId?: string;
     cateringRequestId?: number;
     onDemandId?: number;
+    isTemporary: boolean;
   }

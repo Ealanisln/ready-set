@@ -5,22 +5,23 @@ import { createClient } from "@/utils/supabase/server";
 const prisma = new PrismaClient();
 
 // Updated type definitions
-type CateringOrder = Prisma.catering_requestGetPayload<{
+type CateringOrder = Prisma.CateringRequestGetPayload<{
   include: { 
     user: { select: { name: true, email: true } }, 
-    address: true, 
-    delivery_address: true 
+    pickupAddress: true, 
+    deliveryAddress: true 
   }
 }>;
 
-type OnDemandOrder = Prisma.on_demandGetPayload<{
+type OnDemandOrder = Prisma.OnDemandGetPayload<{
   include: { 
     user: { select: { name: true, email: true } }, 
-    address: true
+    pickupAddress: true,
+    deliveryAddress: true
   }
 }>;
 
-type Order = CateringOrder | (OnDemandOrder & { delivery_address: null });
+type Order = CateringOrder | Omit<OnDemandOrder, 'deliveryAddress'>;
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,37 +46,41 @@ export async function GET(req: NextRequest) {
     let onDemandOrders: OnDemandOrder[] = [];
 
     if (type === 'all' || type === 'catering' || !type) {
-      cateringOrders = await prisma.catering_request.findMany({
-        where: { user_id: user.id },
+      cateringOrders = await prisma.cateringRequest.findMany({
+        where: { userId: user.id },
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: { 
           user: { select: { name: true, email: true } },
-          address: true,
-          delivery_address: true
+          pickupAddress: true,
+          deliveryAddress: true
         },
       });
     }
 
     if (type === 'all' || type === 'on_demand' || !type) {
-      onDemandOrders = await prisma.on_demand.findMany({
-        where: { user_id: user.id },
+      onDemandOrders = await prisma.onDemand.findMany({
+        where: { userId: user.id },
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: { 
           user: { select: { name: true, email: true } },
-          address: true
+          pickupAddress: true,
+          deliveryAddress: true
         },
       });
     }
 
     const allOrders: Order[] = [
       ...cateringOrders,
-      ...onDemandOrders.map(order => ({ ...order, delivery_address: null }))
+      ...onDemandOrders.map(order => {
+        const { deliveryAddress, ...rest } = order;
+        return rest;
+      })
     ]
-      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
 
     const serializedOrders = allOrders.map(order => ({

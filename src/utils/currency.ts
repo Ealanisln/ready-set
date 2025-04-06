@@ -16,8 +16,8 @@ export const formatCurrency = (
   if (value === null || value === undefined) return defaultValue;
   
   // Handle Decimal-like objects with a toFixed method
-  if (typeof value === 'object' && value !== null && typeof value.toFixed === 'function') {
-    return value.toFixed(2);
+  if (value && typeof value === 'object' && 'toFixed' in value) {
+    return (value as { toFixed: (digits: number) => string }).toFixed(2);
   }
   
   // Handle strings and numbers
@@ -40,8 +40,8 @@ export const toNumber = (
   if (value === null || value === undefined) return defaultValue;
   
   // Handle Decimal-like objects
-  if (typeof value === 'object' && value !== null && typeof value.toFixed === 'function') {
-    return parseFloat(value.toFixed(10));
+  if (value && typeof value === 'object' && 'toFixed' in value) {
+    return parseFloat((value as { toFixed: (digits: number) => string }).toFixed(10));
   }
   
   // Handle strings and numbers

@@ -5,18 +5,18 @@
 // These should match your Prisma schema's enums
 
 export enum UserType {
-  VENDOR = 'VENDOR', // Match Prisma enum names (often used as values in DB/API)
-  CLIENT = 'CLIENT',
-  DRIVER = 'DRIVER',
-  ADMIN = 'ADMIN',
-  HELPDESK = 'HELPDESK',
-  SUPER_ADMIN = 'SUPER_ADMIN',
+  VENDOR = 'vendor',
+  CLIENT = 'client',
+  DRIVER = 'driver',
+  ADMIN = 'admin',
+  HELPDESK = 'helpdesk',
+  SUPER_ADMIN = 'super_admin',
 }
 
 export enum UserStatus {
-  ACTIVE = 'ACTIVE', // Match Prisma enum names
-  PENDING = 'PENDING',
-  DELETED = 'DELETED',
+  ACTIVE = 'active',   // Use lowercase
+  PENDING = 'pending', // Use lowercase
+  DELETED = 'deleted', // Use lowercase
 }
 
 export enum DriverStatus { // Added from Prisma Schema

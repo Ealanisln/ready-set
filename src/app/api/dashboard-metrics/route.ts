@@ -8,31 +8,32 @@ export async function GET() {
   try {
     const [totalRevenue, deliveriesRequests, salesTotal, totalVendors] =
       await Promise.all([
-        prisma.catering_request.aggregate({
+        prisma.cateringRequest.aggregate({
           _sum: {
-            order_total: true,
+            orderTotal: true,
           },
         }),
-        prisma.catering_request.count(),
-        prisma.catering_request.count({
+        prisma.cateringRequest.count(),
+        prisma.cateringRequest.count({
           where: {
-            status: "completed",
+            status: "COMPLETED",
           },
         }),
-        prisma.user.count({
+        prisma.profile.count({
           where: {
-            type: "vendor",
+            type: "VENDOR",
           },
         }),
       ]);
 
     return NextResponse.json({
-      totalRevenue: totalRevenue._sum.order_total?.toNumber() || 0,
+      totalRevenue: totalRevenue._sum.orderTotal?.toNumber() || 0,
       deliveriesRequests,
       salesTotal,
       totalVendors,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Dashboard metrics error:", error);
+    return NextResponse.json({ error: "Failed to fetch dashboard metrics" }, { status: 500 });
   }
 }

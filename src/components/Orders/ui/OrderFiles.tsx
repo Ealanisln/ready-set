@@ -18,14 +18,14 @@ import { FileWithPath } from "react-dropzone";
 
 interface OrderFilesManagerProps {
   orderNumber: string;
-  orderType: OrderType;
+  order_type: OrderType;
   orderId: string;
   initialFiles?: FileUpload[];
 }
 
 export function OrderFilesManager({
   orderNumber,
-  orderType,
+  order_type,
   orderId,
   initialFiles = [],
 }: OrderFilesManagerProps) {
@@ -43,7 +43,7 @@ export function OrderFilesManager({
     size: file.fileSize,
     type: file.fileType || "",
     entityId: file.entityId,
-    category: file.category || orderType,
+    category: file.category || order_type,
   }));
 
   // Updated to use single object parameter
@@ -55,8 +55,8 @@ export function OrderFilesManager({
   } = useUploadFile({
     bucketName: "fileUploader",
     defaultUploadedFiles: safeInitialFiles,
-    category: orderType,
-    entityType: orderType,
+    category: order_type,
+    entityType: order_type,
     entityId: orderId,
     maxFileCount: 10,
     maxFileSize: 4 * 1024 * 1024,
@@ -106,7 +106,7 @@ export function OrderFilesManager({
             fileType: file.fileType || null,
             fileSize: typeof file.fileSize === 'number' ? file.fileSize : 0,
             fileUrl: file.fileUrl || "",
-            entityType: file.entityType || orderType,
+            entityType: file.entityType || order_type,
             entityId: file.entityId || orderId,
             category: file.category, // Optional field
             uploadedAt: new Date(file.uploadedAt || Date.now()),
@@ -114,6 +114,7 @@ export function OrderFilesManager({
             userId: file.userId, // Optional field
             cateringRequestId: typeof file.cateringRequestId === 'number' ? file.cateringRequestId : undefined,
             onDemandId: typeof file.onDemandId === 'number' ? file.onDemandId : undefined,
+            isTemporary: file.isTemporary || false,
           };
         });
 
@@ -131,7 +132,7 @@ export function OrderFilesManager({
     };
 
     fetchFiles();
-  }, [orderNumber, orderId, orderType, toast]);
+  }, [orderNumber, orderId, order_type, toast]);
 
   useEffect(() => {
     if (uploadedFiles.length > 0) {
@@ -148,12 +149,12 @@ export function OrderFilesManager({
             fileType: newFile.type || null,
             fileSize: newFile.size,
             fileUrl: newFile.url,
-            entityType: orderType,
+            entityType: order_type,
             entityId: orderId,
-            category: newFile.category || orderType,
+            category: newFile.category || order_type,
             uploadedAt: new Date(),
             updatedAt: new Date(),
-            // Optional fields can be left undefined
+            isTemporary: false,
           };
 
           const existingIndex = newFiles.findIndex(
@@ -169,7 +170,7 @@ export function OrderFilesManager({
         return newFiles;
       });
     }
-  }, [uploadedFiles, orderType, orderId]);
+  }, [uploadedFiles, order_type, orderId]);
 
   const getDisplayText = (type: OrderType): string => {
     switch (type) {
@@ -222,7 +223,7 @@ export function OrderFilesManager({
         <CardHeader>
           <CardTitle>Order Files</CardTitle>
           <CardDescription>
-            {getDisplayText(orderType)} Files - Order #{orderNumber}
+            {getDisplayText(order_type)} Files - Order #{orderNumber}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -230,8 +231,8 @@ export function OrderFilesManager({
             onUpload={handleUpload}
             progresses={progresses}
             isUploading={isUploading}
-            category={orderType}
-            entityType={orderType}
+            category={order_type}
+            entityType={order_type}
             entityId={orderId}
             accept={{
               "image/*": [],

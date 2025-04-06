@@ -42,7 +42,7 @@ interface OrderHeaderProps {
   date: string | Date | null; 
   driverInfo: Driver | null;
   onAssignDriver: () => void;
-  orderType: OrderType;
+  order_type: OrderType;
   orderId: string | number | bigint;
   onDeleteSuccess: () => void;
 }
@@ -52,7 +52,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   date,
   driverInfo,
   onAssignDriver,
-  orderType,
+  order_type,
   orderId,
   onDeleteSuccess,
 }) => {
@@ -84,7 +84,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
 
   const handleDeleteOrder = async () => {
     try {
-      const apiOrderType = getApiOrderType(orderType);
+      const apiOrderType = getApiOrderType(order_type);
       const response = await fetch(
         `/api/orders/delete?orderId=${orderId.toString()}&orderType=${apiOrderType}`,
         {
@@ -125,7 +125,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       <CardHeader className="flex flex-row items-center justify-between p-6 border-b bg-slate-50">
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex h-12 w-12 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 items-center justify-center text-white font-bold text-lg">
-            {orderType === "catering" ? "CR" : "OD"}
+            {order_type === "catering" ? "CR" : "OD"}
           </div>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-slate-800">

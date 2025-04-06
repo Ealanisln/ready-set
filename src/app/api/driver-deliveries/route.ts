@@ -4,30 +4,24 @@ import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
-type CateringDelivery = Prisma.catering_requestGetPayload<{
+type CateringDelivery = Prisma.CateringRequestGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
-    delivery_address: true;
+    pickupAddress: true;
+    deliveryAddress: true;
   };
 }>;
 
-type OnDemandDelivery = Prisma.on_demandGetPayload<{
+type OnDemandDelivery = Prisma.OnDemandGetPayload<{
   include: {
     user: { select: { name: true; email: true } };
-    address: true;
+    pickupAddress: true;
+    deliveryAddress: true;
   };
 }>;
 
 type Delivery = (CateringDelivery | OnDemandDelivery) & {
   delivery_type: "catering" | "on_demand";
-  delivery_address: {
-    street1?: string | null;
-    street2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    zip?: string | null;
-  } | null;
 };
 
 export async function GET(req: NextRequest) {
@@ -54,7 +48,7 @@ export async function GET(req: NextRequest) {
       },
       select: {
         cateringRequestId: true,
-        on_demandId: true,
+        onDemandId: true,
       },
     });
 
@@ -63,36 +57,37 @@ export async function GET(req: NextRequest) {
       .filter((d) => d.cateringRequestId !== null)
       .map((d) => d.cateringRequestId!);
     const onDemandIds = driverDispatches
-      .filter((d) => d.on_demandId !== null)
-      .map((d) => d.on_demandId!);
+      .filter((d) => d.onDemandId !== null)
+      .map((d) => d.onDemandId!);
 
     // Fetch catering deliveries
-    const cateringDeliveries = await prisma.catering_request.findMany({
+    const cateringDeliveries = await prisma.cateringRequest.findMany({
       where: {
         id: { in: cateringIds },
       },
       include: {
         user: { select: { name: true, email: true } },
-        address: true,
-        delivery_address: true,
+        pickupAddress: true,
+        deliveryAddress: true,
       },
     });
 
     // Fetch on-demand deliveries
-    const onDemandDeliveries = await prisma.on_demand.findMany({
+    const onDemandDeliveries = await prisma.onDemand.findMany({
       where: {
         id: { in: onDemandIds },
       },
       include: {
         user: { select: { name: true, email: true } },
-        address: true,
+        pickupAddress: true,
+        deliveryAddress: true,
       },
     });
 
     // Fetch delivery addresses for on-demand deliveries
     const onDemandDeliveryAddresses = await prisma.address.findMany({
       where: {
-        id: { in: onDemandDeliveries.map((d) => d.delivery_address_id) },
+        id: { in: onDemandDeliveries.map((d) => d.deliveryAddressId) },
       },
     });
 
@@ -101,27 +96,24 @@ export async function GET(req: NextRequest) {
       ...cateringDeliveries.map((d) => ({
         ...d,
         delivery_type: "catering" as const,
+        user: d.user,
+        address: d.pickupAddress,
+        delivery_address: d.deliveryAddress,
       })),
       ...onDemandDeliveries.map((d) => {
         const deliveryAddress = onDemandDeliveryAddresses.find(
-          (addr) => addr.id === d.delivery_address_id,
+          (addr) => addr.id === d.deliveryAddressId,
         );
         return {
           ...d,
           delivery_type: "on_demand" as const,
-          delivery_address: deliveryAddress
-            ? {
-                street1: deliveryAddress.street1,
-                street2: deliveryAddress.street2,
-                city: deliveryAddress.city,
-                state: deliveryAddress.state,
-                zip: deliveryAddress.zip,
-              }
-            : null,
+          user: d.user,
+          address: d.pickupAddress,
+          delivery_address: deliveryAddress,
         };
       }),
     ]
-      .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(skip, skip + limit);
 
     const serializedDeliveries = allDeliveries.map((delivery) => ({

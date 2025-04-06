@@ -30,7 +30,7 @@ export async function PUT(request: Request) {
         userData = { type: profile.type };
       } else {
         // Fall back to prisma if not in profiles
-        userData = await prisma.user.findUnique({
+        userData = await prisma.profile.findUnique({
           where: { id: user.id },
           select: { type: true }
         });
@@ -70,7 +70,7 @@ export async function PUT(request: Request) {
     console.log(`Attempting to update user ${userId} status to ${newStatus}`);
     
     // Update user status in database
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.profile.update({
       where: { id: userId },
       data: { status: newStatus },
       select: {

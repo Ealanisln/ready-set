@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
         const numericId = parseInt(entityId);
         if (!isNaN(numericId)) {
           // Check if a catering request with this ID exists
-          const existingOrder = await prisma.catering_request.findUnique({
+          const existingOrder = await prisma.cateringRequest.findUnique({
             where: {
-              id: BigInt(numericId),
+              id: numericId.toString()
             },
             select: {
               id: true,
@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
         const numericId = parseInt(entityId);
         if (!isNaN(numericId)) {
           // Check if an on_demand order with this ID exists
-          const existingOrder = await prisma.on_demand.findUnique({
+          const existingOrder = await prisma.onDemand.findUnique({
             where: {
-              id: BigInt(numericId),
+              id: numericId.toString()
             },
             select: {
               id: true,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     // If fileKeys are provided, delete specific files
     if (Array.isArray(fileKeys) && fileKeys.length > 0) {
       // Additional safety check for fileKeys: don't delete files that belong to orders
-      const safeToDeleteFiles = await prisma.file_upload.findMany({
+      const safeToDeleteFiles = await prisma.fileUpload.findMany({
         where: {
           id: {
             in: fileKeys,
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Step 3: Delete records from the database
-      await prisma.file_upload.deleteMany({
+      await prisma.fileUpload.deleteMany({
         where: {
           id: {
             in: safeToDeleteIds,
@@ -168,14 +168,11 @@ export async function POST(request: NextRequest) {
     // If entityId is provided, delete all files for that entity
     if (entityId) {
       // Step 1: Get file records for the entity
-      const fileRecords = await prisma.file_upload.findMany({
+      const fileRecords = await prisma.fileUpload.findMany({
         where: {
-          entityId: entityId,
-          entityType: entityType || undefined,
-          userId: session.user.id, // Security check - only delete own files
-          // Additional safety check - don't delete files linked to real orders
+          userId: session.user.id,
           cateringRequestId: null,
-          onDemandId: null,
+          onDemandId: null
         },
         select: {
           id: true,
@@ -217,15 +214,12 @@ export async function POST(request: NextRequest) {
       }
 
       // Step 3: Delete records from the database
-      await prisma.file_upload.deleteMany({
+      await prisma.fileUpload.deleteMany({
         where: {
-          entityId: entityId,
-          entityType: entityType || undefined,
-          userId: session.user.id, // Security check - only delete own files
-          // Additional safety check - don't delete files linked to real orders
+          userId: session.user.id,
           cateringRequestId: null,
-          onDemandId: null,
-        },
+          onDemandId: null
+        }
       });
 
       return NextResponse.json({

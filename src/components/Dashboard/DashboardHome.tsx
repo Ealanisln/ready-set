@@ -18,7 +18,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { User, CateringOrder } from "@/types/user";
+import { User } from "@/types/user";
+import { CateringRequest } from "@/types/order";
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
 
@@ -132,7 +133,7 @@ const UserTypeBadge: React.FC<{type: string}> = ({ type }) => {
 };
 
 // Recent Orders Table Component
-const ModernOrdersTable: React.FC<{orders: CateringOrder[]}> = ({ orders }) => (
+const ModernOrdersTable: React.FC<{orders: CateringRequest[]}> = ({ orders }) => (
   <div className="overflow-hidden">
     {orders.length > 0 ? (
       <div className="min-w-full divide-y divide-gray-200">
@@ -148,16 +149,18 @@ const ModernOrdersTable: React.FC<{orders: CateringOrder[]}> = ({ orders }) => (
           {orders.map((order) => (
             <div key={order.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
               <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                <Link href={`/admin/catering-orders/${order.order_number}`}>
-                  {order.order_number}
+                <Link href={`/admin/catering-orders/${order.orderNumber}`}>
+                  {order.orderNumber}
                 </Link>
               </div>
-              <div className="text-sm text-gray-500">{order.order_type || "Catering"}</div>
+              <div className="text-sm text-gray-500">{order.order_type === 'catering' ? "Catering" : "On Demand"}</div>
               <div><StatusBadge status={order.status} /></div>
               <div className="text-sm font-medium text-gray-900">
-                ${typeof order.order_total === 'number' 
-                  ? order.order_total.toFixed(2) 
-                  : parseFloat(order.order_total as string).toFixed(2)}
+                ${order.orderTotal ? 
+                  (typeof order.orderTotal === 'number' 
+                    ? order.orderTotal.toFixed(2) 
+                    : parseFloat(order.orderTotal).toFixed(2))
+                  : "0.00"}
               </div>
             </div>
           ))}
@@ -189,7 +192,7 @@ const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
             <div key={user.id} className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
               <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
                 <Link href={`/admin/users/${user.id}`}>
-                  {user.name || user.contact_name || "Unnamed User"}
+                  {user.name || user.contactName || "Unnamed User"}
                 </Link>
               </div>
               <div className="text-sm text-gray-500">{user.email}</div>
@@ -237,8 +240,8 @@ const ModernDashboardCard: React.FC<{
 
 // Redesigned DashboardHome Component
 export function ModernDashboardHome() {
-  const [recentOrders, setRecentOrders] = useState<CateringOrder[]>([]);
-  const [activeOrders, setActiveOrders] = useState<CateringOrder[]>([]);
+  const [recentOrders, setRecentOrders] = useState<CateringRequest[]>([]);
+  const [activeOrders, setActiveOrders] = useState<CateringRequest[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -270,7 +273,7 @@ export function ModernDashboardHome() {
         // Fix: Extract users array from the response
         setRecentOrders(ordersData);
         
-        const activeOrdersList = ordersData.filter((order: CateringOrder) => 
+        const activeOrdersList = ordersData.filter((order: CateringRequest) => 
           ['active', 'pending', 'confirmed', 'in_progress'].includes(order.status)
         );
         setActiveOrders(activeOrdersList);

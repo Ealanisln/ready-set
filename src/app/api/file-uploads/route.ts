@@ -172,7 +172,6 @@ export async function POST(request: NextRequest) {
           await prisma.profile.create({
             data: {
               id: userId,
-              user_id: userId,
               email: session?.user?.email || `${userId}@placeholder.com`,
               name: session?.user?.user_metadata?.name || session?.user?.email?.split("@")[0] || "Anonymous",
             },
@@ -213,11 +212,9 @@ export async function POST(request: NextRequest) {
           fileUrl: publicUrl,
           uploadedAt: new Date(),
           updatedAt: new Date(),
-          entityType,
-          entityId,
           category,
-          cateringRequestId,
-          onDemandId,
+          cateringRequestId: cateringRequestId?.toString(),
+          onDemandId: onDemandId?.toString(),
         },
       });
 

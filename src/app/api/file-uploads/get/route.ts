@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     console.log('Prisma query whereClause:', whereClause);
 
-    const files = await prisma.file_upload.findMany({
+    const files = await prisma.fileUpload.findMany({
       where: whereClause,
       orderBy: {
         uploadedAt: "desc",
@@ -50,7 +50,6 @@ export async function GET(request: NextRequest) {
         url: file.fileUrl,
         type: file.fileType,
         size: file.fileSize,
-        entityId: file.entityId,
         category: file.category,
         uploadedAt: file.uploadedAt,
       })),

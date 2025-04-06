@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/utils/prismaDB';
+import { FileUpload } from '@/types/user';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,10 +24,9 @@ export async function GET(request: NextRequest) {
     }
     
     // Fetch files for this user
-    const files = await prisma.file_upload.findMany({
+    const files = await prisma.fileUpload.findMany({
       where: {
-        entityId: userId,
-        entityType: 'user'
+        userId: userId
       },
       orderBy: {
         uploadedAt: 'desc'
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      files: files.map(file => ({
+      files: files.map((file: FileUpload) => ({
         id: file.id,
         name: file.fileName,
         url: file.fileUrl,

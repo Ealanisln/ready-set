@@ -16,14 +16,14 @@ export async function GET() {
     }
     
     // Get the user's profile from your database
-    const userData = await prisma.user.findUnique({
+    const userData = await prisma.profile.findUnique({
       where: { id: user.id },
       select: {
         id: true,
         type: true,
         email: true,
         name: true,
-        contact_name: true,
+        contactName: true,
         image: true
       }
     });

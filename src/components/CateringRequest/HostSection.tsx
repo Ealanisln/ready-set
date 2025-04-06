@@ -15,7 +15,7 @@ interface HostSectionProps {
       <>
         <InputField
           control={control}
-          name="hours_needed"
+          name="hoursNeeded"
           label="Hours Needed"
           type="number"
           required
@@ -25,7 +25,7 @@ interface HostSectionProps {
         />
         <InputField
           control={control}
-          name="number_of_host"
+          name="numberOfHosts"
           label="How many Hosts do you need?"
           type="number"
           required

@@ -1,7 +1,19 @@
 import { PrismaClient } from "@prisma/client";
-import type { UploadMetadata, UploadedFile } from "@/types/upload";
 
 const prisma = new PrismaClient();
+
+export interface UploadMetadata {
+  userId: string;
+  entityType?: string;
+  entityId?: string;
+  category?: string;
+}
+
+export interface UploadedFile {
+  name: string;
+  size: number;
+  url: string;
+}
 
 export interface UploadCompleteParams {
   metadata: UploadMetadata;
@@ -50,7 +62,7 @@ export async function handleUploadComplete({
   console.log("file url", file.url);
 
   try {
-    const existingFile = await prisma.file_upload.findFirst({
+    const existingFile = await prisma.fileUpload.findFirst({
       where: {
         userId: metadata.userId,
         fileName: file.name,
@@ -64,21 +76,18 @@ export async function handleUploadComplete({
         uploadedBy: metadata.userId,
         fileType: existingFile.fileType,
         fileId: existingFile.id,
-        entityType: existingFile.entityType,
         category: existingFile.category,
       };
     }
 
     // Create file without relationships first
-    const newFileUpload = await prisma.file_upload.create({
+    const newFileUpload = await prisma.fileUpload.create({
       data: {
         userId: metadata.userId,
         fileName: file.name,
         fileType: getFileType(file.name),
         fileSize: file.size,
         fileUrl: file.url,
-        entityType: metadata.entityType || "user",
-        entityId: metadata.entityId || metadata.userId,
         category: metadata.category,
         uploadedAt: new Date(),
         updatedAt: new Date(),
@@ -91,7 +100,6 @@ export async function handleUploadComplete({
       uploadedBy: metadata.userId,
       fileType: newFileUpload.fileType,
       fileId: newFileUpload.id,
-      entityType: newFileUpload.entityType,
       category: newFileUpload.category,
     };
   } catch (error) {

@@ -2,23 +2,26 @@
 
 import { Prisma } from "@prisma/client";
 import {
-  Order,
   CateringRequest,
   OnDemand,
-  OrderType,
-  DriverStatus,
+  Order,
   OrderStatus,
+  DriverStatus,
   VehicleType,
-  NeedHost,
+  CateringNeedHost,
+  FileUpload,
+  Dispatch,
+  Address,
+  User,
 } from "../types/order";
 
 // Type to represent a catering_request from Prisma with related fields included
-type PrismaCateringRequest = Prisma.catering_requestGetPayload<{
+type PrismaCateringRequest = Prisma.CateringRequestGetPayload<{
   include: {
     user: true;
-    address: true;
-    delivery_address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: true;
       };
@@ -28,12 +31,12 @@ type PrismaCateringRequest = Prisma.catering_requestGetPayload<{
 }>;
 
 // Type to represent an on_demand from Prisma with related fields included
-type PrismaOnDemand = Prisma.on_demandGetPayload<{
+type PrismaOnDemand = Prisma.OnDemandGetPayload<{
   include: {
     user: true;
-    address: true;
-    delivery_address: true;
-    dispatch: {
+    pickupAddress: true;
+    deliveryAddress: true;
+    dispatches: {
       include: {
         driver: true;
       };
@@ -41,6 +44,11 @@ type PrismaOnDemand = Prisma.on_demandGetPayload<{
     fileUploads: true;
   };
 }>;
+
+// Helper function to convert Prisma Decimal to number
+function convertDecimalToNumber(decimal: Prisma.Decimal | null): number | null {
+  return decimal ? Number(decimal) : null;
+}
 
 /**
  * Maps a Prisma catering_request to our application CateringRequest type
@@ -51,67 +59,66 @@ export function mapPrismaCateringRequestToAppType(
   return {
     id: prismaRequest.id,
     guid: prismaRequest.guid,
-    user_id: prismaRequest.user_id,
-    address_id: prismaRequest.address_id,
-    delivery_address_id: prismaRequest.delivery_address_id,
-    order_number: prismaRequest.order_number,
-    date: prismaRequest.date ?? new Date(),
-    pickup_time: prismaRequest.pickup_time,
-    arrival_time: prismaRequest.arrival_time,
-    complete_time: prismaRequest.complete_time,
-    client_attention: prismaRequest.client_attention ?? "",
-    pickup_notes: prismaRequest.pickup_notes,
-    special_notes: prismaRequest.special_notes,
+    userId: prismaRequest.userId,
+    pickupAddressId: prismaRequest.pickupAddressId,
+    deliveryAddressId: prismaRequest.deliveryAddressId,
+    orderNumber: prismaRequest.orderNumber,
+    pickupDateTime: prismaRequest.pickupDateTime ?? new Date(),
+    arrivalDateTime: prismaRequest.arrivalDateTime,
+    completeDateTime: prismaRequest.completeDateTime,
+    clientAttention: prismaRequest.clientAttention ?? "",
+    pickupNotes: prismaRequest.pickupNotes,
+    specialNotes: prismaRequest.specialNotes,
     image: prismaRequest.image,
     status: (prismaRequest.status as OrderStatus) ?? OrderStatus.ACTIVE,
-    order_total: prismaRequest.order_total,
-    tip: prismaRequest.tip,
-    driver_status: prismaRequest.driver_status as DriverStatus,
-    created_at: prismaRequest.created_at,
-    updated_at: prismaRequest.updated_at,
+    orderTotal: convertDecimalToNumber(prismaRequest.orderTotal),
+    tip: convertDecimalToNumber(prismaRequest.tip),
+    driverStatus: prismaRequest.driverStatus as DriverStatus,
+    createdAt: prismaRequest.createdAt,
+    updatedAt: prismaRequest.updatedAt,
     user: {
       id: prismaRequest.user.id,
       name: prismaRequest.user.name,
       email: prismaRequest.user.email,
     },
-    address: {
-      id: prismaRequest.address.id,
-      name: prismaRequest.address.name,
-      street1: prismaRequest.address.street1,
-      street2: prismaRequest.address.street2,
-      city: prismaRequest.address.city,
-      state: prismaRequest.address.state,
-      zip: prismaRequest.address.zip,
-      county: prismaRequest.address.county,
-      locationNumber: prismaRequest.address.locationNumber,
-      parkingLoading: prismaRequest.address.parkingLoading,
-      isRestaurant: prismaRequest.address.isRestaurant,
-      isShared: prismaRequest.address.isShared,
-      createdAt: prismaRequest.address.createdAt,
-      updatedAt: prismaRequest.address.updatedAt,
-      createdBy: prismaRequest.address.createdBy,
+    pickupAddress: {
+      id: prismaRequest.pickupAddress.id,
+      name: prismaRequest.pickupAddress.name,
+      street1: prismaRequest.pickupAddress.street1,
+      street2: prismaRequest.pickupAddress.street2,
+      city: prismaRequest.pickupAddress.city,
+      state: prismaRequest.pickupAddress.state,
+      zip: prismaRequest.pickupAddress.zip,
+      county: prismaRequest.pickupAddress.county,
+      locationNumber: prismaRequest.pickupAddress.locationNumber,
+      parkingLoading: prismaRequest.pickupAddress.parkingLoading,
+      isRestaurant: prismaRequest.pickupAddress.isRestaurant,
+      isShared: prismaRequest.pickupAddress.isShared,
+      createdAt: prismaRequest.pickupAddress.createdAt,
+      updatedAt: prismaRequest.pickupAddress.updatedAt,
+      createdBy: prismaRequest.pickupAddress.createdBy,
     },
-    delivery_address: {
-      id: prismaRequest.delivery_address.id,
-      name: prismaRequest.delivery_address.name,
-      street1: prismaRequest.delivery_address.street1,
-      street2: prismaRequest.delivery_address.street2,
-      city: prismaRequest.delivery_address.city,
-      state: prismaRequest.delivery_address.state,
-      zip: prismaRequest.delivery_address.zip,
-      county: prismaRequest.delivery_address.county,
-      locationNumber: prismaRequest.delivery_address.locationNumber,
-      parkingLoading: prismaRequest.delivery_address.parkingLoading,
-      isRestaurant: prismaRequest.delivery_address.isRestaurant,
-      isShared: prismaRequest.delivery_address.isShared,
-      createdAt: prismaRequest.delivery_address.createdAt,
-      updatedAt: prismaRequest.delivery_address.updatedAt,
-      createdBy: prismaRequest.delivery_address.createdBy,
+    deliveryAddress: {
+      id: prismaRequest.deliveryAddress.id,
+      name: prismaRequest.deliveryAddress.name,
+      street1: prismaRequest.deliveryAddress.street1,
+      street2: prismaRequest.deliveryAddress.street2,
+      city: prismaRequest.deliveryAddress.city,
+      state: prismaRequest.deliveryAddress.state,
+      zip: prismaRequest.deliveryAddress.zip,
+      county: prismaRequest.deliveryAddress.county,
+      locationNumber: prismaRequest.deliveryAddress.locationNumber,
+      parkingLoading: prismaRequest.deliveryAddress.parkingLoading,
+      isRestaurant: prismaRequest.deliveryAddress.isRestaurant,
+      isShared: prismaRequest.deliveryAddress.isShared,
+      createdAt: prismaRequest.deliveryAddress.createdAt,
+      updatedAt: prismaRequest.deliveryAddress.updatedAt,
+      createdBy: prismaRequest.deliveryAddress.createdBy,
     },
-    dispatch: prismaRequest.dispatch.map((d) => ({
+    dispatches: prismaRequest.dispatches.map((d: Prisma.DispatchGetPayload<{ include: { driver: true } }>) => ({
       id: d.id,
       cateringRequestId: d.cateringRequestId,
-      on_demandId: d.on_demandId,
+      onDemandId: d.onDemandId,
       driverId: d.driverId,
       userId: d.userId,
       createdAt: d.createdAt,
@@ -121,33 +128,34 @@ export function mapPrismaCateringRequestToAppType(
             id: d.driver.id,
             name: d.driver.name,
             email: d.driver.email,
-            contact_number: d.driver.contact_number,
+            contactNumber: d.driver.contactNumber,
           }
         : undefined,
     })),
-    fileUploads: prismaRequest.fileUploads?.map((f) => ({
+    fileUploads: prismaRequest.fileUploads?.map((f: Prisma.FileUploadGetPayload<{}>) => ({
       id: f.id,
-      userId: f.userId,
       fileName: f.fileName,
       fileType: f.fileType,
       fileSize: f.fileSize,
       fileUrl: f.fileUrl,
+      entityType: "catering",
+      entityId: f.cateringRequestId ?? "",
+      category: f.category,
       uploadedAt: f.uploadedAt,
       updatedAt: f.updatedAt,
+      userId: f.userId,
       cateringRequestId: f.cateringRequestId,
       onDemandId: f.onDemandId,
-      entityType: f.entityType,
-      entityId: f.entityId,
-      category: f.category,
+      isTemporary: f.isTemporary,
     })),
 
     // Specific catering fields
     order_type: "catering",
     brokerage: prismaRequest.brokerage,
     headcount: prismaRequest.headcount,
-    need_host: (prismaRequest.need_host as NeedHost) ?? NeedHost.NO,
-    hours_needed: prismaRequest.hours_needed,
-    number_of_host: prismaRequest.number_of_host,
+    needHost: (prismaRequest.needHost as CateringNeedHost) ?? CateringNeedHost.NO,
+    hoursNeeded: prismaRequest.hoursNeeded,
+    numberOfHosts: prismaRequest.numberOfHosts,
   };
 }
 
@@ -160,67 +168,66 @@ export function mapPrismaOnDemandToAppType(
   return {
     id: prismaOnDemand.id,
     guid: prismaOnDemand.guid,
-    user_id: prismaOnDemand.user_id,
-    address_id: prismaOnDemand.address_id,
-    delivery_address_id: prismaOnDemand.delivery_address_id,
-    order_number: prismaOnDemand.order_number,
-    date: prismaOnDemand.date ?? new Date(),
-    pickup_time: prismaOnDemand.pickup_time,
-    arrival_time: prismaOnDemand.arrival_time,
-    complete_time: prismaOnDemand.complete_time,
-    client_attention: prismaOnDemand.client_attention,
-    pickup_notes: prismaOnDemand.pickup_notes,
-    special_notes: prismaOnDemand.special_notes,
+    userId: prismaOnDemand.userId,
+    pickupAddressId: prismaOnDemand.pickupAddressId,
+    deliveryAddressId: prismaOnDemand.deliveryAddressId,
+    orderNumber: prismaOnDemand.orderNumber,
+    pickupDateTime: prismaOnDemand.pickupDateTime ?? new Date(),
+    arrivalDateTime: prismaOnDemand.arrivalDateTime,
+    completeDateTime: prismaOnDemand.completeDateTime,
+    clientAttention: prismaOnDemand.clientAttention,
+    pickupNotes: prismaOnDemand.pickupNotes,
+    specialNotes: prismaOnDemand.specialNotes,
     image: prismaOnDemand.image,
     status: (prismaOnDemand.status as OrderStatus) ?? OrderStatus.ACTIVE,
-    order_total: prismaOnDemand.order_total,
-    tip: prismaOnDemand.tip,
-    driver_status: prismaOnDemand.driver_status as DriverStatus,
-    created_at: prismaOnDemand.created_at,
-    updated_at: prismaOnDemand.updated_at,
+    orderTotal: convertDecimalToNumber(prismaOnDemand.orderTotal),
+    tip: convertDecimalToNumber(prismaOnDemand.tip),
+    driverStatus: prismaOnDemand.driverStatus as DriverStatus,
+    createdAt: prismaOnDemand.createdAt,
+    updatedAt: prismaOnDemand.updatedAt,
     user: {
       id: prismaOnDemand.user.id,
       name: prismaOnDemand.user.name,
       email: prismaOnDemand.user.email,
     },
-    address: {
-      id: prismaOnDemand.address.id,
-      name: prismaOnDemand.address.name,
-      street1: prismaOnDemand.address.street1,
-      street2: prismaOnDemand.address.street2,
-      city: prismaOnDemand.address.city,
-      state: prismaOnDemand.address.state,
-      zip: prismaOnDemand.address.zip,
-      county: prismaOnDemand.address.county,
-      locationNumber: prismaOnDemand.address.locationNumber,
-      parkingLoading: prismaOnDemand.address.parkingLoading,
-      isRestaurant: prismaOnDemand.address.isRestaurant,
-      isShared: prismaOnDemand.address.isShared,
-      createdAt: prismaOnDemand.address.createdAt,
-      updatedAt: prismaOnDemand.address.updatedAt,
-      createdBy: prismaOnDemand.address.createdBy,
+    pickupAddress: {
+      id: prismaOnDemand.pickupAddress.id,
+      name: prismaOnDemand.pickupAddress.name,
+      street1: prismaOnDemand.pickupAddress.street1,
+      street2: prismaOnDemand.pickupAddress.street2,
+      city: prismaOnDemand.pickupAddress.city,
+      state: prismaOnDemand.pickupAddress.state,
+      zip: prismaOnDemand.pickupAddress.zip,
+      county: prismaOnDemand.pickupAddress.county,
+      locationNumber: prismaOnDemand.pickupAddress.locationNumber,
+      parkingLoading: prismaOnDemand.pickupAddress.parkingLoading,
+      isRestaurant: prismaOnDemand.pickupAddress.isRestaurant,
+      isShared: prismaOnDemand.pickupAddress.isShared,
+      createdAt: prismaOnDemand.pickupAddress.createdAt,
+      updatedAt: prismaOnDemand.pickupAddress.updatedAt,
+      createdBy: prismaOnDemand.pickupAddress.createdBy,
     },
-    delivery_address: {
-      id: prismaOnDemand.delivery_address.id,
-      name: prismaOnDemand.delivery_address.name,
-      street1: prismaOnDemand.delivery_address.street1,
-      street2: prismaOnDemand.delivery_address.street2,
-      city: prismaOnDemand.delivery_address.city,
-      state: prismaOnDemand.delivery_address.state,
-      zip: prismaOnDemand.delivery_address.zip,
-      county: prismaOnDemand.delivery_address.county,
-      locationNumber: prismaOnDemand.delivery_address.locationNumber,
-      parkingLoading: prismaOnDemand.delivery_address.parkingLoading,
-      isRestaurant: prismaOnDemand.delivery_address.isRestaurant,
-      isShared: prismaOnDemand.delivery_address.isShared,
-      createdAt: prismaOnDemand.delivery_address.createdAt,
-      updatedAt: prismaOnDemand.delivery_address.updatedAt,
-      createdBy: prismaOnDemand.delivery_address.createdBy,
+    deliveryAddress: {
+      id: prismaOnDemand.deliveryAddress.id,
+      name: prismaOnDemand.deliveryAddress.name,
+      street1: prismaOnDemand.deliveryAddress.street1,
+      street2: prismaOnDemand.deliveryAddress.street2,
+      city: prismaOnDemand.deliveryAddress.city,
+      state: prismaOnDemand.deliveryAddress.state,
+      zip: prismaOnDemand.deliveryAddress.zip,
+      county: prismaOnDemand.deliveryAddress.county,
+      locationNumber: prismaOnDemand.deliveryAddress.locationNumber,
+      parkingLoading: prismaOnDemand.deliveryAddress.parkingLoading,
+      isRestaurant: prismaOnDemand.deliveryAddress.isRestaurant,
+      isShared: prismaOnDemand.deliveryAddress.isShared,
+      createdAt: prismaOnDemand.deliveryAddress.createdAt,
+      updatedAt: prismaOnDemand.deliveryAddress.updatedAt,
+      createdBy: prismaOnDemand.deliveryAddress.createdBy,
     },
-    dispatch: prismaOnDemand.dispatch.map((d) => ({
+    dispatches: prismaOnDemand.dispatches.map((d: Prisma.DispatchGetPayload<{ include: { driver: true } }>) => ({
       id: d.id,
       cateringRequestId: d.cateringRequestId,
-      on_demandId: d.on_demandId,
+      onDemandId: d.onDemandId,
       driverId: d.driverId,
       userId: d.userId,
       createdAt: d.createdAt,
@@ -230,31 +237,32 @@ export function mapPrismaOnDemandToAppType(
             id: d.driver.id,
             name: d.driver.name,
             email: d.driver.email,
-            contact_number: d.driver.contact_number,
+            contactNumber: d.driver.contactNumber,
           }
         : undefined,
     })),
-    fileUploads: prismaOnDemand.fileUploads?.map((f) => ({
+    fileUploads: prismaOnDemand.fileUploads?.map((f: Prisma.FileUploadGetPayload<{}>) => ({
       id: f.id,
-      userId: f.userId,
       fileName: f.fileName,
       fileType: f.fileType,
       fileSize: f.fileSize,
       fileUrl: f.fileUrl,
+      entityType: "on_demand",
+      entityId: f.onDemandId ?? "",
+      category: f.category,
       uploadedAt: f.uploadedAt,
       updatedAt: f.updatedAt,
+      userId: f.userId,
       cateringRequestId: f.cateringRequestId,
       onDemandId: f.onDemandId,
-      entityType: f.entityType,
-      entityId: f.entityId,
-      category: f.category,
+      isTemporary: f.isTemporary,
     })),
 
     // Specific on_demand fields
     order_type: "on_demand",
-    item_delivered: prismaOnDemand.item_delivered,
-    vehicle_type: prismaOnDemand.vehicle_type as VehicleType,
-    hours_needed: prismaOnDemand.hours_needed,
+    itemDelivered: prismaOnDemand.itemDelivered,
+    vehicleType: prismaOnDemand.vehicleType as VehicleType,
+    hoursNeeded: prismaOnDemand.hoursNeeded,
     length: prismaOnDemand.length,
     width: prismaOnDemand.width,
     height: prismaOnDemand.height,

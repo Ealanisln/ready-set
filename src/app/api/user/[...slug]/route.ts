@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const dbUser = await prisma.user.findUnique({
+    const dbUser = await prisma.profile.findUnique({
       where: { email: user.email },
     });
 
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
 
     // Fetch the current user to get their type
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.profile.findUnique({
       where: { email: user.email },
       select: { type: true }
     });
@@ -76,16 +76,28 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Prepare the data for update
+    // Prepare the data for update using camelCase and including all updatable fields
     const updateData: any = {
       name: data.name,
       email: data.email,
-      contact_number: data.contact_number,
+      contactNumber: data.contactNumber,
+      companyName: data.companyName,
+      contactName: data.contactName,
+      website: data.website,
       street1: data.street1,
       street2: data.street2,
       city: data.city,
       state: data.state,
       zip: data.zip,
+      locationNumber: data.locationNumber,
+      parkingLoading: data.parkingLoading,
+      counties: data.counties,
+      timeNeeded: data.timeNeeded,
+      cateringBrokerage: data.cateringBrokerage,
+      frequency: data.frequency,
+      provide: data.provide,
+      headCount: data.headCount,
+      sideNotes: data.sideNotes
     };
 
     // Only update fields that are not undefined or null
@@ -93,7 +105,7 @@ export async function PUT(request: NextRequest) {
       (updateData[key] === undefined || updateData[key] === null) && delete updateData[key]
     );
 
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.profile.update({
       where: { email: user.email },
       data: updateData,
     });

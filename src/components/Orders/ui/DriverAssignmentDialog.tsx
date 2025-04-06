@@ -66,7 +66,7 @@ const DriverAssignmentDialog: React.FC<DriverAssignmentDialogProps> = ({
       const filtered = drivers.filter(
         (driver) =>
           (driver.name?.toLowerCase().includes(lowercaseSearch) ?? false) ||
-          (driver.contact_number && driver.contact_number.includes(searchTerm)),
+          (driver.contactNumber && driver.contactNumber.includes(searchTerm)),
       );
       setFilteredDrivers(filtered);
     }
@@ -139,7 +139,7 @@ const DriverAssignmentDialog: React.FC<DriverAssignmentDialogProps> = ({
                 </div>
                 <div className="flex items-center gap-1 text-sm text-slate-500">
                   <Phone className="h-3 w-3" />
-                  {getSelectedDriver()?.contact_number || "No phone"}
+                  {getSelectedDriver()?.contactNumber || "No phone"}
                 </div>
               </div>
               <Badge
@@ -220,7 +220,7 @@ const DriverAssignmentDialog: React.FC<DriverAssignmentDialogProps> = ({
                           <div className="font-medium">{driver.name}</div>
                           <div className="flex items-center gap-1 text-sm text-slate-500">
                             <Phone className="h-3 w-3" />
-                            {driver.contact_number || "No phone"}
+                            {driver.contactNumber || "No phone"}
                           </div>
                         </div>
                       </div>

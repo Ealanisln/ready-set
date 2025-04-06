@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma } from "@prisma/client";
 
-function serializeData(obj: any): any {
+function serializeData(obj: unknown): number | string | Date | Record<string, unknown> | unknown {
   if (typeof obj === "bigint") {
     return Number(obj);
   } else if (obj instanceof Date) {
@@ -40,12 +40,12 @@ export async function POST(request: Request) {
 
       // Fetch the order based on orderType
       if (orderType === "catering") {
-        order = await prisma.catering_request.findUnique({
-          where: { id: BigInt(orderId) },
+        order = await prisma.cateringRequest.findUnique({
+          where: { id: String(orderId) },
         });
       } else if (orderType === "on_demand") {
-        order = await prisma.on_demand.findUnique({
-          where: { id: BigInt(orderId) },
+        order = await prisma.onDemand.findUnique({
+          where: { id: String(orderId) },
         });
       } else {
         throw new Error("Invalid order type");
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
       // Check if a dispatch already exists
       dispatch = await prisma.dispatch.findFirst({
         where: orderType === "catering"
-          ? { cateringRequestId: BigInt(orderId) }
-          : { on_demandId: BigInt(orderId) },
+          ? { cateringRequestId: String(orderId) }
+          : { onDemandId: String(orderId) },
       });
 
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
                 id: true,
                 name: true,
                 email: true,
-                contact_number: true,
+                contactNumber: true,
               },
             },
           },
@@ -84,10 +84,10 @@ export async function POST(request: Request) {
         // Create new dispatch
         const dispatchData = {
           driverId: driverId,
-          userId: order.user_id,
+          userId: order.userId,
           ...(orderType === "catering"
-            ? { cateringRequestId: BigInt(orderId) }
-            : { on_demandId: BigInt(orderId) }),
+            ? { cateringRequestId: String(orderId) }
+            : { onDemandId: String(orderId) }),
         };
 
         dispatch = await prisma.dispatch.create({
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
                 id: true,
                 name: true,
                 email: true,
-                contact_number: true,
+                contactNumber: true,
               },
             },
           },
@@ -107,13 +107,13 @@ export async function POST(request: Request) {
 
       // Update the order status
       const updatedOrder = await (orderType === "catering"
-        ? prisma.catering_request.update({
-            where: { id: BigInt(orderId) },
-            data: { status: "assigned" },
+        ? prisma.cateringRequest.update({
+            where: { id: String(orderId) },
+            data: { status: "ASSIGNED" },
           })
-        : prisma.on_demand.update({
-            where: { id: BigInt(orderId) },
-            data: { status: "assigned" },
+        : prisma.onDemand.update({
+            where: { id: String(orderId) },
+            data: { status: "ASSIGNED" },
           }));
 
       return { updatedOrder, dispatch };

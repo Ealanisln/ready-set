@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { UserType } from "@prisma/client";
 
 // Helper function to check authorization (re-used from the users/[userId] endpoint)
 async function checkAuthorization(requestedUserId: string) {
@@ -18,13 +19,13 @@ async function checkAuthorization(requestedUserId: string) {
   }
   
   // Get the user's type from your database
-  const userData = await prisma.user.findUnique({
+  const userData = await prisma.profile.findUnique({
     where: { id: user.id },
     select: { type: true }
   });
   
   // Allow access if the user is an admin or super_admin
-  if (userData?.type === "admin" || userData?.type === "super_admin") {
+  if (userData?.type === UserType.ADMIN || userData?.type === UserType.SUPER_ADMIN) {
     return null;
   }
   
@@ -43,10 +44,9 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
     if (authResponse) return authResponse;
     
     // Fetch files for this user from the database
-    const files = await prisma.file_upload.findMany({
+    const files = await prisma.fileUpload.findMany({
       where: {
-        entityId: userId,
-        entityType: 'user'
+        userId: userId
       },
       orderBy: {
         uploadedAt: 'desc'

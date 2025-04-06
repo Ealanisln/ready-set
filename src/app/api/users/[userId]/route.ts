@@ -3,9 +3,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserType } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
 import { deleteUserFiles } from "@/app/actions/delete-user-files";
+import { UserType as UserTypeType, UserStatus } from "@/types/user";
 
 // Helper function to check authorization
 async function checkAuthorization(requestedUserId: string) {
@@ -22,14 +23,13 @@ async function checkAuthorization(requestedUserId: string) {
   }
   
   // Get the user's type from your database
-  // Note: Supabase auth doesn't store user type by default, so we need to fetch it
-  const userData = await prisma.user.findUnique({
+  const userData = await prisma.profile.findUnique({
     where: { id: user.id },
     select: { type: true }
   });
   
   // Allow access if the user is an admin or super_admin
-  if (userData?.type === "admin" || userData?.type === "super_admin") {
+  if (userData?.type && (userData.type === UserType.ADMIN || userData.type === UserType.SUPER_ADMIN)) {
     return null;
   }
   
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
     // Log the user ID we're trying to fetch
     console.log("Fetching user with ID:", userId);
     
-    const user = await prisma.user.findUnique({
+    const user = await prisma.profile.findUnique({
       where: { id: userId },
     });
     
@@ -63,14 +63,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
     const processedUser = {
       ...user,
       // Only set displayName if name or contact_name exist
-      displayName: user.contact_name || user.name || "",
-      countiesServed: user.counties ? user.counties.split(",").map(s => s.trim()) : [],
-      timeNeeded: user.time_needed ? user.time_needed.split(",").map(s => s.trim()) : [],
-      cateringBrokerage: user.catering_brokerage
-        ? user.catering_brokerage.split(",").map(s => s.trim())
+      displayName: user.contactName || user.name || "",
+      countiesServed: user.counties ? (typeof user.counties === 'string' ? user.counties.split(",").map((s: string) => s.trim()) : user.counties) : [],
+      timeNeeded: user.timeNeeded ? user.timeNeeded.split(",").map((s: string) => s.trim()) : [],
+      cateringBrokerage: user.cateringBrokerage
+        ? user.cateringBrokerage.split(",").map((s: string) => s.trim())
         : [],
-      provisions: user.provide ? user.provide.split(",").map(s => s.trim()) : [],
-      location_number: user.location_number || "", // Make sure this field is included
+      provisions: user.provide ? user.provide.split(",").map((s: string) => s.trim()) : [],
+      location_number: user.locationNumber || "", // Make sure this field is included
     };
     
     console.log("Processed user for response:", processedUser);
@@ -109,13 +109,12 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
     }
     
     if (processedData.timeNeeded) {
-      processedData.time_needed = processedData.timeNeeded.join(",");
+      processedData.timeNeeded = processedData.timeNeeded.join(",");
       delete processedData.timeNeeded;
     }
     
     if (processedData.cateringBrokerage) {
-      processedData.catering_brokerage =
-        processedData.cateringBrokerage.join(",");
+      processedData.cateringBrokerage = processedData.cateringBrokerage.join(",");
       delete processedData.cateringBrokerage;
     }
     
@@ -125,11 +124,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
     }
     
     if (processedData.displayName) {
-      if (processedData.type === "vendor") {
-        processedData.contact_name = processedData.displayName;
-      } else if (processedData.type === "client") {
-        processedData.contact_name = processedData.displayName;
-      } else if (processedData.type === "driver") {
+      if (processedData.type === UserTypeType.VENDOR) {
+        processedData.contactName = processedData.displayName;
+      } else if (processedData.type === UserTypeType.CLIENT) {
+        processedData.contactName = processedData.displayName;
+      } else if (processedData.type === UserTypeType.DRIVER) {
         processedData.name = processedData.displayName;
       }
       delete processedData.displayName;
@@ -140,23 +139,23 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
       "name",
       "email",
       "type",
-      "company_name",
-      "contact_name",
-      "contact_number",
+      "companyName",
+      "contactName",
+      "contactNumber",
       "website",
       "street1",
       "street2",
       "city",
       "state",
       "zip",
-      "location_number",
-      "parking_loading",
+      "locationNumber",
+      "parkingLoading",
       "counties",
-      "time_needed",
-      "catering_brokerage",
+      "timeNeeded",
+      "cateringBrokerage",
       "frequency",
       "provide",
-      "head_count",
+      "headCount",
       "status",
     ];
     
@@ -168,11 +167,11 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
     
     console.log("Processed data for update:", processedData);
     
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.profile.update({
       where: { id: userId },
       data: {
         ...processedData,
-        updated_at: new Date(),
+        updatedAt: new Date(),
       },
     });
     
@@ -181,13 +180,13 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ userI
     // Process the user data to match the component's expectations for the response
     const processedUser = {
       ...updatedUser,
-      displayName: updatedUser.contact_name || updatedUser.name || "",
-      countiesServed: updatedUser.counties ? updatedUser.counties.split(",").map(s => s.trim()) : [],
-      timeNeeded: updatedUser.time_needed ? updatedUser.time_needed.split(",").map(s => s.trim()) : [],
-      cateringBrokerage: updatedUser.catering_brokerage
-        ? updatedUser.catering_brokerage.split(",").map(s => s.trim())
+      displayName: updatedUser.contactName || updatedUser.name || "",
+      countiesServed: updatedUser.counties ? (typeof updatedUser.counties === 'string' ? updatedUser.counties.split(",").map((s: string) => s.trim()) : updatedUser.counties) : [],
+      timeNeeded: updatedUser.timeNeeded ? updatedUser.timeNeeded.split(",").map((s: string) => s.trim()) : [],
+      cateringBrokerage: updatedUser.cateringBrokerage
+        ? updatedUser.cateringBrokerage.split(",").map((s: string) => s.trim())
         : [],
-      provisions: updatedUser.provide ? updatedUser.provide.split(",").map(s => s.trim()) : [],
+      provisions: updatedUser.provide ? updatedUser.provide.split(",").map((s: string) => s.trim()) : [],
     };
     
     return NextResponse.json(processedUser);
@@ -221,12 +220,12 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ us
   }
   
   // Get the user's type from your database
-  const userData = await prisma.user.findUnique({
+  const userData = await prisma.profile.findUnique({
     where: { id: user.id },
     select: { type: true }
   });
   
-  if (userData?.type !== "admin" && userData?.type !== "super_admin") {
+  if (userData?.type && (userData.type !== UserType.ADMIN && userData.type !== UserType.SUPER_ADMIN)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   
@@ -236,7 +235,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ us
     console.log("Files deletion result:", filesDeletionResult);
     
     // Then, delete the user
-    await prisma.user.delete({
+    await prisma.profile.delete({
       where: { id: userId },
     });
     

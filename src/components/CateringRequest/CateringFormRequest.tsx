@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient, Session } from "@supabase/supabase-js";
+import { CateringNeedHost } from "@/types/order";
 
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadedFile[];
@@ -58,21 +59,21 @@ const CateringRequestForm: React.FC = () => {
     useForm<ExtendedCateringFormData>({
       defaultValues: {
         brokerage: "",
-        order_number: "",
-        date: "",
-        pickup_time: "",
-        arrival_time: "",
-        complete_time: "",
+        orderNumber: "",
+        pickupDate: "",
+        pickupTime: "",
+        arrivalTime: "",
+        completeTime: "",
         headcount: "",
-        need_host: "no",
-        hours_needed: "",
-        number_of_host: "",
-        client_attention: "",
-        pickup_notes: "",
-        special_notes: "",
-        order_total: "",
+        needHost: CateringNeedHost.NO,
+        hoursNeeded: "",
+        numberOfHosts: "",
+        clientAttention: "",
+        pickupNotes: "",
+        specialNotes: "",
+        orderTotal: "",
         tip: "",
-        address: {
+        pickupAddress: {
           id: "",
           street1: "",
           street2: null,
@@ -84,7 +85,7 @@ const CateringRequestForm: React.FC = () => {
           isRestaurant: false,
           isShared: false,
         },
-        delivery_address: {
+        deliveryAddress: {
           id: "",
           street1: "",
           street2: null,
@@ -137,7 +138,7 @@ const CateringRequestForm: React.FC = () => {
     setAddresses(loadedAddresses);
   }, []);
 
-  const needHost = watch("need_host");
+  const needHost = watch("needHost");
   
   const {
     onUpload,
@@ -359,7 +360,7 @@ const CateringRequestForm: React.FC = () => {
             (addr) => addr.id === addressId,
           );
           if (selectedAddress) {
-            setValue("address", selectedAddress);
+            setValue("pickupAddress", selectedAddress);
           }
         }}
       />
@@ -382,7 +383,7 @@ const CateringRequestForm: React.FC = () => {
           Do you need a Host?
         </label>
         <Controller
-          name="need_host"
+          name="needHost"
           control={control}
           render={({ field }) => (
             <div className="flex space-x-4">
@@ -390,8 +391,8 @@ const CateringRequestForm: React.FC = () => {
                 <input
                   type="radio"
                   {...field}
-                  value="yes"
-                  checked={field.value === "yes"}
+                  value={CateringNeedHost.YES}
+                  checked={field.value === CateringNeedHost.YES}
                   className="mr-2"
                 />
                 <span className="text-sm text-gray-700">Yes</span>
@@ -400,8 +401,8 @@ const CateringRequestForm: React.FC = () => {
                 <input
                   type="radio"
                   {...field}
-                  value="no"
-                  checked={field.value === "no"}
+                  value={CateringNeedHost.NO}
+                  checked={field.value === CateringNeedHost.NO}
                   className="mr-2"
                 />
                 <span className="text-sm text-gray-700">No</span>
@@ -413,47 +414,47 @@ const CateringRequestForm: React.FC = () => {
       <HostSection control={control} needHost={needHost} />
       <InputField
         control={control}
-        name="order_number"
+        name="orderNumber"
         label="Order Number"
         required
       />
       <InputField
         control={control}
-        name="date"
+        name="pickupDate"
         label="Date"
         type="date"
         required
       />
       <InputField
         control={control}
-        name="pickup_time"
+        name="pickupTime"
         label="Pick Up Time"
         type="time"
         required
       />
       <InputField
         control={control}
-        name="arrival_time"
+        name="arrivalTime"
         label="Arrival Time"
         type="time"
         required
       />
       <InputField
         control={control}
-        name="complete_time"
+        name="completeTime"
         label="Complete Time"
         type="time"
         optional
       />
       <InputField
         control={control}
-        name="client_attention"
+        name="clientAttention"
         label="Client / Attention"
         required
       />
       <InputField
         control={control}
-        name="order_total"
+        name="orderTotal"
         label="Order Total"
         type="number"
         required
@@ -462,7 +463,7 @@ const CateringRequestForm: React.FC = () => {
       <AddressSection
         control={control}
         addresses={addresses}
-        onAddressSelected={(address) => setValue("delivery_address", address)}
+        onAddressSelected={(address) => setValue("deliveryAddress", address)}
       />
       <InputField
         control={control}
@@ -483,7 +484,7 @@ const CateringRequestForm: React.FC = () => {
       />
       <InputField
         control={control}
-        name="pickup_notes"
+        name="pickupNotes"
         label="Pick Up Notes"
         type="textarea"
         rows={3}
@@ -491,7 +492,7 @@ const CateringRequestForm: React.FC = () => {
       />
       <InputField
         control={control}
-        name="special_notes"
+        name="specialNotes"
         label="Special Notes"
         type="textarea"
         rows={3}

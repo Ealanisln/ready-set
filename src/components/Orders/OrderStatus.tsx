@@ -66,14 +66,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 };
 
 interface OrderStatusProps {
-  orderType: OrderType;
+  order_type: OrderType;
   initialStatus: OrderStatus;
-  orderId: string | number | bigint; // Updated to accept bigint
+  orderId: string | number | bigint;
   onStatusChange?: (newStatus: OrderStatus) => void;
 }
 
 export const OrderStatusCard: React.FC<OrderStatusProps> = ({
-  orderType,
+  order_type,
   initialStatus,
   orderId,
   onStatusChange,
@@ -99,7 +99,7 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">
-          {getOrderTypeDisplay(orderType)}
+          {getOrderTypeDisplay(order_type)}
         </CardTitle>
         <CardDescription>Order ID: {orderId.toString()}</CardDescription>
       </CardHeader>

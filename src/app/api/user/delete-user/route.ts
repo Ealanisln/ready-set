@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
+import { UserType } from "@/types/user";
 
 const prisma = new PrismaClient();
 
@@ -19,13 +20,13 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Get the current user's details from the database to check type
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.profile.findUnique({
       where: { id: user.id },
       select: { type: true }
     });
     
     // Check if the user is a super_admin
-    if (currentUser?.type !== "super_admin") {
+    if (currentUser?.type as UserType !== UserType.SUPER_ADMIN) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
     
@@ -40,7 +41,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Check if user exists
-    const userExists = await prisma.user.findUnique({
+    const userExists = await prisma.profile.findUnique({
       where: { id },
     });
     
@@ -58,7 +59,7 @@ export async function DELETE(request: NextRequest) {
       });
       
       // 2. Update file uploads to null out the userId
-      await tx.file_upload.updateMany({
+      await tx.fileUpload.updateMany({
         where: { userId: id },
         data: { userId: null },
       });
@@ -69,21 +70,21 @@ export async function DELETE(request: NextRequest) {
         where: { createdBy: id },
         include: {
           userAddresses: true,
-          pickupRequests: true,
-          deliveryRequests: true,
-          onDemandsPickup: true,
-          onDemandsDelivery: true,
+          cateringPickupRequests: true,
+          cateringDeliveryRequests: true,
+          onDemandPickupRequests: true,
+          onDemandDeliveryRequests: true,
         }
       });
       
       // For each address, check if it's used by others
       for (const address of createdAddresses) {
         const isUsedByOthers = 
-          address.userAddresses.some(ua => ua.userId !== id) ||
-          address.pickupRequests.length > 0 ||
-          address.deliveryRequests.length > 0 ||
-          address.onDemandsPickup.length > 0 ||
-          address.onDemandsDelivery.length > 0;
+          address.userAddresses.some((ua: { userId: string }) => ua.userId !== id) ||
+          address.cateringPickupRequests.length > 0 ||
+          address.cateringDeliveryRequests.length > 0 ||
+          address.onDemandPickupRequests.length > 0 ||
+          address.onDemandDeliveryRequests.length > 0;
         
         if (!isUsedByOthers) {
           // Delete unused addresses
@@ -100,7 +101,7 @@ export async function DELETE(request: NextRequest) {
       }
       
       // 4. Delete the user from public schema (will cascade to most relationships)
-      await tx.user.delete({
+      await tx.profile.delete({
         where: { id },
       });
     });

@@ -2,59 +2,106 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { OrderStatus } from "@/types/order";
 
 const prisma = new PrismaClient();
+const ITEMS_PER_PAGE = 10;
 
 export async function GET(req: NextRequest) {
   try {
-    // Initialize Supabase client
     const supabase = await createClient();
-    
-    // Get user session from Supabase
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Check if user is authenticated
     if (!user || !user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+    const limit = parseInt(url.searchParams.get('limit') || `${ITEMS_PER_PAGE}`, 10);
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
     const status = url.searchParams.get('status');
+    const searchTerm = url.searchParams.get('search') || '';
+    const sortField = url.searchParams.get('sort') || 'pickupDateTime';
+    const sortDirection = url.searchParams.get('direction') || 'desc';
 
-    let whereClause: any = {};
+    let whereClause: Prisma.CateringRequestWhereInput = {};
+
+    // Status filter
     if (status && status !== 'all') {
-      whereClause.status = status;
+      whereClause.status = status as OrderStatus;
     }
 
-    const cateringOrders = await prisma.catering_request.findMany({
-      where: whereClause,
-      skip,
-      take: limit,
-      orderBy: { created_at: 'desc' },
-      include: { 
-        user: { select: { name: true, email: true } },
-        address: true,
-        delivery_address: true
-      },
-    });
+    // Search filter
+    if (searchTerm) {
+      whereClause.OR = [
+        {
+          orderNumber: {
+            contains: searchTerm,
+            mode: 'insensitive',
+          },
+        },
+        {
+          user: {
+            name: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+        },
+      ];
+    }
 
-    const serializedOrders = cateringOrders.map(order => ({
-      ...JSON.parse(JSON.stringify(order, (key, value) =>
-        typeof value === 'bigint'
-          ? value.toString()
-          : value
-      )),
-      order_type: 'catering',
-    }));
+    // Order By Clause
+    let orderByClause: Prisma.CateringRequestOrderByWithRelationInput = {};
+    if (sortField === 'user.name') {
+      orderByClause = { user: { name: sortDirection as Prisma.SortOrder } };
+    } else if (['pickupDateTime', 'orderTotal', 'orderNumber'].includes(sortField)) {
+      orderByClause = { [sortField]: sortDirection as Prisma.SortOrder };
+    } else {
+      orderByClause = { pickupDateTime: 'desc' };
+    }
 
-    return NextResponse.json(serializedOrders, { status: 200 });
+    // Fetch Data and Count
+    const [cateringOrders, totalCount] = await Promise.all([
+      prisma.cateringRequest.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: orderByClause,
+        include: {
+          user: {
+            select: { name: true, email: true }
+          },
+          pickupAddress: true,
+          deliveryAddress: true,
+        },
+      }),
+      prisma.cateringRequest.count({ where: whereClause }),
+    ]);
+
+    // Calculate Total Pages
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Serialize BigInt
+    const serializedOrders = JSON.parse(JSON.stringify(cateringOrders, (key, value) =>
+      typeof value === 'bigint'
+        ? value.toString()
+        : value
+    ));
+
+    // Return Response
+    return NextResponse.json({
+      orders: serializedOrders,
+      totalPages,
+      totalCount,
+    }, { status: 200 });
+
   } catch (error) {
     console.error("Error fetching catering orders:", error);
-    return NextResponse.json({ message: "Error fetching catering orders" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An internal server error occurred";
+    return NextResponse.json({ message: "Error fetching catering orders", error: errorMessage }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
