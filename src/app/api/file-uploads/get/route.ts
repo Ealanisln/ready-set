@@ -23,12 +23,23 @@ export async function GET(request: NextRequest) {
     }
 
     const whereClause: any = {
-      entityId,
-      entityType,
+      category: category || undefined,
     };
 
-    if (category) {
-      whereClause.category = category;
+    if (entityType === "user") {
+      whereClause.userId = entityId;
+    } else if (entityType === "catering") {
+      whereClause.cateringRequestId = entityId;
+    } else if (entityType === "onDemand") {
+      whereClause.onDemandId = entityId;
+    } else if (entityType === "jobApplication") {
+      whereClause.jobApplicationId = entityId;
+    } else {
+      console.warn('Unknown entityType:', entityType);
+      return NextResponse.json(
+        { error: `Invalid entityType: ${entityType}` },
+        { status: 400 }
+      );
     }
 
     console.log('Prisma query whereClause:', whereClause);

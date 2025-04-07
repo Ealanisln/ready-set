@@ -81,18 +81,31 @@ export function useUploadFile({
       console.log('Fetching files with params:', params.toString());
       const response = await fetch(`/api/file-uploads/get?${params}`);
       
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error("Failed to fetch files");
+        console.error('Error details:', {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          entityId,
+          entityType,
+          category
+        });
+        const errorMessage = data.error || "Failed to fetch files";
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      console.log('Fetched files data:', data);
-      
       if (data.success && data.files) {
         console.log('Setting uploaded files:', data.files);
         setUploadedFiles(data.files);
+      } else {
+        console.warn('Unexpected response format:', data);
+        setUploadedFiles([]);
       }
     } catch (error) {
       console.error("Error fetching existing files:", error);
