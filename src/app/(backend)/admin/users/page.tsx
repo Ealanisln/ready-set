@@ -441,8 +441,9 @@ const UsersPage: React.FC = () => {
                    <TableBody>
                      <AnimatePresence>
                        {users.map((user) => {
-                         const typeInfo = userTypeConfig[user.type];
-                         const statusInfo = statusConfig[user.status];
+                         // Safely get type configuration with fallback
+                         const typeInfo = userTypeConfig[user.type] || { className: "bg-gray-100 text-gray-800", icon: null };
+                         const statusInfo = statusConfig[user.status] || { className: "bg-gray-100 text-gray-800", icon: null };
                          
                          return (
                            <motion.tr

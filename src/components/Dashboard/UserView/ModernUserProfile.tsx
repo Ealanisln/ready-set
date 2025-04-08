@@ -29,17 +29,18 @@ export default function ModernUserProfile({ userId }: ModernUserProfileProps) {
   // Auth context
   const { session, isLoading: isUserLoading } = useUser();
 
-  // Custom hooks for user data and form management
+  // Initialize user data hook first
   const { 
     loading, 
     isUpdatingStatus, 
     fetchUser, 
-    handleStatusChange, 
+    handleStatusChange: baseHandleStatusChange, 
     handleRoleChange,
     handleUploadSuccess,
     useUploadFileHook
   } = useUserData(userId, refreshTrigger, setRefreshTrigger);
 
+  // Then initialize form with the fetchUser function
   const {
     control,
     handleSubmit,
@@ -47,8 +48,15 @@ export default function ModernUserProfile({ userId }: ModernUserProfileProps) {
     hasUnsavedChanges,
     isDirty,
     reset,
-    onSubmit
+    onSubmit,
+    setValue
   } = useUserForm(userId, fetchUser);
+
+  // Create a wrapped handleStatusChange that uses both the base function and setValue
+  const handleStatusChange = async (newStatus: NonNullable<UserFormValues["status"]>) => {
+    await baseHandleStatusChange(newStatus);
+    setValue("status", newStatus, { shouldValidate: true, shouldDirty: true });
+  };
 
   // Effect to fetch data when component mounts or dependencies change
   useEffect(() => {

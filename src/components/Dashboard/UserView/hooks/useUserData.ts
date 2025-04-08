@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
 import { useUploadFile } from "@/hooks/use-upload-file"; // Keep this import
 import { User, UserFormValues } from "../types";
+import { UseFormSetValue } from "react-hook-form"; // Import UseFormSetValue
 
 export const useUserData = (
   userId: string,
@@ -133,6 +134,8 @@ export const useUserData = (
       }
 
       toast.success(data.message || "User status updated successfully");
+      
+      // Trigger full refetch via parent component (keeps data consistent)
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Failed to update user status:", error);

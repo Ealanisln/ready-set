@@ -1,10 +1,9 @@
-// src/app/(backend)/admin/layout.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"; // Ensure path is correct
 import { AppSidebar } from "@/components/Dashboard/Sidebar/app-sidebar"; // Ensure path is correct
-// UserProvider import removed
+import { UserProvider } from "@/contexts/UserContext"; // Ensure path is correct
 import { ThemeProvider } from "@/components/ui/theme-provider"; // Ensure path is correct
 // import { CommandMenu } from "@/components/Dashboard/CommandMenu";
 // import { TopNav } from "@/components/Dashboard/TopNav";
@@ -50,43 +49,44 @@ export default function AdminLayout({
       enableSystem
       disableTransitionOnChange
     >
-      {/* UserProvider removed */}
-      <SidebarProvider
-        defaultOpen={defaultOpen}
-        onOpenChange={handleSidebarChange}
-      >
-        {/* Main Flex Container */}
-        <div className="flex min-h-svh w-full bg-slate-50">
-          <AppSidebar />
-          {/* <CommandMenu /> */}
+      <UserProvider>
+        <SidebarProvider
+          defaultOpen={defaultOpen}
+          onOpenChange={handleSidebarChange}
+        >
+          {/* Main Flex Container */}
+          <div className="flex min-h-svh w-full bg-slate-50">
+            <AppSidebar />
+            {/* <CommandMenu /> */}
 
-          {/* SidebarInset: Added flex-1 to make it grow horizontally */}
-          {/* Removed w-full as flex-1 handles width in flex row */}
-          <SidebarInset className="flex flex-1 flex-col p-0"> 
-            {/* <TopNav /> */}
+            {/* SidebarInset: Added flex-1 to make it grow horizontally */}
+            {/* Removed w-full as flex-1 handles width in flex row */}
+            <SidebarInset className="flex flex-1 flex-col p-0"> 
+              {/* <TopNav /> */}
 
-            {/* Main content area: flex-1 for vertical expansion, overflow for scrolling */}
-            <main className="flex flex-1 flex-col overflow-auto"> {/* Added flex flex-col */}
-              <AnimatePresence mode="wait">
-                {/* Use pathname for a stable key during route transitions */}
-                <motion.div
-                  key={pathname} 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  // Removed flex-1 from here, main handles expansion
-                  // Keep w-full if needed, but flex-col parent should manage width
-                  className={cn("w-full")} 
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
-            </main>
-            
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+              {/* Main content area: flex-1 for vertical expansion, overflow for scrolling */}
+              <main className="flex flex-1 flex-col overflow-auto"> {/* Added flex flex-col */}
+                <AnimatePresence mode="wait">
+                  {/* Use pathname for a stable key during route transitions */}
+                  <motion.div
+                    key={pathname} 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    // Removed flex-1 from here, main handles expansion
+                    // Keep w-full if needed, but flex-col parent should manage width
+                    className={cn("w-full")} 
+                  >
+                    {children}
+                  </motion.div>
+                </AnimatePresence>
+              </main>
+              
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+      </UserProvider>
     </ThemeProvider>
   );
 }

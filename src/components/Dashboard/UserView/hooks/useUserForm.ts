@@ -14,6 +14,7 @@ export const useUserForm = (
     watch,
     reset,
     formState: { errors, isDirty },
+    setValue,
   } = useForm<UserFormValues>({
     defaultValues: {
       id: "",
@@ -143,6 +144,7 @@ export const useUserForm = (
     hasUnsavedChanges,
     isDirty,
     reset,
-    onSubmit
+    onSubmit,
+    setValue
   };
 };

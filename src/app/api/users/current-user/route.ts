@@ -8,8 +8,7 @@ export async function GET(request: Request) {
   // Add request tracking for debugging
   const requestId = Math.random().toString(36).substring(7);
   const url = new URL(request.url);
-  console.log(`[${requestId}] API call to /api/users/current-user from ${url.pathname} - Headers:`, 
-    Object.fromEntries(request.headers));
+
   
   try {
     // Initialize Supabase client

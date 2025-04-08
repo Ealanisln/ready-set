@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
+import { Prisma, UserType, UserStatus } from "@prisma/client";
 
 export async function PUT(request: Request) {
   try {
@@ -40,8 +41,8 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 
-    // Check if user is super_admin
-    if (userData?.type !== "super_admin") {
+    // Check if user is super_admin using the imported enum
+    if (userData?.type !== UserType.SUPER_ADMIN) {
       return NextResponse.json({ 
         error: "Forbidden. Only super admins can update user status."
       }, { status: 403 });
@@ -69,10 +70,21 @@ export async function PUT(request: Request) {
 
     console.log(`Attempting to update user ${userId} status to ${newStatus}`);
     
-    // Update user status in database
+    // Convert lowercase status string to uppercase enum value
+    const statusEnum = newStatus.toUpperCase() as UserStatus;
+
+    // Validate the converted enum value (optional but good practice)
+    if (!Object.values(UserStatus).includes(statusEnum)) {
+       return NextResponse.json({
+         error: `Invalid status value after conversion: ${statusEnum}`,
+         details: { providedStatus: newStatus }
+       }, { status: 400 });
+    }
+
+    // Update user status in database using the enum value
     const updatedUser = await prisma.profile.update({
       where: { id: userId },
-      data: { status: newStatus },
+      data: { status: statusEnum },
       select: {
         id: true,
         name: true,

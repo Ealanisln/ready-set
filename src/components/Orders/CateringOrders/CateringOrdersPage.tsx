@@ -83,6 +83,12 @@ interface CateringOrder {
   order_type: string;
 }
 
+// Define interface for the API response structure
+interface CateringOrdersApiResponse {
+  orders: CateringOrder[];
+  totalPages: number; // Assuming the API returns totalPages
+}
+
 type OrderStatus = 'all' | 'active' | 'assigned' | 'cancelled' | 'completed';
 
 const statusConfig = {
@@ -164,14 +170,18 @@ const CateringOrdersPage: React.FC = () => {
           throw new Error(`Failed to fetch orders (${response.status})`);
         }
         
-        const data = await response.json();
+        const apiResponse = await response.json() as CateringOrdersApiResponse;
         
-        if (!Array.isArray(data)) {
+        // Validate the structure of the API response
+        if (!apiResponse || typeof apiResponse !== 'object' || !Array.isArray(apiResponse.orders)) {
+          console.error("Invalid data structure received:", apiResponse);
           throw new Error('Invalid data structure received from API');
         }
 
+        const ordersData = apiResponse.orders || [];
+
         // Format and set orders
-        const formattedOrders = data.map((order: any) => ({
+        const formattedOrders = ordersData.map((order: any) => ({
           ...order,
           // Ensure order_total is always a string
           order_total: typeof order.order_total === 'string' 
@@ -186,15 +196,17 @@ const CateringOrdersPage: React.FC = () => {
 
         setOrders(formattedOrders);
         
-        // Calculate total pages (if your API returns a count, use that instead)
-        // This is a placeholder - your actual implementation might be different
-        const count = parseInt(response.headers.get('x-total-count') || '0', 10);
-        setTotalPages(Math.ceil(count / limit) || 1);
+        // Set total pages from the API response
+        setTotalPages(apiResponse.totalPages || 1);
         
-        // If we have items but no count header, assume there are more pages
-        if (formattedOrders.length === limit && !response.headers.has('x-total-count')) {
-          setTotalPages(page + 1);
-        }
+        // Remove or comment out the logic relying on x-total-count header if totalPages is reliable
+        // const count = parseInt(response.headers.get('x-total-count') || '0', 10);
+        // setTotalPages(Math.ceil(count / limit) || 1);
+        
+        // // If we have items but no count header, assume there are more pages
+        // if (formattedOrders.length === limit && !response.headers.has('x-total-count')) {
+        //   setTotalPages(page + 1);
+        // }
 
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred while fetching orders");

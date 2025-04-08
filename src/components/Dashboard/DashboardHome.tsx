@@ -23,6 +23,12 @@ import { CateringRequest } from "@/types/order";
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
 
+// Add interface for Orders API response
+interface OrdersApiResponse {
+  orders: CateringRequest[];
+  totalPages: number; // Adjust if the API response structure is different
+}
+
 // Interface for API responses
 interface UsersApiResponse {
   users: User[];
@@ -267,13 +273,13 @@ export function ModernDashboardHome() {
           throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
         }
         
-        const ordersData = await ordersResponse.json();
+        const ordersData = await ordersResponse.json() as OrdersApiResponse;
         const usersData = await usersResponse.json() as UsersApiResponse;
         
-        // Fix: Extract users array from the response
-        setRecentOrders(ordersData);
+        // Fix: Extract orders array from the response
+        setRecentOrders(ordersData.orders || []);
         
-        const activeOrdersList = ordersData.filter((order: CateringRequest) => 
+        const activeOrdersList = (ordersData.orders || []).filter((order: CateringRequest) => 
           ['active', 'pending', 'confirmed', 'in_progress'].includes(order.status)
         );
         setActiveOrders(activeOrdersList);
@@ -323,7 +329,8 @@ export function ModernDashboardHome() {
   }
 
   // Calculate percentage changes for metrics
-  const activeOrdersPercentage = ((activeOrders.length / (recentOrders.length || 1)) * 100).toFixed(1);
+  const totalOrdersCount = Array.isArray(recentOrders) ? recentOrders.length : 0;
+  const activeOrdersPercentage = ((activeOrders.length / (totalOrdersCount || 1)) * 100).toFixed(1);
   
   // Modern dashboard layout
   return (
