@@ -77,13 +77,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ userI
     
     return NextResponse.json(processedUser);
   } catch (error: unknown) {
-    console.error("Error fetching user:", error);
-    let errorMessage = "Failed to fetch user";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
+    // Enhance logging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`Error fetching user ID ${userId}:`, error);
     return NextResponse.json(
-      { error: "Failed to fetch user", details: errorMessage },
+      { 
+        error: "Failed to fetch user data", // Consistent error message
+        details: `Error processing request for user ID ${userId}: ${errorMessage}` 
+      },
       { status: 500 },
     );
   }

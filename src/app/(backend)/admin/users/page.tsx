@@ -77,7 +77,7 @@ interface User {
   contact_name?: string | null;
   contact_number?: string | null;
   status: UserStatus;
-  created_at: string; // ISO date string
+  createdAt: string; 
 }
 
 // --- Status and Type Configuration ---
@@ -135,8 +135,8 @@ const UsersPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<UserType | 'all'>('all');
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<string>("created_at");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -195,6 +195,15 @@ const UsersPage: React.FC = () => {
         // --- Update State ---
         setUsers(data.users);
         setTotalPages(data.totalPages);
+
+        console.log("Fetched users:", data.users);
+
+        // Check if each user has a valid created_at field
+        data.users.forEach((user: User) => {
+          if (!user.createdAt) {
+            console.error(`User ${user.id} is missing a created_at field.`);
+          }
+        });
 
       } catch (error) {
         console.error("API Fetch Error:", error);
@@ -445,6 +454,14 @@ const UsersPage: React.FC = () => {
                          const typeInfo = userTypeConfig[user.type] || { className: "bg-gray-100 text-gray-800", icon: null };
                          const statusInfo = statusConfig[user.status] || { className: "bg-gray-100 text-gray-800", icon: null };
                          
+                         // Check if created_at is a valid date
+                         const createdAtDate = new Date(user.createdAt);
+                         const isValidDate = !isNaN(createdAtDate.getTime());
+
+                         if (!isValidDate) {
+                           console.error(`Invalid date for user ${user.id}:`, user.createdAt);
+                         }
+
                          return (
                            <motion.tr
                              key={user.id}
@@ -484,12 +501,14 @@ const UsersPage: React.FC = () => {
                              <TableCell className="text-right font-medium text-slate-600">
                                <div className="flex items-center justify-end gap-2">
                                  <span>
-                                   {new Date(user.created_at).toLocaleDateString(undefined, { 
-                                     year: 'numeric', 
-                                     month: 'short', 
-                                     day: 'numeric',
-                                     timeZone: 'UTC' 
-                                   })}
+                                   {isValidDate
+                                     ? createdAtDate.toLocaleDateString(undefined, {
+                                         year: 'numeric',
+                                         month: 'short',
+                                         day: 'numeric',
+                                         timeZone: 'UTC',
+                                       })
+                                     : 'Invalid Date'}
                                  </span>
                                  <Button
                                    variant="ghost"

@@ -165,10 +165,10 @@ export interface OnDemand extends BaseOrder {
   // hoursNeeded is also present in Prisma OnDemand
   hoursNeeded?: number | null; // Prisma: Float? (camelCase)
   // Dimensions/Weight are Floats in Prisma
-  length?: number | null; // Prisma: Float?
-  width?: number | null; // Prisma: Float?
-  height?: number | null; // Prisma: Float?
-  weight?: number | null; // Prisma: Float?
+  length?: number | null; 
+  width?: number | null; 
+  height?: number | null; 
+  weight?: number | null;
 }
 
 // --- Union Type & Helpers ---

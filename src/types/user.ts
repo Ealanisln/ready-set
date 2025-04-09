@@ -14,12 +14,12 @@ export enum UserType {
 }
 
 export enum UserStatus {
-  ACTIVE = 'active',   // Use lowercase
-  PENDING = 'pending', // Use lowercase
-  DELETED = 'deleted', // Use lowercase
+  ACTIVE = 'active',   
+  PENDING = 'pending', 
+  DELETED = 'deleted',
 }
 
-export enum DriverStatus { // Added from Prisma Schema
+export enum DriverStatus { 
   ARRIVED_AT_VENDOR = 'ARRIVED_AT_VENDOR',
   EN_ROUTE_TO_CLIENT = 'EN_ROUTE_TO_CLIENT',
   ARRIVED_TO_CLIENT = 'ARRIVED_TO_CLIENT',
@@ -44,9 +44,9 @@ export enum CateringStatus { // Added from Prisma Schema
 // Base User interface mirroring relevant fields from Prisma's `Profile` model
 export interface User {
   id: string;
-  guid?: string | null; // Prisma: String?
-  name?: string | null; // Prisma: String? Use this for driver/admin names
-  email: string; // Prisma: String (Required)
+  guid?: string | null; 
+  name?: string | null; 
+  email: string; 
   // emailVerified?: Date; // Removed, not in Profile model
   image?: string | null; // Prisma: String?
   type: UserType; // Prisma: UserType (Required)
