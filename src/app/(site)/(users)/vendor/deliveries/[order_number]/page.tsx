@@ -12,9 +12,11 @@ const OrderPage = () => {
 
   useEffect(() => {
     // Get the order number from the URL
-    const pathSegments = pathname.split("/");
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    setOrderNumber(lastSegment);
+    if (pathname) {
+      const pathSegments = pathname.split("/");
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      setOrderNumber(lastSegment);
+    }
   }, [pathname]);
   return (
     <div className="relative z-10 overflow-hidden pb-[60px] pt-[120px] dark:bg-dark md:pt-[130px] lg:pt-[160px]">

@@ -240,10 +240,19 @@ const OrderPage: React.FC = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      const orderNumber = pathname.split("/").pop();
+    const fetchOrder = async (currentPathname: string) => {
+      const orderNumber = currentPathname.split("/").pop();
+
+      // Prevent fetching if orderNumber is somehow undefined or empty after splitting
+      if (!orderNumber) {
+        setError("Could not determine order number from URL.");
+        setLoading(false);
+        return;
+      }
 
       try {
+        setLoading(true); // Set loading true only when fetching
+        setError(null);
         const response = await fetch(`/api/orders/${orderNumber}`);
         if (!response.ok) {
           throw new Error("Failed to fetch order");
@@ -267,7 +276,14 @@ const OrderPage: React.FC = () => {
       }
     };
 
-    fetchOrder();
+    if (pathname) {
+      fetchOrder(pathname);
+    } else {
+      // Handle the case where pathname is null initially if necessary
+      // For example, set an error or loading state specific to this case
+      // setError("Pathname is not available yet.");
+      setLoading(false); // Or keep loading true until pathname is available
+    }
   }, [pathname]);
 
   const updateDriverStatus = async (newStatus: string) => {
@@ -463,9 +479,14 @@ const DriverDashboardPage: React.FC = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    const pathSegments = pathname.split("/");
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    setOrderNumber(lastSegment);
+    if (pathname) {
+      const pathSegments = pathname.split("/");
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      // Ensure lastSegment is not undefined before setting state
+      if (lastSegment) {
+        setOrderNumber(lastSegment);
+      }
+    }
   }, [pathname]);
 
   return (

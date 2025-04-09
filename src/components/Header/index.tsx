@@ -343,7 +343,7 @@ const Header: React.FC = () => {
               closeNavbarOnNavigate={closeNavbarOnNavigate}
               navbarToggleHandler={navbarToggleHandler}
               user={user}
-              pathUrl={pathUrl}
+              pathUrl={pathUrl ?? ''}
               getTextColorClasses={getTextColorClasses}
             />
 
@@ -368,7 +368,7 @@ const Header: React.FC = () => {
             <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
               <AuthButtons
                 user={user}
-                pathUrl={pathUrl}
+                pathUrl={pathUrl ?? ''}
                 sticky={sticky}
                 isVirtualAssistantPage={isVirtualAssistantPage}
                 isHomePage={isHomePage}

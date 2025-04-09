@@ -87,7 +87,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
   const [files, setFiles] = useState<FileUpload[]>([]);
 
   const pathname = usePathname();
-  const orderNumber = pathname.split("/").pop() || "";
+  const orderNumber = (pathname ?? '').split("/").pop() || "";
 
   const fetchOrderDetails = useCallback(async () => {
     if (!orderNumber) {

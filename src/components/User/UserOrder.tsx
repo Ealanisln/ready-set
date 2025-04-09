@@ -94,7 +94,7 @@ const UserOrderDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const orderNumber = pathname.split("/").pop();
+      const orderNumber = (pathname ?? '').split("/").pop();
 
       try {
         const response = await fetch(

@@ -15,7 +15,7 @@ function PaymentContent() {
   const router = useRouter();
 
   // Handle the success and canceled status from URL parameters
-  const status = searchParams.get("status");
+  const status = searchParams?.get("status");
 
   const handleCheckout = async () => {
     try {

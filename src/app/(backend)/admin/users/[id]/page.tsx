@@ -12,6 +12,9 @@ export default function EditUser() {
   const params = useParams<{ id: string }>();
   const { session, isLoading: isUserLoading } = useUser();
 
+  // Get the ID using useParams
+  const userId = params?.id;
+
   // Check auth status and redirect if needed
   useEffect(() => {
     if (!isUserLoading && !session) {
@@ -19,8 +22,11 @@ export default function EditUser() {
     }
   }, [session, isUserLoading, router]);
 
-  // Get the ID using useParams instead of the params prop
-  const userId = params.id;
+  // Render loading or null if userId is not yet available
+  if (!userId || isUserLoading) {
+    // You can replace null with a loading spinner component if you prefer
+    return null;
+  }
 
   // Simple wrapper that passes the user ID to the component
   return <ModernUserProfile userId={userId} />;

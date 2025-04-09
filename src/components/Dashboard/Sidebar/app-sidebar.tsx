@@ -69,19 +69,19 @@ export function AppSidebar() {
       title: "Catering Orders",
       href: "/admin/catering-orders",
       icon: Truck,
-      isActive: pathname.includes("/admin/catering-orders"),
+      isActive: pathname?.includes("/admin/catering-orders") ?? false,
     },
     {
       title: "On-demand Orders",
       href: "/admin/on-demand-orders",
       icon: Zap,
-      isActive: pathname.includes("/admin/on-demand-orders"),
+      isActive: pathname?.includes("/admin/on-demand-orders") ?? false,
     },
     {
       title: "Users",
       href: "/admin/users",
       icon: Users,
-      isActive: pathname.includes("/admin/users"),
+      isActive: pathname?.includes("/admin/users") ?? false,
     }
   ];
 

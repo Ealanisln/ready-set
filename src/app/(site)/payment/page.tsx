@@ -9,11 +9,11 @@ import { Loader2 } from "lucide-react"; // Assuming you're using lucide-react fo
 // Separate component for the payment status content
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
-  const status = searchParams.get("status");
-  const planName = searchParams.get("plan");
+  const status = searchParams?.get("status");
+  const planName = searchParams?.get("plan");
 
   if (status === "success") {
-    return <PaymentSuccess planName={planName} />;
+    return <PaymentSuccess planName={planName ?? null} />;
   }
 
   return <PaymentCanceled />;

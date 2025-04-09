@@ -25,9 +25,11 @@ const OrderPage = () => {
 
   useEffect(() => {
     // Get the order number from the URL using pathname
-    const pathSegments = pathname.split("/");
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    setOrderNumber(lastSegment);
+    if (pathname) {
+      const pathSegments = pathname.split("/");
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      setOrderNumber(lastSegment);
+    }
   }, [pathname]);
 
   const handleDeleteSuccess = () => {
