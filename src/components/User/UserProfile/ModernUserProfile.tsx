@@ -46,13 +46,15 @@ console.log("User ID from props or session:", userId);
     useUploadFileHook
   } = useUserData(userId || "", refreshTrigger, setRefreshTrigger);
 
+  // Destructure methods object and custom properties from the updated hook
   const {
-    methods,
+    methods, // The full methods object from useForm
     watchedValues,
     hasUnsavedChanges,
     onSubmit
   } = useUserForm(userId || "", fetchUser);
 
+  // Destructure specific methods needed from the 'methods' object
   const { control, handleSubmit, reset, formState: { isDirty } } = methods;
 
   // Add this state to track last refresh time
@@ -146,8 +148,9 @@ useEffect(() => {
   }
 
   return (
-    <div className="bg-muted/20 min-h-screen pb-10 pt-32">
-      <FormProvider {...methods}>
+    <div className="bg-muted/20 min-h-screen pb-10 pt-12">
+      {/* Pass the complete methods object from the hook */}
+      <FormProvider {...methods}> 
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           {/* Header - simplified for user profile */}
           <UserProfileHeader 
@@ -158,34 +161,37 @@ useEffect(() => {
             loading={loading}
           />
 
-          {/* User Header Section */}
-          <UserHeader watchedValues={watchedValues} />
+          {/* Wrap UserHeader and main content grid */}
+          <div className="pt-2"> 
+            {/* User Header Section - remove className */}
+            <UserHeader watchedValues={watchedValues} />
 
-          {/* Main Content */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            {/* Left Column - Main Information */}
-            <div className="col-span-2 space-y-6">
-              <UserProfileTabs
-                userId={userId}
-                activeTab={activeTab}
-                setActiveTab={memoizedSetActivetab}
-                watchedValues={watchedValues}
-                control={control}
-                refreshTrigger={refreshTrigger}
-                isUserProfile={true} // New prop to disable admin-specific features
-              />
-            </div>
+            {/* Main Content */}
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+              {/* Left Column - Main Information */}
+              <div className="col-span-2 space-y-6">
+                <UserProfileTabs
+                  userId={userId}
+                  activeTab={activeTab}
+                  setActiveTab={memoizedSetActivetab}
+                  watchedValues={watchedValues}
+                  control={control}
+                  refreshTrigger={refreshTrigger}
+                  isUserProfile={true} // New prop to disable admin-specific features
+                />
+              </div>
 
-            {/* Right Column - Files & Documents only, no status management */}
-            <div className="space-y-6">
-              <UserDocumentsCard 
-                uploadHooks={uploadHooks}
-                userType={watchedValues.type ?? "client"}
-                setRefreshTrigger={setRefreshTrigger}
-                isUserProfile={true}
-              />
+              {/* Right Column - Files & Documents only, no status management */}
+              <div className="space-y-6">
+                <UserDocumentsCard 
+                  uploadHooks={uploadHooks}
+                  userType={watchedValues.type ?? "client"}
+                  setRefreshTrigger={setRefreshTrigger}
+                  isUserProfile={true}
+                />
+              </div>
             </div>
-          </div>
+          </div> {/* Close the wrapper div */}
         </div>
       </FormProvider>
     </div>
@@ -206,9 +212,9 @@ const UserProfileHeader = ({
   handleSubmit,
   onSubmit,
   hasUnsavedChanges,
-  loading
+  loading,
 }: UserProfileHeaderProps) => (
-  <div className="bg-white">
+  <div className="bg-white z-40">
     <div className="border-b">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 flex-wrap items-center justify-between gap-4">
@@ -227,7 +233,7 @@ const UserProfileHeader = ({
               size="default"
               onClick={handleSubmit(onSubmit)}
               disabled={!hasUnsavedChanges || loading}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               <Save className="mr-2 h-4 w-4" />
               Save Changes

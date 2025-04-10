@@ -9,48 +9,24 @@ import { useActionState } from "react";
 import Loader from "@/components/Common/Loader";
 import { login, FormState } from "@/app/actions/login";
 import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
+import { useUser } from "@/contexts/UserContext";
+import { useRouter } from "next/navigation";
 
 const Signin = ({
   searchParams,
 }: {
   searchParams?: { error?: string; message?: string };
 }) => {
-  // Check if user is already logged in
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoading: isUserLoading, session } = useUser();
+  const router = useRouter();
+
   const [state, formAction] = useActionState<FormState, FormData>(login, {
     error: "",
   });
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { createClient } = await import("@/utils/supabase/client");
-        const supabase = await createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session) {
-          setIsLoggedIn(true);
-          // Redirect to dashboard or home page
-          window.location.href = "/";
-        }
-      } catch (error) {
-        console.error("Error checking auth session:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkSession();
-  }, []);
-
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
@@ -71,6 +47,19 @@ const Signin = ({
       setLoading(false);
     }
   }, [state]);
+
+  useEffect(() => {
+    if (searchParams?.error) {
+      setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (session && !isUserLoading) {
+       console.log("SignIn: Session detected, redirecting to /");
+       router.push("/");
+    }
+  }, [session, isUserLoading, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -108,22 +97,6 @@ const Signin = ({
       const { createClient } = await import("@/utils/supabase/client");
       const supabase = await createClient();
 
-      const { data, error: queryError } = await supabase
-        .from("user")
-        .select("email")
-        .eq("email", magicLinkEmail)
-        .single();
-
-      if (queryError || !data) {
-        setErrors((prev) => ({
-          ...prev,
-          magicLinkEmail:
-            "Email not found. Please check your email or sign up.",
-        }));
-        setMagicLinkLoading(false);
-        return;
-      }
-
       const { error } = await supabase.auth.signInWithOtp({
         email: magicLinkEmail,
         options: {
@@ -137,23 +110,20 @@ const Signin = ({
       setMagicLinkSent(true);
     } catch (error: any) {
       console.error("Magic link error:", error);
+      let errorMessage = "Unable to send magic link. Please check your email and try again.";
+      if (error?.message?.includes("User not found")) {
+         errorMessage = "Email not found. Please sign up first.";
+      }
       setErrors((prev) => ({
         ...prev,
-        magicLinkEmail:
-          "Unable to send magic link. Please check your email and try again.",
+        magicLinkEmail: errorMessage,
       }));
     } finally {
       setMagicLinkLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (searchParams?.error) {
-      setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
-    }
-  }, [searchParams]);
-
-  if (isLoading) {
+  if (isUserLoading) {
     return (
       <section className="bg-[#F4F7FF] py-14 dark:bg-dark lg:py-20">
         <div className="container">
@@ -170,8 +140,8 @@ const Signin = ({
     );
   }
 
-  if (isLoggedIn) {
-    return null;
+  if (session) {
+     return null;
   }
 
   return (

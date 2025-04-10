@@ -254,7 +254,7 @@ export async function POST(request: Request) {
             : undefined,
         headCount:
           "head_count" in body
-            ? parseInt((body as ClientFormData).head_count, 10)
+            ? String((body as ClientFormData).head_count)
             : undefined,
         website:
           "website" in body

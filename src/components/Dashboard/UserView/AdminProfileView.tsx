@@ -19,9 +19,10 @@ import { UserFormValues } from "./types";
 
 interface ModernUserProfileProps {
   userId: string;
+  isUserProfile?: boolean;
 }
 
-export default function ModernUserProfile({ userId }: ModernUserProfileProps) {
+export default function ModernUserProfile({ userId, isUserProfile = false }: ModernUserProfileProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeTab, setActiveTab] = useState("profile");
   const router = useRouter();
@@ -141,6 +142,7 @@ export default function ModernUserProfile({ userId }: ModernUserProfileProps) {
               watchedValues={watchedValues}
               control={control}
               refreshTrigger={refreshTrigger}
+              isUserProfile={isUserProfile}
             />
           </div>
 

@@ -55,6 +55,8 @@ export interface User {
     timeNeeded: string[];
     cateringBrokerage: string[];
     provisions: string[];
+    head_count: string | null;
+    frequency: string | null;
   }
   
   export interface UploadHook {
@@ -111,6 +113,20 @@ export interface User {
   ];
   
   export const TIME_NEEDED = ["Breakfast", "Lunch", "Dinner", "All Day"];
+  
+  export const HEADCOUNT = [
+    "1-24",
+    "25-49",
+    "50-74",
+    "75-99",
+    "100-124",
+    "125-149",
+    "150-174",
+    "175-199",
+    "200-249",
+    "250-299",
+    "+300",
+  ];
   
   export const CATERING_BROKERAGES = [
     "Foodee",

@@ -29,10 +29,12 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const search = searchParams.get("search") || "";
-    const statusFilter = searchParams.get("status") as UserStatus | 'all' || "all";
-    const typeFilter = searchParams.get("type") as UserType | 'all' || "all";
+    const statusFilter = (searchParams.get("status") ?? "all") as UserStatus | 'all';
+    const typeFilter = (searchParams.get("type") ?? "all") as UserType | 'all';
     const sortField = searchParams.get("sort") || "createdAt";
     const sortDirection = searchParams.get("direction") === "asc" ? "asc" : "desc";
+
+    console.log("Filter values:", { statusFilter, typeFilter, search, sortField, sortDirection });
 
     const skip = (page - 1) * limit;
 
@@ -52,26 +54,27 @@ export async function GET(request: NextRequest) {
 
     // Status filter
     if (statusFilter && statusFilter !== "all") {
-        const validStatuses = [UserStatus.ACTIVE, UserStatus.PENDING, UserStatus.DELETED] as const;
-        if (validStatuses.includes(statusFilter as UserStatus)) {
-            where.status = statusFilter as UserStatus;
+        const upperCaseStatus = statusFilter.toUpperCase() as UserStatus;
+        const validStatuses = Object.values(UserStatus); // Get all enum values
+        if (validStatuses.includes(upperCaseStatus)) {
+            where.status = upperCaseStatus;
+        } else {
+             console.warn(`Invalid status filter received: ${statusFilter}`);
         }
     }
 
     // Type filter
     if (typeFilter && typeFilter !== "all") {
-        const validTypes = [
-          UserType.VENDOR,
-          UserType.CLIENT,
-          UserType.DRIVER,
-          UserType.ADMIN,
-          UserType.HELPDESK,
-          UserType.SUPER_ADMIN
-        ];
-        if (validTypes.includes(typeFilter as UserType)) {
-             where.type = typeFilter as UserType;
+        const upperCaseType = typeFilter.toUpperCase() as UserType;
+        const validTypes = Object.values(UserType); // Get all enum values
+        if (validTypes.includes(upperCaseType)) {
+             where.type = upperCaseType;
+        } else {
+             console.warn(`Invalid type filter received: ${typeFilter}`);
         }
     }
+
+    console.log("Final where clause:", where);
 
     // --- Build Prisma OrderBy Clause ---
     let orderBy: Prisma.ProfileOrderByWithRelationInput = {};

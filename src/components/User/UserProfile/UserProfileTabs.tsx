@@ -51,8 +51,8 @@ function UserProfileTabs({
           </TabsTrigger>
           
           {/* Only show type-specific details tab if user type is vendor or client */}
-          {(watchedValues.type === "vendor" ||
-            watchedValues.type === "client") && (
+          {(watchedValues.type?.toLowerCase() === "vendor" ||
+            watchedValues.type?.toLowerCase() === "client") && (
             <TabsTrigger
               value="details"
               className="rounded-t-lg border-b-2 border-transparent px-4 py-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"

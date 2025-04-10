@@ -11,9 +11,14 @@ import {
   TIME_NEEDED, 
   CATERING_BROKERAGES, 
   PROVISIONS, 
-  FREQUENCIES 
+  FREQUENCIES,
+  HEADCOUNT
 } from "../types";
 import { Control } from "react-hook-form";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
+import { motion } from "framer-motion";
+import { TabsContent } from "@/components/ui/tabs";
 
 interface DetailsTabProps {
   userType: UserFormValues["type"];
@@ -75,7 +80,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
                         );
                       }
                     }}
-                    disabled={isUserProfile && !field.value?.includes(county)} // Only allow selections if not in user profile or if already selected
                   />
                 )}
               />
@@ -118,7 +122,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
                         );
                       }
                     }}
-                    disabled={isUserProfile && !field.value?.includes(time)} // Only allow selections if not in user profile or if already selected
                   />
                 )}
               />
@@ -166,7 +169,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
                         );
                       }
                     }}
-                    disabled={isUserProfile && !field.value?.includes(brokerage)} // Only allow selections if not in user profile or if already selected
                   />
                 )}
               />
@@ -194,7 +196,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
               onValueChange={field.onChange}
               value={field.value ?? undefined}
               className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4"
-              disabled={isUserProfile} // Disable in user profile view
             >
               {FREQUENCIES.map((freq) => (
                 <div
@@ -204,7 +205,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
                   <RadioGroupItem
                     value={freq}
                     id={`freq-${freq}`}
-                    disabled={isUserProfile && field.value !== freq} // Only allow current selection in user profile
                   />
                   <Label
                     htmlFor={`freq-${freq}`}
@@ -266,15 +266,6 @@ function VendorDetails({ control, isUserProfile = false }: VendorDetailsProps) {
           ))}
         </div>
       </div>
-      
-      {/* Add a note for user profile view */}
-      {isUserProfile && (
-        <div className="mt-4 rounded-md bg-amber-50 p-4 text-amber-800">
-          <p className="text-sm">
-            To request changes to these details, please contact support.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -287,79 +278,136 @@ interface ClientDetailsProps {
 function ClientDetails({ control, isUserProfile = false }: ClientDetailsProps) {
   return (
     <div className="space-y-6">
-      {/* Client specific fields */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="head_count">Headcount</Label>
-          <Controller
-            name="head_count"
-            control={control}
-            render={({ field }) => (
-              <Input
-                id="head_count"
-                placeholder="Enter approximate headcount"
-                {...field}
-                value={field.value || ""}
-                disabled={isUserProfile} // Disable in user profile view
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Counties Served */}
+      {/* County Location */}
       <div className="space-y-3">
         <h3 className="text-base font-medium text-slate-800">
-          Counties Served
+          County Location
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
           {COUNTIES.map((county) => (
-            <div
-              key={county}
-              className="flex items-center space-x-2"
-            >
+            <div key={county} className="flex items-center space-x-2">
               <Controller
                 name="countiesServed"
                 control={control}
                 render={({ field }) => (
                   <Checkbox
-                    id={`county-${county}`}
+                    id={`client-county-${county}`}
                     checked={field.value?.includes(county)}
                     onCheckedChange={(checked) => {
                       const currentValue = field.value || [];
                       if (checked) {
                         field.onChange([...currentValue, county]);
                       } else {
-                        field.onChange(
-                          currentValue.filter(
-                            (v) => v !== county,
-                          ),
-                        );
+                        field.onChange(currentValue.filter((v) => v !== county));
                       }
                     }}
-                    disabled={isUserProfile && !field.value?.includes(county)} // Only allow selections if not in user profile or if already selected
                   />
                 )}
               />
-              <Label
-                htmlFor={`county-${county}`}
-                className="text-sm font-normal"
-              >
+              <Label htmlFor={`client-county-${county}`} className="text-sm font-normal">
                 {county}
               </Label>
             </div>
           ))}
         </div>
       </div>
-      
-      {/* Add a note for user profile view */}
-      {isUserProfile && (
-        <div className="mt-4 rounded-md bg-amber-50 p-4 text-amber-800">
-          <p className="text-sm">
-            To request changes to these details, please contact support.
-          </p>
+
+      {/* Time Needed */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Time Needed
+        </h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {TIME_NEEDED.map((time) => (
+            <div key={time} className="flex items-center space-x-2">
+              <Controller
+                name="timeNeeded"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id={`client-time-${time}`}
+                    checked={field.value?.includes(time)}
+                    onCheckedChange={(checked) => {
+                      const currentValue = field.value || [];
+                      if (checked) {
+                        field.onChange([...currentValue, time]);
+                      } else {
+                        field.onChange(currentValue.filter((v) => v !== time));
+                      }
+                    }}
+                  />
+                )}
+              />
+              <Label htmlFor={`client-time-${time}`} className="text-sm font-normal">
+                {time}
+              </Label>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+
+      {/* Headcount */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Headcount
+        </h3>
+        <Controller
+          name="head_count"
+          control={control}
+          render={({ field }) => (
+            <RadioGroup
+              onValueChange={field.onChange}
+              value={field.value ?? undefined}
+              className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
+            >
+              {HEADCOUNT.map((countLabel: string) => (
+                <div
+                  key={countLabel}
+                  className="flex items-center space-x-2"
+                >
+                  <RadioGroupItem
+                    value={countLabel}
+                    id={`headcount-${countLabel}`}
+                  />
+                  <Label
+                    htmlFor={`headcount-${countLabel}`}
+                    className="text-sm font-normal"
+                  >
+                    {countLabel}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+        />
+      </div>
+
+      {/* Frequency */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Frequency
+        </h3>
+        <Controller
+          name="frequency"
+          control={control}
+          render={({ field }) => (
+            <RadioGroup
+              onValueChange={field.onChange}
+              value={field.value ?? undefined}
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4"
+            >
+              {FREQUENCIES.map((freq) => (
+                <div key={freq} className="flex items-center space-x-2">
+                  <RadioGroupItem value={freq} id={`client-freq-${freq}`} />
+                  <Label htmlFor={`client-freq-${freq}`} className="text-sm font-normal">
+                    {freq}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+        />
+      </div>
     </div>
   );
 }

@@ -97,7 +97,7 @@ model Profile {
   cateringBrokerage   String?     // Changed to camelCase
   frequency           String?     // Consider Enum if values are fixed
   provide             String?
-  headCount           Int?        // Changed from String
+  headCount           String?     // Reverted back to String? to match frontend data ranges
   status              UserStatus  @default(PENDING) // Changed enum name
   sideNotes           String?     @db.Text // Changed to camelCase
   confirmationCode    String?     // Changed to camelCase

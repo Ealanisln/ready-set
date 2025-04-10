@@ -5,7 +5,7 @@
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
-import ModernUserProfile from "@/components/Dashboard/UserView/ModernUserProfile";
+import ModernUserProfile from "@/components/Dashboard/UserView/AdminProfileView";
 
 export default function EditUser() {
   const router = useRouter();

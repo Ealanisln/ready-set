@@ -60,8 +60,7 @@ export const useUserData = (
         displayName: data.name || data.contact_name || "",
         email: data.email,
         contact_number: data.contact_number,
-        // Use 'type' instead of 'role' since that's what your API returns
-        type: data.type || "client", 
+        type: (data.type?.toLowerCase() as UserFormValues['type']) || "client",
         company_name: data.company_name,
         website: data.website,
         street1: data.street1 || "",
@@ -72,27 +71,32 @@ export const useUserData = (
         location_number: data.location_number || "",
         parking_loading: data.parking_loading || "",
         
-        // Transform string fields to arrays
-        countiesServed: stringToValueArray(data.counties),
-        counties: data.counties || "",
+        // Counties - Use the array provided by the API if available
+        countiesServed: Array.isArray(data.countiesServed) ? data.countiesServed : stringToValueArray(data.counties),
+        counties: data.counties || "", // Keep original string if needed elsewhere
         
-        timeNeeded: stringToValueArray(data.time_needed),
-        time_needed: data.time_needed || "",
+        // Time Needed - Directly use the array from the API response
+        timeNeeded: Array.isArray(data.timeNeeded) ? data.timeNeeded : [], // Use data.timeNeeded (camelCase array)
+        // time_needed: data.time_needed || "", // Remove or comment out if time_needed isn't needed in the form state
         
-        cateringBrokerage: stringToValueArray(data.catering_brokerage),
-        catering_brokerage: data.catering_brokerage || "",
+        // Catering Brokerage - Use the array provided by the API if available
+        cateringBrokerage: Array.isArray(data.cateringBrokerage) ? data.cateringBrokerage : stringToValueArray(data.catering_brokerage),
+        // catering_brokerage: data.catering_brokerage || "", // Remove or comment out
         
-        provisions: stringToValueArray(data.provide),
-        provide: data.provide || "",
+        // Provisions - Use the array provided by the API if available
+        provisions: Array.isArray(data.provisions) ? data.provisions : stringToValueArray(data.provide),
+        provide: data.provide || "", // Keep original string if needed elsewhere
         
-        frequency: data.frequency || "",
-        head_count: data.head_count || "",
+        frequency: data.frequency || null,
+        head_count: data.head_count || null, // Keep original snake_case if needed
+        headCount: data.headCount ?? null, // Use the camelCase field from API response
         status: data.status || "pending",
         name: data.name,
         contact_name: data.contact_name,
       };
       
-      console.log("Transformed form data:", formData);
+      console.log("[useUserData] fetchUser returning transformed data:", JSON.stringify(formData, null, 2));
+      
       return formData;
     } catch (error) {
       console.error("Error fetching user:", error);

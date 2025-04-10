@@ -83,23 +83,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     
     const setupAuth = async () => {
       try {
-        console.log("Getting initial session...");
+        console.log("UserContext: Getting initial session...");
         // Get initial session
-        const { data } = await supabase.auth.getSession();
+        const { data, error: getSessionError } = await supabase.auth.getSession();
+        
+        console.log("UserContext: getSession returned.", { sessionExists: !!data?.session, error: getSessionError });
         
         if (!mounted) return;
         
         const currentSession = data?.session;
-        console.log("Initial session:", currentSession ? "Found" : "Not found");
         setSession(currentSession);
         setUser(currentSession?.user || null);
         
         // Only fetch role if we have a user
         if (currentSession?.user) {
-          console.log("Fetching user role...");
+          console.log("UserContext: Session found. Fetching user role...");
           await fetchUserRole(currentSession.user);
         } else {
-          console.log("No user session, setting loading to false");
+          console.log("UserContext: No initial session found. Setting loading to false.");
           setIsLoading(false);
         }
         
@@ -141,83 +142,107 @@ export function UserProvider({ children }: { children: ReactNode }) {
     
     // Helper to fetch user role
     const fetchUserRole = async (user: User) => {
+      console.log("UserContext: fetchUserRole started for user:", user.id);
+      let roleFound: UserType | null = null;
       try {
-        const now = Date.now();
-        
-        // Check cache first
-        if (
-          userRoleCache.role &&
-          userRoleCache.userId === user.id &&
-          now - userRoleCache.timestamp < CACHE_EXPIRY
-        ) {
-          console.log("Using cached user role:", userRoleCache.role, "for user:", user.id);
-          setUserRole(userRoleCache.role);
-          setIsLoading(false);
-          return;
+        // First check if user has a profile in the database
+        console.log("UserContext: Checking for profile...");
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('type')
+          .eq('id', user.id)
+          .single();
+        console.log("UserContext: Profile check done.", { profile, profileError });
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error("UserContext: Error checking profile (excluding not found):", profileError);
         }
-        
-        console.log("Fetching user role from API for user:", user.id);
-        
-        // Make the API call with a unique timestamp to bust cache
-        const response = await fetch(`/api/users/current-user?_t=${Date.now()}`, {
-          headers: {
-            'Cache-Control': 'no-store',
-            'x-request-source': 'UserProvider',
-          }
-        });
-        
-        if (!mounted) return;
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.type) {
-            // Update the cache
-            userRoleCache = {
-              role: data.type,
-              userId: user.id,
-              timestamp: now
-            };
-            
-            setUserRole(data.type);
-            console.log("Fetched and set user role:", data.type);
-          } else {
-            // Fallback to metadata
+
+        if (profileError && profileError.code === 'PGRST116') {
+          // If no profile exists, create one
+          console.log("UserContext: Profile not found. Attempting to create profile...");
+
+          // Ensure email exists before attempting insert
+          if (!user.email) {
+            console.error("UserContext: Cannot create profile: User email is missing.");
+            // Handle fallback or return appropriately
             const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-            if (metadataType) {
-              setUserRole(metadataType);
-              
-              // Cache this too
-              userRoleCache = {
-                role: metadataType,
-                userId: user.id,
-                timestamp: now
-              };
-              
-              console.log("Using role from metadata:", metadataType);
+            if (metadataType) roleFound = metadataType.toLowerCase() as UserType;
+          } else {
+            console.log("UserContext: Inserting new profile...");
+            const { error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: user.id,
+                email: user.email, 
+                name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'user',
+                type: (user.user_metadata?.type?.toUpperCase() || user.user_metadata?.role?.toUpperCase() || 'CLIENT') as UserType,
+                status: 'PENDING',
+                updatedAt: new Date()
+              });
+            console.log("UserContext: Profile insert attempt finished.", { createError });
+
+            if (createError) {
+              console.error("UserContext: Failed to create user profile:", JSON.stringify(createError, null, 2)); 
+              // Fallback to metadata
+              const metadataType = user.user_metadata?.type || user.user_metadata?.role;
+              if (metadataType) {
+                roleFound = metadataType.toLowerCase() as UserType;
+              }
+            } else {
+              // Profile created successfully, now fetch it to get the type (or use metadata as fallback)
+              console.log("UserContext: Profile created. Re-fetching profile type or using metadata.");
+              const { data: newProfile, error: newProfileError } = await supabase
+                .from('profiles')
+                .select('type')
+                .eq('id', user.id)
+                .single();
+              if (newProfile?.type) {
+                roleFound = newProfile.type.toLowerCase() as UserType;
+              } else {
+                if (newProfileError) console.error("UserContext: Error fetching newly created profile:", newProfileError);
+                const metadataType = user.user_metadata?.type || user.user_metadata?.role;
+                if (metadataType) roleFound = metadataType.toLowerCase() as UserType;
+              }
             }
           }
-        } else {
-          console.error("Failed to fetch user role", response.status);
-          
-          // Fallback to metadata if API fails
+        } else if (profile?.type) {
+          // If we have a profile and type, use its type
+          console.log("UserContext: Profile found with type:", profile.type);
+          roleFound = profile.type.toLowerCase() as UserType;
+        }
+        
+        // If role still not found, try metadata as fallback
+        if (!roleFound) {
+          console.log("UserContext: Role not determined from profile. Checking metadata...");
           const metadataType = user.user_metadata?.type || user.user_metadata?.role;
           if (metadataType) {
-            setUserRole(metadataType);
-            console.log("Using role from metadata (fallback):", metadataType);
+            console.log("UserContext: Found role in metadata:", metadataType);
+            roleFound = metadataType.toLowerCase() as UserType;
           }
         }
+
+        // If all else fails, set a default role
+        if (!roleFound) {
+          console.log("UserContext: Role not found in profile or metadata. Setting default 'client'.");
+          roleFound = 'client';
+        }
+
       } catch (err) {
-        console.error("Error fetching user role:", err);
-        // Fallback to metadata on error
+        console.error("UserContext: Error caught in fetchUserRole try block:", err);
+        // Fallback to metadata even in case of error
         const metadataType = user.user_metadata?.type || user.user_metadata?.role;
         if (metadataType) {
-          setUserRole(metadataType);
-          console.log("Using role from metadata (error fallback):", metadataType);
+          roleFound = metadataType.toLowerCase() as UserType;
+        } else {
+          roleFound = 'client'; // Default role on error
         }
       } finally {
         if (mounted) {
+          console.log("UserContext: fetchUserRole finally block. Determined role:", roleFound);
+          setUserRole(roleFound);
           setIsLoading(false);
+          console.log("UserContext: fetchUserRole finally block. Set role and isLoading to false.");
         }
       }
     };

@@ -6,11 +6,12 @@ import { UserFormValues, USER_TYPE_COLORS, USER_STATUS_COLORS } from "./types";
 
 interface UserHeaderProps {
   watchedValues: UserFormValues;
+  className?: string;
 }
 
-export default function UserHeader({ watchedValues }: UserHeaderProps) {
+export default function UserHeader({ watchedValues, className }: UserHeaderProps) {
   return (
-    <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
+    <div className={`rounded-xl bg-white p-6 shadow-sm ${className ?? ''}`}>
       <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700">

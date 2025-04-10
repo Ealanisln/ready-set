@@ -1,15 +1,21 @@
-// src/components/User/UserProfile/hooks/useUserForm.ts
-
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import toast from "react-hot-toast";
 import { UserFormValues } from "../types";
+
+// Define the return type for clarity
+interface UseUserFormReturn {
+  methods: UseFormReturn<UserFormValues>;
+  watchedValues: UserFormValues;
+  hasUnsavedChanges: boolean;
+  onSubmit: (data: UserFormValues) => Promise<void>;
+}
 
 export const useUserForm = (
   userId: string,
   fetchUser: () => Promise<UserFormValues | null>
-) => {
-  // Form setup with default values - Assign the result to 'methods'
+): UseUserFormReturn => {
+  // Capture the full methods object
   const methods = useForm<UserFormValues>({
     defaultValues: {
       id: "",
@@ -42,35 +48,38 @@ export const useUserForm = (
     },
   });
 
-  // Destructure necessary parts from 'methods' for use within this hook
-  const {
-    watch,
-    reset,
-    formState: { isDirty },
-    // Note: control, handleSubmit, errors etc. are available via the returned 'methods' object
-  } = methods;
+  // Destructure necessary methods/state for internal use
+  const { watch, reset, formState: { isDirty } } = methods;
 
   // Watch form values
   const watchedValues = watch();
   const hasUnsavedChanges = isDirty;
-
+  
   // Load initial data
   useEffect(() => {
     const loadUserData = async () => {
+      console.log("[useUserForm] Fetching user data...");
       const userData = await fetchUser();
       if (userData) {
-        // Use reset from the destructured methods
-        reset(userData);
-        console.log("Form reset with data:", userData);
+        console.log("[useUserForm] User data fetched, attempting reset with:", JSON.stringify(userData, null, 2));
+        try {
+          reset(userData);
+          console.log("[useUserForm] Form reset executed successfully.");
+        } catch (error) {
+          console.error("[useUserForm] Error during form reset:", error);
+        }
+        // console.log("Form reset with data:", userData); // Original log, can be removed or kept
+      } else {
+        console.log("[useUserForm] No user data fetched, skipping reset.");
       }
     };
-
+    
     loadUserData();
-  }, [fetchUser, reset]); // Dependency array includes reset
+  }, [fetchUser, reset]);
 
-  // Form submission logic (remains the same)
+  // Form submission
   const onSubmit = async (data: UserFormValues) => {
-    try {
+    try {      
       // Destructure known form-specific fields and array fields
       const {
         displayName,
@@ -83,11 +92,9 @@ export const useUserForm = (
       } = data;
 
       // Start with base data
-      const submitData = {
+      const submitData: any = {
         ...baseSubmitData,
-        // Use 'type' as is (don't map to 'role')
         type: type,
-        // Transform arrays back to comma-separated strings
         counties: countiesServed?.join(",") || "",
         time_needed: timeNeeded?.join(",") || "",
         catering_brokerage: cateringBrokerage?.join(",") || "",
@@ -95,6 +102,7 @@ export const useUserForm = (
       };
 
       // Set name/contact_name based on the form's 'type' field
+      // Only update the relevant field, don't nullify the other
       if (
         type === "driver" ||
         type === "helpdesk" ||
@@ -102,11 +110,17 @@ export const useUserForm = (
         type === "super_admin"
       ) {
         submitData.name = displayName;
-        submitData.contact_name = null; // Explicitly nullify the other
       } else if (type === "vendor" || type === "client") {
         submitData.contact_name = displayName;
-        submitData.name = null; // Explicitly nullify the other
+      } else {
+         // Optional: Handle unexpected types 
+         console.warn(`Unexpected user type ${type} in form submission`);
+         // Default to setting both if type is unknown, might need review
+         submitData.name = displayName;
+         submitData.contact_name = displayName;
       }
+      
+      console.log("Data being sent to API:", submitData); // Add log
 
       const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
@@ -131,11 +145,7 @@ export const useUserForm = (
       }
 
       await response.json();
-      // Fetch user again to potentially update state elsewhere and ensure form is reset with latest saved data
-      const latestUserData = await fetchUser();
-      if (latestUserData) {
-          reset(latestUserData); // Reset the form with the data just saved
-      }
+      await fetchUser();
       toast.success("User saved successfully!");
     } catch (error) {
       console.error("Error updating user:", error);
@@ -145,15 +155,11 @@ export const useUserForm = (
     }
   };
 
-  // Return the entire methods object along with custom values/handlers
   return {
-    methods, // <- Now returning the whole methods object
+    methods, // Return the whole methods object
     watchedValues,
     hasUnsavedChanges,
-    onSubmit, // Your custom submit handler
+    onSubmit,
     // Note: isDirty is available via methods.formState.isDirty
-    // Note: reset is available via methods.reset
-    // Note: control is available via methods.control
-    // Note: handleSubmit is available via methods.handleSubmit (you'll use it like: methods.handleSubmit(onSubmit))
   };
 };

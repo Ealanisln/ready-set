@@ -54,10 +54,19 @@ export const useUserForm = (
   // Load initial data
   useEffect(() => {
     const loadUserData = async () => {
+      console.log("[useUserForm] Fetching user data...");
       const userData = await fetchUser();
       if (userData) {
-        reset(userData);
-        console.log("Form reset with data:", userData);
+        console.log("[useUserForm] User data fetched, attempting reset with:", JSON.stringify(userData, null, 2));
+        try {
+          reset(userData);
+          console.log("[useUserForm] Form reset executed successfully.");
+        } catch (error) {
+          console.error("[useUserForm] Error during form reset:", error);
+        }
+        // console.log("Form reset with data:", userData); // Original log, can be removed or kept
+      } else {
+        console.log("[useUserForm] No user data fetched, skipping reset.");
       }
     };
     
@@ -79,11 +88,9 @@ export const useUserForm = (
       } = data;
 
       // Start with base data
-      const submitData = {
+      const submitData: any = {
         ...baseSubmitData,
-        // Use 'type' as is (don't map to 'role')
         type: type,
-        // Transform arrays back to comma-separated strings
         counties: countiesServed?.join(",") || "",
         time_needed: timeNeeded?.join(",") || "",
         catering_brokerage: cateringBrokerage?.join(",") || "",
@@ -91,6 +98,7 @@ export const useUserForm = (
       };
 
       // Set name/contact_name based on the form's 'type' field
+      // Only update the relevant field, don't nullify the other
       if (
         type === "driver" ||
         type === "helpdesk" ||
@@ -98,11 +106,17 @@ export const useUserForm = (
         type === "super_admin"
       ) {
         submitData.name = displayName;
-        submitData.contact_name = null; // Explicitly nullify the other
       } else if (type === "vendor" || type === "client") {
         submitData.contact_name = displayName;
-        submitData.name = null; // Explicitly nullify the other
+      } else {
+         // Optional: Handle unexpected types 
+         console.warn(`Unexpected user type ${type} in form submission`);
+         // Default to setting both if type is unknown, might need review
+         submitData.name = displayName;
+         submitData.contact_name = displayName;
       }
+      
+      console.log("Data being sent to API:", submitData); // Add log
 
       const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",

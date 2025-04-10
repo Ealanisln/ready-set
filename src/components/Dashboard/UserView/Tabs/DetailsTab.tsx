@@ -11,28 +11,35 @@ import {
   TIME_NEEDED, 
   CATERING_BROKERAGES, 
   PROVISIONS, 
-  FREQUENCIES 
+  FREQUENCIES,
+  HEADCOUNT
 } from "../types";
 import { Control } from "react-hook-form";
 
 interface DetailsTabProps {
   userType: UserFormValues["type"];
   control: Control<UserFormValues>;
+  isUserProfile?: boolean;
 }
 
-export default function DetailsTab({ userType, control }: DetailsTabProps) {
+export default function DetailsTab({ userType, control, isUserProfile = false }: DetailsTabProps) {
   if (userType === "vendor") {
-    return <VendorDetails control={control} />;
+    return <VendorDetails control={control} isUserProfile={isUserProfile} />;
   }
 
   if (userType === "client") {
-    return <ClientDetails control={control} />;
+    return <ClientDetails control={control} isUserProfile={isUserProfile} />;
   }
 
   return <div>No additional details for this user type.</div>;
 }
 
-function VendorDetails({ control }: { control: Control<UserFormValues> }) {
+interface VendorDetailsProps {
+  control: Control<UserFormValues>;
+  isUserProfile: boolean;
+}
+
+function VendorDetails({ control, isUserProfile }: VendorDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Counties Served */}
@@ -254,70 +261,160 @@ function VendorDetails({ control }: { control: Control<UserFormValues> }) {
   );
 }
 
-function ClientDetails({ control }: { control: Control<UserFormValues> }) {
+interface ClientDetailsProps {
+  control: Control<UserFormValues>;
+  isUserProfile: boolean;
+}
+
+function ClientDetails({ control, isUserProfile }: ClientDetailsProps) {
   return (
     <div className="space-y-6">
-      {/* Client specific fields */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="head_count">Headcount</Label>
-          <Controller
-            name="head_count"
-            control={control}
-            render={({ field }) => (
-              <Input
-                id="head_count"
-                placeholder="Enter approximate headcount"
-                {...field}
-                value={field.value || ""}
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Counties Served */}
+      {/* County Location */}
       <div className="space-y-3">
         <h3 className="text-base font-medium text-slate-800">
-          Counties Served
+          County Location
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
           {COUNTIES.map((county) => (
-            <div
-              key={county}
-              className="flex items-center space-x-2"
-            >
+            <div key={county} className="flex items-center space-x-2">
               <Controller
                 name="countiesServed"
                 control={control}
                 render={({ field }) => (
                   <Checkbox
-                    id={`county-${county}`}
+                    id={`admin-county-${county}`}
                     checked={field.value?.includes(county)}
                     onCheckedChange={(checked) => {
                       const currentValue = field.value || [];
                       if (checked) {
                         field.onChange([...currentValue, county]);
                       } else {
-                        field.onChange(
-                          currentValue.filter(
-                            (v) => v !== county,
-                          ),
-                        );
+                        field.onChange(currentValue.filter((v) => v !== county));
                       }
                     }}
                   />
                 )}
               />
-              <Label
-                htmlFor={`county-${county}`}
-                className="text-sm font-normal"
-              >
+              <Label htmlFor={`admin-county-${county}`} className="text-sm font-normal">
                 {county}
               </Label>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Time Needed */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Time Needed
+        </h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {TIME_NEEDED.map((time) => (
+            <div key={time} className="flex items-center space-x-2">
+              <Controller
+                name="timeNeeded"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id={`admin-time-${time}`}
+                    checked={field.value?.includes(time)}
+                    onCheckedChange={(checked) => {
+                      const currentValue = field.value || [];
+                      if (checked) {
+                        field.onChange([...currentValue, time]);
+                      } else {
+                        field.onChange(currentValue.filter((v) => v !== time));
+                      }
+                    }}
+                  />
+                )}
+              />
+              <Label htmlFor={`admin-time-${time}`} className="text-sm font-normal">
+                {time}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Headcount */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Headcount
+        </h3>
+        <Controller
+          name="headCount"
+          control={control}
+          render={({ field }) => {
+            // Convert number to range string for display
+            let displayValue = undefined;
+            if (field.value !== null && field.value !== undefined) {
+              const numValue = Number(field.value);
+              displayValue = HEADCOUNT.find(range => {
+                if (range.startsWith('+')) {
+                  return numValue >= 300;
+                }
+                const [min, max] = range.split('-').map(Number);
+                return numValue >= min && numValue <= (max || min); // If no max, use min as max
+              });
+              console.log('[ClientDetails Headcount Render] field.value:', field.value, ' | Calculated displayValue:', displayValue);
+            }
+            
+            return (
+              <RadioGroup
+                onValueChange={(value) => {
+                  let numValue;
+                  if (value.startsWith('+')) {
+                    numValue = 300; // For +300, store as 300
+                  } else {
+                    const [min] = value.split('-').map(Number);
+                    numValue = min;
+                  }
+                  console.log('Setting headcount to:', numValue);
+                  field.onChange(numValue);
+                }}
+                value={displayValue}
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
+              >
+                {HEADCOUNT.map((count: string) => (
+                  <div key={count} className="flex items-center space-x-2">
+                    <RadioGroupItem value={count} id={`client-headcount-${count}`} />
+                    <Label htmlFor={`client-headcount-${count}`} className="text-sm font-normal">
+                      {count}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            );
+          }}
+        />
+      </div>
+
+      {/* Frequency */}
+      <div className="space-y-3">
+        <h3 className="text-base font-medium text-slate-800">
+          Frequency
+        </h3>
+        <Controller
+          name="frequency"
+          control={control}
+          render={({ field }) => (
+            <RadioGroup
+              onValueChange={field.onChange}
+              value={field.value ?? undefined}
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4"
+            >
+              {FREQUENCIES.map((freq) => (
+                <div key={freq} className="flex items-center space-x-2">
+                  <RadioGroupItem value={freq} id={`client-freq-${freq}`} />
+                  <Label htmlFor={`client-freq-${freq}`} className="text-sm font-normal">
+                    {freq}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+        />
       </div>
     </div>
   );

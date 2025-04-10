@@ -186,23 +186,36 @@ const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
   <div className="overflow-hidden">
     {users.length > 0 ? (
       <div className="min-w-full divide-y divide-gray-200">
-        <div className="bg-gray-50">
-          <div className="grid grid-cols-3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            <div>Name</div>
-            <div>Email</div>
-            <div>Type</div>
-          </div>
+        {/* Header - hidden on small screens, grid on medium+ */}
+        <div className="hidden md:grid md:grid-cols-3 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div>Name</div>
+          <div>Email</div>
+          <div>Type</div>
         </div>
+        {/* User Rows */}
         <div className="bg-white divide-y divide-gray-200">
           {users.map((user) => (
-            <div key={user.id} className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
-              <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                <Link href={`/admin/users/${user.id}`}>
-                  {user.name || user.contactName || "Unnamed User"}
-                </Link>
+            // Stack vertically on small screens, grid on medium+
+            <div key={user.id} className="px-4 py-4 md:px-6 md:grid md:grid-cols-3 md:gap-4 hover:bg-gray-50 transition-colors duration-150 items-center">
+              {/* Name */}
+              <div className="flex justify-between items-center md:block">
+                 <span className="text-xs font-medium text-gray-500 uppercase md:hidden mr-2">Name:</span>
+                 <div className="text-sm font-medium text-blue-600 hover:text-blue-800 truncate">
+                   <Link href={`/admin/users/${user.id}`}>
+                     {user.name || user.contactName || "Unnamed User"}
+                   </Link>
+                 </div>
               </div>
-              <div className="text-sm text-gray-500">{user.email}</div>
-              <div><UserTypeBadge type={user.type} /></div>
+              {/* Email */}
+              <div className="mt-2 md:mt-0 flex justify-between items-center md:block">
+                 <span className="text-xs font-medium text-gray-500 uppercase md:hidden mr-2">Email:</span>
+                 <div className="text-sm text-gray-500 truncate">{user.email}</div>
+              </div>
+              {/* Type */}
+              <div className="mt-2 md:mt-0 flex justify-between items-center md:block">
+                 <span className="text-xs font-medium text-gray-500 uppercase md:hidden mr-2">Type:</span>
+                 <div><UserTypeBadge type={user.type} /></div>
+              </div>
             </div>
           ))}
         </div>

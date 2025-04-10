@@ -104,7 +104,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({ user, pathUrl, sticky, isVirt
     if (user) {
         return (
           <>
-            <Link href={`/user/${user.id}`}>
+            <Link href="/profile">
               <p className={`loginBtn hidden px-7 py-3 font-medium lg:block ${ sticky ? "text-dark dark:text-white" : isVirtualAssistantPage ? "text-white" : "text-black dark:text-white" }`}>
                 {user.name}
               </p>
@@ -179,20 +179,44 @@ const Header: React.FC = () => {
                   } = await client.auth.getUser();
                   if (error) {
                       console.error("Error fetching user:", error.message);
+                      setUser(null); // Set user to null on error
                       return;
                   }
                   if (supabaseUser) {
-                      const { data: profile } = await client
-                          .from("users")
-                          .select("name, type")
-                          .eq("id", supabaseUser.id)
-                          .single();
+                      try {
+                        const { data: profile, error: profileError } = await client
+                            .from("profiles")
+                            .select("name, type")
+                            .eq("id", supabaseUser.id)
+                            .single();
 
-                      setUser({
-                          id: supabaseUser.id,
-                          name: profile?.name || supabaseUser.email?.split("@")[0],
-                          type: profile?.type as UserType,
-                      });
+                        if (profileError) {
+                            console.error("Error fetching user profile:", profileError.message);
+                            // Decide if you want to set user state even if profile fetch fails
+                        }
+
+                        if (profile && profile.name) {
+                            setUser({
+                                id: supabaseUser.id,
+                                name: profile.name,
+                                type: profile.type as UserType,
+                            });
+                        } else {
+                            console.warn(`Profile or name not found for user ${supabaseUser.id}. Falling back to email.`);
+                            setUser({
+                                id: supabaseUser.id,
+                                name: supabaseUser.email?.split("@")[0] || "User", // Provide a generic fallback
+                                type: profile?.type as UserType, // Still try to get type if profile exists
+                            });
+                        }
+                      } catch (profileFetchError) {
+                          console.error("Exception fetching user profile:", profileFetchError);
+                          setUser({
+                              id: supabaseUser.id,
+                              name: supabaseUser.email?.split("@")[0] || "User", // Fallback on exception
+                              type: undefined, // Type is unknown
+                          });
+                      }
                   } else {
                       setUser(null);
                   }
@@ -202,17 +226,39 @@ const Header: React.FC = () => {
 
               const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
                   if (session?.user) {
-                      const { data: profile } = await client
-                          .from("users")
-                          .select("name, type")
-                          .eq("id", session.user.id)
-                          .single();
+                      try {
+                          const { data: profile, error: profileError } = await client
+                              .from("profiles")
+                              .select("name, type")
+                              .eq("id", session.user.id)
+                              .single();
 
-                      setUser({
-                          id: session.user.id,
-                          name: profile?.name || session.user.email?.split("@")[0],
-                          type: profile?.type as UserType,
-                      });
+                          if (profileError) {
+                              console.error("Auth change: Error fetching profile:", profileError.message);
+                          }
+
+                          if (profile && profile.name) {
+                                setUser({
+                                    id: session.user.id,
+                                    name: profile.name,
+                                    type: profile.type as UserType,
+                                });
+                          } else {
+                                console.warn(`Auth change: Profile/name not found for user ${session.user.id}. Falling back.`);
+                                setUser({
+                                    id: session.user.id,
+                                    name: session.user.email?.split("@")[0] || "User", // Generic fallback
+                                    type: profile?.type as UserType,
+                                });
+                          }
+                      } catch (profileFetchError) {
+                            console.error("Auth change: Exception fetching profile:", profileFetchError);
+                            setUser({
+                                id: session.user.id,
+                                name: session.user.email?.split("@")[0] || "User", // Fallback on exception
+                                type: undefined,
+                            });
+                      }
                   } else {
                       setUser(null);
                   }

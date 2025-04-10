@@ -98,19 +98,14 @@ export default function UserStatusCard({
             <Label className="text-sm font-medium text-slate-700">Role</Label>
             {isSuperAdmin ? (
               <div className="mt-2 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-4 shadow-sm ring-1 ring-blue-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-blue-100 p-2">
-                      <Shield className="h-5 w-5 text-blue-700" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <h4 className="font-medium text-blue-900">Super Admin</h4>
-                      <p className="text-sm text-blue-600">Highest level of access</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-blue-100 p-2">
+                    <Shield className="h-5 w-5 text-blue-700" />
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    Locked
-                  </Badge>
+                  <div className="space-y-0.5">
+                    <h4 className="font-medium text-blue-900">Super Admin</h4>
+                    <p className="text-sm text-blue-600">Highest level of access</p>
+                  </div>
                 </div>
               </div>
             ) : (

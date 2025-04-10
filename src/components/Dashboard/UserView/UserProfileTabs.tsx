@@ -15,6 +15,7 @@ interface UserProfileTabsProps {
   watchedValues: UserFormValues;
   control: Control<UserFormValues>;
   refreshTrigger: number;
+  isUserProfile?: boolean;
 }
 
 export default function UserProfileTabs({
@@ -23,7 +24,8 @@ export default function UserProfileTabs({
   setActiveTab,
   watchedValues,
   control,
-  refreshTrigger
+  refreshTrigger,
+  isUserProfile = false
 }: UserProfileTabsProps) {
   return (
     <Tabs
@@ -81,6 +83,7 @@ export default function UserProfileTabs({
         <DetailsTab 
           userType={watchedValues.type} 
           control={control} 
+          isUserProfile={isUserProfile}
         />
       </TabsContent>
 

@@ -1,43 +1,37 @@
 // src/app/(site)/profile/page.tsx
 "use client";
 
-import UserProfile from "@/components/User/UserProfile/ModernUserProfile";
-import { useUser } from "@/contexts/UserContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import ModernUserProfile from "@/components/User/UserProfile/ModernUserProfile";
 
 export default function ProfilePage() {
-  const { session, isLoading } = useUser();
   const router = useRouter();
+  const { session, isLoading: isUserLoading, user } = useUser();
 
   useEffect(() => {
-    // Only redirect after loading is complete
-    if (!isLoading && !session) {
+    if (!isUserLoading && !session) {
       router.push('/sign-in');
     }
-  }, [isLoading, session, router]);
+  }, [session, isUserLoading, router]);
 
-  // Always show loading state while auth is loading
-  if (isLoading) {
+  if (isUserLoading || !user) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex items-center space-x-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-lg font-semibold">Loading user session...</p>
-        </div>
+      <div className="space-y-4 p-4">
+        <Skeleton className="h-8 w-1/4" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
-  // Session loading is complete but no session was found
-  if (!session) {
-    return (
-      <div className="flex h-screen items-center justify-center pt-32">
-        <p>Redirecting to login...</p>
-      </div>
-    );
+  const userId = user.id;
+
+  if (!userId) {
+    console.error("User ID not found in context despite user object existing.");
+    return <div className="p-4 text-red-600">Error: Could not load user profile. Please try again later.</div>;
   }
 
-  // We have a valid session
-  return <UserProfile userId={session.user.id} />;
+  return <ModernUserProfile userId={userId} isUserProfile />;
 }

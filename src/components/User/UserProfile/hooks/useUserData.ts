@@ -1,17 +1,16 @@
-// src/components/User/UserProfile/hooks/useUserData.ts
+// src/components/Dashboard/UserView/hooks/useUserData.ts
 
 import { useState, useCallback } from "react";
-import { FileWithPath } from "react-dropzone";
+import { FileWithPath } from "react-dropzone"; // Keep this import for typing
 import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
-import { useUploadFile } from "@/hooks/use-upload-file";
-import { User, UserFormValues } from "../types";
+import { useUploadFile } from "@/hooks/use-upload-file"; // Keep this import
+import { UserFormValues } from "../types";
 
 export const useUserData = (
   userId: string,
   refreshTrigger: number,
-  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>,
-  isUserProfile = false // New prop for distinguishing between admin and user views
+  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>
 ) => {
   // State management
   const [loading, setLoading] = useState(true);
@@ -38,16 +37,12 @@ export const useUserData = (
       // Add a timestamp and request id to prevent caching
       const cacheKey =
         Date.now().toString() + Math.random().toString(36).substring(7);
-      
-      // Use different endpoint for user profile if needed
-      const endpoint = `/api/users/${userId}`;
-        
-      const response = await fetch(`${endpoint}?t=${cacheKey}`, {
+      const response = await fetch(`/api/users/${userId}?t=${cacheKey}`, {
         cache: "no-store",
         headers: {
           "Cache-Control": "no-cache, no-store, must-revalidate",
           Pragma: "no-cache",
-          "x-request-source": isUserProfile ? "UserProfile" : "ModernUserProfile",
+          "x-request-source": "ModernUserProfile",
         },
       });
 
@@ -64,8 +59,7 @@ export const useUserData = (
         displayName: data.name || data.contact_name || "",
         email: data.email,
         contact_number: data.contact_number,
-        // Use 'type' instead of 'role' since that's what your API returns
-        type: data.type || "client", 
+        type: (data.type?.toLowerCase() as UserFormValues['type']) || "client",
         company_name: data.company_name,
         website: data.website,
         street1: data.street1 || "",
@@ -76,27 +70,31 @@ export const useUserData = (
         location_number: data.location_number || "",
         parking_loading: data.parking_loading || "",
         
-        // Transform string fields to arrays
-        countiesServed: stringToValueArray(data.counties),
-        counties: data.counties || "",
+        // Counties - Use the array provided by the API if available
+        countiesServed: Array.isArray(data.countiesServed) ? data.countiesServed : stringToValueArray(data.counties),
+        counties: data.counties || "", // Keep original string if needed elsewhere
         
-        timeNeeded: stringToValueArray(data.time_needed),
-        time_needed: data.time_needed || "",
+        // Time Needed - Directly use the array from the API response
+        timeNeeded: Array.isArray(data.timeNeeded) ? data.timeNeeded : [], // Use data.timeNeeded (camelCase array)
+        // time_needed: data.time_needed || "", // Remove or comment out if time_needed isn't needed in the form state
         
-        cateringBrokerage: stringToValueArray(data.catering_brokerage),
-        catering_brokerage: data.catering_brokerage || "",
+        // Catering Brokerage - Use the array provided by the API if available
+        cateringBrokerage: Array.isArray(data.cateringBrokerage) ? data.cateringBrokerage : stringToValueArray(data.catering_brokerage),
+        // catering_brokerage: data.catering_brokerage || "", // Remove or comment out
         
-        provisions: stringToValueArray(data.provide),
-        provide: data.provide || "",
+        // Provisions - Use the array provided by the API if available
+        provisions: Array.isArray(data.provisions) ? data.provisions : stringToValueArray(data.provide),
+        provide: data.provide || "", // Keep original string if needed elsewhere
         
-        frequency: data.frequency || "",
-        head_count: data.head_count || "",
+        frequency: data.frequency || null,
+        head_count: data.headCount ?? data.head_count ?? null, // Use camelCase from API if available, fallback to snake_case
         status: data.status || "pending",
         name: data.name,
         contact_name: data.contact_name,
       };
       
-      console.log("Transformed form data:", formData);
+      console.log("[useUserData] fetchUser returning transformed data:", JSON.stringify(formData, null, 2));
+      
       return formData;
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -105,7 +103,7 @@ export const useUserData = (
     } finally {
       setLoading(false);
     }
-  }, [userId, stringToValueArray, isUserProfile]);
+  }, [userId, stringToValueArray]);
 
   const handleUploadSuccess = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
@@ -138,6 +136,8 @@ export const useUserData = (
       }
 
       toast.success(data.message || "User status updated successfully");
+      
+      // Trigger full refetch via parent component (keeps data consistent)
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Failed to update user status:", error);
@@ -194,7 +194,7 @@ export const useUserData = (
   const useUploadFileHook = (category: string) => {
     const uploadHook = useUploadFile({
       defaultUploadedFiles: [],
-      userId: session?.user?.id ?? "",
+      userId: userId,
       maxFileCount: 1,
       maxFileSize: 3 * 1024 * 1024,
       allowedFileTypes: [
@@ -229,21 +229,13 @@ export const useUserData = (
     };
   };
 
-  // Return a subset of functions for user profile
-  return isUserProfile 
-    ? {
-        loading,
-        fetchUser,
-        handleUploadSuccess,
-        useUploadFileHook
-      } 
-    : {
-        loading,
-        isUpdatingStatus,
-        fetchUser,
-        handleStatusChange, 
-        handleRoleChange,
-        handleUploadSuccess,
-        useUploadFileHook
-      };
+  return {
+    loading,
+    isUpdatingStatus,
+    fetchUser,
+    handleStatusChange,
+    handleRoleChange,
+    handleUploadSuccess,
+    useUploadFileHook
+  };
 };
