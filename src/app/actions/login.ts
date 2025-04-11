@@ -31,7 +31,7 @@ export async function login(
 
   if (error) {
     const { data: userData } = await supabase
-      .from("user")
+      .from("profiles")
       .select("email")
       .eq("email", email)
       .maybeSingle();
