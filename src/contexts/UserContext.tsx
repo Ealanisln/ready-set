@@ -146,13 +146,19 @@ function UserProviderClient({ children }: { children: ReactNode }) {
         console.log("UserContext: Profile check done.", { profile, profileError, rawType: profile?.type });
 
         if (profile?.type) {
-          // Ensure the type is a valid UserType enum value by normalizing the case
+          // Convert both the profile type and enum values to uppercase for comparison
           const typeUpper = profile.type.toUpperCase();
-          console.log("UserContext: Type converted to uppercase:", typeUpper);
+          const enumValues = Object.values(UserType).map(val => val.toUpperCase());
           
-          // Verify that the type exists in UserType enum
-          if (Object.values(UserType).includes(typeUpper as UserType)) {
-            roleFound = typeUpper as UserType;
+          console.log("UserContext: Type converted to uppercase:", typeUpper);
+          console.log("UserContext: Available enum values:", enumValues);
+          
+          if (enumValues.includes(typeUpper)) {
+            // Find the original enum value by matching case-insensitive
+            const originalEnumValue = Object.values(UserType).find(
+              val => val.toUpperCase() === typeUpper
+            );
+            roleFound = originalEnumValue as UserType;
             console.log("UserContext: Valid role found:", roleFound);
           } else {
             console.warn("UserContext: Invalid role in profile:", typeUpper);
@@ -204,8 +210,13 @@ function UserProviderClient({ children }: { children: ReactNode }) {
         
         if (profile?.type) {
           const typeUpper = profile.type.toUpperCase();
-          if (Object.values(UserType).includes(typeUpper as UserType)) {
-            setUserRole(typeUpper as UserType);
+          const enumValues = Object.values(UserType).map(val => val.toUpperCase());
+          
+          if (enumValues.includes(typeUpper)) {
+            const originalEnumValue = Object.values(UserType).find(
+              val => val.toUpperCase() === typeUpper
+            );
+            setUserRole(originalEnumValue as UserType);
           } else {
             setUserRole(UserType.CLIENT);
           }

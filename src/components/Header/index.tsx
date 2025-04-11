@@ -12,14 +12,6 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { MenuItem } from "@/types/menu";
 import { UserType } from "@/types/user";
 import MobileMenu from "./MobileMenu";
-import {
-  adminMenuItem,
-  superAdminMenuItem,
-  driverMenuItem,
-  helpdeskMenuItem,
-  vendorMenuItem,
-  clientMenuItem,
-} from "./menuData";
 
 // Define base menu items (visible to all users)
 const baseMenuItems: MenuItem[] = [
@@ -61,12 +53,36 @@ const baseMenuItems: MenuItem[] = [
 
 // Map user roles to their specific menu items
 const ROLE_MENU_ITEMS: Record<UserType, MenuItem> = {
-  [UserType.VENDOR]: vendorMenuItem,
-  [UserType.CLIENT]: clientMenuItem,
-  [UserType.DRIVER]: driverMenuItem,
-  [UserType.ADMIN]: adminMenuItem,
-  [UserType.HELPDESK]: helpdeskMenuItem,
-  [UserType.SUPER_ADMIN]: superAdminMenuItem,
+  [UserType.VENDOR]: {
+    id: 5,
+    title: "Vendor Dashboard",
+    path: "/vendor",
+  },
+  [UserType.CLIENT]: {
+    id: 6,
+    title: "Client Dashboard",
+    path: "/client",
+  },
+  [UserType.DRIVER]: {
+    id: 3,
+    title: "Driver Dashboard",
+    path: "/driver",
+  },
+  [UserType.ADMIN]: {
+    id: 1,
+    title: "Admin Dashboard",
+    path: "/admin",
+  },
+  [UserType.HELPDESK]: {
+    id: 4,
+    title: "Helpdesk",
+    path: "/helpdesk",
+  },
+  [UserType.SUPER_ADMIN]: {
+    id: 2,
+    title: "Super Admin",
+    path: "/admin",
+  },
 };
 
 interface LogoProps {
@@ -160,7 +176,7 @@ const Header: React.FC = () => {
   const pathUrl = usePathname() || "/";
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState(-1);
+  const [activeSubmenu, setActiveSubmenu] = useState<number>(-1);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
   
@@ -186,13 +202,13 @@ const Header: React.FC = () => {
   
   // Handle submenu clicks
   const handleSubmenu = (index: number) => {
-    setSubmenuOpen(index === submenuOpen ? -1 : index);
+    setActiveSubmenu(index === activeSubmenu ? -1 : index);
   };
 
   // Close mobile menu on navigation
   const closeNavbar = () => {
     setNavbarOpen(false);
-    setSubmenuOpen(-1);
+    setActiveSubmenu(-1);
   };
 
   // Handle sticky behavior
@@ -226,15 +242,11 @@ const Header: React.FC = () => {
     }
   };
 
-  // Get role-specific menu item if user is authenticated
-  const roleMenuItem = userRole && !isLoading 
-    ? ROLE_MENU_ITEMS[userRole] 
-    : null;
+  // Get role-specific menu item
+  const roleMenuItem = userRole ? ROLE_MENU_ITEMS[userRole] : null;
   
-  // Combine base menu items with role-specific item if available
-  const menuItems = roleMenuItem 
-    ? [...baseMenuItems, roleMenuItem] 
-    : baseMenuItems;
+  // Use base menu items without adding role-specific item (it will be shown separately)
+  const menuItems = baseMenuItems;
 
   return (
     <header
@@ -258,7 +270,7 @@ const Header: React.FC = () => {
             <MobileMenu
               navbarOpen={navbarOpen}
               menuData={menuItems}
-              openIndex={submenuOpen}
+              openIndex={activeSubmenu}
               handleSubmenu={handleSubmenu}
               closeNavbarOnNavigate={closeNavbar}
               navbarToggleHandler={toggleNavbar}
@@ -320,17 +332,19 @@ const Header: React.FC = () => {
                 </>
               ) : user ? (
                 <>
-                  <Link href="/profile">
-                    <p className={`loginBtn hidden px-7 py-3 font-medium lg:block ${
-                      sticky
-                        ? "text-dark dark:text-white"
-                        : isVirtualAssistantPage || isHomePage
-                          ? "text-white"
-                          : "text-dark dark:text-white"
-                    }`}>
-                      {user.user_metadata?.name || user.email?.split('@')[0] || 'Profile'}
-                    </p>
-                  </Link>
+                  {roleMenuItem && roleMenuItem.path && (
+                    <Link href={roleMenuItem.path}>
+                      <p className={`loginBtn hidden px-7 py-3 font-medium lg:block ${
+                        sticky
+                          ? "text-dark dark:text-white"
+                          : isVirtualAssistantPage || isHomePage
+                            ? "text-white"
+                            : "text-dark dark:text-white"
+                      }`}>
+                        {roleMenuItem.title}
+                      </p>
+                    </Link>
+                  )}
                   {isVirtualAssistantPage || isHomePage ? (
                     <button
                       onClick={handleSignOut}

@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"; // Ensure path is correct
-import { AppSidebar } from "@/components/Dashboard/Sidebar/app-sidebar"; // Ensure path is correct
-import { UserProvider } from "@/contexts/UserContext"; // Ensure path is correct
-import { ThemeProvider } from "@/components/ui/theme-provider"; // Ensure path is correct
-// import { CommandMenu } from "@/components/Dashboard/CommandMenu";
-// import { TopNav } from "@/components/Dashboard/TopNav";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"; 
+import { UserProvider } from "@/contexts/UserContext"; 
+import { ThemeProvider } from "@/components/ui/theme-provider"; 
+
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils"; // Ensure path is correct
-import { usePathname } from 'next/navigation'; // Import usePathname for unique keys
+import { cn } from "@/lib/utils"; 
+import { usePathname } from 'next/navigation'; 
+import { AdminFooter } from "@/components/Dashboard/Footer/admin-footer";
+import AppSidebar from "@/components/Dashboard/Sidebar/app-sidebar";
 
 export default function AdminLayout({
   children,
@@ -18,11 +18,10 @@ export default function AdminLayout({
 }) {
   const [defaultOpen, setDefaultOpen] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
-  const pathname = usePathname(); // Get pathname for a stable animation key
+  const pathname = usePathname(); 
 
   useEffect(() => {
     const savedState = localStorage.getItem("sidebar_state");
-    // Ensure we only parse if the value exists and is 'true' or 'false'
     if (savedState === "true" || savedState === "false") {
       setDefaultOpen(savedState === "true");
     }
@@ -33,11 +32,10 @@ export default function AdminLayout({
     localStorage.setItem("sidebar_state", String(isOpen));
   };
 
-  // Loading state remains the same
   if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600" /> {/* Adjusted color */}
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-amber-600" /> 
       </div>
     );
   }
@@ -82,7 +80,7 @@ export default function AdminLayout({
                   </motion.div>
                 </AnimatePresence>
               </main>
-              
+              <AdminFooter />
             </SidebarInset>
           </div>
         </SidebarProvider>

@@ -32,11 +32,11 @@ export default function UserProfile({
   const fetchInProgressRef = useRef(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-// Auth context - get the current user ID if not provided as prop
-const { session, isLoading: isUserLoading } = useUser();
-const userId = propUserId || session?.user?.id || "";
+  // Auth context - get the current user ID if not provided as prop
+  const { session, isLoading: isUserLoading } = useUser();
+  const userId = propUserId || session?.user?.id || "";
 
-console.log("User ID from props or session:", userId);
+  console.log("User ID from props or session:", userId);
 
   // Custom hooks for user data and form management
   const { 
@@ -66,51 +66,51 @@ console.log("User ID from props or session:", userId);
   }, []);
 
   // Effect to fetch data when component mounts or dependencies change
-useEffect(() => {
-  // Skip if already loading to prevent cascading API calls
-  if (loading || fetchInProgressRef.current) return;
-  
-  // Prevent refreshes that are too close together (minimum 5 seconds between refreshes)
-  const now = Date.now();
-  if ((now - lastRefreshTime) < 5000 && lastRefreshTime !== 0) {
-    console.log("Skipping refresh - too soon since last refresh");
-    return;
-  }
-  
-  console.log("Profile component mount. Session status:", { 
-    isUserLoading, 
-    userId, 
-    sessionExists: !!session
-  });
-  
-  if (!isUserLoading && userId) {
-    // Cancel any existing timer
-    const timeoutId = setTimeout(() => {
-      // Set the ref to true to indicate fetch is in progress
-      fetchInProgressRef.current = true;
-      console.log("About to fetch user data for ID:", userId);
-      
-      // Update last refresh time
-      setLastRefreshTime(Date.now());
-      
-      fetchUser()
-        .then(result => {
-          console.log("Fetch user result:", result ? "Data received" : "No data");
-          fetchInProgressRef.current = false;
-          if (isInitialLoad) setIsInitialLoad(false);
-        })
-        .catch(err => {
-          console.error("Error in fetchUser:", err);
-          fetchInProgressRef.current = false;
-          if (isInitialLoad) setIsInitialLoad(false);
-        });
-    }, 500); // Longer 500ms debounce
+  useEffect(() => {
+    // Skip if already loading to prevent cascading API calls
+    if (loading || fetchInProgressRef.current) return;
     
-    return () => clearTimeout(timeoutId);
-  } else if (!isUserLoading && !userId) {
-    console.error("No userId available after session loaded");
-  }
-}, [fetchUser, refreshTrigger, isUserLoading, userId, loading, lastRefreshTime, session, isInitialLoad]);
+    // Prevent refreshes that are too close together (minimum 5 seconds between refreshes)
+    const now = Date.now();
+    if ((now - lastRefreshTime) < 5000 && lastRefreshTime !== 0) {
+      console.log("Skipping refresh - too soon since last refresh");
+      return;
+    }
+    
+    console.log("Profile component mount. Session status:", { 
+      isUserLoading, 
+      userId, 
+      sessionExists: !!session
+    });
+    
+    if (!isUserLoading && userId) {
+      // Cancel any existing timer
+      const timeoutId = setTimeout(() => {
+        // Set the ref to true to indicate fetch is in progress
+        fetchInProgressRef.current = true;
+        console.log("About to fetch user data for ID:", userId);
+        
+        // Update last refresh time
+        setLastRefreshTime(Date.now());
+        
+        fetchUser()
+          .then(result => {
+            console.log("Fetch user result:", result ? "Data received" : "No data");
+            fetchInProgressRef.current = false;
+            if (isInitialLoad) setIsInitialLoad(false);
+          })
+          .catch(err => {
+            console.error("Error in fetchUser:", err);
+            fetchInProgressRef.current = false;
+            if (isInitialLoad) setIsInitialLoad(false);
+          });
+      }, 500); // Longer 500ms debounce
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!isUserLoading && !userId) {
+      console.error("No userId available after session loaded");
+    }
+  }, [fetchUser, refreshTrigger, isUserLoading, userId, loading, lastRefreshTime, session, isInitialLoad]);
 
   const handleDiscard = async () => {
     const userData = await fetchUser();
@@ -132,10 +132,10 @@ useEffect(() => {
   // Loading states
   if (isUserLoading && !session) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex items-center space-x-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-lg font-semibold">
+      <div className="flex h-full min-h-[50vh] items-center justify-center">
+        <div className="flex items-center space-x-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
             Loading profile...
           </p>
         </div>
@@ -148,10 +148,10 @@ useEffect(() => {
   }
 
   return (
-    <div className="bg-muted/20 min-h-screen pb-10 pt-12">
+    <div className="w-full">
       {/* Pass the complete methods object from the hook */}
       <FormProvider {...methods}> 
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="w-full">
           {/* Header - simplified for user profile */}
           <UserProfileHeader 
             handleDiscard={handleDiscard} 
@@ -162,14 +162,14 @@ useEffect(() => {
           />
 
           {/* Wrap UserHeader and main content grid */}
-          <div className="pt-2"> 
+          <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-8"> 
             {/* User Header Section - remove className */}
             <UserHeader watchedValues={watchedValues} />
 
             {/* Main Content */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="mt-8 grid gap-8 lg:grid-cols-3">
               {/* Left Column - Main Information */}
-              <div className="col-span-2 space-y-6">
+              <div className="col-span-2 space-y-8">
                 <UserProfileTabs
                   userId={userId}
                   activeTab={activeTab}
@@ -182,7 +182,7 @@ useEffect(() => {
               </div>
 
               {/* Right Column - Files & Documents only, no status management */}
-              <div className="space-y-6">
+              <div>
                 <UserDocumentsCard 
                   uploadHooks={uploadHooks}
                   userType={watchedValues.type ?? "client"}
@@ -214,62 +214,81 @@ const UserProfileHeader = ({
   hasUnsavedChanges,
   loading,
 }: UserProfileHeaderProps) => (
-  <div className="bg-white z-40">
-    <div className="border-b">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="outline"
-              size="default"
-              onClick={handleDiscard}
-              disabled={!hasUnsavedChanges || loading}
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              Discard
-            </Button>
-            <Button
-              size="default"
-              onClick={handleSubmit(onSubmit)}
-              disabled={!hasUnsavedChanges || loading}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
-          </div>
+  <div className="sticky top-0 z-40 border-b bg-white dark:bg-gray-800 shadow-sm">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">My Profile</h1>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="default"
+            onClick={handleDiscard}
+            disabled={!hasUnsavedChanges || loading}
+            className="border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Discard
+          </Button>
+          <Button
+            size="default"
+            onClick={handleSubmit(onSubmit)}
+            disabled={!hasUnsavedChanges || loading}
+            className="bg-green-600 hover:bg-green-700 text-white dark:bg-green-700 dark:hover:bg-green-800"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
         </div>
       </div>
     </div>
   </div>
 );
 
-// Loading skeleton component
-const ProfileSkeleton = () => (
-    <div className="p-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" disabled className="h-9 w-9">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Skeleton className="h-8 w-32" />
+// Skeleton for loading state
+function ProfileSkeleton() {
+  return (
+    <div className="w-full">
+      <div className="sticky top-0 z-40 border-b bg-white dark:bg-gray-800 shadow-sm">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <Skeleton className="h-8 w-36" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-28" />
+              <Skeleton className="h-10 w-32" />
+            </div>
           </div>
-          <Skeleton className="h-10 w-32" />
         </div>
-  
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="col-span-2 space-y-6">
-            <Skeleton className="h-64 w-full rounded-lg" />
-            <Skeleton className="h-48 w-full rounded-lg" />
-            <Skeleton className="h-64 w-full rounded-lg" />
+      </div>
+      
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-5 w-32" />
+            </div>
           </div>
-          <div className="space-y-6">
-            <Skeleton className="h-48 w-full rounded-lg" />
-            <Skeleton className="h-64 w-full rounded-lg" />
+          
+          <div className="mt-8 grid gap-8 lg:grid-cols-3">
+            <div className="col-span-2 space-y-8">
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <div className="grid grid-cols-2 gap-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+            
+            <div>
+              <Skeleton className="h-64 w-full rounded-lg" />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}

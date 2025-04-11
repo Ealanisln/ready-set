@@ -11,6 +11,41 @@ import { ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@/contexts/UserContext";
 import { MenuItem } from "@/types/menu";
+import { UserType } from "@/types/user";
+
+// Map user roles to their specific menu items
+const ROLE_MENU_ITEMS: Record<UserType, MenuItem> = {
+  [UserType.VENDOR]: {
+    id: 5,
+    title: "Vendor Dashboard",
+    path: "/vendor",
+  },
+  [UserType.CLIENT]: {
+    id: 6,
+    title: "Client Dashboard",
+    path: "/client",
+  },
+  [UserType.DRIVER]: {
+    id: 3,
+    title: "Driver Dashboard",
+    path: "/driver",
+  },
+  [UserType.ADMIN]: {
+    id: 1,
+    title: "Admin Dashboard",
+    path: "/admin",
+  },
+  [UserType.HELPDESK]: {
+    id: 4,
+    title: "Helpdesk",
+    path: "/helpdesk",
+  },
+  [UserType.SUPER_ADMIN]: {
+    id: 2,
+    title: "Super Admin",
+    path: "/admin",
+  },
+};
 
 interface MobileMenuProps {
   navbarOpen: boolean;
@@ -143,6 +178,9 @@ const MobileMenuOverlay: React.FC<{
   const [isSigningOut, setIsSigningOut] = useState(false);
   const router = useRouter();
 
+  // Get role-specific menu item
+  const roleMenuItem = userRole ? ROLE_MENU_ITEMS[userRole] : null;
+
   // Initialize Supabase client
   useEffect(() => {
     const initSupabase = async () => {
@@ -199,154 +237,121 @@ const MobileMenuOverlay: React.FC<{
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.3 }}
           >
-            <motion.button
-              onClick={navbarToggleHandler}
-              className="absolute right-4 top-4 z-50 rounded-full p-2 text-amber-500 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-400/10"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <X className="h-6 w-6" />
-            </motion.button>
-
-            <div className="flex h-full flex-col px-6 py-16">
-              <motion.ul 
-                className="space-y-2"
-                initial="closed"
-                animate="open"
-                variants={{
-                  open: {
-                    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-                  },
-                  closed: {
-                    transition: { staggerChildren: 0.05, staggerDirection: -1 }
-                  }
-                }}
-              >
-                {menuData.map((menuItem, index) => (
-                  <motion.li
-                    key={`mobile-${menuItem.id}-${index}`}
-                    className="group"
-                    variants={{
-                      open: { opacity: 1, x: 0 },
-                      closed: { opacity: 0, x: 50 }
-                    }}
+            <div className="flex h-full flex-col justify-between p-6">
+              <div>
+                <div className="mb-6 flex items-center justify-end">
+                  <button
+                    onClick={navbarToggleHandler}
+                    className="text-dark hover:text-primary dark:text-white"
                   >
-                    {menuItem.path ? (
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <ul className="mb-6 space-y-4">
+                  {user && roleMenuItem && roleMenuItem.path && (
+                    <li>
                       <Link
+                        href={roleMenuItem.path}
+                        className="text-base font-medium text-dark hover:text-primary dark:text-white"
                         onClick={closeNavbarOnNavigate}
-                        scroll={false}
-                        href={menuItem.path}
-                        className="flex w-full rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
                       >
-                        {menuItem.title}
+                        {roleMenuItem.title}
                       </Link>
-                    ) : (
-                      <div className="space-y-2">
-                        <button
-                          onClick={() => handleSubmenu(index)}
-                          className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
-                        >
-                          {menuItem.title}
-                          <motion.div
-                            animate={{ rotate: openIndex === index ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
+                    </li>
+                  )}
+                  {menuData.map((menuItem, index) => (
+                    <li key={`mobile-${menuItem.id}-${index}`}>
+                      {menuItem.submenu ? (
+                        <>
+                          <button
+                            onClick={() => handleSubmenu(index)}
+                            className="flex w-full items-center justify-between text-base font-medium text-dark hover:text-primary dark:text-white"
                           >
-                            <ChevronDown className="h-5 w-5" />
-                          </motion.div>
-                        </button>
-                        
-                        <AnimatePresence>
-                          {openIndex === index && (
+                            {menuItem.title}
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
+                              animate={{ rotate: openIndex === index ? 180 : 0 }}
                               transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
                             >
-                              <div className="space-y-1 pl-4">
-                                {menuItem.submenu?.map((submenuItem, i) => (
-                                  <motion.div
+                              <ChevronDown className="h-4 w-4" />
+                            </motion.div>
+                          </button>
+                          <AnimatePresence>
+                            {openIndex === index && (
+                              <motion.ul
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="mt-4 space-y-2 pl-4"
+                              >
+                                {menuItem.submenu.map((submenuItem, i) => (
+                                  <motion.li
                                     key={`mobile-submenu-${submenuItem.id}-${i}`}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     transition={{ duration: 0.2 }}
                                   >
-                                    <Link
-                                      href={submenuItem.path || "#"}
-                                      onClick={() => {
-                                        handleSubmenu(index);
-                                        navbarToggleHandler();
-                                      }}
-                                      className="block rounded-lg px-4 py-2 text-sm transition-colors text-gray-600 hover:bg-amber-100 dark:text-gray-300 dark:hover:bg-amber-400/10"
-                                    >
-                                      {submenuItem.title}
-                                    </Link>
-                                  </motion.div>
+                                    {submenuItem.path && (
+                                      <Link
+                                        href={submenuItem.path}
+                                        className="block text-sm text-dark/80 hover:text-primary dark:text-white/80"
+                                        onClick={closeNavbarOnNavigate}
+                                      >
+                                        {submenuItem.title}
+                                      </Link>
+                                    )}
+                                  </motion.li>
                                 ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </motion.li>
-                ))}
-              </motion.ul>
+                              </motion.ul>
+                            )}
+                          </AnimatePresence>
+                        </>
+                      ) : menuItem.path ? (
+                        <Link
+                          href={menuItem.path}
+                          className="block text-base font-medium text-dark hover:text-primary dark:text-white"
+                          onClick={closeNavbarOnNavigate}
+                        >
+                          {menuItem.title}
+                        </Link>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              <motion.div
-                className="mt-auto border-t border-gray-200 py-6 dark:border-gray-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                {!user && !isSigningOut ? (
+              {/* Auth buttons */}
+              <div className="mt-auto">
+                {user ? (
+                  <button
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="flex w-full items-center justify-center rounded-lg bg-amber-400 px-6 py-3 text-base font-medium text-black transition duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                  >
+                    {isSigningOut ? "Signing Out..." : "Sign Out"}
+                  </button>
+                ) : (
                   <div className="space-y-3">
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        href="/sign-in"
-                        className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
-                      >
-                        Sign In
-                      </Link>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        href="/sign-up"
-                        className="block w-full rounded-lg bg-amber-400 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600"
-                      >
-                        Sign Up
-                      </Link>
-                    </motion.div>
+                    <Link
+                      href="/sign-in"
+                      className="block w-full rounded-lg bg-gray-100 px-6 py-3 text-center text-base font-medium text-dark transition duration-300 ease-in-out hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                      onClick={closeNavbarOnNavigate}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/sign-up"
+                      className="block w-full rounded-lg bg-amber-400 px-6 py-3 text-center text-base font-medium text-black transition duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                      onClick={closeNavbarOnNavigate}
+                    >
+                      Sign Up
+                    </Link>
                   </div>
-                ) : user ? (
-                  <div className="space-y-3">
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link
-                        onClick={closeNavbarOnNavigate}
-                        href="/profile"
-                        className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
-                      >
-                        {user.user_metadata?.name || user.email?.split('@')[0] || 'Profile'}
-                      </Link>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <button
-                        onClick={handleSignOut}
-                        disabled={isSigningOut}
-                        className="block w-full rounded-lg bg-amber-400 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600"
-                      >
-                        {isSigningOut ? "Signing Out..." : "Sign Out"}
-                      </button>
-                    </motion.div>
-                  </div>
-                ) : null}
-              </motion.div>
+                )}
+              </div>
             </div>
           </motion.nav>
         </motion.div>
@@ -365,7 +370,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   pathUrl,
   sticky
 }) => {
-  const { user, isLoading } = useUser();
+  const { user, userRole, isLoading } = useUser();
+  const roleMenuItem = userRole ? ROLE_MENU_ITEMS[userRole] : null;
 
   return (
     <>
@@ -496,6 +502,23 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     }
                   }}
                 >
+                  {user && roleMenuItem && roleMenuItem.path && (
+                    <motion.li
+                      className="group"
+                      variants={{
+                        open: { opacity: 1, x: 0 },
+                        closed: { opacity: 0, x: 50 }
+                      }}
+                    >
+                      <Link
+                        onClick={closeNavbarOnNavigate}
+                        href={roleMenuItem.path}
+                        className="flex w-full rounded-lg px-4 py-3 text-base font-medium text-gray-900 transition-colors hover:bg-amber-100 dark:text-white dark:hover:bg-amber-400/10"
+                      >
+                        {roleMenuItem.title}
+                      </Link>
+                    </motion.li>
+                  )}
                   {menuData.map((menuItem, index) => (
                     <motion.li
                       key={`mobile-${menuItem.id}-${index}`}
@@ -598,15 +621,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     </div>
                   ) : user ? (
                     <div className="space-y-3">
-                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Link
-                          onClick={closeNavbarOnNavigate}
-                          href="/profile"
-                          className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
-                        >
-                          {user.user_metadata?.name || user.email?.split('@')[0] || 'Profile'}
-                        </Link>
-                      </motion.div>
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <button
                           onClick={() => {

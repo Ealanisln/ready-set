@@ -2,7 +2,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArchiveIcon,
   Gauge,
@@ -15,7 +15,11 @@ import {
   Plus,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -55,7 +59,50 @@ type SidebarNavItem = {
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const { user } = useUser();
+
+  // Initialize Supabase client
+  useEffect(() => {
+    const initSupabase = async () => {
+      try {
+        const client = await createClient();
+        setSupabase(client);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+        toast.error("Connection error. Please try again later.");
+      }
+    };
+
+    initSupabase();
+  }, []);
+
+  const handleSignOut = async () => {
+    if (!supabase) {
+      toast.error("Unable to connect to authentication service");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Successfully signed out");
+      router.push("/sign-in");
+      router.refresh(); // Refresh to update auth state across the app
+    } catch (err: any) {
+      console.error("Sign out error:", err);
+      toast.error(err.message || "An unexpected error occurred while signing out");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Main navigation items
   const mainNavItems: SidebarNavItem[] = [
@@ -87,13 +134,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <SidebarMenu>
+      <SidebarHeader className="p-4">
+        <SidebarMenu className="mb-0">
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/admin">
-                <Gauge className="h-5 w-5" />
-                <span>Ready Set</span>
+            <SidebarMenuButton asChild className="p-0 h-auto">
+              <Link href="/admin" className="flex justify-center items-center w-full py-2">
+                <Image
+                  src="/images/logo/logo-white.png"
+                  alt="Ready Set Logo"
+                  width={240}
+                  height={80}
+                  className="w-[240px] h-auto max-w-full"
+                  priority
+                />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -104,7 +157,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-3 py-1">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
@@ -113,6 +166,7 @@ export function AppSidebar() {
                     asChild
                     isActive={item.isActive}
                     tooltip={item.title}
+                    className="py-1.5"
                   >
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5" />
@@ -127,7 +181,7 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <Collapsible defaultOpen className="group/collapsible">
-            <SidebarGroupLabel asChild>
+            <SidebarGroupLabel asChild className="px-3 py-1">
               <CollapsibleTrigger>
                 Quick Actions
                 <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -186,12 +240,13 @@ export function AppSidebar() {
                   <Link href="/admin/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/profile">Profile</Link>
+                  <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => console.log("Sign out clicked")}
+                  onClick={handleSignOut}
+                  disabled={isLoading}
                 >
-                  Sign out
+                  {isLoading ? "Signing out..." : "Sign out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

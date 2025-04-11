@@ -1,8 +1,12 @@
 // src/components/CateringRequest/CateringOrderForm.tsx as reference
 
 import React, { useCallback, useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import AddressManager from "../AddressManager";
+import { useForm } from "react-hook-form";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import AddressManager from "@/components/AddressManager";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient, User, Session, AuthChangeEvent } from "@supabase/supabase-js";
@@ -10,11 +14,14 @@ import { Address } from "@/types/address";
 import { CateringRequest, OnDemand, CateringNeedHost, VehicleType, OrderType } from "@/types/order";
 import { CateringFormData } from "@/types/catering";
 
-interface FormData extends Omit<CateringFormData, 'pickupDate' | 'pickupTime' | 'arrivalDate' | 'arrivalTime' | 'completeDate' | 'completeTime'> {
-  pickupDateTime: string;
-  arrivalDateTime: string;
-  completeDateTime?: string;
-  orderType: OrderType;
+interface FormData {
+  eventName: string;
+  eventDate: string;
+  eventTime: string;
+  guests: number;
+  budget: number;
+  specialInstructions: string;
+  addressId: string;
 }
 
 const CateringOrderForm: React.FC = () => {
@@ -82,55 +89,41 @@ const CateringOrderForm: React.FC = () => {
   };
 
   const {
-    control,
+    register,
     handleSubmit,
-    formState: { errors },
-    watch,
+    formState: { errors, isSubmitting },
     setValue,
-    reset,
   } = useForm<FormData>({
     defaultValues: {
-      orderNumber: "",
-      pickupAddressId: "",
-      deliveryAddressId: "",
-      pickupDateTime: "",
-      arrivalDateTime: "",
-      completeDateTime: "",
-      headcount: "",
-      needHost: CateringNeedHost.NO,
-      hoursNeeded: "",
-      numberOfHosts: "",
-      clientAttention: "",
-      pickupNotes: "",
-      specialNotes: "",
-      orderTotal: "",
-      tip: "",
+      eventName: "",
+      eventDate: "",
+      eventTime: "",
+      guests: 1,
+      budget: 0,
+      specialInstructions: "",
+      addressId: "",
     },
   });
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleAddressesLoaded = useCallback((loadedAddresses: Address[]) => {
-    setAddresses(loadedAddresses);
-  }, []);
+  const handleAddressSelect = (addressId: string) => {
+    setValue("addressId", addressId);
+  };
 
-  const orderType = watch("orderType");
-  const needHost = watch("needHost");
+  const handleAddressesLoaded = (addresses: Address[]) => {
+    setAddresses(addresses);
+  };
 
   const onSubmit = async (data: FormData) => {
     if (!user?.id) {
       console.error("User not authenticated");
       return;
     }
-    if (!data.pickupAddressId) {
-      console.error("Pickup address not selected");
-      toast.error("Please select a pickup address");
-      return;
-    }
-    if (!data.deliveryAddressId) {
-      console.error("Delivery address not selected for catering order");
-      toast.error("Please select a delivery address for catering order");
+    if (!data.addressId) {
+      console.error("Address not selected");
+      toast.error("Please select an address");
       return;
     }
 
@@ -142,29 +135,25 @@ const CateringOrderForm: React.FC = () => {
         body: JSON.stringify({
           order_type: "catering" as OrderType,
           userId: user.id,
-          pickupAddressId: data.pickupAddressId,
-          deliveryAddressId: data.deliveryAddressId,
-          orderNumber: data.orderNumber,
-          pickupDateTime: data.pickupDateTime,
-          arrivalDateTime: data.arrivalDateTime,
-          completeDateTime: data.completeDateTime,
-          headcount: data.headcount ? parseInt(data.headcount) : null,
-          needHost: data.needHost,
-          hoursNeeded: data.hoursNeeded ? parseFloat(data.hoursNeeded) : null,
-          numberOfHosts: data.numberOfHosts ? parseInt(data.numberOfHosts) : null,
-          clientAttention: data.clientAttention,
-          pickupNotes: data.pickupNotes,
-          specialNotes: data.specialNotes,
-          orderTotal: data.orderTotal ? parseFloat(data.orderTotal) : null,
-          tip: data.tip ? parseFloat(data.tip) : null,
-          brokerage: data.brokerage,
+          addressId: data.addressId,
+          eventName: data.eventName,
+          eventDate: data.eventDate,
+          eventTime: data.eventTime,
+          guests: data.guests,
+          budget: data.budget,
+          specialInstructions: data.specialInstructions,
           status: "ACTIVE",
         }),
       });
 
       if (response.ok) {
-        const result = await response.json();
-        reset();
+        setValue("eventName", "");
+        setValue("eventDate", "");
+        setValue("eventTime", "");
+        setValue("guests", 1);
+        setValue("budget", 0);
+        setValue("specialInstructions", "");
+        setValue("addressId", "");
         toast.success("Catering request submitted successfully!");
       } else {
         const errorData = await response.json();
@@ -189,548 +178,131 @@ const CateringOrderForm: React.FC = () => {
   if (!user) return <div>Please sign in to create orders.</div>;
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-3xl space-y-6 px-4 py-8"
-    >
-      {errorMessage && (
-        <div className="mb-4 rounded-md bg-red-100 p-4 text-red-700">
-          {errorMessage}
-        </div>
-      )}
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Order Type
-        </label>
-        <Controller
-          name="orderType"
-          control={control}
-          rules={{ required: "Order type is required" }}
-          render={({ field }) => (
-            <select
-              {...field}
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="catering">Catering</option>
-              <option value="on_demand">On-Demand</option>
-            </select>
-          )}
-        />
-      </div>
-
-      <AddressManager
-        onAddressesLoaded={handleAddressesLoaded}
-        onAddressSelected={(addressId) => {
-          const selectedAddress = addresses.find(
-            (addr) => addr.id === addressId,
-          );
-          if (selectedAddress) {
-            setValue("pickupAddressId", selectedAddress.id);
-          }
-        }}
-      />
-
-      <div>
-        <label
-          htmlFor="brokerage"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Brokerage / Direct
-        </label>
-        <Controller
-          name="brokerage"
-          control={control}
-          rules={{ required: "Brokerage is required" }}
-          render={({ field }) => (
-            <select
-              {...field}
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="">Please Select</option>
-              <option value="Foodee">Foodee</option>
-              <option value="Ez Cater">Ez Cater</option>
-              <option value="Grubhub">Grubhub</option>
-              <option value="Cater Cow">Cater Cow</option>
-              <option value="Cater2me">Cater2me</option>
-              <option value="Zero Cater">Zero Cater</option>
-              <option value="Platterz">Platterz</option>
-              <option value="Direct Delivery">Direct Delivery</option>
-              <option value="Other">Other</option>
-            </select>
-          )}
-        />
-        {errors.brokerage && (
-          <span className="text-sm text-red-500">
-            {errors.brokerage.message}
-          </span>
-        )}
-      </div>
-
-      {orderType === "catering" && (
-        <>
-          <div>
-            <label
-              htmlFor="headcount"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Headcount
-            </label>
-            <Controller
-              name="headcount"
-              control={control}
-              rules={{ required: "Headcount is required for catering orders" }}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  type="number"
-                  className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                />
-              )}
-            />
-            {errors.headcount && (
-              <span className="text-sm text-red-500">
-                {errors.headcount.message}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Do you need a Host?
-            </label>
-            <Controller
-              name="needHost"
-              control={control}
-              render={({ field }) => (
-                <div className="flex space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      {...field}
-                      value={CateringNeedHost.YES}
-                      checked={field.value === CateringNeedHost.YES}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700">Yes</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      {...field}
-                      value={CateringNeedHost.NO}
-                      checked={field.value === CateringNeedHost.NO}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700">No</span>
-                  </label>
-                </div>
-              )}
-            />
-          </div>
-
-          {needHost === CateringNeedHost.YES && (
-            <>
-              <div>
-                <label
-                  htmlFor="hoursNeeded"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Hours Needed
-                </label>
-                <Controller
-                  name="hoursNeeded"
-                  control={control}
-                  rules={{
-                    required: "Hours Needed is required",
-                    max: { value: 24, message: "Maximum 24 hours" },
-                  }}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="number"
-                      min="1"
-                      max="24"
-                      className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                    />
-                  )}
-                />
-                {errors.hoursNeeded && (
-                  <span className="text-sm text-red-500">
-                    {errors.hoursNeeded.message}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="numberOfHosts"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  How many Hosts do you need?
-                </label>
-                <Controller
-                  name="numberOfHosts"
-                  control={control}
-                  rules={{
-                    required: "Number of Hosts is required",
-                    max: { value: 10, message: "Maximum 10 hosts" },
-                  }}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="number"
-                      min="1"
-                      max="10"
-                      className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-                    />
-                  )}
-                />
-                {errors.numberOfHosts && (
-                  <span className="text-sm text-red-500">
-                    {errors.numberOfHosts.message}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      <div>
-        <label
-          htmlFor="orderNumber"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Order Number
-        </label>
-        <Controller
-          name="orderNumber"
-          control={control}
-          rules={{ required: "Order Number is required" }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="text"
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
-          )}
-        />
-        {errors.orderNumber && (
-          <span className="text-sm text-red-500">
-            {errors.orderNumber.message}
-          </span>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-4">
         <div>
-          <label htmlFor="pickupDate" className="mb-2 block text-sm font-medium text-gray-700">
-            Pick Up Date
-          </label>
-          <Controller
-            name="pickupDateTime"
-            control={control}
-            rules={{ required: "Pick Up Date is required" }}
-            render={({ field }) => (
-              <input
-                type="date"
-                onChange={(e) => {
-                  const time = field.value.split("T")[1] || "00:00";
-                  field.onChange(handleDateTimeChange(e.target.value, time));
-                }}
-                value={field.value.split("T")[0]}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
+          <Label htmlFor="eventName">Event Name</Label>
+          <Input
+            id="eventName"
+            {...register("eventName", {
+              required: "Event name is required",
+              minLength: {
+                value: 3,
+                message: "Event name must be at least 3 characters"
+              }
+            })}
+            placeholder="Enter event name"
           />
-        </div>
-        <div>
-          <label htmlFor="pickupTime" className="mb-2 block text-sm font-medium text-gray-700">
-            Pick Up Time
-          </label>
-          <Controller
-            name="pickupDateTime"
-            control={control}
-            rules={{ required: "Pick Up Time is required" }}
-            render={({ field }) => (
-              <input
-                type="time"
-                onChange={(e) => {
-                  const date = field.value.split("T")[0] || "";
-                  field.onChange(handleDateTimeChange(date, e.target.value));
-                }}
-                value={field.value.split("T")[1] || ""}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="arrivalDate" className="mb-2 block text-sm font-medium text-gray-700">
-            Arrival Date
-          </label>
-          <Controller
-            name="arrivalDateTime"
-            control={control}
-            rules={{ required: "Arrival Date is required" }}
-            render={({ field }) => (
-              <input
-                type="date"
-                onChange={(e) => {
-                  const time = field.value.split("T")[1] || "00:00";
-                  field.onChange(handleDateTimeChange(e.target.value, time));
-                }}
-                value={field.value.split("T")[0]}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
-          />
-        </div>
-        <div>
-          <label htmlFor="arrivalTime" className="mb-2 block text-sm font-medium text-gray-700">
-            Arrival Time
-          </label>
-          <Controller
-            name="arrivalDateTime"
-            control={control}
-            rules={{ required: "Arrival Time is required" }}
-            render={({ field }) => (
-              <input
-                type="time"
-                onChange={(e) => {
-                  const date = field.value.split("T")[0] || "";
-                  field.onChange(handleDateTimeChange(date, e.target.value));
-                }}
-                value={field.value.split("T")[1] || ""}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="completeDate" className="mb-2 block text-sm font-medium text-gray-700">
-            Complete Date (optional)
-          </label>
-          <Controller
-            name="completeDateTime"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="date"
-                onChange={(e) => {
-                  const time = field.value?.split("T")[1] || "00:00";
-                  field.onChange(handleDateTimeChange(e.target.value, time));
-                }}
-                value={field.value?.split("T")[0] || ""}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
-          />
-        </div>
-        <div>
-          <label htmlFor="completeTime" className="mb-2 block text-sm font-medium text-gray-700">
-            Complete Time (optional)
-          </label>
-          <Controller
-            name="completeDateTime"
-            control={control}
-            render={({ field }) => (
-              <input
-                type="time"
-                onChange={(e) => {
-                  const date = field.value?.split("T")[0] || "";
-                  field.onChange(handleDateTimeChange(date, e.target.value));
-                }}
-                value={field.value?.split("T")[1] || ""}
-                className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label
-          htmlFor="clientAttention"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Client / Attention
-        </label>
-        <Controller
-          name="clientAttention"
-          control={control}
-          rules={{ required: "Client / Attention is required" }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="text"
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
+          {errors.eventName && (
+            <p className="text-sm text-red-500 mt-1">{errors.eventName.message}</p>
           )}
-        />
-        {errors.clientAttention && (
-          <span className="text-sm text-red-500">
-            {errors.clientAttention.message}
-          </span>
-        )}
-      </div>
+        </div>
 
-      <div>
-        <label
-          htmlFor="orderTotal"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Order Total
-        </label>
-        <Controller
-          name="orderTotal"
-          control={control}
-          rules={{ required: "Order Total is required" }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="number"
-              step="0.01"
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
-          )}
-        />
-        {errors.orderTotal && (
-          <span className="text-sm text-red-500">
-            {errors.orderTotal.message}
-          </span>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="deliveryAddressId"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Delivery Address
-        </label>
-        <Controller
-          name="deliveryAddressId"
-          control={control}
-          rules={{ required: "Delivery Address is required" }}
-          render={({ field }) => (
-            <select
-              onChange={(e) => {
-                const selectedAddress = addresses.find(
-                  (addr) => addr.id === e.target.value,
-                );
-                if (selectedAddress) {
-                  field.onChange(selectedAddress.id);
+        <div>
+          <Label htmlFor="eventDate">Event Date</Label>
+          <Input
+            id="eventDate"
+            type="date"
+            {...register("eventDate", {
+              required: "Event date is required",
+              validate: {
+                futureDate: (value) => {
+                  const selectedDate = new Date(value);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  return selectedDate >= today || "Event date must be in the future";
                 }
-              }}
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="">Select delivery address</option>
-              {addresses.map((address) => (
-                <option key={address.id} value={address.id}>
-                  {`${address.street1}, ${address.city}, ${address.state} ${address.zip}`}
-                  {address.isRestaurant ? " (Restaurant)" : ""}
-                  {address.isShared ? " (Shared)" : ""}
-                </option>
-              ))}
-            </select>
+              }
+            })}
+          />
+          {errors.eventDate && (
+            <p className="text-sm text-red-500 mt-1">{errors.eventDate.message}</p>
           )}
+        </div>
+
+        <div>
+          <Label htmlFor="eventTime">Event Time</Label>
+          <Input
+            id="eventTime"
+            type="time"
+            {...register("eventTime", {
+              required: "Event time is required"
+            })}
+          />
+          {errors.eventTime && (
+            <p className="text-sm text-red-500 mt-1">{errors.eventTime.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="guests">Number of Guests</Label>
+          <Input
+            id="guests"
+            type="number"
+            min="1"
+            {...register("guests", {
+              required: "Number of guests is required",
+              min: {
+                value: 1,
+                message: "Must have at least 1 guest"
+              },
+              max: {
+                value: 1000,
+                message: "Maximum 1000 guests allowed"
+              }
+            })}
+          />
+          {errors.guests && (
+            <p className="text-sm text-red-500 mt-1">{errors.guests.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="budget">Budget (USD)</Label>
+          <Input
+            id="budget"
+            type="number"
+            min="0"
+            step="0.01"
+            {...register("budget", {
+              required: "Budget is required",
+              min: {
+                value: 0,
+                message: "Budget must be a positive number"
+              }
+            })}
+          />
+          {errors.budget && (
+            <p className="text-sm text-red-500 mt-1">{errors.budget.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="specialInstructions">Special Instructions</Label>
+          <Textarea
+            id="specialInstructions"
+            {...register("specialInstructions")}
+            placeholder="Any special requirements or preferences?"
+            rows={4}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <Label>Event Location</Label>
+        <AddressManager
+          onAddressSelected={handleAddressSelect}
+          onAddressesLoaded={handleAddressesLoaded}
+          defaultFilter="all"
         />
-        {errors.deliveryAddressId && (
-          <span className="text-sm text-red-500">
-            {errors.deliveryAddressId.message}
-          </span>
+        {errors.addressId && (
+          <p className="text-sm text-red-500 mt-1">{errors.addressId.message}</p>
         )}
       </div>
 
-      <div>
-        <label
-          htmlFor="tip"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Tip (optional)
-        </label>
-        <Controller
-          name="tip"
-          control={control}
-          rules={{
-            validate: (value: string | undefined) => {
-              if (value === undefined || value === "") return true;
-              const num = parseFloat(value);
-              return (
-                (!isNaN(num) && num >= 0) ||
-                "Tip must be a positive number or empty"
-              );
-            },
-          }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="number"
-              step="0.01"
-              min="0"
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-            />
-          )}
-        />
-        {errors.tip && (
-          <span className="text-sm text-red-500">{errors.tip.message}</span>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="pickupNotes"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Pick Up Notes (optional)
-        </label>
-        <Controller
-          name="pickupNotes"
-          control={control}
-          render={({ field }) => (
-            <textarea
-              {...field}
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              rows={3}
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="specialNotes"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Special Notes (optional)
-        </label>
-        <Controller
-          name="specialNotes"
-          control={control}
-          render={({ field }) => (
-            <textarea
-              {...field}
-              className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:outline-none"
-              rows={3}
-            />
-          )}
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="w-full rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"
-      >
-        Submit Catering Request
-      </button>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Submitting..." : "Submit Request"}
+      </Button>
     </form>
   );
 };

@@ -23,9 +23,9 @@ const Breadcrumb = ({
                 <h1 className="mb-4 text-3xl font-bold text-black sm:text-4xl md:text-[40px] md:leading-[1.2]">
                   {pageName}
                 </h1>
-                {/* <p className="mb-5 text-base text-gray-800">
+                <p className="mb-5 text-base text-gray-800">
                   {pageDescription}
-                </p> */}
+                </p>
 
                 <ul className="flex items-center justify-center gap-[10px]">
                   <li>
@@ -38,8 +38,7 @@ const Breadcrumb = ({
                   </li>
                   <li>
                     <p className="flex items-center gap-[10px] text-base font-medium text-gray-800">
-
-                      {pageDescription}
+                      {pageName}
                     </p>
                   </li>
                 </ul>

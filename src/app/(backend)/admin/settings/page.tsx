@@ -2,7 +2,7 @@ import { BreadcrumbNavigation } from '@/components/Dashboard'
 import { SettingsUser } from '@/components/Dashboard/AdminView/Settings'
 import React from 'react'
 
-const page = () => {
+const SettingsPage = () => {
   return (
     <div className="bg-muted/40 flex min-h-screen w-full flex-col">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -10,11 +10,11 @@ const page = () => {
           <BreadcrumbNavigation />
         </header>
         <SettingsUser />
-        </div>
+      </div>
     </div>
   )
 }
 
-export default page
+export default SettingsPage
 
 

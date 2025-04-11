@@ -30,13 +30,16 @@ export const useUserData = (
 
   // Fetch user data
   const fetchUser = useCallback(async () => {
-    if (!userId) return null;
+    if (!userId) {
+      console.log("No userId provided to fetchUser");
+      return null;
+    }
 
     try {
       setLoading(true);
-      // Add a timestamp and request id to prevent caching
-      const cacheKey =
-        Date.now().toString() + Math.random().toString(36).substring(7);
+      const cacheKey = Date.now().toString() + Math.random().toString(36).substring(7);
+      console.log(`Fetching user data for ID: ${userId} with cache key: ${cacheKey}`);
+      
       const response = await fetch(`/api/users/${userId}?t=${cacheKey}`, {
         cache: "no-store",
         headers: {
@@ -46,13 +49,26 @@ export const useUserData = (
         },
       });
 
+      console.log("API Response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch user");
+        const errorText = await response.text();
+        console.error("API Error Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`Failed to fetch user: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log("API Response:", data);
+      console.log("API Response data:", data);
       
+      if (!data) {
+        console.error("No data received from API");
+        throw new Error("No data received from API");
+      }
+
       // Transform the API data to match form structure
       const formData: UserFormValues = {
         id: data.id,
@@ -93,12 +109,11 @@ export const useUserData = (
         contact_name: data.contact_name,
       };
       
-      console.log("[useUserData] fetchUser returning transformed data:", JSON.stringify(formData, null, 2));
-      
+      console.log("Transformed form data:", formData);
       return formData;
     } catch (error) {
-      console.error("Error fetching user:", error);
-      toast.error("Failed to fetch user data");
+      console.error("Error in fetchUser:", error);
+      toast.error("Failed to fetch user data. Please try again later.");
       return null;
     } finally {
       setLoading(false);

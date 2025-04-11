@@ -4,6 +4,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { UserType } from "@prisma/client";
 
 export interface FormState {
   error?: string;
@@ -40,7 +41,59 @@ export async function login(
       : { error: "Account not found. Please check your email or sign up." };
   }
 
-  redirect("/");
+  // Get user profile to determine the correct dashboard
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Failed to get user data" };
+  }
+
+  // Get user type from profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("type")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) {
+    console.error("Error fetching user profile:", profileError);
+    return { error: "Failed to get user profile" };
+  }
+
+  if (!profile?.type) {
+    console.error("No profile type found for user:", user.id);
+    return { error: "User profile type not found" };
+  }
+
+  // Redirect based on user type
+  const userType = profile.type.toLowerCase();
+  let redirectPath = "/";
+
+  console.log("User type for redirection:", userType);
+
+  switch (userType) {
+    case UserType.VENDOR.toLowerCase():
+      redirectPath = "/vendor";
+      break;
+    case UserType.CLIENT.toLowerCase():
+      redirectPath = "/client";
+      break;
+    case UserType.DRIVER.toLowerCase():
+      redirectPath = "/driver";
+      break;
+    case UserType.HELPDESK.toLowerCase():
+      redirectPath = "/helpdesk";
+      break;
+    case UserType.ADMIN.toLowerCase():
+    case UserType.SUPER_ADMIN.toLowerCase():
+      redirectPath = "/admin";
+      break;
+    default:
+      console.warn("Unknown user type:", userType);
+      redirectPath = "/client"; // Default to client dashboard
+  }
+
+  console.log("Redirecting user to:", redirectPath);
+  redirect(redirectPath);
   return { error: "" }; // Unreachable but satisfies TypeScript
 }
 

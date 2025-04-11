@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   // Create a Supabase client for server-side authentication
   const supabase = await createClient();
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const data = await req.json();
+    const data = await request.json();
     const {
       order_type,
       brokerage,

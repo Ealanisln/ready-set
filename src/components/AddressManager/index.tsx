@@ -97,16 +97,20 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       const data = await response.json();
       console.log(`Fetched ${data.length} addresses with filter "${filterType}"`);
       
-      setAddresses(data);
-      setFilteredAddresses(data);
+      // Ensure data is an array before setting it
+      const validAddresses = Array.isArray(data) ? data : [];
+      setAddresses(validAddresses);
+      setFilteredAddresses(validAddresses);
       
       if (onAddressesLoaded) {
-        onAddressesLoaded(data);
+        onAddressesLoaded(validAddresses);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error("Error fetching addresses:", errorMessage);
       setError(`Error fetching addresses: ${errorMessage}`);
+      setAddresses([]);
+      setFilteredAddresses([]);
     } finally {
       setIsLoading(false);
     }
@@ -227,7 +231,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Your Addresses</SelectLabel>
-                    {addresses
+                    {Array.isArray(addresses) && addresses
                       .filter(a => !a.isShared && a.createdBy === user?.id)
                       .map((address) => (
                         <SelectItem key={address.id} value={address.id}>
@@ -243,7 +247,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
                         </SelectItem>
                       ))}
                   </SelectGroup>
-                  {addresses.some(a => a.isShared) && (
+                  {Array.isArray(addresses) && addresses.some(a => a.isShared) && (
                     <SelectGroup>
                       <SelectLabel>Shared Addresses</SelectLabel>
                       {addresses
