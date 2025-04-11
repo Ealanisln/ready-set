@@ -145,13 +145,25 @@ export async function middleware(request: NextRequest) {
 
   // --- Admin Path Handling (Rewrite & Authorization) ---
   if (pathname.startsWith("/admin")) {
-      // Check if user has admin privileges (case-insensitive)
+      // First check if user is authenticated at all
+      if (!user) {
+          console.log("Middleware V2: Unauthenticated user trying to access admin path");
+          const signInUrl = new URL("/sign-in", origin);
+          signInUrl.searchParams.set("returnTo", pathname);
+          const redirectResponse = NextResponse.redirect(signInUrl);
+          supabaseResponse.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+          });
+          return redirectResponse;
+      }
+
+      // Then check if user has admin privileges (case-insensitive)
       if (!lowerCaseUserRole || !["admin", "super_admin"].includes(lowerCaseUserRole)) {
           console.log(`Middleware V2: Non-admin user (${userRole}) trying to access ${pathname}, redirecting.`);
           // Redirect non-admins away from /admin/* paths
           const redirectPath = (lowerCaseUserRole && lowerCaseUserRole in TYPE_ROUTES) ? TYPE_ROUTES[lowerCaseUserRole] : "/";
           const redirectUrl = new URL(redirectPath, origin);
-           // Re-apply cookies
+          // Re-apply cookies
           const redirectResponse = NextResponse.redirect(redirectUrl);
           supabaseResponse.cookies.getAll().forEach((cookie) => {
             redirectResponse.cookies.set(cookie.name, cookie.value, cookie);

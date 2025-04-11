@@ -39,9 +39,14 @@ export function FileUploader({
 }: FileUploaderProps) {
   const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isTemporarilyDisabled] = useState(true); // Temporary disable flag
 
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
+      if (isTemporarilyDisabled) {
+        setError("File uploads are temporarily disabled. Please try again later.");
+        return;
+      }
       setError(null);
       
       // Validate file count
@@ -59,7 +64,7 @@ export function FileUploader({
 
       setSelectedFiles(acceptedFiles);
     },
-    [maxFileCount, maxSize]
+    [maxFileCount, maxSize, isTemporarilyDisabled]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -102,25 +107,39 @@ export function FileUploader({
 
   return (
     <div className="space-y-4">
+      {isTemporarilyDisabled && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+          <p className="text-yellow-800 text-sm">
+            File uploads are temporarily disabled for maintenance. Please try again later.
+          </p>
+        </div>
+      )}
       <div
         {...getRootProps()}
         className={cn(
-          "border-2 border-dashed rounded-md cursor-pointer transition-colors",
+          "border-2 border-dashed rounded-md transition-colors",
+          isTemporarilyDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
           isDragActive
             ? "border-primary/70 bg-primary/5"
             : "border-border hover:border-primary/50 hover:bg-muted/50",
           isUploading && "opacity-50 cursor-not-allowed"
         )}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} disabled={isTemporarilyDisabled} />
         {children || (
           <div className="flex flex-col items-center justify-center text-center space-y-2 p-6">
             <Upload className="h-10 w-10 text-muted-foreground" />
             <div className="text-sm">
               <p className="font-medium">
-                {isDragActive ? "Drop the files here" : "Drag and drop files here"}
+                {isTemporarilyDisabled 
+                  ? "File uploads are temporarily disabled"
+                  : isDragActive 
+                    ? "Drop the files here" 
+                    : "Drag and drop files here"}
               </p>
-              <p className="text-muted-foreground">or click to browse</p>
+              <p className="text-muted-foreground">
+                {isTemporarilyDisabled ? "Please try again later" : "or click to browse"}
+              </p>
             </div>
           </div>
         )}

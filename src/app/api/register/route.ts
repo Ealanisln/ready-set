@@ -215,6 +215,13 @@ export async function POST(request: Request) {
     // Get the Supabase user ID
     const supabaseUserId = authData.user.id;
 
+    // Helper function to safely convert head_count to number
+    const parseHeadCount = (value: string | undefined): number | null | undefined => {
+      if (value === undefined) return undefined;
+      const num = parseInt(value, 10);
+      return isNaN(num) ? null : num;
+    };
+
     // Prepare user data for Prisma
     const userData: Prisma.ProfileCreateInput = {
       id: supabaseUserId,
@@ -228,6 +235,9 @@ export async function POST(request: Request) {
           ? (body as VendorFormData | ClientFormData).company
           : undefined,
       status: 'PENDING',
+      headCount: userType === UserType.CLIENT 
+        ? parseInt((body as ClientFormData).head_count) || null
+        : undefined,
       street1: body.street1,
       street2: body.street2,
       city: body.city,
@@ -251,10 +261,6 @@ export async function POST(request: Request) {
         frequency:
           "frequency" in body
             ? (body as VendorFormData | ClientFormData).frequency
-            : undefined,
-        headCount:
-          "head_count" in body
-            ? String((body as ClientFormData).head_count)
             : undefined,
         website:
           "website" in body

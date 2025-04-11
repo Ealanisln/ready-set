@@ -7,360 +7,235 @@ import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import menuData, {
-  cateringRequestMenuItem,
-  adminMenuItem,
-  vendorMenuItem,
-  driverMenuItem,
-} from "./menuData";
-import MobileMenu from "./MobileMenu";
-import toast from "react-hot-toast";
+import { useUser } from "@/contexts/UserContext";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { MenuItem } from "@/types/menu";
+import { UserType } from "@/types/user";
+import MobileMenu from "./MobileMenu";
+import {
+  adminMenuItem,
+  superAdminMenuItem,
+  driverMenuItem,
+  helpdeskMenuItem,
+  vendorMenuItem,
+  clientMenuItem,
+} from "./menuData";
 
-// Types
-type UserType =
-  | "client"
-  | "admin"
-  | "super_admin"
-  | "vendor"
-  | "driver"
-  | undefined;
+// Define base menu items (visible to all users)
+const baseMenuItems: MenuItem[] = [
+  {
+    id: 101,
+    title: "Home",
+    path: "/",
+  },
+  {
+    id: 102,
+    title: "About",
+    path: "/about",
+  },
+  {
+    id: 103,
+    title: "RS Subsidiaries",
+    submenu: [
+      { id: 1031, title: "Logistics", path: "/logistics" },
+      { id: 1032, title: "Virtual Assistant", path: "/va" },
+      { id: 1033, title: "Join Us", path: "/join-the-team" },
+    ],
+  },
+  {
+    id: 104,
+    title: "Contact",
+    path: "/contact",
+  },
+  {
+    id: 105,
+    title: "Blog",
+    path: "/blog",
+  },
+  {
+    id: 106,
+    title: "Resources",
+    path: "/resources",
+  },
+];
 
-interface MenuItem {
-  id: string | number;
-  title: string;
-  path?: string;
-  newTab?: boolean;
-  submenu?: MenuItem[];
-}
-
-interface User {
-  id: string;
-  name?: string;
-  type?: UserType;
-}
+// Map user roles to their specific menu items
+const ROLE_MENU_ITEMS: Record<UserType, MenuItem> = {
+  [UserType.VENDOR]: vendorMenuItem,
+  [UserType.CLIENT]: clientMenuItem,
+  [UserType.DRIVER]: driverMenuItem,
+  [UserType.ADMIN]: adminMenuItem,
+  [UserType.HELPDESK]: helpdeskMenuItem,
+  [UserType.SUPER_ADMIN]: superAdminMenuItem,
+};
 
 interface LogoProps {
   isHomePage: boolean;
   sticky: boolean;
-  logoClasses: {
-    light: string;
-    dark: string;
+  isVirtualAssistantPage: boolean;
+}
+
+const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, isVirtualAssistantPage }) => {
+  if (isVirtualAssistantPage) {
+    return (
+      <Link href="/" className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}>
+        {sticky ? (
+          <picture>
+            <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
+            <Image 
+              src="/images/virtual/logo-headset.png" 
+              alt="Virtual Assistant Logo" 
+              width={180} 
+              height={40} 
+              className="header-logo w-full" 
+              priority 
+            />
+          </picture>
+        ) : (
+          <picture>
+            <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
+            <Image 
+              src="/images/virtual/logo-headset-dark.png" 
+              alt="Virtual Assistant Logo" 
+              width={180} 
+              height={40} 
+              className="header-logo w-full" 
+              priority 
+            />
+          </picture>
+        )}
+      </Link>
+    );
+  }
+
+  const logoClasses = {
+    light: sticky || !isHomePage ? "block dark:hidden" : "hidden dark:block",
+    dark: sticky || !isHomePage ? "hidden dark:block" : "block dark:hidden"
   };
-  isVirtualAssistantPage: boolean;
-}
 
-interface AuthButtonsProps {
-  user: User | null;
-  pathUrl: string;
-  sticky: boolean;
-  isVirtualAssistantPage: boolean;
-  isHomePage: boolean;
-  onSignOut: () => Promise<void>;
-  isSigningOut: boolean;
-}
-
-// Logo Component (No changes)
-const Logo: React.FC<LogoProps> = ({ isHomePage, sticky, logoClasses, isVirtualAssistantPage }) => {
-    // ... (logo rendering logic remains the same)
-    if (isVirtualAssistantPage) {
-        return (
-          <Link href="/" className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}>
-            {sticky ? (
-              <picture>
-                <source srcSet="/images/virtual/logo-headset.webp" type="image/webp" />
-                <Image src="/images/virtual/logo-headset.png" alt="Virtual Assistant Logo" width={180} height={40} className="header-logo w-full" priority />
-              </picture>
-            ) : (
-              <picture>
-                <source srcSet="/images/virtual/logo-headset-dark.webp" type="image/webp" />
-                <Image src="/images/virtual/logo-headset-dark.png" alt="Virtual Assistant Logo" width={180} height={40} className="header-logo w-full" priority />
-              </picture>
-            )}
-          </Link>
-        );
-      }
-
-      return (
-        <Link href="/" className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}>
-          {!isHomePage || sticky ? (
-            <>
-              <Image src="/images/logo/logo-white.png" alt="logo" width={280} height={40} className={`header-logo w-full ${logoClasses.light}`} />
-              <Image src="/images/logo/logo-dark.png" alt="logo" width={280} height={40} className={`header-logo w-full ${logoClasses.dark}`} />
-            </>
-          ) : (
-            <>
-              <Image src="/images/logo/logo-white.png" alt="logo" width={180} height={40} className={`header-logo w-full ${logoClasses.light}`} />
-              <Image src="/images/logo/logo-dark.png" alt="logo" width={180} height={40} className={`header-logo w-full ${logoClasses.dark}`} />
-            </>
-          )}
-        </Link>
-      );
-};
-
-// Auth Buttons Component (No changes from previous version)
-const AuthButtons: React.FC<AuthButtonsProps> = ({ user, pathUrl, sticky, isVirtualAssistantPage, isHomePage, onSignOut, isSigningOut }) => {
-    // ... (AuthButtons logic remains the same)
-    if (user) {
-        return (
-          <>
-            <Link href="/profile">
-              <p className={`loginBtn hidden px-7 py-3 font-medium lg:block ${ sticky ? "text-dark dark:text-white" : isVirtualAssistantPage ? "text-white" : "text-black dark:text-white" }`}>
-                {user.name}
-              </p>
-            </Link>
-            {isVirtualAssistantPage || isHomePage ? (
-              <button onClick={onSignOut} disabled={isSigningOut} className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white md:block" >
-                {isSigningOut ? "Signing Out..." : "Sign Out"}
-              </button>
-            ) : (
-              <button onClick={onSignOut} disabled={isSigningOut} className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark md:block">
-                {isSigningOut ? "Signing Out..." : "Sign Out"}
-              </button>
-            )}
-          </>
-        );
-      }
-
-      return (
-         <>
-          {pathUrl !== "/" || isVirtualAssistantPage ? (
-            <div className="flex items-center gap-3">
-              <Link href="/sign-in" className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block ${ sticky ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" : isVirtualAssistantPage ? "bg-white/90 text-dark shadow-md hover:bg-white" : "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"} `}>
-                Sign In
-              </Link>
-              <Link href="/sign-up" className="hidden rounded-lg bg-amber-400 px-6 py-3 text-base font-medium text-black duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:hover:bg-white/20 lg:block">
-                Sign Up
-              </Link>
-            </div>
-          ) : (
-            <>
-              <Link href="/sign-in" className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block ${ sticky ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" : "bg-white/90 text-dark shadow-md hover:bg-white"} `}>
-                Sign In
-              </Link>
-              <Link href="/sign-up" className={`hidden rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out md:block ${ sticky ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800" : "bg-blue-500 hover:bg-blue-600"}`}>
-                Sign Up
-              </Link>
-            </>
-          )}
+  return (
+    <Link href="/" className={`navbar-logo block w-full ${sticky ? "py-3" : "py-6"}`}>
+      {!isHomePage || sticky ? (
+        <>
+          <Image 
+            src="/images/logo/logo-white.png" 
+            alt="logo" 
+            width={280} 
+            height={40} 
+            className={`header-logo w-full ${logoClasses.light}`} 
+          />
+          <Image 
+            src="/images/logo/logo-dark.png" 
+            alt="logo" 
+            width={280} 
+            height={40} 
+            className={`header-logo w-full ${logoClasses.dark}`} 
+          />
         </>
-      );
+      ) : (
+        <>
+          <Image 
+            src="/images/logo/logo-white.png" 
+            alt="logo" 
+            width={180} 
+            height={40} 
+            className={`header-logo w-full ${logoClasses.light}`} 
+          />
+          <Image 
+            src="/images/logo/logo-dark.png" 
+            alt="logo" 
+            width={180} 
+            height={40} 
+            className={`header-logo w-full ${logoClasses.dark}`} 
+          />
+        </>
+      )}
+    </Link>
+  );
 };
-
 
 // Main Header Component
 const Header: React.FC = () => {
   const router = useRouter();
-  const pathUrl = usePathname();
+  const pathUrl = usePathname() || "/";
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
-  const [openIndex, setOpenIndex] = useState(-1);
-  const [user, setUser] = useState<User | null>(null);
+  const [submenuOpen, setSubmenuOpen] = useState(-1);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
-
+  
+  // Use the UserContext for authentication state
+  const { user, userRole, isLoading } = useUser();
+  
   const isVirtualAssistantPage = pathUrl === "/va";
   const isHomePage = pathUrl === "/";
 
-  // *** MODIFIED: Replaced useEffect with your provided code ***
+  // Initialize Supabase client
   useEffect(() => {
-    // Wrap the initialization logic in an async function
     const initSupabase = async () => {
-      const client = await createClient(); // Await the client creation
+      const client = await createClient();
       setSupabaseClient(client);
-
-      // This function already exists and is async
-      const initializeAuth = async (client: SupabaseClient) => {
-          try {
-              const getUser = async () => {
-                  const {
-                      data: { user: supabaseUser },
-                      error,
-                  } = await client.auth.getUser();
-                  if (error) {
-                      console.error("Error fetching user:", error.message);
-                      setUser(null); // Set user to null on error
-                      return;
-                  }
-                  if (supabaseUser) {
-                      try {
-                        const { data: profile, error: profileError } = await client
-                            .from("profiles")
-                            .select("name, type")
-                            .eq("id", supabaseUser.id)
-                            .single();
-
-                        if (profileError) {
-                            console.error("Error fetching user profile:", profileError.message);
-                            // Decide if you want to set user state even if profile fetch fails
-                        }
-
-                        if (profile && profile.name) {
-                            setUser({
-                                id: supabaseUser.id,
-                                name: profile.name,
-                                type: profile.type as UserType,
-                            });
-                        } else {
-                            console.warn(`Profile or name not found for user ${supabaseUser.id}. Falling back to email.`);
-                            setUser({
-                                id: supabaseUser.id,
-                                name: supabaseUser.email?.split("@")[0] || "User", // Provide a generic fallback
-                                type: profile?.type as UserType, // Still try to get type if profile exists
-                            });
-                        }
-                      } catch (profileFetchError) {
-                          console.error("Exception fetching user profile:", profileFetchError);
-                          setUser({
-                              id: supabaseUser.id,
-                              name: supabaseUser.email?.split("@")[0] || "User", // Fallback on exception
-                              type: undefined, // Type is unknown
-                          });
-                      }
-                  } else {
-                      setUser(null);
-                  }
-              };
-
-              await getUser();
-
-              const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
-                  if (session?.user) {
-                      try {
-                          const { data: profile, error: profileError } = await client
-                              .from("profiles")
-                              .select("name, type")
-                              .eq("id", session.user.id)
-                              .single();
-
-                          if (profileError) {
-                              console.error("Auth change: Error fetching profile:", profileError.message);
-                          }
-
-                          if (profile && profile.name) {
-                                setUser({
-                                    id: session.user.id,
-                                    name: profile.name,
-                                    type: profile.type as UserType,
-                                });
-                          } else {
-                                console.warn(`Auth change: Profile/name not found for user ${session.user.id}. Falling back.`);
-                                setUser({
-                                    id: session.user.id,
-                                    name: session.user.email?.split("@")[0] || "User", // Generic fallback
-                                    type: profile?.type as UserType,
-                                });
-                          }
-                      } catch (profileFetchError) {
-                            console.error("Auth change: Exception fetching profile:", profileFetchError);
-                            setUser({
-                                id: session.user.id,
-                                name: session.user.email?.split("@")[0] || "User", // Fallback on exception
-                                type: undefined,
-                            });
-                      }
-                  } else {
-                      setUser(null);
-                  }
-              });
-
-              // This now correctly returns the cleanup function from onAuthStateChange
-              return () => {
-                  subscription.unsubscribe();
-              };
-          } catch (error) {
-              console.error("Error initializing Supabase client/auth:", error);
-          }
-      };
-
-      // Call initializeAuth with the awaited client
-      if (client) {
-          // initializeAuth returns the cleanup function (or undefined on error)
-          const cleanupAuth = await initializeAuth(client);
-          // Return the cleanup function if it exists
-          return cleanupAuth;
-      }
     };
+    initSupabase();
+  }, []);
 
-    // Call the async function
-    const cleanupPromise = initSupabase();
+  // Toggle mobile menu
+  const toggleNavbar = () => {
+    setNavbarOpen(!navbarOpen);
+  };
+  
+  // Handle submenu clicks
+  const handleSubmenu = (index: number) => {
+    setSubmenuOpen(index === submenuOpen ? -1 : index);
+  };
 
-    // Return a cleanup function that handles the promise from initSupabase
-    // This ensures the unsubscribe function from onAuthStateChange is called on unmount
-    return () => {
-        cleanupPromise.then(cleanup => {
-            if (typeof cleanup === 'function') {
-                cleanup(); // Execute the unsubscribe function
-            }
-        }).catch(error => {
-            // Handle potential errors during the initSupabase async execution itself
-            console.error("Error during Supabase initialization cleanup promise:", error);
-        });
-    };
+  // Close mobile menu on navigation
+  const closeNavbar = () => {
+    setNavbarOpen(false);
+    setSubmenuOpen(-1);
+  };
 
-  }, []); // Run once on mount
-  // *** End of MODIFIED useEffect ***
+  // Handle sticky behavior
+  const handleStickyNavbar = () => {
+    setSticky(window.scrollY >= 80);
+  };
+  
+  // Effect to close menu on route change
+  useEffect(() => {
+    closeNavbar();
+  }, [pathUrl]);
+  
+  useEffect(() => {
+    window.addEventListener("scroll", handleStickyNavbar);
+    return () => window.removeEventListener("scroll", handleStickyNavbar);
+  }, []);
 
-
+  // Handle sign out
   const handleSignOut = async () => {
-    if (!supabaseClient) { toast.error("Supabase client not initialized."); return; }
+    if (!supabaseClient) return;
+    
+    setIsSigningOut(true);
     try {
-      setIsSigningOut(true);
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) { console.error("Error signing out:", error.message); toast.error("Failed to sign out. Please try again.");
-      } else { toast.success("Signed out successfully"); setUser(null); router.push("/"); router.refresh(); }
-    } catch (error: any) { console.error("Error in sign out process:", error); toast.error(error.message || "An error occurred while signing out");
-    } finally { setIsSigningOut(false); }
+      await supabaseClient.auth.signOut();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      setIsSigningOut(false);
+      setNavbarOpen(false);
+    }
   };
 
-  // Utility function for text colors (No changes)
-  const getTextColorClasses = () => {
-    if (isVirtualAssistantPage) { return sticky ? "text-dark dark:text-white" : "text-white"; }
-    if (sticky) { return "text-dark dark:text-white"; }
-    return "text-black dark:text-white";
-  };
+  // Get role-specific menu item if user is authenticated
+  const roleMenuItem = userRole && !isLoading 
+    ? ROLE_MENU_ITEMS[userRole] 
+    : null;
+  
+  // Combine base menu items with role-specific item if available
+  const menuItems = roleMenuItem 
+    ? [...baseMenuItems, roleMenuItem] 
+    : baseMenuItems;
 
-  // Utility function for logo visibility (No changes)
-  const getLogoVisibility = () => {
-    if (sticky) { return { light: "block dark:hidden", dark: "hidden dark:block" }; }
-    if (isVirtualAssistantPage || isHomePage) { return { light: "hidden dark:block", dark: "block dark:hidden" }; }
-    return { light: "block dark:hidden", dark: "hidden dark:block" };
-  };
-
-   // Utility function for toggle bar color (No changes from previous version)
-  const getToggleBarColor = () => {
-    if (sticky) return "bg-dark dark:bg-white";
-    if (isVirtualAssistantPage) return "bg-white";
-    return "bg-black dark:bg-white";
-  };
-
-
-  // Event handlers (No changes)
-  const navbarToggleHandler = () => setNavbarOpen((prev) => !prev);
-  const closeNavbarOnNavigate = () => { setNavbarOpen(false); setOpenIndex(-1); };
-  const handleSubmenu = (index: number) => setOpenIndex(openIndex === index ? -1 : index);
-  const handleStickyNavbar = () => { setSticky(window.scrollY >= 80); };
-
-  // Effect to close mobile menu on route change (No changes)
-  useEffect(() => { closeNavbarOnNavigate(); }, [pathUrl]);
-
-  // Effect for sticky navbar scroll listener (No changes)
-  useEffect(() => { window.addEventListener("scroll", handleStickyNavbar); return () => window.removeEventListener("scroll", handleStickyNavbar); }, []);
-
-
-  // Menu data processing (No changes)
-  const userType = user?.type as UserType;
-  const updatedMenuData: MenuItem[] = [
-    ...menuData.filter( (item) => item.title !== "Sign In" && item.title !== "Sign Up" ),
-    ...(userType === "client" ? [cateringRequestMenuItem] : []),
-    ...(userType === "admin" || userType === "super_admin" ? [adminMenuItem] : []),
-    ...(userType === "vendor" ? [vendorMenuItem] : []),
-    ...(userType === "driver" ? [driverMenuItem] : []),
-  ];
-
-  const logoClasses = getLogoVisibility();
-
-  // Component Render (No changes)
   return (
     <header
       className={`ud-header left-0 top-0 z-40 flex w-full items-center ${
@@ -375,7 +250,6 @@ const Header: React.FC = () => {
             <Logo
               isHomePage={isHomePage}
               sticky={sticky}
-              logoClasses={logoClasses}
               isVirtualAssistantPage={isVirtualAssistantPage}
             />
           </div>
@@ -383,18 +257,104 @@ const Header: React.FC = () => {
           <div className="flex w-full items-center justify-between">
             <MobileMenu
               navbarOpen={navbarOpen}
-              menuData={updatedMenuData}
-              openIndex={openIndex}
+              menuData={menuItems}
+              openIndex={submenuOpen}
               handleSubmenu={handleSubmenu}
-              closeNavbarOnNavigate={closeNavbarOnNavigate}
-              navbarToggleHandler={navbarToggleHandler}
-              user={user}
-              pathUrl={pathUrl ?? ''}
-              getTextColorClasses={getTextColorClasses}
+              closeNavbarOnNavigate={closeNavbar}
+              navbarToggleHandler={toggleNavbar}
+              pathUrl={pathUrl}
+              sticky={sticky}
             />
 
+            {/* Auth Buttons (only visible on desktop; mobile handled by MobileMenu) */}
+            <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
+              {!user && !isLoading ? (
+                <>
+                  {pathUrl !== "/" || isVirtualAssistantPage ? (
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href="/sign-in"
+                        className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
+                          ${sticky 
+                            ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                            : isVirtualAssistantPage 
+                              ? "bg-white/90 text-dark shadow-md hover:bg-white"
+                              : "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                          }
+                        `}
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/sign-up"
+                        className="hidden rounded-lg bg-amber-400 px-6 py-3 text-base font-medium text-black duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:hover:bg-white/20 lg:block"
+                      >
+                        Sign Up
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        href="/sign-in"
+                        className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
+                          ${sticky 
+                            ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                            : "bg-white/90 text-dark shadow-md hover:bg-white"
+                          }
+                        `}
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/sign-up"
+                        className={`hidden rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out md:block ${
+                          sticky
+                            ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                            : "bg-blue-500 hover:bg-blue-600"
+                        }`}
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </>
+              ) : user ? (
+                <>
+                  <Link href="/profile">
+                    <p className={`loginBtn hidden px-7 py-3 font-medium lg:block ${
+                      sticky
+                        ? "text-dark dark:text-white"
+                        : isVirtualAssistantPage || isHomePage
+                          ? "text-white"
+                          : "text-dark dark:text-white"
+                    }`}>
+                      {user.user_metadata?.name || user.email?.split('@')[0] || 'Profile'}
+                    </p>
+                  </Link>
+                  {isVirtualAssistantPage || isHomePage ? (
+                    <button
+                      onClick={handleSignOut}
+                      disabled={isSigningOut}
+                      className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-20 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-100 hover:text-white md:block"
+                    >
+                      {isSigningOut ? "Signing Out..." : "Sign Out"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSignOut}
+                      disabled={isSigningOut}
+                      className="signUpBtn hidden rounded-lg bg-blue-800 bg-opacity-100 px-6 py-3 text-base font-medium text-white duration-300 ease-in-out hover:bg-opacity-20 hover:text-dark md:block"
+                    >
+                      {isSigningOut ? "Signing Out..." : "Sign Out"}
+                    </button>
+                  )}
+                </>
+              ) : null}
+            </div>
+
+            {/* Mobile Menu Toggle */}
             <button
-              onClick={navbarToggleHandler}
+              onClick={toggleNavbar}
               id="navbarToggler"
               aria-label="Mobile Menu"
               className="absolute right-4 top-1/2 block -translate-y-1/2 rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
@@ -402,26 +362,20 @@ const Header: React.FC = () => {
               {[1, 2, 3].map((_, index) => (
                 <span
                   key={index}
-                  className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${getToggleBarColor()} ${
+                  className={`relative my-1.5 block h-0.5 w-[30px] transition-all duration-300 ${
                     navbarOpen
-                      ? index === 1 ? "opacity-0" : index === 0 ? "top-[7px] rotate-45" : "top-[-8px] -rotate-45"
-                      : ""
-                  }`}
+                      ? index === 1
+                        ? "opacity-0"
+                        : index === 0
+                          ? "top-[7px] rotate-45"
+                          : "top-[-8px] -rotate-45"
+                      : index === 1
+                        ? "opacity-100"
+                        : ""
+                  } ${sticky ? "bg-dark dark:bg-white" : isVirtualAssistantPage || isHomePage ? "bg-white" : "bg-dark dark:bg-white"}`}
                 />
               ))}
             </button>
-
-            <div className="hidden items-center justify-end pr-16 sm:flex lg:pr-0">
-              <AuthButtons
-                user={user}
-                pathUrl={pathUrl ?? ''}
-                sticky={sticky}
-                isVirtualAssistantPage={isVirtualAssistantPage}
-                isHomePage={isHomePage}
-                onSignOut={handleSignOut}
-                isSigningOut={isSigningOut}
-              />
-            </div>
           </div>
         </div>
       </div>

@@ -126,95 +126,11 @@ export function useUploadFile({
     async (files: FileWithPath[]): Promise<UploadedFile[]> => {
       setIsUploading(true);
       const newProgresses = { ...progresses };
-      const uploadResults: UploadedFile[] = [];
 
       try {
-        // Validate file count
-        if (uploadedFiles.length + files.length > maxFileCount) {
-          toast.error(`You can only upload up to ${maxFileCount} files`);
-          throw new Error(`You can only upload up to ${maxFileCount} files`);
-        }
-
-        // Process each file using FormData and the API route
-        for (const file of files) {
-          // Validate file size
-          if (file.size > maxFileSize) {
-            const maxSizeMB = maxFileSize / 1024 / 1024;
-            toast.error(
-              `File ${file.name} exceeds the maximum size of ${maxSizeMB}MB`,
-            );
-            continue; // Skip this file but try to process others
-          }
-
-          // Validate file type if restrictions exist
-          if (
-            allowedFileTypes.length > 0 &&
-            !allowedFileTypes.includes(file.type)
-          ) {
-            toast.error(`File type ${file.type} is not allowed`);
-            continue; // Skip this file but try to process others
-          }
-
-          // Create FormData for API upload
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("entityId", entityId || "");
-          formData.append("entityType", entityType || "");
-          formData.append("category", category || "general");
-          formData.append("bucketName", bucketName || "fileUploader");
-
-          newProgresses[file.name] = 10;
-          setProgresses(newProgresses);
-
-          console.log(`Uploading file ${file.name} via API`);
-
-          // Upload file using the API route
-          const response = await fetch("/api/file-uploads", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error(`Error uploading ${file.name}:`, errorData);
-            toast.error(
-              `Error uploading ${file.name}: ${errorData.error || "Unknown error"}`,
-            );
-            continue; // Skip this file but try to process others
-          }
-
-          const data = await response.json();
-          console.log(`Upload response for ${file.name}:`, data);
-
-          if (data.success && data.file) {
-            const uploadedFile: UploadedFile = {
-              key: data.file.id,
-              name: data.file.name,
-              url: data.file.url,
-              size: data.file.size,
-              type: data.file.type,
-              entityId: data.file.entityId,
-              category: data.file.category,
-              path: data.file.path,
-              bucketName: data.file.bucketName || bucketName,
-            };
-
-            uploadResults.push(uploadedFile);
-          }
-
-          newProgresses[file.name] = 100;
-          setProgresses(newProgresses);
-        }
-
-        // Only add successfully uploaded files to state
-        if (uploadResults.length > 0) {
-          setUploadedFiles((prev) => [...prev, ...uploadResults]);
-          toast.success(
-            `Successfully uploaded ${uploadResults.length} file(s)`,
-          );
-        }
-
-        return uploadResults;
+        // Temporary maintenance message
+        toast.error("File uploads are temporarily disabled for maintenance. Please try again later.");
+        throw new Error("File uploads are temporarily disabled for maintenance");
       } catch (error: any) {
         console.error("Error uploading files:", error);
         toast.error(`Upload error: ${error.message || "Unknown error"}`);
@@ -223,17 +139,7 @@ export function useUploadFile({
         setIsUploading(false);
       }
     },
-    [
-      category,
-      entityType,
-      maxFileCount,
-      maxFileSize,
-      allowedFileTypes,
-      progresses,
-      entityId,
-      uploadedFiles,
-      bucketName,
-    ],
+    [progresses]
   );
 
   // Update the entity ID for all uploaded files

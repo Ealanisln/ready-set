@@ -27,7 +27,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <ThemeProvider attribute="class" enableSystem={true} defaultTheme="light">
         <ToasterContext />
         {!isBackendAdminRoute && !isStudioRoute && !isHomePage && <Header />}
-        <main className="flex-grow pt-20">{children}</main>
+        <main className="flex-grow">{children}</main>
         {!isBackendAdminRoute && !isStudioRoute && <Footer />}
         <ScrollToTop />
       </ThemeProvider>

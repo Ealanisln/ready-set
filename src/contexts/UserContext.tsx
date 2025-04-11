@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { createClient } from "@/utils/supabase/client";
 import { Session, User } from '@supabase/supabase-js';
-import { UserType } from "@/components/Auth/SignUp/FormSchemas";
+import { UserType } from "@/types/user";
 
 // Define user context types
 type UserContextType = {
@@ -43,8 +43,8 @@ let userRoleCache: {
 // Cache expiry time (5 minutes)
 const CACHE_EXPIRY = 5 * 60 * 1000;
 
-// Provider component
-export function UserProvider({ children }: { children: ReactNode }) {
+// Create a client component wrapper
+function UserProviderClient({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserType | null>(null);
@@ -84,7 +84,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const setupAuth = async () => {
       try {
         console.log("UserContext: Getting initial session...");
-        // Get initial session
         const { data, error: getSessionError } = await supabase.auth.getSession();
         
         console.log("UserContext: getSession returned.", { sessionExists: !!data?.session, error: getSessionError });
@@ -95,7 +94,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setSession(currentSession);
         setUser(currentSession?.user || null);
         
-        // Only fetch role if we have a user
         if (currentSession?.user) {
           console.log("UserContext: Session found. Fetching user role...");
           await fetchUserRole(currentSession.user);
@@ -104,8 +102,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
         }
         
-        // Set up auth listener
-        console.log("Setting up auth state listener...");
         const { data: listener } = supabase.auth.onAuthStateChange(
           async (_event: string, newSession: Session | null) => {
             if (!mounted) return;
@@ -114,14 +110,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
             setSession(newSession);
             setUser(newSession?.user || null);
             
-            // Reset role if user signs out
             if (!newSession?.user) {
               setUserRole(null);
               setIsLoading(false);
               return;
             }
             
-            // Only fetch role if user ID changed
             if (newSession?.user?.id !== currentSession?.user?.id) {
               await fetchUserRole(newSession.user);
             }
@@ -140,116 +134,52 @@ export function UserProvider({ children }: { children: ReactNode }) {
     
     setupAuth();
     
-    // Helper to fetch user role
     const fetchUserRole = async (user: User) => {
       console.log("UserContext: fetchUserRole started for user:", user.id);
       let roleFound: UserType | null = null;
       try {
-        // First check if user has a profile in the database
-        console.log("UserContext: Checking for profile...");
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('type')
           .eq('id', user.id)
           .single();
-        console.log("UserContext: Profile check done.", { profile, profileError });
+        console.log("UserContext: Profile check done.", { profile, profileError, rawType: profile?.type });
 
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error("UserContext: Error checking profile (excluding not found):", profileError);
-        }
-
-        if (profileError && profileError.code === 'PGRST116') {
-          // If no profile exists, create one
-          console.log("UserContext: Profile not found. Attempting to create profile...");
-
-          // Ensure email exists before attempting insert
-          if (!user.email) {
-            console.error("UserContext: Cannot create profile: User email is missing.");
-            // Handle fallback or return appropriately
-            const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-            if (metadataType) roleFound = metadataType.toLowerCase() as UserType;
+        if (profile?.type) {
+          // Ensure the type is a valid UserType enum value by normalizing the case
+          const typeUpper = profile.type.toUpperCase();
+          console.log("UserContext: Type converted to uppercase:", typeUpper);
+          
+          // Verify that the type exists in UserType enum
+          if (Object.values(UserType).includes(typeUpper as UserType)) {
+            roleFound = typeUpper as UserType;
+            console.log("UserContext: Valid role found:", roleFound);
           } else {
-            console.log("UserContext: Inserting new profile...");
-            const { error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                id: user.id,
-                email: user.email, 
-                name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'user',
-                type: (user.user_metadata?.type?.toUpperCase() || user.user_metadata?.role?.toUpperCase() || 'CLIENT') as UserType,
-                status: 'PENDING',
-                updatedAt: new Date()
-              });
-            console.log("UserContext: Profile insert attempt finished.", { createError });
-
-            if (createError) {
-              console.error("UserContext: Failed to create user profile:", JSON.stringify(createError, null, 2)); 
-              // Fallback to metadata
-              const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-              if (metadataType) {
-                roleFound = metadataType.toLowerCase() as UserType;
-              }
-            } else {
-              // Profile created successfully, now fetch it to get the type (or use metadata as fallback)
-              console.log("UserContext: Profile created. Re-fetching profile type or using metadata.");
-              const { data: newProfile, error: newProfileError } = await supabase
-                .from('profiles')
-                .select('type')
-                .eq('id', user.id)
-                .single();
-              if (newProfile?.type) {
-                roleFound = newProfile.type.toLowerCase() as UserType;
-              } else {
-                if (newProfileError) console.error("UserContext: Error fetching newly created profile:", newProfileError);
-                const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-                if (metadataType) roleFound = metadataType.toLowerCase() as UserType;
-              }
-            }
-          }
-        } else if (profile?.type) {
-          // If we have a profile and type, use its type
-          console.log("UserContext: Profile found with type:", profile.type);
-          roleFound = profile.type.toLowerCase() as UserType;
-        }
-        
-        // If role still not found, try metadata as fallback
-        if (!roleFound) {
-          console.log("UserContext: Role not determined from profile. Checking metadata...");
-          const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-          if (metadataType) {
-            console.log("UserContext: Found role in metadata:", metadataType);
-            roleFound = metadataType.toLowerCase() as UserType;
+            console.warn("UserContext: Invalid role in profile:", typeUpper);
+            roleFound = UserType.CLIENT; // Default fallback
           }
         }
 
-        // If all else fails, set a default role
         if (!roleFound) {
-          console.log("UserContext: Role not found in profile or metadata. Setting default 'client'.");
-          roleFound = 'client';
+          console.log("UserContext: No valid role found. Setting default role.");
+          roleFound = UserType.CLIENT;
         }
 
       } catch (err) {
         console.error("UserContext: Error caught in fetchUserRole try block:", err);
-        // Fallback to metadata even in case of error
-        const metadataType = user.user_metadata?.type || user.user_metadata?.role;
-        if (metadataType) {
-          roleFound = metadataType.toLowerCase() as UserType;
-        } else {
-          roleFound = 'client'; // Default role on error
-        }
+        roleFound = UserType.CLIENT;
       } finally {
         if (mounted) {
-          console.log("UserContext: fetchUserRole finally block. Determined role:", roleFound);
+          console.log("UserContext: Setting final role:", roleFound);
           setUserRole(roleFound);
           setIsLoading(false);
-          console.log("UserContext: fetchUserRole finally block. Set role and isLoading to false.");
         }
       }
     };
     
     return () => {
       mounted = false;
-      if (authListener && authListener.subscription) {
+      if (authListener?.subscription) {
         authListener.subscription.unsubscribe();
       }
     };
@@ -257,40 +187,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
   
   // Function to manually refresh user data
   const refreshUserData = async () => {
-    if (!user) return;
+    if (!user || !supabase) return;
     
     setIsLoading(true);
     try {
-      // Force a refetch of user role
-      userRoleCache = { role: null, userId: null, timestamp: 0 };
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
       
-      // Fetch fresh session
-      if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user || null);
+      if (data.session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('type')
+          .eq('id', data.session.user.id)
+          .single();
         
-        if (data.session?.user) {
-          await fetch(`/api/users/current-user?_t=${Date.now()}`, {
-            headers: {
-              'Cache-Control': 'no-store',
-              'x-request-source': 'refreshUserData',
-            }
-          }).then(response => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Failed to refresh user data');
-          }).then(data => {
-            if (data.type) {
-              setUserRole(data.type);
-              userRoleCache = {
-                role: data.type,
-                userId: data.session.user.id,
-                timestamp: Date.now()
-              };
-            }
-          });
+        if (profile?.type) {
+          const typeUpper = profile.type.toUpperCase();
+          if (Object.values(UserType).includes(typeUpper as UserType)) {
+            setUserRole(typeUpper as UserType);
+          } else {
+            setUserRole(UserType.CLIENT);
+          }
+        } else {
+          setUserRole(UserType.CLIENT);
         }
       }
     } catch (err) {
@@ -313,4 +233,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       {children}
     </UserContext.Provider>
   );
+}
+
+// Export a wrapper component that ensures client-side only rendering
+export function UserProvider({ children }: { children: ReactNode }) {
+  return <UserProviderClient>{children}</UserProviderClient>;
 }

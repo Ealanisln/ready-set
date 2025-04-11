@@ -1,15 +1,347 @@
-// Updated Prisma Schema with Improvements
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model Profile {
+  id                  String            @id @default(uuid()) @db.Uuid
+  guid                String?
+  name                String?
+  email               String            @unique
+  image               String?
+  type                UserType          @default(VENDOR)
+  companyName         String?
+  contactName         String?
+  contactNumber       String?
+  website             String?
+  street1             String?
+  street2             String?
+  city                String?
+  state               String?
+  zip                 String?
+  locationNumber      String?
+  parkingLoading      String?
+  counties            Json?
+  timeNeeded          String?
+  cateringBrokerage   String?
+  frequency           String?
+  provide             String?
+  headCount           Int?
+  status              UserStatus        @default(PENDING)
+  sideNotes           String?
+  confirmationCode    String?
+  createdAt           DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime          @updatedAt @db.Timestamptz(6)
+  isTemporaryPassword Boolean           @default(false)
+  deletedAt           DateTime?         @db.Timestamptz(6)
+  accounts            Account[]
+  createdAddresses    Address[]         @relation("AddressCreatedBy")
+  cateringRequests    CateringRequest[]
+  driverDispatches    Dispatch[]        @relation("DriverDispatch")
+  userDispatches      Dispatch[]        @relation("UserDispatch")
+  fileUploads         FileUpload[]
+  jobApplications     JobApplication[]  @relation("ProfileToJobApplication")
+  onDemandRequests    OnDemand[]
+  sessions            Session[]
+  userAddresses       UserAddress[]
+
+  @@index([email])
+  @@index([type])
+  @@index([status])
+  @@map("profiles")
 }
 
-// --- Enums (Standardized naming and conventions) ---
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String?
+  accessToken       String?
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String?
+  sessionState      String?
+  user              Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Address {
+  id                       String            @id @default(uuid()) @db.Uuid
+  county                   String?
+  street1                  String
+  street2                  String?
+  city                     String
+  state                    String
+  zip                      String
+  createdAt                DateTime          @default(now())
+  createdBy                String?           @db.Uuid
+  isRestaurant             Boolean           @default(false)
+  isShared                 Boolean           @default(false)
+  locationNumber           String?
+  parkingLoading           String?
+  updatedAt                DateTime          @updatedAt
+  name                     String?
+  latitude                 Float?
+  longitude                Float?
+  deletedAt                DateTime?         @db.Timestamptz(6)
+  creator                  Profile?          @relation("AddressCreatedBy", fields: [createdBy], references: [id])
+  cateringDeliveryRequests CateringRequest[] @relation("CateringDelivery")
+  cateringPickupRequests   CateringRequest[] @relation("CateringPickup")
+  onDemandDeliveryRequests OnDemand[]        @relation("OnDemandDelivery")
+  onDemandPickupRequests   OnDemand[]        @relation("OnDemandPickup")
+  userAddresses            UserAddress[]
+
+  @@index([createdBy])
+  @@index([city, state])
+  @@map("addresses")
+}
+
+model CateringRequest {
+  id                String           @id @default(uuid()) @db.Uuid
+  guid              String?
+  userId            String           @db.Uuid
+  pickupAddressId   String           @db.Uuid
+  deliveryAddressId String           @db.Uuid
+  brokerage         String?
+  orderNumber       String           @unique
+  pickupDateTime    DateTime?        @db.Timestamptz(6)
+  arrivalDateTime   DateTime?        @db.Timestamptz(6)
+  completeDateTime  DateTime?        @db.Timestamptz(6)
+  headcount         Int?
+  needHost          CateringNeedHost @default(NO)
+  hoursNeeded       Float?
+  numberOfHosts     Int?
+  clientAttention   String?
+  pickupNotes       String?
+  specialNotes      String?
+  image             String?
+  status            CateringStatus   @default(ACTIVE)
+  orderTotal        Decimal?         @default(0.00) @db.Decimal(10, 2)
+  tip               Decimal?         @default(0.00) @db.Decimal(10, 2)
+  createdAt         DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime         @updatedAt @db.Timestamptz(6)
+  driverStatus      DriverStatus?
+  deletedAt         DateTime?        @db.Timestamptz(6)
+  deliveryAddress   Address          @relation("CateringDelivery", fields: [deliveryAddressId], references: [id])
+  pickupAddress     Address          @relation("CateringPickup", fields: [pickupAddressId], references: [id])
+  user              Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dispatches        Dispatch[]
+  fileUploads       FileUpload[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([pickupDateTime])
+  @@index([userId, status])
+  @@index([deliveryAddressId, pickupDateTime])
+  @@map("catering_requests")
+}
+
+model Dispatch {
+  id                String           @id @default(uuid()) @db.Uuid
+  cateringRequestId String?          @db.Uuid
+  createdAt         DateTime         @default(now()) @db.Timestamptz(6)
+  driverId          String?          @db.Uuid
+  onDemandId        String?          @db.Uuid
+  updatedAt         DateTime         @updatedAt @db.Timestamptz(6)
+  userId            String?          @db.Uuid
+  cateringRequest   CateringRequest? @relation(fields: [cateringRequestId], references: [id])
+  driver            Profile?         @relation("DriverDispatch", fields: [driverId], references: [id])
+  onDemand          OnDemand?        @relation(fields: [onDemandId], references: [id])
+  user              Profile?         @relation("UserDispatch", fields: [userId], references: [id])
+
+  @@index([driverId])
+  @@index([cateringRequestId])
+  @@index([onDemandId])
+  @@map("dispatches")
+}
+
+model FileUpload {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String?          @db.Uuid
+  fileName          String
+  fileType          String
+  fileSize          Int
+  fileUrl           String
+  uploadedAt        DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  cateringRequestId String?          @db.Uuid
+  onDemandId        String?          @db.Uuid
+  jobApplicationId  String?          @db.Uuid
+  category          String?
+  isTemporary       Boolean          @default(false)
+  cateringRequest   CateringRequest? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
+  jobApplication    JobApplication?  @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  onDemand          OnDemand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
+  user              Profile?         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([cateringRequestId])
+  @@index([onDemandId])
+  @@index([jobApplicationId])
+  @@index([fileType])
+  @@map("file_uploads")
+}
+
+model OnDemand {
+  id                String         @id @default(uuid()) @db.Uuid
+  guid              String?
+  userId            String         @db.Uuid
+  pickupAddressId   String         @db.Uuid
+  deliveryAddressId String         @db.Uuid
+  orderNumber       String         @unique
+  pickupDateTime    DateTime       @db.Timestamptz(6)
+  arrivalDateTime   DateTime       @db.Timestamptz(6)
+  completeDateTime  DateTime?      @db.Timestamptz(6)
+  hoursNeeded       Float?
+  itemDelivered     String?
+  vehicleType       VehicleType    @default(CAR)
+  clientAttention   String
+  pickupNotes       String?
+  specialNotes      String?
+  image             String?
+  status            OnDemandStatus @default(ACTIVE)
+  orderTotal        Decimal?       @default(0.00) @db.Decimal(10, 2)
+  tip               Decimal?       @default(0.00) @db.Decimal(10, 2)
+  length            Float?
+  width             Float?
+  height            Float?
+  weight            Float?
+  createdAt         DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime       @updatedAt @db.Timestamptz(6)
+  driverStatus      DriverStatus?
+  deletedAt         DateTime?      @db.Timestamptz(6)
+  dispatches        Dispatch[]
+  fileUploads       FileUpload[]
+  deliveryAddress   Address        @relation("OnDemandDelivery", fields: [deliveryAddressId], references: [id])
+  pickupAddress     Address        @relation("OnDemandPickup", fields: [pickupAddressId], references: [id])
+  user              Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([pickupDateTime])
+  @@index([vehicleType])
+  @@index([userId, status])
+  @@map("on_demand_requests")
+}
+
+model UserAddress {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  addressId String   @db.Uuid
+  alias     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  address   Address  @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, addressId])
+  @@index([userId])
+  @@index([addressId])
+  @@map("user_addresses")
+}
+
+model VerificationToken {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@index([token])
+  @@map("verification_tokens")
+}
+
+model FormSubmission {
+  id                 String   @id @default(uuid()) @db.Uuid
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  formType           FormType
+  companyName        String
+  contactName        String
+  email              String
+  phone              String
+  website            String
+  counties           Json
+  frequency          String
+  pickupAddress      Json
+  additionalComments String
+  specifications     String
+
+  @@index([formType])
+  @@index([email])
+  @@map("form_submissions")
+}
+
+model LeadCapture {
+  id                String   @id @default(uuid()) @db.Uuid
+  firstName         String
+  lastName          String
+  email             String   @unique
+  industry          String
+  newsletterConsent Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([email])
+  @@index([industry])
+  @@map("lead_captures")
+}
+
+model JobApplication {
+  id                String            @id @default(uuid()) @db.Uuid
+  profileId         String?           @db.Uuid
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  position          String
+  addressStreet     String
+  addressCity       String
+  addressState      String
+  addressZip        String
+  education         String
+  workExperience    String
+  skills            String
+  coverLetter       String?
+  resumeUrl         String
+  driversLicenseUrl String?
+  insuranceUrl      String?
+  vehicleRegUrl     String?
+  status            ApplicationStatus @default(PENDING)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?         @db.Timestamptz(6)
+  fileUploads       FileUpload[]
+  profile           Profile?          @relation("ProfileToJobApplication", fields: [profileId], references: [id])
+
+  @@index([email])
+  @@index([status])
+  @@index([position])
+  @@map("job_applications")
+}
+
 enum UserType {
   VENDOR
   CLIENT
@@ -70,375 +402,4 @@ enum FormType {
   FLOWER
   BAKERY
   SPECIALTY
-}
-
-// --- Models ---
-
-model Profile {
-  id                  String      @id @default(uuid()) @db.Uuid
-  guid                String?
-  name                String?
-  email               String      @unique
-  image               String?
-  type                UserType    @default(VENDOR) // Changed enum name
-  companyName         String?     // Changed to camelCase
-  contactName         String?     // Changed to camelCase
-  contactNumber       String?     // Changed to camelCase
-  website             String?
-  street1             String?
-  street2             String?
-  city                String?
-  state               String?
-  zip                 String?
-  locationNumber      String?     // Changed to camelCase
-  parkingLoading      String?     // Changed to camelCase
-  counties            Json?       // Changed to Json type for better querying
-  timeNeeded          String?     // Changed to camelCase
-  cateringBrokerage   String?     // Changed to camelCase
-  frequency           String?     // Consider Enum if values are fixed
-  provide             String?
-  headCount           String?     // Reverted back to String? to match frontend data ranges
-  status              UserStatus  @default(PENDING) // Changed enum name
-  sideNotes           String?     @db.Text // Changed to camelCase
-  confirmationCode    String?     // Changed to camelCase
-  createdAt           DateTime    @default(now()) @db.Timestamptz(6) // Changed to camelCase
-  updatedAt           DateTime    @updatedAt @db.Timestamptz(6) // Changed to camelCase
-  isTemporaryPassword Boolean     @default(false)
-  deletedAt           DateTime?   @db.Timestamptz(6) // Added for soft delete
-
-  // Relations
-  accounts         Account[]
-  sessions         Session[]
-  createdAddresses Address[]         @relation("AddressCreatedBy")
-  cateringRequests CateringRequest[]
-  driverDispatches Dispatch[]        @relation("DriverDispatch")
-  userDispatches   Dispatch[]        @relation("UserDispatch")
-  fileUploads      FileUpload[]
-  onDemandRequests OnDemand[]
-  userAddresses    UserAddress[]
-  jobApplications  JobApplication[]  @relation("ProfileToJobApplication")
-
-  // Performance indexes
-  @@index([email])
-  @@index([type])
-  @@index([status])
-
-  @@map("profiles")
-}
-
-model Account {
-  id                String  @id @default(uuid()) @db.Uuid
-  userId            String  @db.Uuid
-  type              String
-  provider          String
-  providerAccountId String
-  refreshToken      String? @db.Text // Changed to camelCase
-  accessToken       String? @db.Text // Changed to camelCase
-  expiresAt         Int?    // Changed to camelCase
-  tokenType         String? // Changed to camelCase
-  scope             String?
-  idToken           String? @db.Text // Changed to camelCase
-  sessionState      String? // Changed to camelCase
-
-  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(uuid()) @db.Uuid
-  sessionToken String   @unique
-  userId       String   @db.Uuid
-  expires      DateTime
-  user         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("sessions")
-}
-
-model Address {
-  id             String   @id @default(uuid()) @db.Uuid
-  county         String?
-  street1        String
-  street2        String?
-  city           String
-  state          String
-  zip            String
-  createdAt      DateTime @default(now())
-  createdBy      String?  @db.Uuid
-  isRestaurant   Boolean  @default(false)
-  isShared       Boolean  @default(false)
-  locationNumber String?
-  parkingLoading String?
-  updatedAt      DateTime @updatedAt
-  name           String?
-  latitude       Float?   // Added for geospatial functionality
-  longitude      Float?   // Added for geospatial functionality
-  deletedAt      DateTime? @db.Timestamptz(6) // Added for soft delete
-
-  // Relations
-  creator                  Profile?          @relation("AddressCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  cateringPickupRequests   CateringRequest[] @relation("CateringPickup")
-  cateringDeliveryRequests CateringRequest[] @relation("CateringDelivery")
-  onDemandPickupRequests   OnDemand[]        @relation("OnDemandPickup")
-  onDemandDeliveryRequests OnDemand[]        @relation("OnDemandDelivery")
-  userAddresses            UserAddress[]
-
-  // Performance indexes
-  @@index([createdBy])
-  @@index([city, state])
-  // Add GIN index for geospatial queries if needed - must be added in a migration
-  // CREATE INDEX address_location_idx ON addresses USING gist (point(longitude, latitude));
-
-  @@map("addresses")
-}
-
-model CateringRequest {
-  id                String           @id @default(uuid()) @db.Uuid
-  guid              String?
-  userId            String           @db.Uuid
-  pickupAddressId   String           @db.Uuid
-  deliveryAddressId String           @db.Uuid
-  brokerage         String?
-  orderNumber       String           @unique // Changed to camelCase
-  // Combined date and time for better handling
-  pickupDateTime    DateTime?        @db.Timestamptz(6) // Changed to combined datetime
-  arrivalDateTime   DateTime?        @db.Timestamptz(6) // Changed to combined datetime
-  completeDateTime  DateTime?        @db.Timestamptz(6) // Changed to combined datetime
-  headcount         Int?
-  needHost          CateringNeedHost @default(NO) // Changed enum name and field to camelCase
-  hoursNeeded       Float?           // Changed to camelCase and Float
-  numberOfHosts     Int?             // Changed to camelCase and Int
-  clientAttention   String?          // Changed to camelCase
-  pickupNotes       String?          @db.Text // Changed to camelCase
-  specialNotes      String?          @db.Text // Changed to camelCase
-  image             String?
-  status            CateringStatus   @default(ACTIVE) // Changed enum name
-  orderTotal        Decimal?         @default(0.00) @db.Decimal(10, 2) // Changed to camelCase
-  tip               Decimal?         @default(0.00) @db.Decimal(10, 2)
-  createdAt         DateTime         @default(now()) @db.Timestamptz(6) // Changed to camelCase
-  updatedAt         DateTime         @updatedAt @db.Timestamptz(6) // Changed to camelCase
-  driverStatus      DriverStatus?    // Changed to camelCase
-  deletedAt         DateTime?        @db.Timestamptz(6) // Added for soft delete
-
-  // Relations
-  user            Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pickupAddress   Address      @relation("CateringPickup", fields: [pickupAddressId], references: [id], onDelete: Restrict)
-  deliveryAddress Address      @relation("CateringDelivery", fields: [deliveryAddressId], references: [id], onDelete: Restrict)
-  dispatches      Dispatch[]
-  fileUploads     FileUpload[]
-
-  // Performance indexes
-  @@index([userId])
-  @@index([status])
-  @@index([pickupDateTime])
-  @@index([userId, status]) // Composite index for common query pattern
-  @@index([deliveryAddressId, pickupDateTime]) // For queries that filter by delivery location and date
-
-  @@map("catering_requests")
-}
-
-model Dispatch {
-  id                String   @id @default(uuid()) @db.Uuid
-  cateringRequestId String?  @db.Uuid
-  createdAt         DateTime @default(now()) @db.Timestamptz(6)
-  driverId          String?  @db.Uuid
-  onDemandId        String?  @db.Uuid
-  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
-  userId            String?  @db.Uuid
-
-  // Relations
-  cateringRequest CateringRequest? @relation(fields: [cateringRequestId], references: [id], onDelete: SetNull)
-  driver          Profile?         @relation("DriverDispatch", fields: [driverId], references: [id], onDelete: SetNull)
-  onDemand        OnDemand?        @relation(fields: [onDemandId], references: [id], onDelete: SetNull)
-  user            Profile?         @relation("UserDispatch", fields: [userId], references: [id], onDelete: SetNull)
-
-  // Performance indexes
-  @@index([driverId])
-  @@index([cateringRequestId])
-  @@index([onDemandId])
-
-  @@map("dispatches")
-}
-
-model FileUpload {
-  id                String   @id @default(uuid()) @db.Uuid
-  userId            String?  @db.Uuid
-  fileName          String
-  fileType          String
-  fileSize          Int
-  fileUrl           String
-  uploadedAt        DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  cateringRequestId String?  @db.Uuid
-  onDemandId        String?  @db.Uuid
-  jobApplicationId  String?  @db.Uuid
-  category          String?
-  isTemporary       Boolean  @default(false)
-
-  // Relations
-  cateringRequest CateringRequest? @relation(fields: [cateringRequestId], references: [id], onDelete: Cascade)
-  onDemand        OnDemand?        @relation(fields: [onDemandId], references: [id], onDelete: Cascade)
-  jobApplication  JobApplication?  @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
-  user            Profile?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Performance indexes
-  @@index([userId])
-  @@index([cateringRequestId])
-  @@index([onDemandId])
-  @@index([jobApplicationId])
-  @@index([fileType]) // For querying by file type
-
-  @@map("file_uploads")
-}
-
-model OnDemand {
-  id                String         @id @default(uuid()) @db.Uuid
-  guid              String?
-  userId            String         @db.Uuid
-  pickupAddressId   String         @db.Uuid
-  deliveryAddressId String         @db.Uuid
-  orderNumber       String         @unique // Changed to camelCase
-  // Date/time fields changed to timestamptz
-  pickupDateTime    DateTime       @db.Timestamptz(6) // Combined date/time fields
-  arrivalDateTime   DateTime       @db.Timestamptz(6) // Combined date/time fields 
-  completeDateTime  DateTime?      @db.Timestamptz(6) // Combined date/time fields
-  hoursNeeded       Float?         // Changed to camelCase
-  itemDelivered     String?        // Changed to camelCase
-  vehicleType       VehicleType    @default(CAR) // Changed enum name
-  clientAttention   String         // Changed to camelCase
-  pickupNotes       String?        @db.Text // Changed to camelCase
-  specialNotes      String?        @db.Text // Changed to camelCase
-  image             String?
-  status            OnDemandStatus @default(ACTIVE)
-  orderTotal        Decimal?       @default(0.00) @db.Decimal(10, 2) // Changed to camelCase
-  tip               Decimal?       @default(0.00) @db.Decimal(10, 2)
-  length            Float?
-  width             Float?
-  height            Float?
-  weight            Float?
-  createdAt         DateTime       @default(now()) @db.Timestamptz(6) // Changed to camelCase
-  updatedAt         DateTime       @updatedAt @db.Timestamptz(6) // Changed to camelCase
-  driverStatus      DriverStatus?  // Changed to camelCase
-  deletedAt         DateTime?      @db.Timestamptz(6) // Added for soft delete
-
-  // Relations
-  user            Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pickupAddress   Address      @relation("OnDemandPickup", fields: [pickupAddressId], references: [id], onDelete: Restrict)
-  deliveryAddress Address      @relation("OnDemandDelivery", fields: [deliveryAddressId], references: [id], onDelete: Restrict)
-  dispatches      Dispatch[]
-  fileUploads     FileUpload[]
-
-  // Performance indexes
-  @@index([userId])
-  @@index([status])
-  @@index([pickupDateTime])
-  @@index([vehicleType])
-  @@index([userId, status]) // Composite index for common query pattern
-
-  @@map("on_demand_requests")
-}
-
-model UserAddress {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  addressId String   @db.Uuid
-  alias     String?
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  address Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, addressId])
-  @@index([userId])
-  @@index([addressId])
-  @@map("user_addresses")
-}
-
-model VerificationToken {
-  id         String   @id @default(uuid()) @db.Uuid
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@index([token])
-  @@map("verification_tokens")
-}
-
-// Renamed model from snake_case to PascalCase 
-model FormSubmission {
-  id                  String    @id @default(uuid()) @db.Uuid
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  formType            FormType  // Changed enum name
-  companyName         String    // Changed to camelCase
-  contactName         String    // Changed to camelCase
-  email               String
-  phone               String
-  website             String
-  counties            Json      // Keep Json type
-  frequency           String
-  pickupAddress       Json      // Changed to camelCase
-  additionalComments  String    @db.Text // Changed to camelCase
-  specifications      String    @db.Text
-
-  @@index([formType])
-  @@index([email])
-  @@map("form_submissions")
-}
-
-model LeadCapture {
-  id                 String   @id @default(uuid()) @db.Uuid
-  firstName          String   // Changed to camelCase
-  lastName           String   // Changed to camelCase
-  email              String   @unique
-  industry           String
-  newsletterConsent  Boolean  @default(false) // Changed to camelCase
-  createdAt          DateTime @default(now()) // Changed to camelCase
-  updatedAt          DateTime @updatedAt // Changed to camelCase
-
-  @@index([email])
-  @@index([industry])
-  @@map("lead_captures")
-}
-
-model JobApplication {
-  id                String            @id @default(uuid()) @db.Uuid
-  profileId         String?           @db.Uuid
-  firstName         String
-  lastName          String
-  email             String
-  phone             String?
-  position          String
-  addressStreet     String
-  addressCity       String
-  addressState      String
-  addressZip        String
-  education         String            @db.Text
-  workExperience    String            @db.Text
-  skills            String            @db.Text
-  coverLetter       String?           @db.Text
-  resumeUrl         String
-  driversLicenseUrl String?
-  insuranceUrl      String?
-  vehicleRegUrl     String?
-  status            ApplicationStatus @default(PENDING)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?         @db.Timestamptz(6) // Added for soft delete
-
-  // Relations
-  fileUploads FileUpload[]
-  profile     Profile?     @relation("ProfileToJobApplication", fields: [profileId], references: [id], onDelete: SetNull)
-
-  @@index([email])
-  @@index([status])
-  @@index([position])
-  @@map("job_applications") 
 }
