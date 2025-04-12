@@ -134,292 +134,247 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json();
+    console.log("Received data in API route:", data); // Add detailed logging
+
+    // Destructure fields sent by the frontend
     const {
       order_type,
       brokerage,
-      order_number,
-      address,
-      delivery_address,
-      date,
-      pickup_time,
-      arrival_time,
-      complete_time,
+      orderNumber, // Changed from order_number
+      pickupAddressId, // Changed from address
+      deliveryAddressId, // Changed from delivery_address
+      pickupDateTime, // Changed from date, pickup_time
+      arrivalDateTime, // Changed from arrival_time
+      completeDateTime, // Changed from complete_time
       headcount,
-      need_host,
-      hours_needed,
-      number_of_host,
-      client_attention,
-      pickup_notes,
-      special_notes,
-      order_total,
+      needHost, // Changed from need_host
+      hoursNeeded, // Changed from hours_needed
+      numberOfHosts, // Changed from number_of_host
+      clientAttention, // Changed from client_attention
+      pickupNotes, // Changed from pickup_notes
+      specialNotes, // Changed from special_notes
+      orderTotal, // Changed from order_total
       tip,
-      item_delivered,
-      vehicle_type,
-      length,
-      width,
-      height,
-      weight,
+      // On-demand specific fields (add if needed)
+      // item_delivered,
+      // vehicle_type,
+      // length,
+      // width,
+      // height,
+      // weight,
+      // attachments, // Added attachments
+      status, // Added status
+      userId // Added userId (though we use the authenticated user.id)
     } = data;
 
-    // Validate required fields
-    if (
-      !order_type ||
-      !brokerage ||
-      !order_number ||
-      !address ||
-      !delivery_address ||
-      !date ||
-      !pickup_time ||
-      !arrival_time ||
-      !client_attention ||
-      !order_total
-    ) {
+    // --- Improved Validation ---
+    const missingFields: string[] = [];
+    const requiredFieldsCommon = [
+      "order_type", "brokerage", "orderNumber", "pickupAddressId",
+      "deliveryAddressId", "pickupDateTime", "arrivalDateTime",
+      "clientAttention", "orderTotal", "status", "userId"
+    ];
+
+    requiredFieldsCommon.forEach(field => {
+      if (data[field] === undefined || data[field] === null || data[field] === '') {
+        missingFields.push(field);
+      }
+    });
+
+    // Catering specific validation
+    if (order_type === 'catering') {
+      if (data.headcount === undefined || data.headcount === null || data.headcount === '') {
+        missingFields.push("headcount");
+      }
+      if (data.needHost === CateringNeedHost.YES) {
+        if (data.hoursNeeded === undefined || data.hoursNeeded === null || data.hoursNeeded === '') {
+          missingFields.push("hoursNeeded");
+        }
+        if (data.numberOfHosts === undefined || data.numberOfHosts === null || data.numberOfHosts === '') {
+          missingFields.push("numberOfHosts");
+        }
+      }
+    }
+    // TODO: Add validation for 'on_demand' order_type if needed
+
+    if (missingFields.length > 0) {
+      console.error("Validation failed. Missing fields:", missingFields);
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: `Missing required fields: ${missingFields.join(', ')}` },
         { status: 400 },
       );
     }
+    // --- End Improved Validation ---
+
 
     // Use a transaction to ensure atomicity
     const result = await prisma.$transaction(async (txPrisma) => {
       // Check for existing order number within both cateringRequest and onDemand tables
       const existingCateringRequest = await txPrisma.cateringRequest.findUnique({
-        where: { orderNumber: order_number },
+        where: { orderNumber: orderNumber }, // Use correct field name
       });
 
       const existingOnDemandRequest = await txPrisma.onDemand.findUnique({
-        where: { orderNumber: order_number },
+        where: { orderNumber: orderNumber }, // Use correct field name
       });
 
       if (existingCateringRequest || existingOnDemandRequest) {
-        throw new Error("Order number already exists");
+        // Use a specific status code for conflict
+        return NextResponse.json({ message: "Order number already exists" }, { status: 409 });
       }
 
-      // Parse dates
-      let parsedDate = new Date(date);
-      let parsedPickupDateTime = new Date(parsedDate.setHours(
-        new Date(`1970-01-01T${pickup_time}`).getHours(),
-        new Date(`1970-01-01T${pickup_time}`).getMinutes()
-      ));
-      let parsedArrivalDateTime = new Date(parsedDate.setHours(
-        new Date(`1970-01-01T${arrival_time}`).getHours(),
-        new Date(`1970-01-01T${arrival_time}`).getMinutes()
-      ));
-      let parsedCompleteDateTime = complete_time ? new Date(parsedDate.setHours(
-        new Date(`1970-01-01T${complete_time}`).getHours(),
-        new Date(`1970-01-01T${complete_time}`).getMinutes()
-      )) : null;
+      // Use dates directly from the request body
+      const parsedPickupDateTime = new Date(pickupDateTime);
+      const parsedArrivalDateTime = new Date(arrivalDateTime);
+      const parsedCompleteDateTime = completeDateTime ? new Date(completeDateTime) : null;
 
-      // Parse numbers
-      const parsedOrderTotal = parseFloat(order_total);
-      let parsedTip: number | null = null;
+      // Validate parsed dates
+      if (isNaN(parsedPickupDateTime.getTime())) throw new Error("Invalid pickupDateTime format");
+      if (isNaN(parsedArrivalDateTime.getTime())) throw new Error("Invalid arrivalDateTime format");
+      if (parsedCompleteDateTime && isNaN(parsedCompleteDateTime.getTime())) throw new Error("Invalid completeDateTime format");
 
+
+      // Parse numbers (ensure they are valid numbers before parsing)
+      const parsedOrderTotal = typeof orderTotal === 'number' ? orderTotal : parseFloat(orderTotal);
       if (isNaN(parsedOrderTotal)) {
-        throw new Error("Invalid order total");
+        throw new Error("Invalid order total format");
       }
 
+      let parsedTip: number | undefined = undefined; // Use undefined instead of null for optional Prisma fields
       if (tip !== null && tip !== undefined && tip !== "") {
-        parsedTip = parseFloat(tip);
+        parsedTip = typeof tip === 'number' ? tip : parseFloat(tip);
         if (isNaN(parsedTip)) {
-          throw new Error("Invalid tip amount");
+          throw new Error("Invalid tip amount format");
         }
       }
 
-      // Handle address creation or update
-      let addressId: string;
-      if (address.id) {
-        // If an id is provided, update the existing address
-        await txPrisma.address.update({
-          where: { id: address.id },
-          data: {
-            street1: address.street1,
-            street2: address.street2 || null,
-            city: address.city,
-            state: address.state,
-            zip: address.zip,
-            locationNumber: address.locationNumber || null,
-            parkingLoading: address.parkingLoading || null,
-            isRestaurant: address.isRestaurant || false,
-            isShared: address.isShared || false,
-            createdBy: user.id,
-          },
-        });
-        addressId = address.id;
-      } else {
-        // If no id is provided, create a new address
-        const newAddress = await txPrisma.address.create({
-          data: {
-            street1: address.street1,
-            street2: address.street2 || null,
-            city: address.city,
-            state: address.state,
-            zip: address.zip,
-            locationNumber: address.locationNumber || null,
-            parkingLoading: address.parkingLoading || null,
-            isRestaurant: address.isRestaurant || false,
-            isShared: address.isShared || false,
-            createdBy: user.id,
-          },
-        });
-        addressId = newAddress.id;
+      const parsedHeadcount = typeof headcount === 'number' ? headcount : parseInt(headcount, 10);
+      if (order_type === 'catering' && isNaN(parsedHeadcount)) {
+         throw new Error("Invalid headcount format");
       }
 
-      // Handle delivery address creation or update
-      let deliveryAddressId: string;
-      if (delivery_address.id) {
-        // If an id is provided, update the existing address
-        await txPrisma.address.update({
-          where: { id: delivery_address.id },
-          data: {
-            street1: delivery_address.street1,
-            street2: delivery_address.street2 || null,
-            city: delivery_address.city,
-            state: delivery_address.state,
-            zip: delivery_address.zip,
-            locationNumber: delivery_address.locationNumber || null,
-            parkingLoading: delivery_address.parkingLoading || null,
-            isRestaurant: delivery_address.isRestaurant || false,
-            isShared: delivery_address.isShared || false,
-            createdBy: user.id,
-          },
-        });
-        deliveryAddressId = delivery_address.id;
-      } else {
-        // If no id is provided, create a new address
-        const newDeliveryAddress = await txPrisma.address.create({
-          data: {
-            street1: delivery_address.street1,
-            street2: delivery_address.street2 || null,
-            city: delivery_address.city,
-            state: delivery_address.state,
-            zip: delivery_address.zip,
-            locationNumber: delivery_address.locationNumber || null,
-            parkingLoading: delivery_address.parkingLoading || null,
-            isRestaurant: delivery_address.isRestaurant || false,
-            isShared: delivery_address.isShared || false,
-            createdBy: user.id,
-          },
-        });
-        deliveryAddressId = newDeliveryAddress.id;
+      let parsedHoursNeeded: number | undefined = undefined;
+      if (needHost === CateringNeedHost.YES && hoursNeeded !== null && hoursNeeded !== undefined && hoursNeeded !== "") {
+        parsedHoursNeeded = typeof hoursNeeded === 'number' ? hoursNeeded : parseFloat(hoursNeeded);
+        if (isNaN(parsedHoursNeeded)) {
+          throw new Error("Invalid hoursNeeded format");
+        }
       }
 
-      let newOrder: PrismaOrder;
-      if (order_type === "catering") {
-        const cateringData = {
-          userId: user.id,
-          pickupAddressId: addressId,
-          deliveryAddressId: deliveryAddressId,
-          brokerage,
-          orderNumber: order_number,
-          pickupDateTime: parsedPickupDateTime,
-          arrivalDateTime: parsedArrivalDateTime,
-          completeDateTime: parsedCompleteDateTime,
-          headcount: headcount ? parseInt(headcount) : null,
-          needHost: need_host === "yes" ? CateringNeedHost.YES : CateringNeedHost.NO,
-          hoursNeeded: hours_needed ? parseFloat(hours_needed) : null,
-          numberOfHosts: number_of_host ? parseInt(number_of_host) : null,
-          clientAttention: client_attention,
-          pickupNotes: pickup_notes,
-          specialNotes: special_notes,
-          orderTotal: parsedOrderTotal,
-          tip: parsedTip,
-          status: OrderStatus.ACTIVE,
-        };
-        
-        newOrder = await txPrisma.cateringRequest.create({
-          data: cateringData,
-          include: {
-            user: { select: { name: true, email: true } },
-            pickupAddress: true,
-            deliveryAddress: true,
-          },
-        });
-      } else {
-        const onDemandData = {
-          userId: user.id,
-          pickupAddressId: addressId,
-          deliveryAddressId: deliveryAddressId,
-          orderNumber: order_number,
-          pickupDateTime: parsedPickupDateTime,
-          arrivalDateTime: parsedArrivalDateTime,
-          completeDateTime: parsedCompleteDateTime,
-          hoursNeeded: hours_needed ? parseFloat(hours_needed) : null,
-          itemDelivered: item_delivered,
-          vehicleType: vehicle_type as VehicleType,
-          clientAttention: client_attention,
-          pickupNotes: pickup_notes,
-          specialNotes: special_notes,
-          orderTotal: parsedOrderTotal,
-          tip: parsedTip,
-          length: length ? parseFloat(length) : null,
-          width: width ? parseFloat(width) : null,
-          height: height ? parseFloat(height) : null,
-          weight: weight ? parseFloat(weight) : null,
-          status: OrderStatus.ACTIVE,
-        };
-
-        newOrder = await txPrisma.onDemand.create({
-          data: onDemandData,
-          include: {
-            user: { select: { name: true, email: true } },
-            pickupAddress: true,
-            deliveryAddress: true,
-          },
-        });
+      let parsedNumberOfHosts: number | undefined = undefined;
+      if (needHost === CateringNeedHost.YES && numberOfHosts !== null && numberOfHosts !== undefined && numberOfHosts !== "") {
+        parsedNumberOfHosts = typeof numberOfHosts === 'number' ? numberOfHosts : parseInt(numberOfHosts, 10);
+        if (isNaN(parsedNumberOfHosts)) {
+           throw new Error("Invalid numberOfHosts format");
+        }
       }
 
-      // Send email notification with type information
-      const emailData = {
-        ...newOrder,
-        order_type,
-        address: newOrder.pickupAddress,
-        delivery_address: newOrder.deliveryAddress,
-        order_number: newOrder.orderNumber,
-        date: newOrder.pickupDateTime,
-        pickup_time: newOrder.pickupDateTime,
-        arrival_time: newOrder.arrivalDateTime,
-        order_total: String(newOrder.orderTotal),
-        client_attention: newOrder.clientAttention,
-        // Convert numeric fields to strings for email
-        headcount: 'headcount' in newOrder ? String(newOrder.headcount) : undefined,
-        hours_needed: newOrder.hoursNeeded ? String(newOrder.hoursNeeded) : undefined,
-        number_of_host: 'numberOfHosts' in newOrder ? String(newOrder.numberOfHosts) : undefined,
-        item_delivered: 'itemDelivered' in newOrder ? newOrder.itemDelivered : undefined,
-        vehicle_type: 'vehicleType' in newOrder ? newOrder.vehicleType : undefined
+      // Check if addresses exist (we only have IDs now)
+      const pickupAddr = await txPrisma.address.findUnique({ where: { id: pickupAddressId } });
+      if (!pickupAddr) throw new Error(`Pickup address with ID ${pickupAddressId} not found.`);
+
+      const deliveryAddr = await txPrisma.address.findUnique({ where: { id: deliveryAddressId } });
+      if (!deliveryAddr) throw new Error(`Delivery address with ID ${deliveryAddressId} not found.`);
+
+      let createdOrder: PrismaOrder;
+
+      // Prepare common data
+      const commonOrderData = {
+        userId: user.id, // Use authenticated user ID
+        pickupAddressId: pickupAddressId,
+        deliveryAddressId: deliveryAddressId,
+        orderNumber: orderNumber,
+        pickupDateTime: parsedPickupDateTime,
+        arrivalDateTime: parsedArrivalDateTime,
+        completeDateTime: parsedCompleteDateTime,
+        clientAttention: clientAttention?.trim(),
+        pickupNotes: pickupNotes,
+        specialNotes: specialNotes,
+        orderTotal: parsedOrderTotal,
+        tip: parsedTip,
+        status: status as OrderStatus, // Assume status is valid or add validation
       };
 
-      await sendOrderEmail(emailData);
-      
-      return newOrder;
-    });
+      if (order_type === "catering") {
+        createdOrder = await txPrisma.cateringRequest.create({
+          data: {
+            ...commonOrderData,
+            brokerage: brokerage,
+            headcount: parsedHeadcount,
+            needHost: needHost as CateringNeedHost,
+            hoursNeeded: parsedHoursNeeded,
+            numberOfHosts: parsedNumberOfHosts,
+          },
+          include: {
+            user: { select: { name: true, email: true } },
+            pickupAddress: true,
+            deliveryAddress: true,
+          },
+        });
+      } else if (order_type === "on_demand") {
+        // Prepare on-demand specific data
+        const onDemandData = {
+          // itemDelivered: item_delivered, // Uncomment and use if needed
+          // vehicleType: vehicle_type as VehicleType, // Uncomment and use if needed
+          // length: length ? parseFloat(length) : null,
+          // width: width ? parseFloat(width) : null,
+          // height: height ? parseFloat(height) : null,
+          // weight: weight ? parseFloat(weight) : null,
+        };
 
-    // Convert BigInt to string for JSON serialization
-    const serializedOrder = JSON.parse(
-      JSON.stringify(result, (key, value) =>
-        typeof value === "bigint" ? value.toString() : value,
-      ),
-    );
+         createdOrder = await txPrisma.onDemand.create({
+           data: {
+             ...commonOrderData,
+             ...onDemandData, // Add specific on-demand fields here
+           },
+           include: {
+             user: { select: { name: true, email: true } },
+             pickupAddress: true,
+             deliveryAddress: true,
+           },
+        });
 
-    return NextResponse.json(serializedOrder, { status: 201 });
+      } else {
+        throw new Error(`Unsupported order_type: ${order_type}`);
+      }
+
+      // Send email notification
+      // try {
+      //   await sendOrderEmail(createdOrder as EmailOrder, order_type); // Adjust type casting if needed
+      // } catch (emailError) {
+      //   console.error("Failed to send order confirmation email:", emailError);
+      //   // Decide if email failure should prevent order creation or just be logged
+      // }
+
+      return createdOrder;
+    }); // End transaction
+
+    // Serialize the result before sending (handle BigInt, etc.)
+    const serializedResult = JSON.parse(
+        JSON.stringify(result, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        ),
+      );
+
+    return NextResponse.json(serializedResult, { status: 201 }); // Return 201 Created status
   } catch (error) {
     console.error("Error creating order:", error);
+    // Provide more specific error messages based on error type
     if (error instanceof Error) {
-      if (error.message === "Order number already exists") {
-        return NextResponse.json(
-          { message: "Order number already exists" },
-          { status: 400 },
-        );
-      } else if (
-        error.message === "Invalid date format" ||
-        error.message === "Invalid order total" ||
-        error.message === "Invalid tip amount" ||
-        error.message === "Invalid order type"
-      ) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
-      }
+       // Handle specific Prisma errors or other known errors if necessary
+       if (error.message.includes("already exists")) {
+         return NextResponse.json({ message: error.message }, { status: 409 }); // Conflict
+       }
+       if (error.message.includes("not found")) {
+         return NextResponse.json({ message: error.message }, { status: 404 }); // Not Found
+       }
+       if (error.message.includes("Invalid") || error.message.includes("Missing")) {
+         return NextResponse.json({ message: error.message }, { status: 400 }); // Bad Request for validation errors caught in transaction
+       }
+       return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json(
-      { message: "Error creating order" },
+      { message: "An unexpected error occurred while creating the order." },
       { status: 500 },
     );
   } finally {

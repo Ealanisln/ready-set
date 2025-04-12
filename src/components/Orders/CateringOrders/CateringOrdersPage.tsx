@@ -35,7 +35,8 @@ import {
   User, 
   DollarSign,
   PlusCircle,
-  Filter
+  Filter,
+  ArrowUpDown
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -56,46 +57,92 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 // --- Interface, Type, Configs, Skeleton ---
+enum CateringNeedHost {
+  YES = 'YES',
+  NO = 'NO',
+  MAYBE = 'MAYBE'
+}
+
+enum DriverStatus {
+  ARRIVED_AT_VENDOR = 'ARRIVED_AT_VENDOR',
+  EN_ROUTE_TO_CLIENT = 'EN_ROUTE_TO_CLIENT',
+  ARRIVED_TO_CLIENT = 'ARRIVED_TO_CLIENT',
+  ASSIGNED = 'ASSIGNED',
+  COMPLETED = 'COMPLETED'
+}
+
 interface CateringOrder {
   id: string;
-  order_number: string;
-  status: string;
-  date: string;
-  order_total: string;
+  userId: string;
+  orderNumber: string;
+  brokerage?: string | null;
+  status: OrderStatus;
+  pickupDateTime?: Date | string | null;
+  arrivalDateTime?: Date | string | null;
+  completeDateTime?: Date | string | null;
+  headcount?: number | null;
+  needHost: CateringNeedHost;
+  hoursNeeded?: number | null;
+  numberOfHosts?: number | null;
+  clientAttention?: string | null;
+  pickupNotes?: string | null;
+  specialNotes?: string | null;
+  image?: string | null;
+  orderTotal?: number | null;
+  tip?: number | null;
+  driverStatus?: DriverStatus | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  deletedAt?: Date | string | null;
   user: {
+    id: string;
     name: string;
     email: string;
+    contactNumber?: string | null;
   };
-  address: {
+  pickupAddress: {
     id: string;
-    name?: string;
     street1: string;
+    street2?: string | null;
     city: string;
     state: string;
+    zip: string;
+    county?: string | null;
   };
-  delivery_address: {
+  deliveryAddress: {
     id: string;
-    name?: string;
     street1: string;
+    street2?: string | null;
     city: string;
     state: string;
+    zip: string;
+    county?: string | null;
   };
-  order_type: string;
+  dispatches?: Array<{
+    id: string;
+    driver: {
+      id: string;
+      name: string;
+      email: string;
+      contactNumber?: string | null;
+    };
+  }>;
+  order_type: 'catering';
 }
 
 // Define interface for the API response structure
 interface CateringOrdersApiResponse {
   orders: CateringOrder[];
-  totalPages: number; // Assuming the API returns totalPages
+  totalPages: number;
 }
 
-type OrderStatus = 'all' | 'active' | 'assigned' | 'cancelled' | 'completed';
+type OrderStatus = 'ACTIVE' | 'ASSIGNED' | 'CANCELLED' | 'COMPLETED';
 
 const statusConfig = {
-  active: { className: "bg-amber-100 text-amber-800 hover:bg-amber-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
-  assigned: { className: "bg-blue-100 text-blue-800 hover:bg-blue-200", icon: <User className="h-3 w-3 mr-1" /> },
-  cancelled: { className: "bg-red-100 text-red-800 hover:bg-red-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
-  completed: { className: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200", icon: <ClipboardList className="h-3 w-3 mr-1" /> },
+  ACTIVE: { className: "bg-amber-100 text-amber-800 hover:bg-amber-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+  ASSIGNED: { className: "bg-blue-100 text-blue-800 hover:bg-blue-200", icon: <User className="h-3 w-3 mr-1" /> },
+  CANCELLED: { className: "bg-red-100 text-red-800 hover:bg-red-200", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+  COMPLETED: { className: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200", icon: <ClipboardList className="h-3 w-3 mr-1" /> },
 };
 
 const getStatusConfig = (status: string) => {
@@ -133,7 +180,7 @@ const CateringOrdersPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<OrderStatus>('all');
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>('ACTIVE');
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<string>("date");
@@ -154,7 +201,7 @@ const CateringOrdersPage: React.FC = () => {
         });
 
         // Add status filter if not 'all'
-        if (statusFilter !== 'all') {
+        if (statusFilter !== 'ACTIVE') {
           queryParams.append('status', statusFilter);
         }
 
@@ -163,14 +210,20 @@ const CateringOrdersPage: React.FC = () => {
           queryParams.append('search', searchTerm);
         }
 
+        console.log('Fetching orders with params:', queryParams.toString());
+        
         // Make the API request
         const response = await fetch(`/api/orders/catering-orders?${queryParams.toString()}`);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch orders (${response.status})`);
+          console.error('Error response:', response.status, response.statusText);
+          const errorData = await response.json();
+          console.error('Error data:', errorData);
+          throw new Error(`Failed to fetch orders (${response.status}): ${errorData.message || 'Unknown error'}`);
         }
         
-        const apiResponse = await response.json() as CateringOrdersApiResponse;
+        const apiResponse = await response.json();
+        console.log('API Response:', apiResponse);
         
         // Validate the structure of the API response
         if (!apiResponse || typeof apiResponse !== 'object' || !Array.isArray(apiResponse.orders)) {
@@ -179,14 +232,19 @@ const CateringOrdersPage: React.FC = () => {
         }
 
         const ordersData = apiResponse.orders || [];
+        console.log('Orders data:', ordersData);
 
         // Format and set orders
         const formattedOrders = ordersData.map((order: any) => ({
           ...order,
-          // Ensure order_total is always a string
-          order_total: typeof order.order_total === 'string' 
-            ? order.order_total 
-            : String(order.order_total || '0'),
+          // Ensure orderTotal is properly handled
+          orderTotal: typeof order.orderTotal === 'number' 
+            ? order.orderTotal 
+            : typeof order.order_total === 'string'
+            ? parseFloat(order.order_total)
+            : 0,
+          // Ensure order number is available
+          orderNumber: order.orderNumber || order.order_number || 'N/A',
           // Ensure user name is available
           user: {
             ...order.user,
@@ -194,23 +252,16 @@ const CateringOrdersPage: React.FC = () => {
           }
         }));
 
+        console.log('Formatted orders:', formattedOrders);
+        
         setOrders(formattedOrders);
         
         // Set total pages from the API response
         setTotalPages(apiResponse.totalPages || 1);
         
-        // Remove or comment out the logic relying on x-total-count header if totalPages is reliable
-        // const count = parseInt(response.headers.get('x-total-count') || '0', 10);
-        // setTotalPages(Math.ceil(count / limit) || 1);
-        
-        // // If we have items but no count header, assume there are more pages
-        // if (formattedOrders.length === limit && !response.headers.has('x-total-count')) {
-        //   setTotalPages(page + 1);
-        // }
-
       } catch (error) {
-        setError(error instanceof Error ? error.message : "An error occurred while fetching orders");
         console.error("Error fetching catering orders:", error);
+        setError(error instanceof Error ? error.message : "An error occurred while fetching orders");
       } finally {
         setIsLoading(false);
       }
@@ -251,23 +302,33 @@ const CateringOrdersPage: React.FC = () => {
   };
 
   // Format date for display
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString(undefined, { 
+  const formatDate = (dateInput: string | Date | null): string => {
+    if (!dateInput) return 'N/A';
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    return date.toLocaleDateString(undefined, { 
+      weekday: 'long',
       year: 'numeric', 
-      month: 'short', 
+      month: 'long', 
       day: 'numeric' 
     });
   };
 
+  const formatTime = (dateInput: string | Date | null): string => {
+    if (!dateInput) return 'N/A';
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   // Format currency for display
-  const formatCurrency = (amount: string) => {
+  const formatCurrency = (amount: number | undefined | null): string => {
     if (!amount) return '$0.00';
-    const value = parseFloat(amount);
-    return `$${value.toLocaleString(undefined, {
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2
-    })}`;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
   };
 
   return (
@@ -350,14 +411,14 @@ const CateringOrdersPage: React.FC = () => {
 
             {/* Status Filter Buttons */}
             <div className="mt-4 flex flex-wrap gap-2">
-              {(['all', 'active', 'assigned', 'cancelled', 'completed'] as OrderStatus[]).map(status => (
+              {(['ACTIVE', 'ASSIGNED', 'CANCELLED', 'COMPLETED'] as OrderStatus[]).map(status => (
                 <Button
                   key={status}
                   variant={statusFilter === status ? "secondary" : "outline"}
                   onClick={() => handleStatusFilter(status)}
                   className={`capitalize ${
                     statusFilter === status 
-                    ? (status === 'all' ? 'bg-slate-700 text-white hover:bg-slate-800' : getStatusConfig(status)?.className.replace('hover:bg-', 'bg-').replace('100', '200'))
+                    ? (status === 'ACTIVE' ? 'bg-slate-700 text-white hover:bg-slate-800' : getStatusConfig(status)?.className.replace('hover:bg-', 'bg-').replace('100', '200'))
                     : 'text-slate-600 hover:bg-slate-100' 
                   } text-xs px-3 py-1 h-auto`}
                 >
@@ -412,10 +473,10 @@ const CateringOrdersPage: React.FC = () => {
                         >
                           <TableCell>
                             <Link 
-                              href={`/admin/catering-orders/${order.order_number}`} 
+                              href={`/admin/catering-orders/${order.orderNumber}`}
                               className="font-medium text-slate-800 hover:text-amber-600 transition-colors group-hover:underline"
                             >
-                              {order.order_number}
+                              {order.orderNumber}
                             </Link>
                           </TableCell>
                           <TableCell>
@@ -425,12 +486,19 @@ const CateringOrdersPage: React.FC = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-sm text-slate-600">
-                            {formatDate(order.date)}
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {formatDate(order.pickupDateTime || order.createdAt)}
+                              </span>
+                              <span className="text-sm text-slate-500">
+                                {formatTime(order.pickupDateTime || order.createdAt)}
+                              </span>
+                            </div>
                           </TableCell>
                           <TableCell className="font-medium text-slate-700">{order.user.name}</TableCell>
                           <TableCell className="text-right font-semibold text-slate-800">
                             <span className="group-hover:text-amber-700 transition-colors">
-                              {formatCurrency(order.order_total)}
+                              {formatCurrency(Number(order.orderTotal))}
                             </span>
                           </TableCell>
                         </motion.tr>
@@ -447,7 +515,7 @@ const CateringOrdersPage: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800">No orders found</h3>
                 <p className="text-slate-500 max-w-md mt-1">
-                  No {statusFilter !== 'all' ? <span className="capitalize font-medium">{statusFilter}</span> : ''} orders match your current filters.
+                  No {statusFilter !== 'ACTIVE' ? <span className="capitalize font-medium">{statusFilter}</span> : ''} orders match your current filters.
                 </p>
                 <Link href="/catering-request" className="mt-4">
                   <Button variant="outline" className="mt-2">

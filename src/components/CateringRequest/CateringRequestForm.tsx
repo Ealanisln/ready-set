@@ -262,9 +262,10 @@ interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadedFile[];
   brokerage?: string;
   orderNumber: string;
-  pickupDateTime: string;
-  arrivalDateTime: string;
-  completeDateTime: string;
+  date: string;
+  pickupTime: string;
+  arrivalTime: string;
+  completeTime?: string;
   headcount: string;
   needHost: CateringNeedHost;
   hoursNeeded: string;
@@ -322,9 +323,10 @@ const CateringRequestForm: React.FC = () => {
       defaultValues: {
         brokerage: "",
         orderNumber: "",
-        pickupDateTime: "",
-        arrivalDateTime: "",
-        completeDateTime: "",
+        date: new Date().toISOString().split('T')[0],
+        pickupTime: "",
+        arrivalTime: "",
+        completeTime: "",
         headcount: "",
         needHost: CateringNeedHost.NO,
         hoursNeeded: "",
@@ -547,11 +549,65 @@ const CateringRequestForm: React.FC = () => {
       return;
     }
 
+    // Validate required fields
+    const requiredFields: { [key: string]: string } = {
+      brokerage: "Brokerage",
+      orderNumber: "Order Number",
+      date: "Date",
+      pickupTime: "Pick Up Time",
+      arrivalTime: "Arrival Time",
+      headcount: "Headcount",
+      clientAttention: "Client/Attention",
+      orderTotal: "Order Total",
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key]) => !data[key as keyof ExtendedCateringFormData])
+      .map(([_, label]) => label);
+
+    // Additional validation for host-related fields when host is needed
+    if (data.needHost === CateringNeedHost.YES) {
+      if (!data.hoursNeeded) missingFields.push("Hours Needed");
+      if (!data.numberOfHosts) missingFields.push("Number of Hosts");
+    }
+
+    // Validate addresses
+    if (!data.pickupAddress?.id) {
+      missingFields.push("Pickup Address");
+    }
+
+    if (!data.deliveryAddress?.id) {
+      missingFields.push("Delivery Address");
+    }
+
+    if (missingFields.length > 0) {
+      const errorMessage = `Please fill in the following required fields: ${missingFields.join(", ")}`;
+      setErrorMessage(errorMessage);
+      toast.error(errorMessage);
+      return;
+    }
+
+    // Validate numeric fields
+    const numericValidation: { [key: string]: { min?: number; message: string } } = {
+      headcount: { min: 1, message: "Headcount must be at least 1" },
+      orderTotal: { min: 0, message: "Order total must be a positive number" },
+      tip: { min: 0, message: "Tip must be a positive number" },
+    };
+
+    for (const [field, validation] of Object.entries(numericValidation)) {
+      const value = parseFloat(data[field as keyof ExtendedCateringFormData] as string);
+      if (field === 'tip' && !data[field]) continue; // Skip tip validation if not provided
+      if (isNaN(value) || (validation.min !== undefined && value < validation.min)) {
+        setErrorMessage(validation.message);
+        toast.error(validation.message);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
     // Clear the uploadedFileKeys to prevent cleanup during submission
-    // This prevents the beforeunload handler from removing files we want to keep
     const filesToKeep = [...uploadedFileKeys];
     setUploadedFileKeys([]);
 
@@ -562,113 +618,165 @@ const CateringRequestForm: React.FC = () => {
         attachmentCount: data.attachments?.length,
       });
 
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          order_type: "catering",
-          tip: data.tip ? parseFloat(data.tip) : undefined,
-          attachments: data.attachments?.map((file) => ({
-            key: file.key,
-            name: file.name,
-            url: file.url,
-          })),
-        }),
-      });
+      // Properly format dates by combining date and time
+      const formatDateTime = (date: string, time: string | null | undefined) => {
+        if (!date || !time) return null;
+        
+        // Validate time format
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(time)) {
+          throw new Error(`Invalid time format: ${time}. Please use HH:MM format (24-hour).`);
+        }
 
-      console.log("Order API response received", {
-        status: response.status,
-        ok: response.ok,
-      });
+        try {
+          const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
+          const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+          
+          // Validate date components
+          if (isNaN(year) || isNaN(month) || isNaN(day)) {
+            throw new Error('Invalid date format');
+          }
+          
+          // Validate time components
+          if (isNaN(hours) || isNaN(minutes)) {
+            throw new Error('Invalid time format');
+          }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Order API error response:", {
-          status: response.status,
-          errorData,
-        });
+          // Create date in UTC
+          const dateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+          
+          // Validate the resulting date
+          if (isNaN(dateTime.getTime())) {
+            throw new Error('Invalid date/time combination');
+          }
+          
+          return dateTime.toISOString();
+        } catch (error) {
+          console.error('Date/time parsing error:', { date, time, error });
+          throw new Error(`Invalid date/time format: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      };
 
-        // If submission fails, restore the file keys so they'll be cleaned up later if needed
-        setUploadedFileKeys(filesToKeep);
+      // Validate and format all times
+      let pickupDateTime: string | null = null;
+      let arrivalDateTime: string | null = null;
+      let completeDateTime: string | null = null;
 
-        throw new Error(
-          errorData.message || "Failed to submit catering request",
-        );
+      try {
+        pickupDateTime = formatDateTime(data.date, data.pickupTime);
+        if (!pickupDateTime) {
+          throw new Error('Pickup date and time are required');
+        }
+
+        arrivalDateTime = formatDateTime(data.date, data.arrivalTime);
+        if (!arrivalDateTime) {
+          throw new Error('Arrival date and time are required');
+        }
+
+        // Complete time is optional
+        if (data.completeTime) {
+          completeDateTime = formatDateTime(data.date, data.completeTime);
+        }
+
+        // Validate time sequence
+        const pickup = new Date(pickupDateTime);
+        const arrival = new Date(arrivalDateTime);
+        const complete = completeDateTime ? new Date(completeDateTime) : null;
+
+        if (arrival < pickup) {
+          throw new Error('Arrival time cannot be earlier than pickup time');
+        }
+
+        if (complete && complete < arrival) {
+          throw new Error('Complete time cannot be earlier than arrival time');
+        }
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
+        return;
       }
 
-      const order = await response.json();
-      console.log("Order created successfully", {
-        orderId: order.id,
-        hasAttachments: uploadedFiles.length > 0,
+      const requestBody = {
+        userId: session.user.id,
+        pickupAddressId: data.pickupAddress.id,
+        deliveryAddressId: data.deliveryAddress.id,
+        order_type: "catering",
+        brokerage: data.brokerage,
+        orderNumber: data.orderNumber,
+        pickupDateTime,
+        arrivalDateTime,
+        completeDateTime,
+        headcount: data.headcount ? parseInt(data.headcount) : null,
+        needHost: data.needHost,
+        hoursNeeded: data.hoursNeeded ? parseFloat(data.hoursNeeded) : null,
+        numberOfHosts: data.numberOfHosts ? parseInt(data.numberOfHosts) : null,
+        clientAttention: data.clientAttention?.trim(),
+        pickupNotes: data.pickupNotes,
+        specialNotes: data.specialNotes,
+        orderTotal: parseFloat(data.orderTotal),
+        tip: data.tip ? parseFloat(data.tip) : undefined,
+        status: "ACTIVE",
+        attachments: data.attachments?.map((file) => ({
+          key: file.key,
+          name: file.name,
+          url: file.url,
+        })),
+      };
+
+      // Log the full request body for debugging
+      console.log("Full request body:", requestBody);
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
       });
 
-      // Update file associations with the actual order ID
-      if (uploadedFiles.length > 0) {
-        try {
-          console.log("Updating file associations", {
-            orderId: order.id,
-            fileCount: uploadedFiles.length,
-          });
-
-          const updateResponse = await fetch(
-            "/api/file-uploads/update-entity",
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                oldEntityId: tempEntityId,
-                newEntityId: order.id.toString(),
-                entityType: "catering_request",
-              }),
-            },
-          );
-
-          if (!updateResponse.ok) {
-            const updateErrorData = await updateResponse
-              .json()
-              .catch(() => ({}));
-            console.error("File association update failed:", updateErrorData);
-            // We'll continue with form submission even if this fails
-          } else {
-            const updateResult = await updateResponse.json();
-            console.log(
-              "File associations updated successfully:",
-              updateResult,
-            );
-          }
-        } catch (updateError) {
-          console.error("Error updating file associations:", {
-            error: updateError,
-            orderId: order.id,
-            fileCount: uploadedFiles.length,
-          });
-          // Continue with form submission even if file update fails
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        // Check for specific error types from the API
+        if (response.status === 400) {
+          const errorMessage = responseData.message || 'Invalid request data';
+          console.error('API validation error:', responseData);
+          throw new Error(errorMessage);
+        } else if (response.status === 401) {
+          throw new Error('Please log in to submit an order');
+        } else if (response.status === 409) {
+          throw new Error('This order number already exists');
+        } else {
+          console.error('API error response:', responseData);
+          throw new Error(responseData.message || 'Failed to submit order');
         }
       }
 
+      console.log("Order submitted successfully:", responseData);
+      
+      // Reset form and show success message
       reset();
-      console.log("Form reset and submission completed successfully");
       toast.success("Catering request submitted successfully!");
+      setErrorMessage("");
 
-      // Redirect to orders dashboard or appropriate page
-      setTimeout(() => {
-        router.push("/dashboard/orders");
-      }, 2000);
+      // --- Add Redirect Logic ---
+      // Assuming session.user.role contains the user role ('client' or other)
+      // Adjust the check based on your actual user role structure
+      const userRole = session?.user?.app_metadata?.role || session?.user?.role; // Check app_metadata first, then root role
+
+      if (userRole === 'client') {
+        console.log("Redirecting client user to /client");
+        router.push("/client");
+      } else {
+        console.log("Redirecting user to /dashboard");
+        router.push("/dashboard");
+      }
+      // --- End Redirect Logic ---
+
     } catch (error) {
-      console.error("Submission error:", {
-        error,
-        formData: { ...data, attachments: data.attachments?.length },
-      });
-      setErrorMessage(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-      );
-      toast.error("An error occurred. Please try again.");
+      console.error("Error submitting order:", error);
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
-      console.log("Form submission process completed");
     }
   };
 
@@ -758,7 +866,7 @@ const CateringRequestForm: React.FC = () => {
       <div className="mb-8 grid gap-6 md:grid-cols-2">
         <InputField
           control={control}
-          name="pickupDateTime"
+          name="date"
           label="Date"
           type="date"
           required
@@ -778,7 +886,7 @@ const CateringRequestForm: React.FC = () => {
       <div className="mb-8 grid gap-6 md:grid-cols-3">
         <InputField
           control={control}
-          name="pickupDateTime"
+          name="pickupTime"
           label="Pick Up Time"
           type="time"
           required
@@ -786,7 +894,7 @@ const CateringRequestForm: React.FC = () => {
         />
         <InputField
           control={control}
-          name="arrivalDateTime"
+          name="arrivalTime"
           label="Arrival Time"
           type="time"
           required
@@ -794,7 +902,7 @@ const CateringRequestForm: React.FC = () => {
         />
         <InputField
           control={control}
-          name="completeDateTime"
+          name="completeTime"
           label="Complete Time"
           type="time"
           optional

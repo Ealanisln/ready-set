@@ -1,60 +1,210 @@
-import React from "react";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { Calendar, Clock, Truck, MapPin, MessageSquare, PlusCircle, User } from "lucide-react";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { CateringStatus, OnDemandStatus, Prisma } from "@prisma/client";
 
-// Mock data for UI demonstration - replace with actual data fetching
-const mockRecentOrders = [
-  {
-    id: "1",
-    orderNumber: "ORD-20230001",
-    status: "COMPLETED",
-    orderType: "catering",
-    pickupDateTime: new Date(2023, 5, 15, 9, 0),
-    arrivalDateTime: new Date(2023, 5, 15, 10, 30),
-    orderTotal: 450.00,
-  },
-  {
-    id: "2",
-    orderNumber: "ORD-20230002",
-    status: "ACTIVE",
-    orderType: "on_demand",
-    pickupDateTime: new Date(2023, 5, 20, 14, 0),
-    arrivalDateTime: new Date(2023, 5, 20, 15, 30),
-    orderTotal: 120.00,
+// Define types for our orders
+type CombinedOrder = (
+  | (Pick<Prisma.CateringRequestGetPayload<{}>, 'id' | 'orderNumber' | 'status' | 'pickupDateTime' | 'arrivalDateTime' | 'orderTotal'> & { orderType: 'catering' })
+  | (Pick<Prisma.OnDemandGetPayload<{}>, 'id' | 'orderNumber' | 'status' | 'pickupDateTime' | 'arrivalDateTime' | 'orderTotal'> & { orderType: 'on_demand' })
+);
+
+interface DashboardStats {
+  activeOrders: number;
+  completedOrders: number;
+  savedLocations: number;
+}
+
+interface ClientDashboardData {
+  recentOrders: CombinedOrder[];
+  stats: DashboardStats;
+}
+
+// Add this utility function at the top level
+function convertToUTC(date: string, time: string): string {
+  // Parse the local date and time
+  const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
+  const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+  
+  // Create a date object in the local timezone
+  const localDate = new Date(year, month - 1, day, hours, minutes);
+  
+  // Convert to UTC
+  const utcYear = localDate.getUTCFullYear();
+  const utcMonth = (localDate.getUTCMonth() + 1).toString().padStart(2, '0');
+  const utcDay = localDate.getUTCDate().toString().padStart(2, '0');
+  const utcHours = localDate.getUTCHours().toString().padStart(2, '0');
+  const utcMinutes = localDate.getUTCMinutes().toString().padStart(2, '0');
+  
+  // Return ISO string
+  return `${utcYear}-${utcMonth}-${utcDay}T${utcHours}:${utcMinutes}:00.000Z`;
+}
+
+// Update the formatDateTime function in getClientDashboardData
+const formatDateTime = (date: string, time: string | null | undefined) => {
+  if (!date || !time) return null;
+  
+  // Validate time format
+  const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  if (!timeRegex.test(time)) {
+    throw new Error(`Invalid time format: ${time}. Please use HH:MM format (24-hour).`);
   }
-];
 
-const UpcomingOrderCard = ({ order }: { order: any }) => {
-  const statusColors = {
+  try {
+    // Convert the local date/time to UTC
+    return convertToUTC(date, time);
+  } catch (error) {
+    console.error('Date/time parsing error:', { date, time, error });
+    throw new Error(`Invalid date/time format: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Data fetching function
+async function getClientDashboardData(userId: string): Promise<ClientDashboardData> {
+  // Fetch recent catering orders
+  const recentCateringOrders = await prisma.cateringRequest.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 3,
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      pickupDateTime: true,
+      arrivalDateTime: true,
+      orderTotal: true,
+    },
+  });
+
+  // Fetch recent on-demand orders
+  const recentOnDemandOrders = await prisma.onDemand.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 3,
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      pickupDateTime: true,
+      arrivalDateTime: true,
+      orderTotal: true,
+    },
+  });
+
+  // Combine and sort orders
+  const combinedOrders: CombinedOrder[] = [
+    ...recentCateringOrders.map(order => ({ ...order, orderType: 'catering' as const })),
+    ...recentOnDemandOrders.map(order => ({ ...order, orderType: 'on_demand' as const })),
+  ]
+    .sort((a, b) => (b.pickupDateTime?.getTime() ?? 0) - (a.pickupDateTime?.getTime() ?? 0))
+    .slice(0, 3);
+
+  // Get stats
+  const [activeCateringCount, activeOnDemandCount, completedCateringCount, completedOnDemandCount, savedLocationsCount] =
+    await Promise.all([
+      prisma.cateringRequest.count({
+        where: {
+          userId,
+          status: { in: [CateringStatus.ACTIVE, CateringStatus.ASSIGNED] },
+          deletedAt: null,
+        },
+      }),
+      prisma.onDemand.count({
+        where: {
+          userId,
+          status: { in: [OnDemandStatus.ACTIVE, OnDemandStatus.ASSIGNED] },
+          deletedAt: null,
+        },
+      }),
+      prisma.cateringRequest.count({
+        where: {
+          userId,
+          status: CateringStatus.COMPLETED,
+          deletedAt: null,
+        },
+      }),
+      prisma.onDemand.count({
+        where: {
+          userId,
+          status: OnDemandStatus.COMPLETED,
+          deletedAt: null,
+        },
+      }),
+      prisma.userAddress.count({
+        where: { userId },
+      }),
+    ]);
+
+  return {
+    recentOrders: combinedOrders,
+    stats: {
+      activeOrders: activeCateringCount + activeOnDemandCount,
+      completedOrders: completedCateringCount + completedOnDemandCount,
+      savedLocations: savedLocationsCount,
+    },
+  };
+}
+
+const UpcomingOrderCard = ({ order }: { order: CombinedOrder }) => {
+  const statusColors: Record<CateringStatus | OnDemandStatus, string> = {
     ACTIVE: "bg-blue-100 text-blue-800",
     ASSIGNED: "bg-indigo-100 text-indigo-800",
     COMPLETED: "bg-green-100 text-green-800",
     CANCELLED: "bg-red-100 text-red-800",
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
+  const formatDate = (date: Date | null) => {
+    if (!date) return "N/A";
+    
+    // Create a date object and convert to local time
+    const localDate = new Date(date);
+    return localDate.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Los_Angeles'
     });
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
+  const formatTime = (date: Date | null) => {
+    if (!date) return "N/A";
+    
+    // Create a date object and convert to local time
+    const localDate = new Date(date);
+    return localDate.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Los_Angeles',
+      hour12: true
     });
   };
+
+  const formatCurrency = (amount: Prisma.Decimal | null) => {
+    if (!amount) return "$0.00";
+    return `$${Number(amount).toFixed(2)}`;
+  };
+
+  // Determine the correct route based on order type
+  const orderDetailsLink = order.orderType === 'catering' 
+    ? `/client/orders/${order.id}`  // Update this path based on your routing structure
+    : `/client/orders/${order.id}`; // Update this path based on your routing structure
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-semibold text-gray-900">{order.orderNumber}</h4>
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status as keyof typeof statusColors]}`}>
-          {order.status}
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
+          {order.status.toLowerCase().replace('_', ' ')}
         </span>
       </div>
       
@@ -74,9 +224,9 @@ const UpcomingOrderCard = ({ order }: { order: any }) => {
       </div>
       
       <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-        <span className="text-sm font-medium">${order.orderTotal.toFixed(2)}</span>
+        <span className="text-sm font-medium">{formatCurrency(order.orderTotal)}</span>
         <Link 
-          href={`/client/orders/${order.id}`}
+          href={orderDetailsLink}
           className="text-primary text-sm font-medium hover:underline"
         >
           View Details
@@ -86,8 +236,8 @@ const UpcomingOrderCard = ({ order }: { order: any }) => {
   );
 };
 
-const ClientDashboardContent = () => {
-  const hasRecentOrders = mockRecentOrders.length > 0;
+const ClientDashboardContent = ({ data }: { data: ClientDashboardData }) => {
+  const hasRecentOrders = data.recentOrders.length > 0;
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -100,7 +250,7 @@ const ClientDashboardContent = () => {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Active Orders</p>
-              <h4 className="text-2xl font-bold text-gray-900">3</h4>
+              <h4 className="text-2xl font-bold text-gray-900">{data.stats.activeOrders}</h4>
             </div>
           </div>
         </div>
@@ -112,7 +262,7 @@ const ClientDashboardContent = () => {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Completed</p>
-              <h4 className="text-2xl font-bold text-gray-900">42</h4>
+              <h4 className="text-2xl font-bold text-gray-900">{data.stats.completedOrders}</h4>
             </div>
           </div>
         </div>
@@ -124,7 +274,7 @@ const ClientDashboardContent = () => {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Saved Locations</p>
-              <h4 className="text-2xl font-bold text-gray-900">5</h4>
+              <h4 className="text-2xl font-bold text-gray-900">{data.stats.savedLocations}</h4>
             </div>
           </div>
         </div>
@@ -147,8 +297,8 @@ const ClientDashboardContent = () => {
         <div className="p-5">
           {hasRecentOrders ? (
             <div className="space-y-4">
-              {mockRecentOrders.map(order => (
-                <UpcomingOrderCard key={order.id} order={order} />
+              {data.recentOrders.map(order => (
+                <UpcomingOrderCard key={`${order.orderType}-${order.id}`} order={order} />
               ))}
             </div>
           ) : (
@@ -232,21 +382,30 @@ const ClientDashboardContent = () => {
   );
 };
 
-const ClientPage = () => {
+const ClientPage = async () => {
+  const user = await getCurrentUser();
+  
+  if (!user?.id) {
+    redirect('/signin');
+  }
+
+  // Fetch dashboard data
+  const dashboardData = await getClientDashboardData(user.id);
+
   return (
     <>
       <Breadcrumb pageName="Client Dashboard" pageDescription="Manage your account" />
       <div className="rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:p-7.5">
         <div className="max-w-full">
           <h2 className="text-title-md2 font-bold text-black dark:text-white mb-2">
-            Welcome to your Client Dashboard
+            Welcome back{user.email ? `, ${user.email.split('@')[0]}` : ''}!
           </h2>
           <p className="text-body-color dark:text-gray-400 mb-8">
             Track orders, manage your deliveries, and update your profile information.
           </p>
           
           <Suspense fallback={<div className="text-center py-10">Loading dashboard...</div>}>
-            <ClientDashboardContent />
+            <ClientDashboardContent data={dashboardData} />
           </Suspense>
         </div>
       </div>

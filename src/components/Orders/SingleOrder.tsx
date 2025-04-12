@@ -18,12 +18,16 @@ import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 import OrderStatusCard from "./OrderStatus";
 import { usePathname } from "next/navigation";
 import { OrderFilesManager } from "./ui/OrderFiles";
-import { Driver, Order, OrderStatus, OrderType } from "@/types/order";
+import { Driver, Order, OrderStatus, OrderType, VehicleType } from "@/types/order";
 import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
 import { FileUpload } from '@/types/file';
 
+// Extend the base order type to ensure id is string after serialization
+type SerializedOrder = Omit<Order, 'id'> & { id: string };
+
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
+  showHeader?: boolean;
 }
 
 // Added status config similar to CateringOrdersPage
@@ -76,7 +80,7 @@ const OrderSkeleton: React.FC = () => (
   </div>
 );
 
-const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
+const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader = true }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -111,11 +115,23 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
 
       const orderData = await orderResponse.json();
       console.log("Order data received:", orderData);
-      setOrder(orderData);
+
+      // Transform the data to match our types
+      const transformedOrder: Order = {
+        ...orderData,
+        // Ensure required fields for OnDemand orders
+        ...(orderData.order_type === 'on_demand' && {
+          vehicleType: orderData.vehicleType || VehicleType.CAR // Default to CAR if not specified
+        }),
+        // Ensure ID is string
+        id: String(orderData.id)
+      };
+
+      setOrder(transformedOrder);
 
       // Set driver info if available
-      if (orderData.dispatch?.length > 0 && orderData.dispatch[0].driver) {
-        setDriverInfo(orderData.dispatch[0].driver);
+      if (orderData.dispatches?.length > 0 && orderData.dispatches[0]?.driver) {
+        setDriverInfo(orderData.dispatches[0].driver);
         setIsDriverAssigned(true);
       } else {
         setDriverInfo(null);
@@ -223,18 +239,25 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
     if (!order || !selectedDriver) return;
 
     try {
+      console.log("Assigning driver with data:", {
+        orderId: order.id,
+        driverId: selectedDriver,
+        orderType: order.order_type,
+      });
+
       const response = await fetch("/api/orders/assignDriver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
           driverId: selectedDriver,
-          order_type: order.order_type,
+          orderType: order.order_type === "on_demand" ? "on_demand" : "catering",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to assign/edit driver");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to assign/edit driver");
       }
 
       await fetchOrderDetails();
@@ -246,7 +269,8 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
       );
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
-      toast.error("Failed to assign/edit driver. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to assign/edit driver";
+      toast.error(errorMessage);
     }
   };
 
@@ -335,48 +359,50 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
       <div className="mx-auto w-full max-w-5xl space-y-6">
         {/* Order Status Overview Card */}
         <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
-          <CardHeader className="p-6 border-b bg-slate-50">
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                    Order {order.orderNumber}
-                  </h1>
-                  {order.status && (
-                    <Badge className={`${getStatusConfig(order.status as string).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>
-                      {getStatusConfig(order.status as string).icon}
-                      {order.status}
-                    </Badge>
-                  )}
+          {showHeader && (
+            <CardHeader className="p-6 border-b bg-slate-50">
+              <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                      Order {order.orderNumber}
+                    </h1>
+                    {order.status && (
+                      <Badge className={`${getStatusConfig(order.status as string).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>
+                        {getStatusConfig(order.status as string).icon}
+                        {order.status}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center mt-1 text-slate-500">
+                    <Calendar className="h-4 w-4 mr-1.5" />
+                    {order.pickupDateTime ? (
+                      <span className="text-sm">
+                        {new Date(order.pickupDateTime).toLocaleDateString(undefined, {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    ) : (
+                      <span className="text-sm italic">No date specified</span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center mt-1 text-slate-500">
-                  <Calendar className="h-4 w-4 mr-1.5" />
-                  {order.pickupDateTime ? (
-                    <span className="text-sm">
-                      {new Date(order.pickupDateTime).toLocaleDateString(undefined, {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  ) : (
-                    <span className="text-sm italic">No date specified</span>
-                  )}
+                
+                <div className="flex flex-wrap gap-2 justify-end">
+                  <Button
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm transition-all hover:shadow-md"
+                    onClick={handleOpenDriverDialog}
+                  >
+                    <Truck className="mr-2 h-4 w-4" />
+                    {isDriverAssigned ? "Update Driver" : "Assign Driver"}
+                  </Button>
                 </div>
               </div>
-              
-              <div className="flex flex-wrap gap-2 justify-end">
-                <Button
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm transition-all hover:shadow-md"
-                  onClick={handleOpenDriverDialog}
-                >
-                  <Truck className="mr-2 h-4 w-4" />
-                  {isDriverAssigned ? "Update Driver" : "Assign Driver"}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
+          )}
 
           <OrderHeader
             orderNumber={order.orderNumber}
@@ -489,7 +515,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess }) => {
           <CardContent className="p-6">
             <DriverStatusCard
               order={{
-                id: Number(order.id),
+                id: order.id,
                 status: order.status,
                 driver_status: order.driverStatus,
                 user_id: order.userId,

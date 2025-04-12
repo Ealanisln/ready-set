@@ -78,7 +78,7 @@ const OrderPage = () => {
       </div>
       
       <div className="flex-1">
-        <SingleOrder onDeleteSuccess={handleDeleteSuccess} />
+        <SingleOrder onDeleteSuccess={handleDeleteSuccess} showHeader={false} />
       </div>
     </div>
   );

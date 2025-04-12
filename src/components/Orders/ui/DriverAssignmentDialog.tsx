@@ -108,7 +108,7 @@ const DriverAssignmentDialog: React.FC<DriverAssignmentDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px]">
+      <DialogContent className="sm:max-w-[650px] bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <Truck className="h-5 w-5 text-amber-500" />

@@ -56,8 +56,11 @@ function serializeOrder(data: any): any {
   ));
 }
 
-export async function GET(req: NextRequest, props: { params: Promise<{ orderNumber: string }> }) {
-  const params = await props.params;
+// Using a simpler approach with generic parameter type
+export async function GET(
+  req: NextRequest,
+  { params }: any
+) {
   try {
     // Initialize Supabase client
     const supabase = await createClient();
@@ -70,7 +73,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ orderNumb
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderNumber } = params;
+    const orderNumber = params.order_number;
 
     let order: Order | null = null;
 
@@ -143,8 +146,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ orderNumb
   }
 }
 
-export async function PATCH(req: NextRequest, props: { params: Promise<{ orderNumber: string }> }) {
-  const params = await props.params;
+export async function PATCH(
+  req: NextRequest,
+  { params }: any
+) {
   try {
     // Initialize Supabase client
     const supabase = await createClient();
@@ -157,7 +162,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ orderNu
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderNumber } = params;
+    const orderNumber = params.order_number;
     const body = await req.json();
     const { status, driverStatus } = body;
 
