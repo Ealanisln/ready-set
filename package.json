@@ -117,6 +117,7 @@
     "react-hot-toast": "^2.4.1",
     "react-share": "^5.1.2",
     "react-virtualized": "^9.22.5",
+    "recharts": "^2.15.2",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "resend": "^4.2.0",

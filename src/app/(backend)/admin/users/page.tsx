@@ -64,6 +64,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 // --- Types ---
 type UserType = 'vendor' | 'client' | 'driver' | 'admin' | 'helpdesk' | 'super_admin';
@@ -141,6 +144,8 @@ const UsersPage: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createClient();
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -148,30 +153,25 @@ const UsersPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      // --- Construct API URL with query parameters ---
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
-        sort: sortField,
-        direction: sortDirection,
-      });
-
-      if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
-      }
-
-      if (typeFilter !== 'all') {
-        params.append('type', typeFilter);
-      }
-
-      if (searchTerm) {
-        params.append('search', searchTerm);
-      }
+      // Build query params
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", "10");
+      if (searchTerm) params.append("search", searchTerm);
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (typeFilter !== "all") params.append("type", typeFilter);
+      params.append("sort", sortField);
+      params.append("direction", sortDirection);
 
       const apiUrl = `/api/users?${params.toString()}`;
 
       try {
-        const response = await fetch(apiUrl);
+        // First refresh the session if possible to ensure we have valid auth
+        await supabase.auth.refreshSession();
+        
+        const response = await fetch(apiUrl, {
+          credentials: 'include'
+        });
 
         if (!response.ok) {
           let errorData;
@@ -222,7 +222,7 @@ const UsersPage: React.FC = () => {
 
     return () => clearTimeout(debounceTimer);
 
-  }, [page, statusFilter, typeFilter, searchTerm, sortField, sortDirection]);
+  }, [page, statusFilter, typeFilter, searchTerm, sortField, sortDirection, supabase.auth]);
 
   // --- Handlers ---
   const handlePageChange = (newPage: number) => {

@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/utils/prismaDB';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ order_number: string }> }
@@ -26,27 +27,40 @@ export async function GET(
   console.log("Processing files request for order:", orderNumber);
   
   try {
-    // Get the Supabase client for auth
+    // Initialize Supabase client for auth check
     const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!session) {
-      console.log("Unauthorized - No session found");
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is authenticated
+    if (!user || !user.id) {
+      console.log("Unauthorized access attempt to files API");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
     // Try to fetch the catering request
     console.log("Fetching catering request for", orderNumber);
-    const cateringRequest = await prisma.cateringRequest.findUnique({
-      where: { orderNumber: orderNumber },
+    const cateringRequest = await prisma.cateringRequest.findFirst({
+      where: { 
+        orderNumber: {
+          equals: orderNumber,
+          mode: 'insensitive' // Add case-insensitive mode
+        }
+      },
       select: { id: true }
     });
     
     // Try to fetch the on-demand request if catering request not found
     if (!cateringRequest) {
       console.log("Catering request not found, trying on_demand");
-      const onDemandRequest = await prisma.onDemand.findUnique({
-        where: { orderNumber: orderNumber },
+      const onDemandRequest = await prisma.onDemand.findFirst({
+        where: { 
+          orderNumber: {
+            equals: orderNumber,
+            mode: 'insensitive' // Add case-insensitive mode
+          }
+        },
         select: { id: true }
       });
       

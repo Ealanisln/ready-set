@@ -96,10 +96,14 @@ function serializeOrder(data: any): any {
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ order_number: string }> }
 ) {
   try {
+    // Await params before accessing its properties
+    const resolvedParams = await params;
+    console.log(`GET request for order: ${resolvedParams.order_number}`);
+    
     // Initialize Supabase client
     const supabase = await createClient();
     
@@ -108,17 +112,26 @@ export async function GET(
 
     // Check if user is authenticated
     if (!user || !user.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      console.error("Unauthorized access attempt to order API");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Extract order_number and await the params Promise
-    const { order_number } = await params;
+    console.log(`Authenticated user: ${user.id}`);
+    
+    // Extract order_number from params
+    const { order_number } = resolvedParams;
 
     let order: Order | null = null;
 
-    // Try to find catering request
-    const cateringRequest = await prisma.cateringRequest.findUnique({
-      where: { orderNumber: order_number },
+    // Try to find catering request using case-insensitive search and check soft delete
+    const cateringRequest = await prisma.cateringRequest.findFirst({
+      where: { 
+        orderNumber: {
+          equals: order_number,
+          mode: 'insensitive'
+        },
+        deletedAt: null // Add soft delete check
+      },
       include: {
         user: { select: { name: true, email: true } },
         pickupAddress: true,
@@ -142,9 +155,17 @@ export async function GET(
     if (cateringRequest) {
       order = { ...cateringRequest, orderType: "catering" };
     } else {
-      // If not found, try to find on-demand order
-      const onDemandOrder = await prisma.onDemand.findUnique({
-        where: { orderNumber: order_number },
+      // If not found, try to find on-demand order using case-insensitive search and check soft delete
+      const onDemandOrder = await prisma.onDemand.findFirst({
+        where: { 
+          orderNumber: {
+            equals: order_number,
+            mode: 'insensitive'
+          },
+          // Assuming onDemand table also has a deletedAt field for soft deletes
+          // If not, this line might need adjustment based on your schema
+          deletedAt: null // Add soft delete check 
+        },
         include: {
           user: { select: { name: true, email: true } },
           pickupAddress: true,
@@ -186,10 +207,14 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ order_number: string }> }
 ) {
   try {
+    // Await params before accessing its properties
+    const resolvedParams = await params;
+    console.log(`PATCH request for order: ${resolvedParams.order_number}`);
+    
     // Initialize Supabase client
     const supabase = await createClient();
     
@@ -198,11 +223,14 @@ export async function PATCH(
 
     // Check if user is authenticated
     if (!user || !user.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      console.error("Unauthorized access attempt to order PATCH API");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Extract order_number and await the params Promise
-    const { order_number } = await params;
+    console.log(`Authenticated user: ${user.id}`);
+    
+    // Extract order_number from params
+    const { order_number } = resolvedParams;
     
     const body = await request.json();
     const { status, driverStatus } = body;

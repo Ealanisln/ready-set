@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 function serializeData(obj: unknown): number | string | Date | Record<string, unknown> | unknown {
   if (typeof obj === "bigint") {
@@ -24,6 +25,17 @@ function serializeData(obj: unknown): number | string | Date | Record<string, un
 
 export async function POST(request: Request) {
   try {
+    // Initialize Supabase client for auth check
+    const supabase = await createClient();
+    
+    // Get user session from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is authenticated
+    if (!user || !user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const body = await request.json();
     console.log("Request body:", body);
     

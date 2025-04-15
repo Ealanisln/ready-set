@@ -13,6 +13,7 @@ import {
   Zap,
   ChevronDown,
   Plus,
+  ClipboardList,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -129,6 +130,12 @@ export function AppSidebar() {
       href: "/admin/users",
       icon: Users,
       isActive: pathname?.includes("/admin/users") ?? false,
+    },
+    {
+      title: "Job Applications",
+      href: "/admin/job-applications",
+      icon: ClipboardList,
+      isActive: pathname?.includes("/admin/job-applications") ?? false,
     }
   ];
 

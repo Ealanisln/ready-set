@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Menu,
   Search,
-  Bell 
+  Bell,
+  Briefcase 
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,14 @@ import { User } from "@/types/user";
 import { CateringRequest, OrderStatus, isCateringRequest, isOnDemand } from "@/types/order";
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
+import { ApplicationStatus, JobApplication } from "@/types/job-application";
+
+// Add interface for Job Applications API response
+interface JobApplicationsApiResponse {
+  applications: JobApplication[];
+  totalCount: number;
+  totalPages: number;
+}
 
 // Add interface for Orders API response
 interface OrdersApiResponse {
@@ -98,6 +107,31 @@ const ActionCard: React.FC = () => (
   </Card>
 );
 
+// Application Status Badge Component
+const ApplicationStatusBadge: React.FC<{status: ApplicationStatus}> = ({ status }) => {
+  const config: Record<string, { bg: string, text: string }> = {
+    [ApplicationStatus.PENDING]: { bg: "bg-yellow-100", text: "text-yellow-700" },
+    [ApplicationStatus.APPROVED]: { bg: "bg-green-100", text: "text-green-700" },
+    [ApplicationStatus.REJECTED]: { bg: "bg-red-100", text: "text-red-700" },
+    [ApplicationStatus.INTERVIEWING]: { bg: "bg-blue-100", text: "text-blue-700" }
+  };
+
+  const style = config[status] || { bg: "bg-gray-100", text: "text-gray-700" };
+  
+  const label = {
+    [ApplicationStatus.PENDING]: "Pending",
+    [ApplicationStatus.APPROVED]: "Approved",
+    [ApplicationStatus.REJECTED]: "Rejected",
+    [ApplicationStatus.INTERVIEWING]: "Interviewing"
+  }[status];
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {label}
+    </span>
+  );
+};
+
 // Status Badge Component
 const StatusBadge: React.FC<{status: string}> = ({ status }) => {
   const config: Record<string, { bg: string, text: string }> = {
@@ -135,6 +169,58 @@ const UserTypeBadge: React.FC<{type: string}> = ({ type }) => {
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
       {type.charAt(0).toUpperCase() + type.slice(1)}
     </span>
+  );
+};
+
+// New component for Job Applications
+const ModernJobApplicationsTable: React.FC<{applications: JobApplication[]}> = ({ applications }) => {
+  // Format date for display
+  const formatDate = (dateString: string | Date): string => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+  
+  return (
+    <div className="overflow-hidden">
+      {applications.length > 0 ? (
+        <div className="min-w-full divide-y divide-gray-200">
+          <div className="bg-gray-50">
+            <div className="grid grid-cols-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <div>Applicant</div>
+              <div>Position</div>
+              <div>Status</div>
+              <div>Applied</div>
+            </div>
+          </div>
+          <div className="bg-white divide-y divide-gray-200">
+            {applications.map((app) => (
+              <div key={app.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                  <Link href={`/admin/job-applications?id=${app.id}`}>
+                    {app.firstName} {app.lastName}
+                  </Link>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {app.position}
+                </div>
+                <div><ApplicationStatusBadge status={app.status} /></div>
+                <div className="text-sm text-gray-500">
+                  {formatDate(app.createdAt)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+          <Briefcase className="h-10 w-10 text-gray-300 mb-2" />
+          <p>No job applications at this moment</p>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -264,6 +350,8 @@ export function ModernDashboardHome() {
   const [recentOrders, setRecentOrders] = useState<CateringRequest[]>([]);
   const [activeOrders, setActiveOrders] = useState<CateringRequest[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [recentApplications, setRecentApplications] = useState<JobApplication[]>([]);
+  const [pendingApplications, setPendingApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const {
@@ -277,6 +365,7 @@ export function ModernDashboardHome() {
       try {
         const ordersResponse = await fetch("/api/orders/catering-orders?recentOnly=true");
         const usersResponse = await fetch("/api/users");
+        const applicationsResponse = await fetch("/api/admin/job-applications");
         
         if (!ordersResponse.ok) {
           const errorText = await ordersResponse.text();
@@ -288,14 +377,22 @@ export function ModernDashboardHome() {
           throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
         }
         
+        if (!applicationsResponse.ok) {
+          const errorText = await applicationsResponse.text();
+          throw new Error(`Applications API failed: ${applicationsResponse.status} - ${errorText}`);
+        }
+        
         const ordersData = await ordersResponse.json() as OrdersApiResponse;
         const usersData = await usersResponse.json() as UsersApiResponse;
+        const applicationsData = await applicationsResponse.json() as JobApplicationsApiResponse;
         
         console.log('Orders data:', ordersData.orders);
+        console.log('Applications data:', applicationsData.applications);
         
-        // Fix: Extract orders array from the response
+        // Extract orders array from the response
         setRecentOrders(ordersData.orders || []);
         
+        // Filter active orders
         const activeOrdersList = (ordersData.orders || []).filter((order: CateringRequest) => 
           [OrderStatus.ACTIVE, OrderStatus.ASSIGNED].includes(order.status)
         );
@@ -303,6 +400,16 @@ export function ModernDashboardHome() {
         
         // Use the users array from the response
         setUsers(usersData.users || []);
+        
+        // Set applications data
+        setRecentApplications(applicationsData.applications || []);
+        
+        // Filter pending applications
+        const pendingAppsList = (applicationsData.applications || []).filter(
+          (app) => app.status === ApplicationStatus.PENDING
+        );
+        setPendingApplications(pendingAppsList);
+        
         setLoading(false);
         
       } catch (error) {
@@ -349,6 +456,10 @@ export function ModernDashboardHome() {
   const totalOrdersCount = Array.isArray(recentOrders) ? recentOrders.length : 0;
   const activeOrdersPercentage = ((activeOrders.length / (totalOrdersCount || 1)) * 100).toFixed(1);
   
+  // Calculate pending applications percentage
+  const totalApplicationsCount = Array.isArray(recentApplications) ? recentApplications.length : 0;
+  const pendingApplicationsPercentage = ((pendingApplications.length / (totalApplicationsCount || 1)) * 100).toFixed(1);
+  
   // Modern dashboard layout
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
@@ -394,12 +505,12 @@ export function ModernDashboardHome() {
               accent="bg-blue-500"
             />
             <ModernMetricCard
-              title="Delivery Requests"
-              value={metrics.deliveriesRequests}
-              icon={Clock}
-              change="+180.1% from last month"
-              trend="up"
-              accent="bg-purple-500"
+              title="Pending Applications"
+              value={pendingApplications.length}
+              icon={Briefcase}
+              change={`${pendingApplicationsPercentage}% of total`}
+              trend={Number(pendingApplicationsPercentage) > 30 ? "up" : "neutral"}
+              accent="bg-yellow-500"
             />
             <ModernMetricCard
               title="Total Vendors"
@@ -421,6 +532,15 @@ export function ModernDashboardHome() {
             icon={Calendar}
           >
             <ModernOrdersTable orders={activeOrders} />
+          </ModernDashboardCard>
+          
+          <ModernDashboardCard
+            title="Recent Job Applications"
+            linkText="View All Applications"
+            linkHref="/admin/job-applications"
+            icon={Briefcase}
+          >
+            <ModernJobApplicationsTable applications={recentApplications.slice(0, 5)} />
           </ModernDashboardCard>
           
           <ModernDashboardCard

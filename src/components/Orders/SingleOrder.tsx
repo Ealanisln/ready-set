@@ -16,12 +16,12 @@ import CustomerInfo from "./ui/CustomerInfo";
 import AdditionalInfo from "./ui/AdditionalInfo";
 import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 import OrderStatusCard from "./OrderStatus";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { OrderFilesManager } from "./ui/OrderFiles";
 import { Driver, Order, OrderStatus, OrderType, VehicleType } from "@/types/order";
 import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
 import { FileUpload } from '@/types/file';
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client"; // Added for auth refresh
 
 // Extend the base order type to ensure id is string after serialization
 type SerializedOrder = Omit<Order, 'id'> & { id: string };
@@ -90,9 +90,11 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
   const [files, setFiles] = useState<FileUpload[]>([]);
-
+  
+  const router = useRouter();
   const pathname = usePathname();
   const orderNumber = (pathname ?? '').split("/").pop() || "";
+  const supabase = createClient();
 
   const fetchOrderDetails = useCallback(async () => {
     if (!orderNumber) {
@@ -105,38 +107,44 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     console.log("Fetching order details for:", orderNumber);
 
     try {
-      // Get Supabase client and session
-      const supabase = await createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      // Refresh auth session before making the request
+      await supabase.auth.refreshSession();
+      
+      // Fetch order details
+      const orderResponse = await fetch(
+        `/api/orders/${orderNumber}?include=dispatch.driver`,
+        {
+          credentials: 'include' // Ensure cookies are sent with the request
+        }
+      );
 
-      if (!session) {
-        throw new Error("No authenticated session");
+      if (!orderResponse.ok) {
+        // Get more detailed error information
+        let errorText = '';
+        try {
+          const errorData = await orderResponse.json();
+          errorText = JSON.stringify(errorData);
+        } catch (parseError) {
+          errorText = 'Could not parse error response';
+        }
+        
+        console.error(`Order API error (${orderResponse.status}): ${errorText}`);
+        throw new Error(`HTTP error! status: ${orderResponse.status}, details: ${errorText}`);
       }
 
-      const response = await fetch(`/api/orders/${orderNumber}?include=dispatch.driver`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const orderData = await response.json();
+      const orderData = await orderResponse.json();
       console.log("Order data received:", orderData);
-
+      
       // Transform the data to match our types
       const transformedOrder: Order = {
         ...orderData,
         // Ensure required fields for OnDemand orders
         ...(orderData.order_type === 'on_demand' && {
-          vehicleType: orderData.vehicleType || VehicleType.CAR // Default to CAR if not specified
+          vehicleType: orderData.vehicleType || VehicleType.CAR
         }),
-        // Ensure ID is string
         id: String(orderData.id)
       };
-
+      
       setOrder(transformedOrder);
 
       // Set driver info if available
@@ -151,46 +159,23 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       // Fetch files with improved error handling
       try {
         console.log(`Fetching files for order: ${orderNumber}`);
-        const filesResponse = await fetch(`/api/orders/${orderNumber}/files`);
-
-        const contentType = filesResponse.headers.get("content-type");
+        const filesResponse = await fetch(`/api/orders/${orderNumber}/files`, {
+          credentials: 'include'
+        });
 
         if (!filesResponse.ok) {
-          if (contentType?.includes("application/json")) {
-            const errorData = await filesResponse.json();
-            throw new Error(errorData.message || "Failed to fetch files");
-          } else {
-            const errorText = await filesResponse.text();
-            throw new Error(errorText || "Failed to fetch files");
-          }
+          throw new Error("Failed to fetch files");
         }
 
         const filesData = await filesResponse.json();
         console.log("Files data received:", filesData);
 
-        // Convert object to array if necessary
-        const filesArray = Object.values(filesData);
-
-        if (!Array.isArray(filesArray)) {
-          throw new Error("Invalid files data format");
-        }
-
+        const filesArray = Array.isArray(filesData) ? filesData : Object.values(filesData);
         const transformedFiles = filesArray.map((file: any) => ({
           ...file,
-          // Handle empty date objects by using current date as fallback
-          uploadedAt:
-            file.uploadedAt && Object.keys(file.uploadedAt).length > 0
-              ? new Date(file.uploadedAt)
-              : new Date(),
-          updatedAt:
-            file.updatedAt && Object.keys(file.updatedAt).length > 0
-              ? new Date(file.updatedAt)
-              : new Date(),
-          // Ensure cateringRequestId is handled correctly
-          cateringRequestId: file.cateringRequestId
-            ? Number(file.cateringRequestId)
-            : null,
-          // Ensure other numeric fields are handled correctly
+          uploadedAt: file.uploadedAt ? new Date(file.uploadedAt) : new Date(),
+          updatedAt: file.updatedAt ? new Date(file.updatedAt) : new Date(),
+          cateringRequestId: file.cateringRequestId ? Number(file.cateringRequestId) : null,
           fileSize: Number(file.fileSize),
           onDemandId: file.onDemandId ? Number(file.onDemandId) : null,
         }));
@@ -198,19 +183,20 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
         setFiles(transformedFiles);
       } catch (fileError) {
         console.error("Error fetching files:", fileError);
-        toast.error(
-          fileError instanceof Error
-            ? fileError.message
-            : "Failed to load order files",
-        );
+        toast.error("Failed to load order files");
       }
     } catch (error) {
       console.error("Error fetching order:", error);
+      // Log more details about the error
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       toast.error("Failed to load order details");
     } finally {
       setIsLoading(false);
     }
-  }, [orderNumber]);
+  }, [orderNumber, supabase.auth, setIsLoading, setOrder, setDriverInfo, setIsDriverAssigned, setFiles]);
 
   // Fetch order details on mount
   useEffect(() => {
@@ -221,7 +207,12 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const response = await fetch("/api/drivers");
+        // Refresh auth session before making the request 
+        await supabase.auth.refreshSession();
+        
+        const response = await fetch("/api/drivers", {
+          credentials: 'include'
+        });
         if (response.ok) {
           const data = await response.json();
           setDrivers(data);
@@ -236,7 +227,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     };
 
     fetchDrivers();
-  }, []);
+  }, [setDrivers, supabase.auth]);
 
   const handleOpenDriverDialog = () => {
     setIsDriverDialogOpen(true);
@@ -249,15 +240,13 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order || !selectedDriver) return;
 
     try {
-      console.log("Assigning driver with data:", {
-        orderId: order.id,
-        driverId: selectedDriver,
-        orderType: order.order_type,
-      });
-
+      // Refresh auth session before making the request
+      await supabase.auth.refreshSession();
+      
       const response = await fetch("/api/orders/assignDriver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
           orderId: order.id,
           driverId: selectedDriver,
@@ -266,8 +255,16 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to assign/edit driver");
+        // Get error details
+        let errorText = '';
+        try {
+          const errorData = await response.json();
+          errorText = errorData.error || errorData.message || '';
+        } catch (parseError) {
+          errorText = '';
+        }
+        
+        throw new Error(`Failed to assign/edit driver: ${errorText || response.statusText}`);
       }
 
       await fetchOrderDetails();
@@ -279,8 +276,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       );
     } catch (error) {
       console.error("Failed to assign/edit driver:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to assign/edit driver";
-      toast.error(errorMessage);
+      toast.error(error instanceof Error ? error.message : "Failed to assign/edit driver. Please try again.");
     }
   };
 
@@ -292,20 +288,37 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order) return;
 
     try {
+      // Refresh auth session before making the request
+      await supabase.auth.refreshSession();
+      
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({ driverStatus: newStatus }),
       });
 
-      if (response.ok) {
-        const updatedOrder = await response.json();
-        setOrder(updatedOrder);
+      if (!response.ok) {
+        // Get error details
+        let errorText = '';
+        try {
+          const errorData = await response.json();
+          errorText = errorData.error || errorData.message || '';
+        } catch (parseError) {
+          errorText = '';
+        }
+        
+        throw new Error(`Failed to update driver status: ${errorText || response.statusText}`);
       }
+
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder);
+      toast.success("Driver status updated successfully!");
     } catch (error) {
       console.error("Error updating driver status:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update driver status. Please try again.");
     }
   };
 
@@ -313,20 +326,37 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order) return;
 
     try {
+      // Refresh auth session before making the request
+      await supabase.auth.refreshSession();
+      
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (response.ok) {
-        const updatedOrder = await response.json();
-        setOrder(updatedOrder);
+      if (!response.ok) {
+        // Get error details
+        let errorText = '';
+        try {
+          const errorData = await response.json();
+          errorText = errorData.error || errorData.message || '';
+        } catch (parseError) {
+          errorText = '';
+        }
+        
+        throw new Error(`Failed to update order status: ${errorText || response.statusText}`);
       }
+
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder);
+      toast.success("Order status updated successfully!");
     } catch (error) {
       console.error("Error updating order status:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update order status. Please try again.");
     }
   };
 
