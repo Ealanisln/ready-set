@@ -1,4 +1,4 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
 type EmailPayload = {
   to: string;
@@ -6,23 +6,20 @@ type EmailPayload = {
   html: string;
 };
 
-// Set SendGrid API key
-sgMail.setApiKey(process.env.SEND_API_KEY || '');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async (data: EmailPayload) => {
-  const msg = {
-    to: data.to,
-    from: process.env.EMAIL_FROM || 'solutions@readysetllc.com', // Use a verified sender email
-    subject: data.subject,
-    html: data.html,
-  };
-
   try {
-    const response = await sgMail.send(msg);
+    const response = await resend.emails.send({
+      to: data.to,
+      from: process.env.EMAIL_FROM || 'solutions@readysetllc.com',
+      subject: data.subject,
+      html: data.html,
+    });
     console.log('Email sent successfully', response);
     return response;
   } catch (error: any) {
-    console.error('Error sending email:');
+    console.error('Error sending email:', error);
     if (error.response) {
       console.error(error.response.body);
     }

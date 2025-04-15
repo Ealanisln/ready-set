@@ -1,4 +1,4 @@
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 import { DriverStatus } from "../types/order";
 
 type PrismaAddress = {
@@ -57,6 +57,8 @@ interface OnDemandOrder extends BaseOrder {
   height: string | null;
   weight: string | null;
 }
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOrderEmail(order: CateringOrder | OnDemandOrder) {
   const formatDate = (date: Date | null) => {
@@ -130,17 +132,13 @@ export async function sendOrderEmail(order: CateringOrder | OnDemandOrder) {
     `;
   }
 
-  const msg = {
-    to: process.env.ADMIN_EMAIL || "info@ready-set.co",
-    from: process.env.EMAIL_FROM || "solutions@readysetllc.com",
-    subject: `New ${order.order_type.charAt(0).toUpperCase() + order.order_type.slice(1)} Order - ${order.order_number}`,
-    html: body,
-  };
-
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY || "");
-
   try {
-    await sgMail.send(msg);
+    await resend.emails.send({
+      to: process.env.ADMIN_EMAIL || "info@ready-set.co",
+      from: process.env.EMAIL_FROM || "solutions@readysetllc.com",
+      subject: `New ${order.order_type.charAt(0).toUpperCase() + order.order_type.slice(1)} Order - ${order.order_number}`,
+      html: body,
+    });
     console.log("Order notification email sent successfully");
   } catch (error) {
     console.error("Error sending order notification email:", error);

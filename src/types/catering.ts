@@ -2,6 +2,7 @@
 // Updated based on Prisma Schema provided on 2025-04-03
 
 import { CateringNeedHost } from './order'; 
+import { UploadedFile } from '@/hooks/use-upload-file';
 
 export interface Address {
   id: string;
@@ -22,18 +23,16 @@ export interface CateringFormData {
   pickupAddressId: string;
   deliveryAddressId: string; 
 
-
   pickupDate: string;
   pickupTime: string; 
   arrivalDate?: string;
-  arrivalTime?: string;
+  arrivalTime: string;
   completeDate?: string;
   completeTime?: string;
   
-
-  headcount?: string;
+  headcount: string;
   needHost: CateringNeedHost; 
-  hoursNeeded?: string;
+  hoursNeeded: string;
   numberOfHosts?: string; 
   clientAttention?: string; 
   pickupNotes?: string; 
@@ -41,8 +40,11 @@ export interface CateringFormData {
   orderTotal?: string; 
   tip?: string; 
 
-
   pickupAddress?: Address; 
   deliveryAddress?: Address; 
+}
 
+export interface ExtendedCateringFormData extends CateringFormData {
+  attachments?: UploadedFile[];
+  date: string;
 }

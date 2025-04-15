@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useUploadFile, UploadedFile } from "@/hooks/use-upload-file";
 import { FileWithPath } from "react-dropzone";
+import { HostSection } from "./HostSection";
 
 // Form field components
 const InputField: React.FC<{
@@ -225,38 +226,6 @@ const AddressSection: React.FC<{
   );
 };
 
-// Host Section Component
-const HostSection: React.FC<{
-  control: any;
-  needHost: string;
-}> = ({ control, needHost }) => {
-  if (needHost !== "yes") return null;
-
-  return (
-    <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
-      <h3 className="mb-5 text-lg font-medium text-blue-800">Host Details</h3>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <InputField
-          control={control}
-          name="hoursNeeded"
-          label="Hours Needed"
-          type="number"
-          required={needHost === "yes"}
-          icon={<Clock size={16} />}
-        />
-        <InputField
-          control={control}
-          name="numberOfHosts"
-          label="Number of Hosts"
-          type="number"
-          required={needHost === "yes"}
-          icon={<Users size={16} />}
-        />
-      </div>
-    </div>
-  );
-};
-
 // Form Component
 interface ExtendedCateringFormData extends CateringFormData {
   attachments?: UploadedFile[];
@@ -269,14 +238,14 @@ interface ExtendedCateringFormData extends CateringFormData {
   headcount: string;
   needHost: CateringNeedHost;
   hoursNeeded: string;
-  numberOfHosts: string;
-  clientAttention: string;
-  pickupNotes: string;
-  specialNotes: string;
-  orderTotal: string;
-  tip: string;
-  pickupAddress: Address;
-  deliveryAddress: Address;
+  numberOfHosts?: string;
+  clientAttention?: string;
+  pickupNotes?: string;
+  specialNotes?: string;
+  orderTotal?: string;
+  tip?: string;
+  pickupAddress?: Address;
+  deliveryAddress?: Address;
 }
 
 const BROKERAGE_OPTIONS = [
@@ -588,16 +557,16 @@ const CateringRequestForm: React.FC = () => {
     }
 
     // Validate numeric fields
-    const numericValidation: { [key: string]: { min?: number; message: string } } = {
+    const numericFields = {
       headcount: { min: 1, message: "Headcount must be at least 1" },
       orderTotal: { min: 0, message: "Order total must be a positive number" },
       tip: { min: 0, message: "Tip must be a positive number" },
     };
 
-    for (const [field, validation] of Object.entries(numericValidation)) {
-      const value = parseFloat(data[field as keyof ExtendedCateringFormData] as string);
-      if (field === 'tip' && !data[field]) continue; // Skip tip validation if not provided
-      if (isNaN(value) || (validation.min !== undefined && value < validation.min)) {
+    for (const [field, validation] of Object.entries(numericFields)) {
+      const value = data[field as keyof Pick<ExtendedCateringFormData, 'headcount' | 'orderTotal' | 'tip'>];
+      if (field === 'tip' && !value) continue; // Skip tip validation if not provided
+      if (!value || isNaN(parseFloat(value)) || (validation.min !== undefined && parseFloat(value) < validation.min)) {
         setErrorMessage(validation.message);
         toast.error(validation.message);
         return;
@@ -642,15 +611,25 @@ const CateringRequestForm: React.FC = () => {
             throw new Error('Invalid time format');
           }
 
-          // Create date in UTC
-          const dateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+          // Get the timezone offset for the delivery address state
+          const state = data.deliveryAddress?.state;
+          let timezone = 'America/Los_Angeles'; // Default to PST
+          if (state === 'TX') {
+            timezone = 'America/Chicago'; // CST for Texas
+          }
+
+          // Create date in the local timezone
+          const localDate = new Date(year, month - 1, day, hours, minutes);
+          
+          // Convert to UTC based on the timezone
+          const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: timezone }));
           
           // Validate the resulting date
-          if (isNaN(dateTime.getTime())) {
+          if (isNaN(utcDate.getTime())) {
             throw new Error('Invalid date/time combination');
           }
           
-          return dateTime.toISOString();
+          return utcDate.toISOString();
         } catch (error) {
           console.error('Date/time parsing error:', { date, time, error });
           throw new Error(`Invalid date/time format: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -697,8 +676,8 @@ const CateringRequestForm: React.FC = () => {
 
       const requestBody = {
         userId: session.user.id,
-        pickupAddressId: data.pickupAddress.id,
-        deliveryAddressId: data.deliveryAddress.id,
+        pickupAddressId: data.pickupAddress?.id ?? '',
+        deliveryAddressId: data.deliveryAddress?.id ?? '',
         order_type: "catering",
         brokerage: data.brokerage,
         orderNumber: data.orderNumber,
@@ -712,7 +691,7 @@ const CateringRequestForm: React.FC = () => {
         clientAttention: data.clientAttention?.trim(),
         pickupNotes: data.pickupNotes,
         specialNotes: data.specialNotes,
-        orderTotal: parseFloat(data.orderTotal),
+        orderTotal: data.orderTotal ? parseFloat(data.orderTotal) : null,
         tip: data.tip ? parseFloat(data.tip) : undefined,
         status: "ACTIVE",
         attachments: data.attachments?.map((file) => ({
@@ -1026,7 +1005,7 @@ const CateringRequestForm: React.FC = () => {
           />
         </div>
       </div>
-
+{/* 
       <div className="mb-8 space-y-4">
         <h3 className="mb-5 border-b border-gray-200 pb-3 text-lg font-medium text-gray-800">
           Attachments
@@ -1046,7 +1025,6 @@ const CateringRequestForm: React.FC = () => {
           </p>
         </div>
 
-        {/* Uploaded Files List */}
         <div className="space-y-2">
           {uploadedFiles?.map((file: UploadedFile) => (
             <div
@@ -1072,7 +1050,7 @@ const CateringRequestForm: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-8 flex items-center justify-center">
         <button

@@ -21,6 +21,7 @@ import { OrderFilesManager } from "./ui/OrderFiles";
 import { Driver, Order, OrderStatus, OrderType, VehicleType } from "@/types/order";
 import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
 import { FileUpload } from '@/types/file';
+import { createClient } from "@/utils/supabase/client";
 
 // Extend the base order type to ensure id is string after serialization
 type SerializedOrder = Omit<Order, 'id'> & { id: string };
@@ -104,16 +105,25 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     console.log("Fetching order details for:", orderNumber);
 
     try {
-      // Fetch order details
-      const orderResponse = await fetch(
-        `/api/orders/${orderNumber}?include=dispatch.driver`,
-      );
+      // Get Supabase client and session
+      const supabase = await createClient();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!orderResponse.ok) {
-        throw new Error("Failed to fetch order details");
+      if (!session) {
+        throw new Error("No authenticated session");
       }
 
-      const orderData = await orderResponse.json();
+      const response = await fetch(`/api/orders/${orderNumber}?include=dispatch.driver`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const orderData = await response.json();
       console.log("Order data received:", orderData);
 
       // Transform the data to match our types
@@ -365,7 +375,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                      Order {order.orderNumber}
+                      {order.order_type === 'catering' ? 'Catering Request' : 'On-Demand Order'} {order.orderNumber}
                     </h1>
                     {order.status && (
                       <Badge className={`${getStatusConfig(order.status as string).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>

@@ -51,15 +51,53 @@ type Order =
   | (OnDemandOrder & { orderType: "onDemand" });
 
 function serializeOrder(data: any): any {
-  return JSON.parse(JSON.stringify(data, (_, value) =>
+  // Helper function to format dates with timezone
+  const formatDate = (date: string | Date | null, state: string | null) => {
+    if (!date) return null;
+    
+    // Create a date object from the input
+    const utcDate = new Date(date);
+    
+    // Determine timezone based on state
+    let timezone = 'America/Los_Angeles'; // Default to PST
+    if (state === 'TX') {
+      timezone = 'America/Chicago'; // CST for Texas
+    }
+    
+    // Format the date in the correct timezone
+    return utcDate.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  };
+
+  // Get the state from the delivery address
+  const state = data.deliveryAddress?.state || null;
+
+  // Create a copy of the data with formatted dates
+  const formattedData = {
+    ...data,
+    pickupDateTime: formatDate(data.pickupDateTime, state),
+    arrivalDateTime: formatDate(data.arrivalDateTime, state),
+    completeDateTime: formatDate(data.completeDateTime, state),
+    createdAt: formatDate(data.createdAt, state),
+    updatedAt: formatDate(data.updatedAt, state)
+  };
+
+  // Convert any BigInt values to strings
+  return JSON.parse(JSON.stringify(formattedData, (_, value) =>
     typeof value === "bigint" ? value.toString() : value
   ));
 }
 
-// Using a simpler approach with generic parameter type
 export async function GET(
-  req: NextRequest,
-  { params }: any
+  request: Request,
+  { params }: { params: Promise<{ order_number: string }> }
 ) {
   try {
     // Initialize Supabase client
@@ -73,13 +111,14 @@ export async function GET(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const orderNumber = params.order_number;
+    // Extract order_number and await the params Promise
+    const { order_number } = await params;
 
     let order: Order | null = null;
 
     // Try to find catering request
     const cateringRequest = await prisma.cateringRequest.findUnique({
-      where: { orderNumber },
+      where: { orderNumber: order_number },
       include: {
         user: { select: { name: true, email: true } },
         pickupAddress: true,
@@ -105,7 +144,7 @@ export async function GET(
     } else {
       // If not found, try to find on-demand order
       const onDemandOrder = await prisma.onDemand.findUnique({
-        where: { orderNumber },
+        where: { orderNumber: order_number },
         include: {
           user: { select: { name: true, email: true } },
           pickupAddress: true,
@@ -147,8 +186,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: NextRequest,
-  { params }: any
+  request: Request,
+  { params }: { params: Promise<{ order_number: string }> }
 ) {
   try {
     // Initialize Supabase client
@@ -162,8 +201,10 @@ export async function PATCH(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const orderNumber = params.order_number;
-    const body = await req.json();
+    // Extract order_number and await the params Promise
+    const { order_number } = await params;
+    
+    const body = await request.json();
     const { status, driverStatus } = body;
 
     if (!status && !driverStatus) {
@@ -177,12 +218,12 @@ export async function PATCH(
 
     // Try updating catering request
     const cateringRequest = await prisma.cateringRequest.findUnique({
-      where: { orderNumber },
+      where: { orderNumber: order_number },
     });
 
     if (cateringRequest) {
       const updated = await prisma.cateringRequest.update({
-        where: { orderNumber },
+        where: { orderNumber: order_number },
         data: {
           ...(status && { status: status as any }),
           ...(driverStatus && { driverStatus: driverStatus as any }),
@@ -210,7 +251,7 @@ export async function PATCH(
     } else {
       // If not found, try updating on-demand order
       const updated = await prisma.onDemand.update({
-        where: { orderNumber },
+        where: { orderNumber: order_number },
         data: {
           ...(status && { status: status as any }),
           ...(driverStatus && { driverStatus: driverStatus as any }),

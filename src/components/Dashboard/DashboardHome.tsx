@@ -19,7 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User } from "@/types/user";
-import { CateringRequest } from "@/types/order";
+import { CateringRequest, OrderStatus, isCateringRequest, isOnDemand } from "@/types/order";
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
 
@@ -159,7 +159,9 @@ const ModernOrdersTable: React.FC<{orders: CateringRequest[]}> = ({ orders }) =>
                   {order.orderNumber}
                 </Link>
               </div>
-              <div className="text-sm text-gray-500">{order.order_type === 'catering' ? "Catering" : "On Demand"}</div>
+              <div className="text-sm text-gray-500">
+                {isCateringRequest(order) ? "Catering" : isOnDemand(order) ? "On Demand" : "Catering"}
+              </div>
               <div><StatusBadge status={order.status} /></div>
               <div className="text-sm font-medium text-gray-900">
                 ${order.orderTotal ? 
@@ -289,11 +291,13 @@ export function ModernDashboardHome() {
         const ordersData = await ordersResponse.json() as OrdersApiResponse;
         const usersData = await usersResponse.json() as UsersApiResponse;
         
+        console.log('Orders data:', ordersData.orders);
+        
         // Fix: Extract orders array from the response
         setRecentOrders(ordersData.orders || []);
         
         const activeOrdersList = (ordersData.orders || []).filter((order: CateringRequest) => 
-          ['active', 'pending', 'confirmed', 'in_progress'].includes(order.status)
+          [OrderStatus.ACTIVE, OrderStatus.ASSIGNED].includes(order.status)
         );
         setActiveOrders(activeOrdersList);
         

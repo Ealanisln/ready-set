@@ -1,7 +1,7 @@
 // app/actions/send-email.ts
 "use server";
 
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 import * as cheerio from "cheerio";
 
 interface FormInputs {
@@ -12,8 +12,8 @@ interface FormInputs {
   subject?: string;
 }
 
-// Set SendGrid API key
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (data: FormInputs) => {
   if (data.message.length > 1000) {
@@ -21,7 +21,7 @@ const sendEmail = async (data: FormInputs) => {
   }
 
   // Validate recipient address
-  const recipient = process.env.NOTIFICATION_RECIPIENT || "info@ready-set.co";
+  const recipient = process.env.NOTIFICATION_RECIPIENT || "info@readysetllc.com";
   if (!recipient) {
     throw new Error("No recipient configured for emails");
   }
@@ -35,9 +35,9 @@ const sendEmail = async (data: FormInputs) => {
       throw new Error("Invalid recipient email address");
     }
 
-    await sgMail.send({
-      to: recipient, // Use validated recipient
-      from: "Ready Set Website <solutions@readysetllc.com>",
+    await resend.emails.send({
+      to: recipient,
+      from: "Ready Set Website <solutions@updates.readysetllc.com>",
       subject,
       html,
     });
@@ -48,6 +48,7 @@ const sendEmail = async (data: FormInputs) => {
     throw new Error("Error trying to send the message.");
   }
 };
+
 // Helper functions
 const determineNotificationType = (data: FormInputs) => {
   if (data.subject?.includes("Vendor Registration")) return "vendor";

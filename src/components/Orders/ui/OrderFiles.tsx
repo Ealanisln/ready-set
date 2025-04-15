@@ -15,6 +15,7 @@ import { FileUpload } from "@/types/file";
 import { useToast } from "@/components/ui/use-toast";
 import FileViewer from "@/components/FileViewer/file-viewer";
 import { FileWithPath } from "react-dropzone";
+import { createClient } from "@/utils/supabase/client";
 
 interface OrderFilesManagerProps {
   orderNumber: string;
@@ -80,7 +81,20 @@ export function OrderFilesManager({
         setIsLoading(true);
         console.log("Fetching files for order:", orderNumber);
 
-        const response = await fetch(`/api/orders/${orderNumber}/files`);
+        // Get Supabase client and session
+        const supabase = await createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error("No authenticated session");
+        }
+
+        const response = await fetch(`/api/orders/${orderNumber}/files`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

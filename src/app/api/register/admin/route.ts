@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { validateAdminRole } from "@/middleware/authMiddleware";
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma, UserType, UserStatus } from "@prisma/client";
@@ -19,12 +19,12 @@ interface AdminRegistrationRequest {
   zip: string;
 }
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const sendRegistrationEmail = async (
   email: string,
   temporaryPassword: string,
 ) => {
-  sgMail.setApiKey(process.env.SEND_API_KEY || "");
-
   const body = `
       <h1>Welcome to Ready Set Platform</h1>
       <p>Your account has been successfully created. Here are your login details:</p>
@@ -36,15 +36,13 @@ const sendRegistrationEmail = async (
       <p>If you did not request this account, please ignore this email.</p>
     `;
 
-  const msg = {
-    to: email,
-    from: process.env.FROM_EMAIL || "solutions@updates.readysetllc.com",
-    subject: "Welcome to Our Platform - Account Created",
-    html: body,
-  };
-
   try {
-    await sgMail.send(msg);
+    await resend.emails.send({
+      to: email,
+      from: process.env.FROM_EMAIL || "solutions@updates.readysetllc.com",
+      subject: "Welcome to Our Platform - Account Created",
+      html: body,
+    });
     console.log("Registration email sent successfully");
   } catch (error) {
     console.error("Error sending registration email:", error);

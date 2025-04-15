@@ -8,7 +8,7 @@ import { sendDownloadEmail } from "@/app/actions/send-download-email";
 const prisma = new PrismaClient();
 const client = new Client();
 
-// We're still using SendGrid for list management, but Resend for transactional emails
+// We're still using SendGrid for list management
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_LIST_ID) {
   throw new Error('SendGrid configuration is missing');
 }
@@ -25,7 +25,7 @@ const FormSchema = z.object({
   newsletterConsent: z.boolean(),
   resourceSlug: z.string().optional(),
   resourceUrl: z.string().optional(),
-  sendEmail: z.boolean().optional().default(true) // Add sendEmail flag with default true
+  sendEmail: z.boolean().optional().default(true)
 });
 
 export async function POST(req: NextRequest) {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const validatedData = FormSchema.parse(data);
 
-    // Store lead in database (only the fields that exist in the model)
+    // Store lead in database
     const lead = await prisma.leadCapture.upsert({
       where: {
         email: validatedData.email,
@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
         lastName: validatedData.lastName,
         industry: validatedData.industry,
         newsletterConsent: validatedData.newsletterConsent,
-        // Remove the fields that don't exist in the database schema
       },
       create: {
         firstName: validatedData.firstName,
@@ -51,7 +50,6 @@ export async function POST(req: NextRequest) {
         email: validatedData.email,
         industry: validatedData.industry,
         newsletterConsent: validatedData.newsletterConsent,
-        // Remove the fields that don't exist in the database schema
       },
     });
 
@@ -100,7 +98,6 @@ export async function POST(req: NextRequest) {
     // Handle resource download email using Resend - only send if sendEmail flag is true
     if (validatedData.resourceSlug && validatedData.sendEmail) {
       try {
-        // This now uses Resend instead of SendGrid for the transactional email
         await sendDownloadEmail(
           validatedData.email,
           validatedData.firstName,
@@ -115,18 +112,11 @@ export async function POST(req: NextRequest) {
 
     // Return success even if email operations fail
     return NextResponse.json({ success: true, data: lead });
-    
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error processing lead:", error.message);
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 },
-      );
-    }
+    console.error('Error in leads API:', error);
     return NextResponse.json(
-      { success: false, error: "Failed to process lead" },
-      { status: 500 },
+      { error: 'Failed to process lead capture' },
+      { status: 500 }
     );
   }
 }

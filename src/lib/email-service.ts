@@ -1,12 +1,12 @@
 // src/lib/email-service.ts
 
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 import {
   FormType,
   DeliveryFormData,
 } from "@/components/Logistics/QuoteRequest/types";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class EmailService {
   static async sendFormSubmissionNotification(data: {
@@ -68,16 +68,14 @@ export class EmailService {
       <p>${additionalComments || "No additional comments provided."}</p>
     `;
 
-    const msg = {
-      to: process.env.NOTIFICATION_RECIPIENT || 'info@ready-set.co', // Add this line
-      from: 'Ready Set Website <updates@updates.readysetllc.com>',
-      subject: `New ${formType} Delivery Quote Request - ${companyName}`,
-      html: htmlContent,
-      text: htmlContent.replace(/<[^>]*>/g, ""), // Strip HTML for plain text version
-    };
-
     try {
-      await sgMail.send(msg);
+      await resend.emails.send({
+        to: process.env.NOTIFICATION_RECIPIENT || 'info@ready-set.co',
+        from: 'Ready Set Website <updates@updates.readysetllc.com>',
+        subject: `New ${formType} Delivery Quote Request - ${companyName}`,
+        html: htmlContent,
+        text: htmlContent.replace(/<[^>]*>/g, ""), // Strip HTML for plain text version
+      });
       console.log("Notification email sent successfully");
     } catch (error) {
       console.error("Error sending notification email:", error);

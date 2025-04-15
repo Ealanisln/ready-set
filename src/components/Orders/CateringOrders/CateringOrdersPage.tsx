@@ -187,6 +187,14 @@ const CateringOrdersPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [limit] = useState(10); // Default limit for pagination
 
+  // Add status tabs
+  const statusTabs = [
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'ASSIGNED', label: 'Assigned' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+    { value: 'COMPLETED', label: 'Completed' }
+  ];
+
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
@@ -198,80 +206,31 @@ const CateringOrdersPage: React.FC = () => {
           limit: limit.toString(),
           sort: sortField,
           direction: sortDirection,
+          status: statusFilter,
         });
 
-        // Add status filter if not 'all'
-        if (statusFilter !== 'ACTIVE') {
-          queryParams.append('status', statusFilter);
-        }
-
-        // Add search term if provided
+        // Add search term if present
         if (searchTerm) {
           queryParams.append('search', searchTerm);
         }
 
-        console.log('Fetching orders with params:', queryParams.toString());
-        
-        // Make the API request
-        const response = await fetch(`/api/orders/catering-orders?${queryParams.toString()}`);
-        
+        const response = await fetch(`/api/orders/catering-orders?${queryParams}`);
         if (!response.ok) {
-          console.error('Error response:', response.status, response.statusText);
-          const errorData = await response.json();
-          console.error('Error data:', errorData);
-          throw new Error(`Failed to fetch orders (${response.status}): ${errorData.message || 'Unknown error'}`);
-        }
-        
-        const apiResponse = await response.json();
-        console.log('API Response:', apiResponse);
-        
-        // Validate the structure of the API response
-        if (!apiResponse || typeof apiResponse !== 'object' || !Array.isArray(apiResponse.orders)) {
-          console.error("Invalid data structure received:", apiResponse);
-          throw new Error('Invalid data structure received from API');
+          throw new Error('Failed to fetch orders');
         }
 
-        const ordersData = apiResponse.orders || [];
-        console.log('Orders data:', ordersData);
-
-        // Format and set orders
-        const formattedOrders = ordersData.map((order: any) => ({
-          ...order,
-          // Ensure orderTotal is properly handled
-          orderTotal: typeof order.orderTotal === 'number' 
-            ? order.orderTotal 
-            : typeof order.order_total === 'string'
-            ? parseFloat(order.order_total)
-            : 0,
-          // Ensure order number is available
-          orderNumber: order.orderNumber || order.order_number || 'N/A',
-          // Ensure user name is available
-          user: {
-            ...order.user,
-            name: order.user?.name || 'Unknown Client'
-          }
-        }));
-
-        console.log('Formatted orders:', formattedOrders);
-        
-        setOrders(formattedOrders);
-        
-        // Set total pages from the API response
-        setTotalPages(apiResponse.totalPages || 1);
-        
-      } catch (error) {
-        console.error("Error fetching catering orders:", error);
-        setError(error instanceof Error ? error.message : "An error occurred while fetching orders");
+        const data: CateringOrdersApiResponse = await response.json();
+        setOrders(data.orders);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while fetching orders');
+        console.error('Error fetching orders:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      fetchOrders();
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
+    fetchOrders();
   }, [page, statusFilter, searchTerm, sortField, sortDirection, limit]);
 
   const handlePageChange = (newPage: number) => {
@@ -280,9 +239,10 @@ const CateringOrdersPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Update status filter handler
   const handleStatusFilter = (status: OrderStatus) => {
     setStatusFilter(status);
-    setPage(1);
+    setPage(1); // Reset to first page when changing filters
   };
 
   const handleSort = (field: string) => {
@@ -354,6 +314,22 @@ const CateringOrdersPage: React.FC = () => {
         </Link>
       </div>
 
+      {/* Status filter tabs */}
+      <div className="mb-6 flex space-x-2">
+        {statusTabs.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => handleStatusFilter(tab.value as OrderStatus)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+              ${statusFilter === tab.value 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Card containing filters and table */}
       <Card className="shadow-sm rounded-xl border-slate-200 overflow-hidden">
         <CardContent className="p-0">
@@ -407,24 +383,6 @@ const CateringOrdersPage: React.FC = () => {
                   <span className="sr-only">Toggle Sort Direction</span>
                 </Button>
               </div>
-            </div>
-
-            {/* Status Filter Buttons */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {(['ACTIVE', 'ASSIGNED', 'CANCELLED', 'COMPLETED'] as OrderStatus[]).map(status => (
-                <Button
-                  key={status}
-                  variant={statusFilter === status ? "secondary" : "outline"}
-                  onClick={() => handleStatusFilter(status)}
-                  className={`capitalize ${
-                    statusFilter === status 
-                    ? (status === 'ACTIVE' ? 'bg-slate-700 text-white hover:bg-slate-800' : getStatusConfig(status)?.className.replace('hover:bg-', 'bg-').replace('100', '200'))
-                    : 'text-slate-600 hover:bg-slate-100' 
-                  } text-xs px-3 py-1 h-auto`}
-                >
-                  {status.replace('_', ' ')}
-                </Button>
-              ))}
             </div>
           </div>
 

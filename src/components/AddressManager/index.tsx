@@ -28,6 +28,7 @@ interface AddressManagerProps {
   onAddressSelected: (addressId: string) => void;
   defaultFilter?: "all" | "shared" | "private";
   showFilters?: boolean;
+  showManagementButtons?: boolean;
 }
 
 const AddressManager: React.FC<AddressManagerProps> = ({
@@ -35,6 +36,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   onAddressSelected,
   defaultFilter = "all",
   showFilters = true,
+  showManagementButtons = true,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -274,22 +276,24 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         </div>
       )}
       
-      <div className="flex space-x-4 pb-6">
-        <Link
-          href="/addresses"
-          className="rounded-md bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
-        >
-          Manage Addresses
-        </Link>
-        
-        <Button
-          onClick={handleToggleAddForm}
-          variant={showAddForm ? "destructive" : "default"}
-          className={showAddForm ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}
-        >
-          {showAddForm ? "Cancel" : "Add New Address"}
-        </Button>
-      </div>
+      {showManagementButtons && (
+        <div className="flex space-x-4 pb-6">
+          <Link
+            href="/addresses"
+            className="rounded-md bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
+          >
+            Manage Addresses
+          </Link>
+          
+          <Button
+            onClick={handleToggleAddForm}
+            variant={showAddForm ? "destructive" : "default"}
+            className={showAddForm ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}
+          >
+            {showAddForm ? "Cancel" : "Add New Address"}
+          </Button>
+        </div>
+      )}
 
       {showAddForm && (
         <AddAddressForm
