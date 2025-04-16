@@ -454,6 +454,32 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
             onDeleteSuccess={onDeleteSuccess}
           />
           <Separator />
+            {/* Driver Card */}
+        <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
+          <CardHeader className="border-b bg-slate-50 p-6">
+            <CardTitle className="text-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+              Driver Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <DriverStatusCard
+              order={{
+                id: order.id,
+                status: order.status,
+                driver_status: order.driverStatus,
+                user_id: order.userId,
+                pickup_time: order.pickupDateTime,
+                arrival_time: order.arrivalDateTime,
+                complete_time: order.completeDateTime,
+                updated_at: order.updatedAt,
+              }}
+              driverInfo={driverInfo}
+              updateDriverStatus={updateDriverStatus}
+            />
+          </CardContent>
+        </Card>
+        <Separator />
+
 
           <CardContent className="space-y-6 p-6">
             <div className="bg-slate-50 rounded-lg p-4 border">
@@ -545,30 +571,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
           </CardContent>
         </Card>
 
-        {/* Driver Card */}
-        <Card className="overflow-hidden shadow-sm border-slate-200 rounded-xl">
-          <CardHeader className="border-b bg-slate-50 p-6">
-            <CardTitle className="text-xl font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-              Driver Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <DriverStatusCard
-              order={{
-                id: order.id,
-                status: order.status,
-                driver_status: order.driverStatus,
-                user_id: order.userId,
-                pickup_time: order.pickupDateTime,
-                arrival_time: order.arrivalDateTime,
-                complete_time: order.completeDateTime,
-                updated_at: order.updatedAt,
-              }}
-              driverInfo={driverInfo}
-              updateDriverStatus={updateDriverStatus}
-            />
-          </CardContent>
-        </Card>
+      
       </div>
 
       <DriverAssignmentDialog
