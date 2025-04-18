@@ -19,8 +19,8 @@
     "db:restore": "tsx scripts/restore-db.ts",
     "db": "tsx src/scripts/db-tasks.ts",
     "db:prod": "cross-env NODE_ENV=production tsx src/scripts/db-tasks.ts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
-    "test:watch": "jest --watch",
+    "test": "dotenv -e .env.test -- vitest run",
+    "test:watch": "dotenv -e .env.test -- vitest",
     "studio": "dotenv -e .env.local -- npx prisma studio",
     "db:generate": "dotenv -e .env.local -- npx prisma generate"
   },
@@ -157,6 +157,7 @@
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
     "dotenv-cli": "^8.0.0",
@@ -173,7 +174,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "vitest-mock-extended": "^3.1.0"
   },
   "overrides": {
     "@octokit/request": "8.4.1",

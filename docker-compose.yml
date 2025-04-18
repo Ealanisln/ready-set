@@ -1,21 +1,46 @@
+version: '3.8' # Specify version if needed
+
 services:
-  db:
+  # Your existing development database (renamed for clarity)
+  postgres-dev:
     image: postgres:15-alpine
+    container_name: ready-set-postgres-dev # Optional: Specific name
     ports:
-      - "5432:5432"
+      - "5432:5432" # Keep original port for dev
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: mydatabase
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_HOST_AUTH_METHOD: trust # Be careful with 'trust' in non-local scenarios
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data # Separate volume for dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"] # Check specific user/db
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: unless-stopped  # Optional but recommended
+    restart: unless-stopped
+
+  # New database service specifically for testing
+  postgres-test:
+    image: postgres:15-alpine # Use the same image or pin version
+    container_name: ready-set-postgres-test # Specific name for test container
+    ports:
+      - "5433:5432" # Expose test DB on host port 5433
+    environment:
+      POSTGRES_USER: testuser          # Separate user for test DB
+      POSTGRES_PASSWORD: testpassword  # Separate password for test DB
+      POSTGRES_DB: ready_set_test      # Separate database name for test DB
+      POSTGRES_HOST_AUTH_METHOD: trust # Keep 'trust' for local testing ease if desired
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data # Separate volume for test data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d ready_set_test"] # Check specific test user/db
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres_dev_data: # Define the volume for dev data
+  postgres_test_data: # Define the volume for test data

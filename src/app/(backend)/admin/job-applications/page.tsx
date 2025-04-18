@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ClipboardList,
@@ -57,6 +57,8 @@ import {
   JobApplicationStats,
 } from "@/types/job-application";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { approveJobApplication } from '@/app/actions/admin/job-applications';
+
 
 const COLORS = ["#4f46e5", "#10b981", "#ef4444", "#f59e0b"];
 
@@ -122,7 +124,8 @@ const ApplicationDetailDialog: React.FC<{
   open: boolean;
   onClose: () => void;
   onStatusChange: (id: string, status: ApplicationStatus) => void;
-}> = ({ application, open, onClose, onStatusChange }) => {
+  isSubmitting?: boolean;
+}> = ({ application, open, onClose, onStatusChange, isSubmitting }) => {
   if (!application) return null;
 
   const handleStatusChange = (status: ApplicationStatus) => {
@@ -323,6 +326,7 @@ const ApplicationDetailDialog: React.FC<{
               variant={application.status === ApplicationStatus.APPROVED ? "default" : "outline"}
               className={application.status === ApplicationStatus.APPROVED ? "bg-green-600 hover:bg-green-700" : ""}
               onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
+              disabled={isSubmitting}
             >
               <CheckCircle className="mr-2 h-4 w-4" />
               Approve
@@ -331,6 +335,7 @@ const ApplicationDetailDialog: React.FC<{
               variant={application.status === ApplicationStatus.REJECTED ? "default" : "outline"}
               className={application.status === ApplicationStatus.REJECTED ? "bg-red-600 hover:bg-red-700" : ""}
               onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
+              disabled={isSubmitting}
             >
               <XCircle className="mr-2 h-4 w-4" />
               Reject
@@ -339,6 +344,7 @@ const ApplicationDetailDialog: React.FC<{
               variant={application.status === ApplicationStatus.INTERVIEWING ? "default" : "outline"}
               className={application.status === ApplicationStatus.INTERVIEWING ? "bg-blue-600 hover:bg-blue-700" : ""}
               onClick={() => handleStatusChange(ApplicationStatus.INTERVIEWING)}
+              disabled={isSubmitting}
             >
               <Calendar className="mr-2 h-4 w-4" />
               Schedule Interview
@@ -394,117 +400,172 @@ export default function JobApplicationsPage() {
   
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [stats, setStats] = useState<JobApplicationStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "all">(
+    "all",
+  );
   const [positionFilter, setPositionFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] =
+    useState<JobApplication | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get stats and applications
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/admin/job-applications?statsOnly=true");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch stats: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setStats(data);
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-        setError("Failed to load application statistics");
+  // Wrap fetchStats in useCallback
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/job-applications/stats");
+      if (!response.ok) {
+        throw new Error("Failed to fetch stats");
       }
-    };
-
-    fetchStats();
+      const data: JobApplicationStats = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      setError("Failed to load application statistics");
+      toast({
+        title: "Error",
+        description: "Failed to load application statistics",
+        variant: "destructive",
+      });
+    }
   }, []);
 
-  // Fetch applications with filters
-  useEffect(() => {
-    const fetchApplications = async () => {
-      setLoading(true);
-      try {
-        let url = `/api/admin/job-applications?page=${page}`;
-        
-        if (statusFilter) {
-          url += `&status=${statusFilter}`;
-        }
-        
-        if (positionFilter) {
-          url += `&position=${positionFilter}`;
-        }
-        
-        if (searchTerm) {
-          url += `&search=${encodeURIComponent(searchTerm)}`;
-        }
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch applications: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        setApplications(data.applications);
-        setTotalPages(data.totalPages);
-      } catch (error) {
-        console.error("Error fetching applications:", error);
-        setError("Failed to load applications");
-      } finally {
-        setLoading(false);
+  // Wrap fetchApplications in useCallback
+  const fetchApplications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+        search: searchTerm,
+        status: statusFilter === "all" ? "" : statusFilter,
+        position: positionFilter,
+      });
+      const response = await fetch(`/api/admin/job-applications?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch applications");
       }
-    };
+      const data = await response.json();
+      setApplications(data.applications);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      console.error("Error fetching applications:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to load applications";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, searchTerm, statusFilter, positionFilter]);
 
+  // useEffect for fetching data on initial load and when dependencies change
+  useEffect(() => {
+    fetchStats();
     fetchApplications();
-  }, [page, statusFilter, positionFilter, searchTerm]);
+  }, [fetchStats, fetchApplications]);
 
   // Handle application status change
   const handleStatusChange = async (id: string, newStatus: ApplicationStatus) => {
-    try {
-      const response = await fetch(`/api/admin/job-applications/${id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+    setIsSubmitting(true);
+    setError(null);
 
-      if (!response.ok) {
-        throw new Error(`Failed to update status: ${response.statusText}`);
+    try {
+      let resultMessage = "";
+      let updatedApp: JobApplication | undefined;
+
+      if (newStatus === ApplicationStatus.APPROVED) {
+        console.log(`Attempting to approve application ID: ${id}`);
+        const result = await approveJobApplication(id);
+        console.log("Server action result:", result);
+
+        resultMessage = result.message || "Application approved successfully.";
+        updatedApp = applications.find(app => app.id === id);
+        if (updatedApp) {
+            updatedApp = { ...updatedApp, status: newStatus };
+        }
+
+      } else {
+        console.log(`Attempting to update status for ${id} to ${newStatus} via API`);
+        const response = await fetch(`/api/admin/job-applications/${id}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        console.log("API response status:", response.status);
+
+        if (!response.ok) {
+          let errorData = { error: `API error ${response.status}` };
+          try {
+            errorData = await response.json();
+          } catch (e) { /* Ignore json parsing error */ }
+          console.error("API Error Data:", errorData);
+          throw new Error(
+            errorData.error || `Failed to update status to ${newStatus}`,
+          );
+        }
+        updatedApp = (await response.json()) as JobApplication;
+        resultMessage = `Application status updated to ${updatedApp.status}`;
+        console.log("API update successful, new status:", updatedApp.status);
       }
 
-      // Update the application in the local state
-      setApplications((prevApplications) =>
-        prevApplications.map((app) =>
-          app.id === id ? { ...app, status: newStatus } : app
-        )
-      );
-
-      if (selectedApplication && selectedApplication.id === id) {
-        setSelectedApplication({ ...selectedApplication, status: newStatus });
+      if (updatedApp) {
+          const finalUpdatedApp = updatedApp;
+          setApplications((prevApps) =>
+            prevApps.map((app) =>
+              app.id === id ? finalUpdatedApp : app,
+            ),
+          );
+          if (selectedApplication && selectedApplication.id === id) {
+              setSelectedApplication(finalUpdatedApp);
+          }
+      } else {
+          setApplications((prevApps) =>
+            prevApps.map((app) =>
+              app.id === id ? { ...app, status: newStatus } : app,
+            ),
+          );
+          if (selectedApplication && selectedApplication.id === id) {
+              setSelectedApplication({ ...selectedApplication, status: newStatus });
+          }
       }
 
       toast({
-        title: "Status updated",
-        description: `Application status changed to ${newStatus.toLowerCase()}`,
+        title: "Success",
+        description: resultMessage,
+        variant: "default",
       });
-    } catch (error) {
-      console.error("Error updating status:", error);
+
+      fetchStats();
+
+    } catch (error: any) {
+      console.error("Error updating application status:", error);
+      const description = error.message || "An unexpected error occurred. Please try again.";
+      setError(description);
       toast({
         title: "Error",
-        description: "Failed to update application status",
+        description: description,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle view application details
   const handleViewApplication = (application: JobApplication) => {
     setSelectedApplication(application);
-    setDetailDialogOpen(true);
+    setIsDetailDialogOpen(true);
   };
 
   // Prepare chart data
@@ -526,16 +587,16 @@ export default function JobApplicationsPage() {
     });
   };
 
-  if (loading && !stats) {
+  if (isLoading && !stats) {
     return <LoadingDashboard />;
   }
 
-  if (error && !stats) {
+  if (!stats) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-800">Error</h2>
-          <p className="mt-2 text-gray-600">{error}</p>
+          <p className="mt-2 text-gray-600">Failed to load application statistics</p>
           <Button
             className="mt-4"
             onClick={() => window.location.reload()}
@@ -624,13 +685,13 @@ export default function JobApplicationsPage() {
                       <div className="p-2">
                         <Select
                           value={statusFilter}
-                          onValueChange={(value) => setStatusFilter(value as ApplicationStatus | "")}
+                          onValueChange={(value) => setStatusFilter(value as ApplicationStatus | "all")}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Statuses</SelectItem>
+                            <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value={ApplicationStatus.PENDING}>
                               Pending
                             </SelectItem>
@@ -733,6 +794,7 @@ export default function JobApplicationsPage() {
                                         ApplicationStatus.APPROVED
                                       )
                                     }
+                                    disabled={isSubmitting || application.status === ApplicationStatus.APPROVED}
                                   >
                                     <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
                                     Approve
@@ -744,6 +806,7 @@ export default function JobApplicationsPage() {
                                         ApplicationStatus.REJECTED
                                       )
                                     }
+                                    disabled={isSubmitting || application.status === ApplicationStatus.REJECTED}
                                   >
                                     <XCircle className="mr-2 h-4 w-4 text-red-500" />
                                     Reject
@@ -755,6 +818,7 @@ export default function JobApplicationsPage() {
                                         ApplicationStatus.INTERVIEWING
                                       )
                                     }
+                                    disabled={isSubmitting || application.status === ApplicationStatus.INTERVIEWING}
                                   >
                                     <Calendar className="mr-2 h-4 w-4 text-blue-500" />
                                     Schedule Interview
@@ -876,9 +940,10 @@ export default function JobApplicationsPage() {
       {/* Application Detail Dialog */}
       <ApplicationDetailDialog
         application={selectedApplication}
-        open={detailDialogOpen}
-        onClose={() => setDetailDialogOpen(false)}
+        open={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
         onStatusChange={handleStatusChange}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
