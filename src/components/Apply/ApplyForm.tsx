@@ -64,6 +64,16 @@ const JobApplicationForm = () => {
       workExperience: "",
       skills: ["", "", ""],
       coverLetter: "",
+      // Initialize file fields (even though they are managed by hooks, RHF needs keys)
+      resume: null,
+      driversLicense: null,
+      insurance: null,
+      vehicleRegistration: null,
+      foodHandler: null,
+      hipaa: null,
+      driverPhoto: null,
+      carPhoto: null,
+      equipmentPhoto: null,
     },
   });
 
@@ -103,6 +113,51 @@ const JobApplicationForm = () => {
     entityType: "job_application",
     entityId: tempEntityId,
     allowedFileTypes: IMAGE_PDF_TYPES,
+    maxFileCount: 1,
+  });
+
+  const foodHandlerUpload = useJobApplicationUpload({
+    bucketName: "user-assets",
+    category: "food_handler",
+    entityType: "job_application",
+    entityId: tempEntityId,
+    allowedFileTypes: IMAGE_PDF_TYPES,
+    maxFileCount: 1,
+  });
+
+  const hipaaUpload = useJobApplicationUpload({
+    bucketName: "user-assets",
+    category: "hipaa",
+    entityType: "job_application",
+    entityId: tempEntityId,
+    allowedFileTypes: IMAGE_PDF_TYPES,
+    maxFileCount: 1,
+  });
+
+  const driverPhotoUpload = useJobApplicationUpload({
+    bucketName: "user-assets",
+    category: "driver_photo",
+    entityType: "job_application",
+    entityId: tempEntityId,
+    allowedFileTypes: [".jpg", ".jpeg", ".png"],
+    maxFileCount: 1,
+  });
+
+  const carPhotoUpload = useJobApplicationUpload({
+    bucketName: "user-assets",
+    category: "car_photo",
+    entityType: "job_application",
+    entityId: tempEntityId,
+    allowedFileTypes: [".jpg", ".jpeg", ".png"],
+    maxFileCount: 1,
+  });
+
+  const equipmentPhotoUpload = useJobApplicationUpload({
+    bucketName: "user-assets",
+    category: "equipment_photo",
+    entityType: "job_application",
+    entityId: tempEntityId,
+    allowedFileTypes: [".jpg", ".jpeg", ".png"],
     maxFileCount: 1,
   });
 
@@ -159,6 +214,12 @@ const JobApplicationForm = () => {
         driversLicenseFileId: licenseUpload.uploadedFiles[0]?.key || null,
         insuranceFileId: insuranceUpload.uploadedFiles[0]?.key || null,
         vehicleRegFileId: registrationUpload.uploadedFiles[0]?.key || null,
+        // Add the file IDs for the new uploads
+        foodHandlerFileId: foodHandlerUpload.uploadedFiles[0]?.key || null,
+        hipaaFileId: hipaaUpload.uploadedFiles[0]?.key || null,
+        driverPhotoFileId: driverPhotoUpload.uploadedFiles[0]?.key || null,
+        carPhotoFileId: carPhotoUpload.uploadedFiles[0]?.key || null,
+        equipmentPhotoFileId: equipmentPhotoUpload.uploadedFiles[0]?.key || null,
       };
 
       console.log("Submitting application data:", submissionData);
@@ -190,6 +251,11 @@ const JobApplicationForm = () => {
       licenseUpload.setUploadedFiles([]);
       insuranceUpload.setUploadedFiles([]);
       registrationUpload.setUploadedFiles([]);
+      foodHandlerUpload.setUploadedFiles([]);
+      hipaaUpload.setUploadedFiles([]);
+      driverPhotoUpload.setUploadedFiles([]);
+      carPhotoUpload.setUploadedFiles([]);
+      equipmentPhotoUpload.setUploadedFiles([]);
 
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -223,6 +289,12 @@ const JobApplicationForm = () => {
       }
       if (registrationUpload.uploadedFiles.length === 0) {
         errors.push("Please upload your vehicle registration");
+      }
+      if (driverPhotoUpload.uploadedFiles.length === 0) {
+        errors.push("Please upload your driver photo");
+      }
+      if (carPhotoUpload.uploadedFiles.length === 0) {
+        errors.push("Please upload your car photo");
       }
     }
 
@@ -421,20 +493,23 @@ const JobApplicationForm = () => {
                 {renderError(errors.address?.zip)}
               </div>
 
-              <div>
-                <FileUpload
-                  name="resume"
-                  label="Resume"
-                  required
-                  error={errors.resume}
-                  startUpload={resumeUpload.onUpload}
-                  deleteFile={resumeUpload.deleteFile}
-                  file={resumeUpload.uploadedFiles[0] || null}
-                  isUploading={resumeUpload.isUploading}
-                  progresses={resumeUpload.progresses}
-                  accept={generateAcceptString(RESUME_TYPES)}
-                />
-              </div>
+              {/* Resume field - only show if NOT Driver for Catering Deliveries */}
+              {!isDriverRole && (
+                <div>
+                  <FileUpload
+                    name="resume"
+                    label="Resume"
+                    required
+                    error={errors.resume}
+                    startUpload={resumeUpload.onUpload}
+                    deleteFile={resumeUpload.deleteFile}
+                    file={resumeUpload.uploadedFiles[0] || null}
+                    isUploading={resumeUpload.isUploading}
+                    progresses={resumeUpload.progresses}
+                    accept={generateAcceptString(RESUME_TYPES)}
+                  />
+                </div>
+              )}
 
               {isDriverRole && (
                 <div className="space-y-4">
@@ -476,104 +551,179 @@ const JobApplicationForm = () => {
                     progresses={registrationUpload.progresses}
                     accept={generateAcceptString(IMAGE_PDF_TYPES)}
                   />
+
+                  {/* Food Handler Certificate */}
+                  <FileUpload
+                    name="foodHandler"
+                    label="Food Handler Certificate"
+                    required={false}
+                    error={errors.foodHandler}
+                    startUpload={foodHandlerUpload.onUpload}
+                    deleteFile={foodHandlerUpload.deleteFile}
+                    file={foodHandlerUpload.uploadedFiles[0] || null}
+                    isUploading={foodHandlerUpload.isUploading}
+                    progresses={foodHandlerUpload.progresses}
+                    accept={generateAcceptString(IMAGE_PDF_TYPES)}
+                  />
+
+                  {/* HIPAA Certificate */}
+                  <FileUpload
+                    name="hipaa"
+                    label="HIPAA Certificate"
+                    required={false}
+                    error={errors.hipaa}
+                    startUpload={hipaaUpload.onUpload}
+                    deleteFile={hipaaUpload.deleteFile}
+                    file={hipaaUpload.uploadedFiles[0] || null}
+                    isUploading={hipaaUpload.isUploading}
+                    progresses={hipaaUpload.progresses}
+                    accept={generateAcceptString(IMAGE_PDF_TYPES)}
+                  />
+
+                  {/* Driver Photo (mandatory) */}
+                  <FileUpload
+                    name="driverPhoto"
+                    label="Driver Photo"
+                    required
+                    error={errors.driverPhoto}
+                    startUpload={driverPhotoUpload.onUpload}
+                    deleteFile={driverPhotoUpload.deleteFile}
+                    file={driverPhotoUpload.uploadedFiles[0] || null}
+                    isUploading={driverPhotoUpload.isUploading}
+                    progresses={driverPhotoUpload.progresses}
+                    accept={generateAcceptString([".jpg", ".jpeg", ".png"])}
+                  />
+
+                  {/* Car Photo (mandatory) */}
+                  <FileUpload
+                    name="carPhoto"
+                    label="Car Photo"
+                    required
+                    error={errors.carPhoto}
+                    startUpload={carPhotoUpload.onUpload}
+                    deleteFile={carPhotoUpload.deleteFile}
+                    file={carPhotoUpload.uploadedFiles[0] || null}
+                    isUploading={carPhotoUpload.isUploading}
+                    progresses={carPhotoUpload.progresses}
+                    accept={generateAcceptString([".jpg", ".jpeg", ".png"])}
+                  />
+
+                  {/* Equipment Photo (optional) */}
+                  <FileUpload
+                    name="equipmentPhoto"
+                    label="Equipment Photo (Optional)"
+                    required={false}
+                    error={errors.equipmentPhoto}
+                    startUpload={equipmentPhotoUpload.onUpload}
+                    deleteFile={equipmentPhotoUpload.deleteFile}
+                    file={equipmentPhotoUpload.uploadedFiles[0] || null}
+                    isUploading={equipmentPhotoUpload.isUploading}
+                    progresses={equipmentPhotoUpload.progresses}
+                    accept={generateAcceptString([".jpg", ".jpeg", ".png"])}
+                  />
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Cover Letter
-                </label>
-                <textarea
-                  className={`mt-1 block w-full rounded-md border ${
-                    errors.coverLetter ? "border-red-500" : "border-gray-300"
-                  } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                  rows={4}
-                  placeholder="Tell us why you're interested in this position..."
-                  {...register("coverLetter")}
-                />
-                {renderError(errors.coverLetter)}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Education *
-                </label>
-                <textarea
-                  className={`mt-1 block w-full rounded-md border ${
-                    errors.education ? "border-red-500" : "border-gray-300"
-                  } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                  rows={3}
-                  placeholder="List your educational background..."
-                  {...register("education", {
-                    required: "Education information is required",
-                    minLength: {
-                      value: 10,
-                      message:
-                        "Please provide more detail about your education",
-                    },
-                  })}
-                />
-                {renderError(errors.education)}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Work Experience *
-                </label>
-                <textarea
-                  className={`mt-1 block w-full rounded-md border ${
-                    errors.workExperience ? "border-red-500" : "border-gray-300"
-                  } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                  rows={4}
-                  placeholder="Describe your relevant work experience..."
-                  {...register("workExperience", {
-                    required: "Work experience is required",
-                    minLength: {
-                      value: 20,
-                      message:
-                        "Please provide more detail about your work experience",
-                    },
-                  })}
-                />
-                {renderError(errors.workExperience)}
-              </div>
-
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Main Skills *
-                </label>
-                {[0, 1, 2].map((index) => (
-                  <div key={index}>
-                    <input
-                      type="text"
-                      className={`block w-full rounded-md border ${
-                        errors.skills?.[index]
-                          ? "border-red-500"
-                          : "border-gray-300"
+              {/* Hide these fields for Driver for Catering Deliveries */}
+              {!isDriverRole && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Cover Letter
+                    </label>
+                    <textarea
+                      className={`mt-1 block w-full rounded-md border ${
+                        errors.coverLetter ? "border-red-500" : "border-gray-300"
                       } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                      placeholder={`Skill ${index + 1} (e.g., ${
-                        index === 0
-                          ? "Customer Service"
-                          : index === 1
-                            ? "Time Management"
-                            : "Problem Solving"
-                      })`}
-                      {...register(`skills.${index}`, {
-                        required: "This skill is required",
+                      rows={4}
+                      placeholder="Tell us why you're interested in this position..."
+                      {...register("coverLetter")}
+                    />
+                    {renderError(errors.coverLetter)}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Education *
+                    </label>
+                    <textarea
+                      className={`mt-1 block w-full rounded-md border ${
+                        errors.education ? "border-red-500" : "border-gray-300"
+                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      rows={3}
+                      placeholder="List your educational background..."
+                      {...register("education", {
+                        required: "Education information is required",
                         minLength: {
-                          value: 2,
-                          message: "Skill must be at least 2 characters",
+                          value: 10,
+                          message:
+                            "Please provide more detail about your education",
                         },
                       })}
                     />
-                    {errors.skills?.[index] && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.skills[index].message}
-                      </p>
-                    )}
+                    {renderError(errors.education)}
                   </div>
-                ))}
-              </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Work Experience *
+                    </label>
+                    <textarea
+                      className={`mt-1 block w-full rounded-md border ${
+                        errors.workExperience ? "border-red-500" : "border-gray-300"
+                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      rows={4}
+                      placeholder="Describe your relevant work experience..."
+                      {...register("workExperience", {
+                        required: "Work experience is required",
+                        minLength: {
+                          value: 20,
+                          message:
+                            "Please provide more detail about your work experience",
+                        },
+                      })}
+                    />
+                    {renderError(errors.workExperience)}
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Main Skills *
+                    </label>
+                    {[0, 1, 2].map((index) => (
+                      <div key={index}>
+                        <input
+                          type="text"
+                          className={`block w-full rounded-md border ${
+                            errors.skills?.[index]
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                          placeholder={`Skill ${index + 1} (e.g., ${
+                            index === 0
+                              ? "Customer Service"
+                              : index === 1
+                                ? "Time Management"
+                                : "Problem Solving"
+                          })`}
+                          {...register(`skills.${index}`, {
+                            required: "This skill is required",
+                            minLength: {
+                              value: 2,
+                              message: "Skill must be at least 2 characters",
+                            },
+                          })}
+                        />
+                        {errors.skills?.[index] && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.skills[index].message}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <button

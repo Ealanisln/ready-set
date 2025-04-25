@@ -14,6 +14,7 @@ import {
   FileText,
   Calendar,
   Briefcase,
+  UserCircle2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -125,7 +126,8 @@ const ApplicationDetailDialog: React.FC<{
   onClose: () => void;
   onStatusChange: (id: string, status: ApplicationStatus) => void;
   isSubmitting?: boolean;
-}> = ({ application, open, onClose, onStatusChange, isSubmitting }) => {
+  error?: string | null;
+}> = ({ application, open, onClose, onStatusChange, isSubmitting, error }) => {
   if (!application) return null;
 
   const handleStatusChange = (status: ApplicationStatus) => {
@@ -179,181 +181,188 @@ const ApplicationDetailDialog: React.FC<{
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl bg-white">
+    <Dialog open={open} onOpenChange={onClose} aria-label="Application Details">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-3xl bg-white"
+        role="dialog"
+        aria-modal="true"
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
+            <UserCircle2 className="h-8 w-8 text-gray-400" aria-hidden="true" />
             Application Details
           </DialogTitle>
           <DialogDescription>
-            Submitted on {formatDate(application.createdAt)}
+            Submitted on{" "}
+            <span className="font-medium">
+              {formatDate(application.createdAt)}
+            </span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <h3 className="mb-4 text-lg font-medium">Personal Information</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Full Name</p>
-                <p>
-                  {application.firstName} {application.lastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Email</p>
-                <p>{application.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Phone</p>
-                <p>{application.phone || "Not provided"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Position</p>
-                <p>{application.position}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Status</p>
-                <StatusBadge status={application.status} />
-              </div>
-            </div>
-
-            <h3 className="mb-4 mt-6 text-lg font-medium">Address</h3>
-            <div className="space-y-2">
-              <p>{application.addressStreet}</p>
-              <p>
-                {application.addressCity}, {application.addressState}{" "}
-                {application.addressZip}
-              </p>
-            </div>
+        {error && (
+          <div className="mb-4 rounded bg-red-100 px-4 py-2 text-red-700" role="alert">
+            {error}
           </div>
+        )}
 
-          <div>
-            <h3 className="mb-4 text-lg font-medium">Qualifications</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Education</p>
-                <p className="whitespace-pre-wrap">{application.education}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Personal Info */}
+          <section aria-labelledby="personal-info-heading">
+            <h3 id="personal-info-heading" className="mb-4 text-lg font-semibold">
+              Personal Information
+            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-full bg-gray-200 h-12 w-12 flex items-center justify-center text-xl font-bold text-gray-600">
+                {application.firstName?.[0]?.toUpperCase() + (application.lastName?.[0]?.toUpperCase() || '')}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Work Experience
-                </p>
-                <p className="whitespace-pre-wrap">
-                  {application.workExperience}
-                </p>
+                <div className="text-base font-medium">
+                  {application.firstName} {application.lastName}
+                </div>
+                <div className="text-sm text-gray-500">{application.email}</div>
+              </div>
+            </div>
+            <dl className="space-y-2">
+              <div>
+                <dt className="text-xs font-semibold text-gray-500">Phone</dt>
+                <dd className="text-sm">{application.phone || "Not provided"}</dd>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Skills</p>
-                <p>{application.skills}</p>
+                <dt className="text-xs font-semibold text-gray-500">Position</dt>
+                <dd className="text-sm">{application.position}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold text-gray-500">Status</dt>
+                <dd>
+                  <StatusBadge status={application.status} />
+                </dd>
+              </div>
+            </dl>
+            <div className="mt-6">
+              <h4 className="text-xs font-semibold text-gray-500 mb-1">Address</h4>
+              <address className="not-italic text-sm text-gray-700">
+                {application.addressStreet}
+                <br />
+                {application.addressCity}, {application.addressState} {application.addressZip}
+              </address>
+            </div>
+          </section>
+
+          {/* Qualifications */}
+          <section aria-labelledby="qualifications-heading">
+            <h3 id="qualifications-heading" className="mb-4 text-lg font-semibold">
+              Qualifications
+            </h3>
+            <dl className="space-y-3">
+              <div>
+                <dt className="text-xs font-semibold text-gray-500">Education</dt>
+                <dd className="text-sm whitespace-pre-wrap">{application.education}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold text-gray-500">Work Experience</dt>
+                <dd className="text-sm whitespace-pre-wrap">{application.workExperience}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold text-gray-500">Skills</dt>
+                <dd className="text-sm">{application.skills}</dd>
               </div>
               {application.coverLetter && (
                 <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Cover Letter
-                  </p>
-                  <p className="whitespace-pre-wrap">
-                    {application.coverLetter}
-                  </p>
+                  <dt className="text-xs font-semibold text-gray-500">Cover Letter</dt>
+                  <dd className="text-sm whitespace-pre-wrap">{application.coverLetter}</dd>
                 </div>
               )}
-            </div>
-          </div>
+            </dl>
+          </section>
         </div>
 
-        <div className="mt-6">
-          <h3 className="mb-4 text-lg font-medium">Documents</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Documents */}
+        <section className="mt-8" aria-labelledby="documents-heading">
+          <h3 id="documents-heading" className="mb-4 text-lg font-semibold">
+            Documents
+          </h3>
+          <div className="flex flex-wrap gap-3">
             {application.resumeUrl && (
               <Button
                 variant="outline"
-                className="justify-start"
+                className="flex items-center gap-2"
                 onClick={() => {
                   console.log("Resume URL (original):", application.resumeUrl);
                   const url = getDocumentUrl(application.resumeUrl);
                   openDocumentWithFallback(url);
                 }}
+                aria-label="View Resume"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                View Resume
+                <FileText className="h-4 w-4" />
+                Resume
               </Button>
             )}
             {application.driversLicenseUrl && (
               <Button
                 variant="outline"
-                className="justify-start"
+                className="flex items-center gap-2"
                 onClick={() => {
                   const url = getDocumentUrl(application.driversLicenseUrl);
                   openDocumentWithFallback(url);
                 }}
+                aria-label="View Driver's License"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                View Driver's License
+                <FileText className="h-4 w-4" />
+                Driver's License
               </Button>
             )}
             {application.insuranceUrl && (
               <Button
                 variant="outline"
-                className="justify-start"
+                className="flex items-center gap-2"
                 onClick={() => {
                   const url = getDocumentUrl(application.insuranceUrl);
                   openDocumentWithFallback(url);
                 }}
+                aria-label="View Insurance"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                View Insurance
+                <FileText className="h-4 w-4" />
+                Insurance
               </Button>
             )}
             {application.vehicleRegUrl && (
               <Button
                 variant="outline"
-                className="justify-start"
+                className="flex items-center gap-2"
                 onClick={() => {
                   const url = getDocumentUrl(application.vehicleRegUrl);
                   openDocumentWithFallback(url);
                 }}
+                aria-label="View Vehicle Registration"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                View Vehicle Registration
+                <FileText className="h-4 w-4" />
+                Vehicle Registration
               </Button>
             )}
           </div>
-        </div>
+        </section>
 
-        <DialogFooter className="flex-col space-y-2 sm:space-y-0">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={application.status === ApplicationStatus.APPROVED ? "default" : "outline"}
-              className={application.status === ApplicationStatus.APPROVED ? "bg-green-600 hover:bg-green-700" : ""}
-              onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
-              disabled={isSubmitting}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Approve
-            </Button>
-            <Button
-              variant={application.status === ApplicationStatus.REJECTED ? "default" : "outline"}
-              className={application.status === ApplicationStatus.REJECTED ? "bg-red-600 hover:bg-red-700" : ""}
-              onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
-              disabled={isSubmitting}
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              Reject
-            </Button>
-            <Button
-              variant={application.status === ApplicationStatus.INTERVIEWING ? "default" : "outline"}
-              className={application.status === ApplicationStatus.INTERVIEWING ? "bg-blue-600 hover:bg-blue-700" : ""}
-              onClick={() => handleStatusChange(ApplicationStatus.INTERVIEWING)}
-              disabled={isSubmitting}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              Schedule Interview
-            </Button>
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </DialogFooter>
+        {/* Actions */}
+        <section className="mt-8 flex flex-row gap-3 justify-end">
+          <Button
+            variant="destructive"
+            disabled={isSubmitting}
+            onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
+            aria-label="Reject Application"
+          >
+            Reject
+          </Button>
+          <Button
+            variant="default"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            disabled={isSubmitting}
+            onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
+            aria-label="Approve Application"
+          >
+            Approve
+          </Button>
+        </section>
       </DialogContent>
     </Dialog>
   );
@@ -905,7 +914,7 @@ export default function JobApplicationsPage() {
                   Applications by Position
                 </h3>
                 <div className="space-y-4">
-                  {stats &&
+                  {stats?.applicationsByPosition &&
                     Object.entries(stats.applicationsByPosition).map(
                       ([position, count]) => (
                         <div key={position}>
@@ -944,6 +953,7 @@ export default function JobApplicationsPage() {
         onClose={() => setIsDetailDialogOpen(false)}
         onStatusChange={handleStatusChange}
         isSubmitting={isSubmitting}
+        error={error}
       />
     </div>
   );

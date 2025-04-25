@@ -20,6 +20,11 @@ export interface FormData {
   driversLicense: File | null;
   insurance: File | null;
   vehicleRegistration: File | null;
+  foodHandler?: File | null;
+  hipaa?: File | null;
+  driverPhoto?: File | null;
+  carPhoto?: File | null;
+  equipmentPhoto?: File | null;
 }
 
 export interface SubmissionData {
@@ -42,6 +47,11 @@ export interface SubmissionData {
   driversLicenseFileId: string | null;
   insuranceFileId: string | null;
   vehicleRegFileId: string | null;
+  foodHandlerFileId: string | null;
+  hipaaFileId: string | null;
+  driverPhotoFileId: string | null;
+  carPhotoFileId: string | null;
+  equipmentPhotoFileId: string | null;
 }
 
 export interface JobApplicationResponse {
