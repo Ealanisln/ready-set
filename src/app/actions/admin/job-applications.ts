@@ -31,11 +31,12 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
   }
 
   const userType = profile?.type;
-  const isAdmin = userType === UserType.ADMIN || userType === UserType.SUPER_ADMIN;
+  // Allow ADMIN, SUPER_ADMIN, and HELPDESK to approve applications
+  const isApprover = userType === UserType.ADMIN || userType === UserType.SUPER_ADMIN || userType === UserType.HELPDESK;
 
-  if (!isAdmin) {
+  if (!isApprover) {
     console.warn(`Unauthorized attempt by user ${user.id} with type ${userType}`);
-    throw new Error("Unauthorized: Admin privileges required.");
+    throw new Error("Unauthorized: Admin, Super Admin, or Helpdesk privileges required.");
   }
   // --- End Authorization Check ---
 

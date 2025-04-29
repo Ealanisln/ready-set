@@ -19,17 +19,11 @@ interface UserNotificationTemplates {
       return {
         subject: `New ${userData.userType.charAt(0).toUpperCase() + userData.userType.slice(1)} Registration - Ready Set`,
         html: `
-          <html>
-            <body>
-              <h2>New User Registration</h2>
-              <p>A new user has registered on the platform:</p>
-              <p>User Type: ${userData.userType}</p>
-              <p>Name: ${userName}</p>
-              <p>Email: ${userData.email}</p>
-              ${companyInfo}
-              <p>Please review this registration in the admin dashboard.</p>
-            </body>
-          </html>
+          <p>User Type: ${userData.userType}</p>
+          <p>Name: ${userName}</p>
+          <p>Email: ${userData.email}</p>
+          <p>Company: ${userData.company ?? ""}</p>
+          <p>Please review this registration in the admin dashboard.</p>
         `
       };
     }

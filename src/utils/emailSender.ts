@@ -60,6 +60,8 @@ interface OnDemandOrder extends BaseOrder {
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+export type { CateringOrder, OnDemandOrder };
+
 export async function sendOrderEmail(order: CateringOrder | OnDemandOrder) {
   const formatDate = (date: Date | null) => {
     if (!date) return "N/A";

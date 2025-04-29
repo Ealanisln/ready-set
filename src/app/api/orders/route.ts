@@ -339,12 +339,60 @@ export async function POST(request: NextRequest) {
       }
 
       // Send email notification
-      // try {
-      //   await sendOrderEmail(createdOrder as EmailOrder, order_type); // Adjust type casting if needed
-      // } catch (emailError) {
-      //   console.error("Failed to send order confirmation email:", emailError);
-      //   // Decide if email failure should prevent order creation or just be logged
-      // }
+      try {
+        // Helper to map PrismaOrder to the expected email sender type
+        function mapOrderForEmail(order: PrismaOrder): import("@/utils/emailSender").CateringOrder | import("@/utils/emailSender").OnDemandOrder {
+          const isCatering = 'brokerage' in order;
+          const base = {
+            user: {
+              name: order.user?.name ?? null,
+              email: order.user?.email ?? null,
+            },
+            address: order.pickupAddress,
+            delivery_address: order.deliveryAddress,
+            order_number: order.orderNumber,
+            brokerage: isCatering ? order.brokerage : undefined,
+            date: order.pickupDateTime ?? null,
+            pickup_time: order.pickupDateTime ?? null,
+            arrival_time: order.arrivalDateTime ?? null,
+            complete_time: order.completeDateTime ?? null,
+            order_total:
+              typeof order.orderTotal === "object" && order.orderTotal !== null && "toNumber" in order.orderTotal
+                ? order.orderTotal.toNumber()
+                : order.orderTotal,
+            client_attention: order.clientAttention ?? null,
+            pickup_notes: order.pickupNotes ?? null,
+            special_notes: order.specialNotes ?? null,
+            status: order.status ?? null,
+            driver_status: undefined, // Add if you have this field
+          };
+          if (isCatering) {
+            return {
+              ...base,
+              order_type: "catering",
+              headcount: order.headcount?.toString() ?? null,
+              need_host: order.needHost?.toString() ?? null,
+              hours_needed: order.hoursNeeded?.toString() ?? null,
+              number_of_host: order.numberOfHosts?.toString() ?? null,
+            };
+          } else {
+            return {
+              ...base,
+              order_type: "on_demand",
+              item_delivered: (order as any).itemDelivered ?? null,
+              vehicle_type: (order as any).vehicleType ?? null,
+              length: (order as any).length ?? null,
+              width: (order as any).width ?? null,
+              height: (order as any).height ?? null,
+              weight: (order as any).weight ?? null,
+            };
+          }
+        }
+        await sendOrderEmail(mapOrderForEmail(createdOrder));
+      } catch (emailError) {
+        console.error("Failed to send order confirmation email:", emailError);
+        // Email failure is logged but does not prevent order creation
+      }
 
       return createdOrder;
     }); // End transaction

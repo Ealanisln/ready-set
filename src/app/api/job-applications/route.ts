@@ -119,8 +119,9 @@ export async function POST(request: Request) {
     }
 
     // Send notification email to admin
+    const recipient = "apply@readysetllc.com";
     await sendEmail({
-      to: process.env.ADMIN_EMAIL || "",
+      to: recipient,
       subject: "New Job Application",
       html: `New application received from ${data.firstName} ${data.lastName} for ${data.role} position. Application ID: ${application.id}`,
     });
