@@ -91,7 +91,7 @@ const Navigation: React.FC<NavigationProps> = ({
           <li className="group relative lg:hidden">
             <button
               onClick={() => {
-                void signOut({ callbackUrl: "/", redirect: true });
+                signOut({ callbackUrl: "/", redirect: true });
                 navbarToggleHandler();
               }}
               className="ud-menu-scroll flex py-2 text-base text-dark group-hover:text-primary dark:text-white dark:group-hover:text-primary lg:inline-flex lg:px-0 lg:py-6"

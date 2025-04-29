@@ -1,12 +1,12 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { X, Phone } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import * as Dialog from "@radix-ui/react-dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { motion, AnimatePresence } from "framer-motion";
-import AppointmentDialog from "../VirtualAssistant/Appointment";
-import dynamic from "next/dynamic";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { X, Phone } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import * as Dialog from '@radix-ui/react-dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { motion, AnimatePresence } from 'framer-motion';
+import AppointmentDialog from '../VirtualAssistant/Appointment';
+import dynamic from 'next/dynamic';
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -29,7 +29,7 @@ const contentVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: 'spring',
       damping: 30,
       stiffness: 300,
     },
@@ -59,7 +59,7 @@ const textVariants = {
 const ClientSidePromoPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const calendarUrl =
-    "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true";
+    'https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true';
 
   useEffect(() => {
     setIsOpen(true);
@@ -89,21 +89,15 @@ const ClientSidePromoPopup = () => {
                 variants={contentVariants}
               >
                 <VisuallyHidden asChild>
-                  <Dialog.Title>
-                    Special Promotion - First Delivery Free
-                  </Dialog.Title>
+                  <Dialog.Title>Special Promotion - First Delivery Free</Dialog.Title>
                 </VisuallyHidden>
                 <Dialog.Description className="hidden">
-                  Get your first delivery free up to $599 in food cost within a
-                  10-mile radius
+                  Get your first delivery free up to $599 in food cost within a 10-mile radius
                 </Dialog.Description>
                 <Card className="relative w-full overflow-y-auto bg-gray-800 text-white">
                   <CardContent className="space-y-4 p-4 sm:space-y-8 sm:p-8">
                     <Dialog.Close className="absolute right-2 top-2 text-gray-400 transition-colors hover:text-white sm:right-4 sm:top-4">
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <X size={24} aria-label="Close dialog" />
                       </motion.div>
                     </Dialog.Close>
@@ -123,13 +117,9 @@ const ClientSidePromoPopup = () => {
                     >
                       <p className="text-lg sm:text-xl">
                         Get your 1ST DELIVERY FREE
-                        <span className="ml-2 text-lg sm:text-xl">
-                          (up to $599 in food cost)
-                        </span>
+                        <span className="ml-2 text-lg sm:text-xl">(up to $599 in food cost)</span>
                       </p>
-                      <p className="text-lg sm:text-xl">
-                        within a 10-mile radius!
-                      </p>
+                      <p className="text-lg sm:text-xl">within a 10-mile radius!</p>
                     </motion.div>
 
                     <motion.div
@@ -144,9 +134,7 @@ const ClientSidePromoPopup = () => {
                         transition={{ delay: 0.4, duration: 0.4 }}
                       >
                         <p>• Extra charges beyond 10 miles</p>
-                        <p>
-                          • Orders above $599 may require additional payment
-                        </p>
+                        <p>• Orders above $599 may require additional payment</p>
                         <p>• Sign-up requirement at readysetllc.com</p>
                       </motion.div>
 
@@ -184,7 +172,7 @@ const ClientSidePromoPopup = () => {
                       variants={textVariants}
                       custom={3}
                     >
-                      Limited-time offer from March 15 to 31, 2025.{" "}
+                      Limited-time offer from April 1 to 30, 2025.{' '}
                     </motion.p>
                   </CardContent>
                 </Card>

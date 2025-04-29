@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Phone } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import * as Dialog from "@radix-ui/react-dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { motion, AnimatePresence } from "framer-motion";
-import AppointmentDialog from "../VirtualAssistant/Appointment";
-import dynamic from "next/dynamic";
+import React, { useState, useEffect } from 'react';
+import { Phone } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import * as Dialog from '@radix-ui/react-dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { motion, AnimatePresence } from 'framer-motion';
+import AppointmentDialog from '../VirtualAssistant/Appointment';
+import dynamic from 'next/dynamic';
 
 // Framer Motion variants for animations
 const overlayVariants = {
@@ -26,7 +26,7 @@ const contentVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: 'spring',
       damping: 25,
       stiffness: 300,
     },
@@ -56,7 +56,7 @@ const textVariants = {
 const ClientSideConsultationBanner = () => {
   const [isOpen, setIsOpen] = useState(false);
   const calendarUrl =
-    "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
+    'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true';
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,8 +92,7 @@ const ClientSideConsultationBanner = () => {
                   <Dialog.Title>Book Your Free Consultation</Dialog.Title>
                 </VisuallyHidden>
                 <Dialog.Description className="hidden">
-                  Book a consultation and receive 10 free VA hours. Limited time
-                  offer.
+                  Book a consultation and receive 10 free VA hours. Limited time offer.
                 </Dialog.Description>
                 <Card className="w-full bg-white">
                   <CardContent className="p-12">
@@ -146,12 +145,8 @@ const ClientSideConsultationBanner = () => {
                           </a>
                         </motion.div>
                       </motion.div>
-                      <motion.p
-                        className="text-center text-lg"
-                        variants={textVariants}
-                        custom={3}
-                      >
-                        Limited-time offer from March 16 to 31, 2025.{" "}
+                      <motion.p className="text-center text-lg" variants={textVariants} custom={3}>
+                        Limited-time offer from April 1 to 30, 2025.{' '}
                       </motion.p>
                     </div>
                   </CardContent>
@@ -166,9 +161,8 @@ const ClientSideConsultationBanner = () => {
 };
 
 // Create a dynamically imported version with no SSR
-const ConsultationBanner = dynamic(
-  () => Promise.resolve(ClientSideConsultationBanner),
-  { ssr: false },
-);
+const ConsultationBanner = dynamic(() => Promise.resolve(ClientSideConsultationBanner), {
+  ssr: false,
+});
 
 export default ConsultationBanner;
