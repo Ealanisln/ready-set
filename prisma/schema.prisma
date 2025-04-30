@@ -311,36 +311,36 @@ model LeadCapture {
 }
 
 model JobApplication {
-  id                String            @id @default(uuid()) @db.Uuid
-  profileId         String?           @db.Uuid
-  firstName         String
-  lastName          String
-  email             String
-  phone             String?
-  position          String
-  addressStreet     String
-  addressCity       String
-  addressState      String
-  addressZip        String
-  education         String
-  workExperience    String
-  skills            String
-  coverLetter       String?
-  resumeUrl         String
-  driversLicenseUrl String?
-  insuranceUrl      String?
-  vehicleRegUrl     String?
-  foodHandlerUrl    String?
-  hipaaUrl          String?
-  driverPhotoUrl    String?
-  carPhotoUrl       String?
-  equipmentPhotoUrl String?
-  status            ApplicationStatus @default(PENDING)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?         @db.Timestamptz(6)
-  fileUploads       FileUpload[]
-  profile           Profile?          @relation("ProfileToJobApplication", fields: [profileId], references: [id])
+  id                     String            @id @default(uuid()) @db.Uuid
+  profileId              String?           @db.Uuid
+  firstName              String
+  lastName               String
+  email                  String
+  phone                  String?
+  position               String
+  addressStreet          String
+  addressCity            String
+  addressState           String
+  addressZip             String
+  education              String?
+  workExperience         String?
+  skills                 String?
+  coverLetter            String?
+  resumeFilePath         String?
+  driversLicenseFilePath String?
+  insuranceFilePath      String?
+  vehicleRegFilePath     String?
+  foodHandlerFilePath    String?
+  hipaaFilePath          String?
+  driverPhotoFilePath    String?
+  carPhotoFilePath       String?
+  equipmentPhotoFilePath String?
+  status                 ApplicationStatus @default(PENDING)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  deletedAt              DateTime?         @db.Timestamptz(6)
+  fileUploads            FileUpload[]
+  profile                Profile?          @relation("ProfileToJobApplication", fields: [profileId], references: [id])
 
   @@index([email])
   @@index([status])

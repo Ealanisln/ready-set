@@ -4,7 +4,18 @@ import { v4 as uuidv4 } from "uuid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { FileWithPath } from "react-dropzone";
 import toast from "react-hot-toast";
-import { UploadedFile } from "./use-upload-file";
+
+export interface UploadedFile {
+  key: string;
+  name: string;
+  url: string;
+  path: string;
+  size: number;
+  type: string;
+  entityId?: string;
+  category?: string;
+  bucketName: string;
+}
 
 interface UseJobApplicationUploadOptions {
   defaultUploadedFiles?: UploadedFile[];
@@ -107,11 +118,11 @@ export function useJobApplicationUpload({
             key: result.file.id,
             name: result.file.name,
             url: result.file.url,
+            path: result.file.path,
             size: result.file.size,
             type: result.file.type,
             entityId: result.file.entityId,
             category: result.file.category,
-            path: result.file.path,
             bucketName,
           };
 
