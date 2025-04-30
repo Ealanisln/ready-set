@@ -149,14 +149,19 @@ const UsersPage: React.FC = () => {
 
   // --- Data Fetching ---
   useEffect(() => {
+    let debounceTimer: NodeJS.Timeout | null = null;
+    let isMounted = true; // Flag to prevent state updates on unmounted component
+
     const fetchUsers = async () => {
-      setIsLoading(true);
+      if (!isMounted) return;
+      // Set loading state at the beginning of the fetch attempt
+      setIsLoading(true); 
       setError(null);
 
       // Build query params
       const params = new URLSearchParams();
       params.append("page", page.toString());
-      params.append("limit", "10");
+      params.append("limit", ITEMS_PER_PAGE.toString());
       if (searchTerm) params.append("search", searchTerm);
       if (statusFilter !== "all") params.append("status", statusFilter);
       if (typeFilter !== "all") params.append("type", typeFilter);
@@ -166,11 +171,15 @@ const UsersPage: React.FC = () => {
       const apiUrl = `/api/users?${params.toString()}`;
 
       try {
-        // First refresh the session if possible to ensure we have valid auth
-        await supabase.auth.refreshSession();
+        // Attempt to get the session. Proceed even if it fails initially, 
+        // relying on cookie-based auth in the API route.
+        const { error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+            console.warn("Error fetching session:", sessionError.message);
+        }
         
         const response = await fetch(apiUrl, {
-          credentials: 'include'
+          credentials: 'include' 
         });
 
         if (!response.ok) {
@@ -180,49 +189,55 @@ const UsersPage: React.FC = () => {
           } catch (parseError) {
              // Ignore if response body is not JSON
           }
-          const errorMessage = errorData?.error || `Failed to fetch users (${response.status} ${response.statusText})`;
+          const errorMessage = errorData?.error || `API Error: ${response.status} ${response.statusText}`;
           throw new Error(errorMessage);
         }
 
         const data = await response.json();
 
-        // --- Validate API response structure ---
         if (!data || !Array.isArray(data.users) || typeof data.totalPages !== 'number') {
            console.error("Invalid data structure received from API:", data);
            throw new Error('Invalid data structure received from API');
         }
-
-        // --- Update State ---
-        setUsers(data.users);
-        setTotalPages(data.totalPages);
-
-        console.log("Fetched users:", data.users);
-
-        // Check if each user has a valid created_at field
-        data.users.forEach((user: User) => {
-          if (!user.createdAt) {
-            console.error(`User ${user.id} is missing a created_at field.`);
-          }
-        });
+        
+        if (isMounted) {
+          setUsers(data.users);
+          setTotalPages(data.totalPages);
+        }
 
       } catch (error) {
         console.error("API Fetch Error:", error);
-        setError(error instanceof Error ? error.message : "An unknown error occurred while fetching users");
-        setUsers([]);
-        setTotalPages(1);
+        if (isMounted) {
+          setError(error instanceof Error ? error.message : "An unknown error occurred while fetching users");
+          setUsers([]); // Clear users on error
+          setTotalPages(1); // Reset pagination on error
+        }
       } finally {
-        setIsLoading(false);
+        // Ensure loading is set to false only after everything, even errors
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    // Debounce fetch
-    const debounceTimer = setTimeout(() => {
-      fetchUsers();
-    }, 300);
+    // --- Effect Logic ---
+    // Clear any existing timer
+    if (debounceTimer) clearTimeout(debounceTimer);
 
-    return () => clearTimeout(debounceTimer);
+    // Set a new timer to fetch users after a delay
+    debounceTimer = setTimeout(() => {
+        fetchUsers();
+    }, 300); // Debounce all fetches triggered by dependency changes
 
-  }, [page, statusFilter, typeFilter, searchTerm, sortField, sortDirection, supabase.auth]);
+    // Cleanup function
+    return () => {
+      isMounted = false; // Set flag when component unmounts
+      if (debounceTimer) clearTimeout(debounceTimer); // Clear timer on unmount or re-run
+    };
+
+  // Fetch when page, filters, search, or sort changes.
+  }, [page, statusFilter, typeFilter, searchTerm, sortField, sortDirection, supabase]); 
+
 
   // --- Handlers ---
   const handlePageChange = (newPage: number) => {

@@ -220,11 +220,9 @@ export function OrderFilesManager({
 
   return (
     <>
-      <Card>
         <CardHeader>
-          <CardTitle>Order Files</CardTitle>
-          <CardDescription>
-            {getDisplayText(order_type)} Files - Order #{orderNumber}
+          <CardDescription className="text-lg">
+            {getDisplayText(order_type)}  #{orderNumber}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -255,8 +253,6 @@ export function OrderFilesManager({
             onFileClick={handleFileClick}
           />
         </CardContent>
-      </Card>
-
       <FileViewer
         file={selectedFile}
         isOpen={isViewerOpen}

@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -26,6 +26,7 @@ import { Spinner } from "@/components/ui/spinner";
 interface AddressManagerProps {
   onAddressesLoaded?: (addresses: Address[]) => void;
   onAddressSelected: (addressId: string) => void;
+  onError?: (error: string) => void;
   defaultFilter?: "all" | "shared" | "private";
   showFilters?: boolean;
   showManagementButtons?: boolean;
@@ -34,6 +35,7 @@ interface AddressManagerProps {
 const AddressManager: React.FC<AddressManagerProps> = ({
   onAddressesLoaded,
   onAddressSelected,
+  onError,
   defaultFilter = "all",
   showFilters = true,
   showManagementButtons = true,
@@ -46,88 +48,179 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const isRequestPending = useRef(false);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fetchAttempts = useRef(0);
+  const MAX_FETCH_ATTEMPTS = 3;
 
+  const supabase = createClient();
   const { control } = useForm();
 
-  // Initialize Supabase client and set up auth
   useEffect(() => {
-    const initSupabase = async () => {
+    let isMounted = true;
+    
+    const fetchSession = async () => {
       try {
-        const client = await createClient();
-        
-        // Get current user
-        const { data: { user }, error } = await client.auth.getUser();
-        if (error) throw error;
-        
-        setUser(user);
-        
-        // Set up auth state listener
-        const { data: authListener } = client.auth.onAuthStateChange((event, session) => {
-          setUser(session?.user || null);
-        });
-        
-        return () => {
-          authListener.subscription.unsubscribe();
-        };
+        const { data: { session } } = await supabase.auth.getSession();
+        if (isMounted) {
+          setUser(session?.user ?? null);
+          if (!session) {
+            setError("Authentication required to load addresses.");
+            if (onError) {
+              onError("Authentication required to load addresses.");
+            }
+            setIsLoading(false); 
+          }
+        }
       } catch (err) {
-        console.error("Error initializing auth:", err);
-        setError("Authentication error. Please try logging in again.");
-        setIsLoading(false);
+        console.error("Error fetching session:", err);
+        if (isMounted) {
+          setError("Error fetching session.");
+          if (onError) {
+            onError("Error fetching session.");
+          }
+          setIsLoading(false);
+        }
       }
     };
     
-    initSupabase();
-  }, []);
+    fetchSession();
 
-  // Fetch addresses whenever user or filter changes
-  const fetchAddresses = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoading(false);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+      
+      if (event === 'SIGNED_IN' && newUser) {
+        setError(null);
+      } else if (event === 'SIGNED_OUT') {
+        setAddresses([]);
+        setError("Authentication required to load addresses.");
+        if (onError) {
+          onError("Authentication required to load addresses.");
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase, onError]);
+
+  const debouncedFetch = useCallback((fn: () => Promise<void>) => {
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    if (fetchAttempts.current >= MAX_FETCH_ATTEMPTS) {
+      console.warn(`Maximum fetch attempts (${MAX_FETCH_ATTEMPTS}) reached. Stopping further requests.`);
       return;
     }
     
+    fetchTimeoutRef.current = setTimeout(() => {
+      fn();
+      fetchTimeoutRef.current = null;
+    }, 500);
+  }, []);
+
+  const fetchAddresses = useCallback(async () => {
+    if (isRequestPending.current) {
+      console.log("Request already pending, skipping fetchAddresses call");
+      return;
+    }
+
+    if (!user) {
+      console.log("No user available, skipping fetchAddresses call");
+      return;
+    }
+    
+    fetchAttempts.current += 1;
+    console.log(`Fetch attempt ${fetchAttempts.current} of ${MAX_FETCH_ATTEMPTS}`);
+    
+    if (fetchAttempts.current > MAX_FETCH_ATTEMPTS) {
+      console.warn(`Maximum fetch attempts (${MAX_FETCH_ATTEMPTS}) reached. Stopping.`);
+      setError(`Address loading failed after ${MAX_FETCH_ATTEMPTS} attempts. Please try again later or enter address manually.`);
+      if (onError) {
+        onError(`Address loading failed after ${MAX_FETCH_ATTEMPTS} attempts. Please try again later or enter address manually.`);
+      }
+      return;
+    }
+
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      setIsLoading(false);
+      setError("Authentication required to load addresses.");
+      if (onError) {
+        onError("Authentication required to load addresses.");
+      }
+      return;
+    }
+
+    isRequestPending.current = true;
     setIsLoading(true);
     setError(null);
   
     try {
-      const response = await fetch(`/api/addresses?filter=${filterType}`);
+      console.log(`Fetching addresses with filter=${filterType}`);
+      const response = await fetch(`/api/addresses?filter=${filterType}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          setError("Unauthorized: Please log in again.");
+          if (onError) {
+            onError("Unauthorized: Please log in again.");
+          }
+        } else {
+          setError(`Error fetching addresses: ${response.statusText}`);
+          if (onError) {
+            onError(`Error fetching addresses: ${response.statusText}`);
+          }
+        }
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`Fetched ${data.length} addresses with filter "${filterType}"`);
-      
-      // Ensure data is an array before setting it
       const validAddresses = Array.isArray(data) ? data : [];
       setAddresses(validAddresses);
-      setFilteredAddresses(validAddresses);
+      
+      fetchAttempts.current = 0;
       
       if (onAddressesLoaded) {
         onAddressesLoaded(validAddresses);
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error("Error fetching addresses:", errorMessage);
-      setError(`Error fetching addresses: ${errorMessage}`);
+    } catch (err) {
+      console.error("Fetch Addresses Catch Block:", err);
       setAddresses([]);
-      setFilteredAddresses([]);
     } finally {
       setIsLoading(false);
+      isRequestPending.current = false;
     }
-  }, [user?.id, filterType, onAddressesLoaded]);
+  }, [user, filterType, onAddressesLoaded, onError, MAX_FETCH_ATTEMPTS]);
 
   useEffect(() => {
-    if (user?.id) {
-      fetchAddresses();
+    if (user) {
+      debouncedFetch(fetchAddresses);
     }
-  }, [user?.id, filterType, fetchAddresses]);
+  }, [user, filterType, fetchAddresses, debouncedFetch]);
 
   const handleAddAddress = useCallback(
     async (newAddress: Partial<Address>) => {
-      if (!user?.id) {
-        setError("You must be logged in to add an address");
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        setError("Authentication required to add an address.");
+        if (onError) {
+          onError("Authentication required to add an address.");
+        }
         return;
       }
 
@@ -137,28 +230,40 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       try {
         const response = await fetch("/api/addresses", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newAddress),
+          headers: {
+             "Content-Type": "application/json",
+             'Authorization': `Bearer ${session.access_token}`,
+           },
+          body: JSON.stringify({ ...newAddress, createdBy: session.user.id }),
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            setError("Unauthorized: Please log in again to add address.");
+            if (onError) {
+              onError("Unauthorized: Please log in again to add address.");
+            }
+            setUser(null);
+          } else {
+            setError(`Failed to add address: ${response.statusText}`);
+            if (onError) {
+              onError(`Failed to add address: ${response.statusText}`);
+            }
+          }
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const addedAddress = await response.json();
         console.log("Successfully added address:", addedAddress);
-        
         setShowAddForm(false);
         await fetchAddresses();
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error("Error adding address:", errorMessage);
-        setError(`Failed to add address: ${errorMessage}`);
+      } catch (err) {
+        console.error("Add Address Catch Block:", err);
       } finally {
         setIsLoading(false);
       }
     },
-    [user?.id, fetchAddresses],
+    [supabase, fetchAddresses, onError],
   );
 
   const handleToggleAddForm = () => {
@@ -170,12 +275,10 @@ const AddressManager: React.FC<AddressManagerProps> = ({
     onAddressSelected(addressId);
   };
 
-  // Function to filter addresses by type (shared, private, or all)
   const handleFilterChange = (value: string) => {
     setFilterType(value as "all" | "shared" | "private");
   };
 
-  // Badge display for address type
   const getAddressBadge = (address: Address) => {
     if (address.isShared) {
       return <Badge className="ml-1 bg-blue-500">Shared</Badge>;

@@ -217,7 +217,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link
-                      href="/join-the-team"
+                      href="/apply"
                       className="mb-3 inline-block text-base text-gray-400 hover:text-gray-200"
                     >
                       Join the team

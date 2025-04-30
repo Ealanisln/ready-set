@@ -155,7 +155,7 @@ const ReadySetVirtualAssistantPage: React.FC = () => {
       </h1>
       <div className="mb-8 flex justify-center">
         <a
-          href="/join-the-team"
+          href="/apply"
           className="inline-block rounded bg-green-500 px-12 py-4 text-white transition-colors hover:bg-green-600"
         >
           Join the team

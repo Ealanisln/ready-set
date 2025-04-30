@@ -100,14 +100,8 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg">
-          {getOrderTypeDisplay(order_type)}
-        </CardTitle>
-        <CardDescription>Order ID: {orderId.toString()}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="w-full">
+      <div>
         <div className="mb-4 flex items-center justify-between">
           <span className="text-sm font-medium">Current Status:</span>
           <StatusBadge status={status} />
@@ -130,8 +124,8 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
             </SelectContent>
           </Select>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

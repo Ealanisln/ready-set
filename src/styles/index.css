@@ -27,7 +27,24 @@ h1, h2 {
   font-family: "Kabel", sans-serif;
 }
 
+/* Calendar disabled days styling */
+.rdp-day_disabled {
+  color: #f87171 !important; /* text-red-300 equivalent */
+  text-decoration: line-through !important;
+  background-color: #f3f4f6 !important; /* bg-gray-100 equivalent */
+  opacity: 0.7 !important;
+}
 
+/* Additional selector to increase specificity */
+button.rdp-button_disabled, 
+div.rdp-day.rdp-day_disabled, 
+.rdp-day[disabled], 
+[aria-disabled="true"].rdp-day {
+  color: #f87171 !important;
+  text-decoration: line-through !important;
+  background-color: #f3f4f6 !important;
+  opacity: 0.7 !important;
+}
 
 .sticky-menu .navbar-logo {
   @apply py-2;

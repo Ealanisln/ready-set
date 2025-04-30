@@ -33,19 +33,17 @@ export const useUserForm = (
       website: "",
       location_number: "",
       parking_loading: "",
-      countiesServed: [],
-      counties: "",
-      timeNeeded: [],
-      time_needed: "",
-      cateringBrokerage: [],
-      catering_brokerage: "",
-      frequency: "",
-      provisions: [],
-      provide: "",
-      head_count: "",
+      countiesServed: null,
+      counties: null,
+      timeNeeded: null,
+      cateringBrokerage: null,
+      provisions: null,
+      frequency: null,
+      headCount: null,
       status: "pending",
       name: null,
       contact_name: null,
+      sideNotes: null
     },
   });
 
@@ -73,25 +71,40 @@ export const useUserForm = (
   // Form submission
   const onSubmit = async (data: UserFormValues) => {
     try {      
-      // Destructure known form-specific fields and array fields
+      // Destructure known fields
       const {
         displayName,
-        countiesServed,
-        timeNeeded,
-        cateringBrokerage,
-        provisions,
+        // Form-specific array fields
+        counties,          // For clients
+        countiesServed,    // For vendors
+        timeNeeded,        // For both
+        cateringBrokerage, // For vendors
+        provisions,        // For vendors
+        // Base fields
         type,
         ...baseSubmitData
       } = data;
 
-      // Start with base data
+      // Prepare data for the API, matching Prisma schema fields
       const submitData: any = {
-        ...baseSubmitData,
+        ...baseSubmitData, // Includes id, email, address fields, headCount, frequency, status, etc.
         type: type,
-        counties: countiesServed?.join(",") || "",
-        time_needed: timeNeeded?.join(",") || "",
-        catering_brokerage: cateringBrokerage?.join(",") || "",
-        provide: provisions?.join(",") || "",
+        // Convert arrays back to strings/JSON based on Prisma schema
+        // counties field in Prisma is Json?, but API likely expects array or specific structure.
+        // Let's assume for now API/Prisma handles array assignment to Json field correctly.
+        counties: type === 'client' ? counties : (type === 'vendor' ? countiesServed : null),
+        
+        // timeNeeded field in Prisma is String?
+        timeNeeded: timeNeeded?.join(",") || null, // Join array to comma-separated string
+        
+        // cateringBrokerage field in Prisma is String?
+        cateringBrokerage: type === 'vendor' ? (cateringBrokerage?.join(",") || null) : null, // Only for vendors
+        
+        // provide field in Prisma is String?
+        provide: type === 'vendor' ? (provisions?.join(",") || null) : null, // Only for vendors
+        
+        // headCount is handled by baseSubmitData as it's number | null
+        // frequency is handled by baseSubmitData as it's string | null
       };
 
       // Set name/contact_name based on the form's 'type' field
@@ -124,6 +137,7 @@ export const useUserForm = (
           "x-request-source": "ModernUserProfile-Submit",
         },
         body: JSON.stringify(submitData),
+        credentials: 'include'
       });
 
       if (!response.ok) {

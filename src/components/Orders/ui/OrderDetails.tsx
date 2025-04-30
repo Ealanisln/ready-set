@@ -10,7 +10,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-2 font-semibold">Order Details</h3>
         <div className="grid grid-cols-2 gap-2 text-sm">
           {isCateringRequest(order) && (
             <>

@@ -20,15 +20,6 @@ export const useUserData = (
   // Auth context
   const { session } = useUser();
 
-  // Helper function to convert comma-separated string to array of values
-  const stringToValueArray = useCallback(
-    (str: string | undefined | null): string[] => {
-      if (!str) return [];
-      return str.split(",").map((item: string) => item.trim());
-    },
-    []
-  );
-
   // Fetch user data
   const fetchUser = useCallback(async () => {
     if (!userId) return null;
@@ -45,6 +36,7 @@ export const useUserData = (
           Pragma: "no-cache",
           "x-request-source": "ModernUserProfile",
         },
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -71,28 +63,25 @@ export const useUserData = (
         location_number: data.location_number || "",
         parking_loading: data.parking_loading || "",
         
-        // Counties - Use the array provided by the API if available
-        countiesServed: Array.isArray(data.countiesServed) ? data.countiesServed : stringToValueArray(data.counties),
-        counties: data.counties || "", // Keep original string if needed elsewhere
+        // Counties - Use the array provided by the API (already split)
+        countiesServed: Array.isArray(data.countiesServed) ? data.countiesServed : [],
+        // Keep original string if needed elsewhere, ensure it's a string or fallback
+        counties: typeof data.counties === 'string' ? data.counties : "", 
         
-        // Time Needed - Directly use the array from the API response
-        timeNeeded: Array.isArray(data.timeNeeded) ? data.timeNeeded : [], // Use data.timeNeeded (camelCase array)
-        // time_needed: data.time_needed || "", // Remove or comment out if time_needed isn't needed in the form state
+        // Time Needed - Use the array directly from the API
+        timeNeeded: Array.isArray(data.timeNeeded) ? data.timeNeeded : [],
         
-        // Catering Brokerage - Use the array provided by the API if available
-        cateringBrokerage: Array.isArray(data.cateringBrokerage) ? data.cateringBrokerage : stringToValueArray(data.catering_brokerage),
-        // catering_brokerage: data.catering_brokerage || "", // Remove or comment out
+        // Catering Brokerage - Use the array directly from the API
+        cateringBrokerage: Array.isArray(data.cateringBrokerage) ? data.cateringBrokerage : [],
         
-        // Provisions - Use the array provided by the API if available
-        provisions: Array.isArray(data.provisions) ? data.provisions : stringToValueArray(data.provide),
-        provide: data.provide || "", // Keep original string if needed elsewhere
-        
+        // Provisions - Use the array directly from the API
+        provisions: Array.isArray(data.provisions) ? data.provisions : [],
         frequency: data.frequency || null,
-        head_count: data.head_count || null, // Keep original snake_case if needed
-        headCount: data.headCount ?? null, // Use the camelCase field from API response
+        headCount: data.headCount ?? data.head_count ?? null, // Use camelCase or snake_case from API
         status: data.status || "pending",
         name: data.name,
         contact_name: data.contact_name,
+        sideNotes: data.sideNotes // Make sure sideNotes exists in API response or handle null
       };
       
       console.log("[useUserData] fetchUser returning transformed data:", JSON.stringify(formData, null, 2));
@@ -105,7 +94,7 @@ export const useUserData = (
     } finally {
       setLoading(false);
     }
-  }, [userId, stringToValueArray]);
+  }, [userId]);
 
   const handleUploadSuccess = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);

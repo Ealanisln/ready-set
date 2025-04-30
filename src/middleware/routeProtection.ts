@@ -21,7 +21,7 @@ const PUBLIC_ROUTES = [
   '/reset-password',
   '/contact',
   '/about',
-  '/join-the-team',
+  '/apply',
   '/privacy-policy',
   '/terms-of-service'
 ];

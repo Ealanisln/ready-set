@@ -304,7 +304,7 @@ const CateringOrdersPage: React.FC = () => {
             Manage and track all catering orders across the platform
           </p>
         </div>
-        <Link href="/catering-request">
+        <Link href="/admin/catering-orders/new" passHref>
           <Button 
             className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md transition-all hover:shadow-lg w-full lg:w-auto"
           >
@@ -475,7 +475,7 @@ const CateringOrdersPage: React.FC = () => {
                 <p className="text-slate-500 max-w-md mt-1">
                   No {statusFilter !== 'ACTIVE' ? <span className="capitalize font-medium">{statusFilter}</span> : ''} orders match your current filters.
                 </p>
-                <Link href="/catering-request" className="mt-4">
+                <Link href="/admin/catering-orders/new" className="mt-4">
                   <Button variant="outline" className="mt-2">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Order

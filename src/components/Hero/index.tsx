@@ -206,7 +206,7 @@ const Hero: React.FC = () => {
             delay={1.1}
           />
           <ButtonLink
-            href="/join-the-team"
+            href="/apply"
             icon={
               <Users
                 strokeWidth={1.5}

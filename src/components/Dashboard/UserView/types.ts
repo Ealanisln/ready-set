@@ -39,9 +39,27 @@ export interface User {
     status?: "active" | "pending" | "deleted";
   }
   
-  export interface UserFormValues extends Omit<User, "role"> {
-    displayName: string;
-    // Use 'type' to match the form field name used in Controller/useForm
+  // Redefined to explicitly list fields needed for the form 
+  // with types appropriate for form controls (e.g., arrays for checkboxes)
+  export interface UserFormValues {
+    id: string; // Include ID for updates
+    displayName: string; // Derived or combined name for display
+    // Core profile fields
+    name?: string | null;
+    contact_name?: string | null;
+    email: string | null;
+    contact_number: string | null;
+    company_name?: string | null;
+    website?: string | null;
+    // Address fields
+    street1?: string | null;
+    street2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip?: string | null;
+    location_number?: string | null;
+    parking_loading?: string | null;
+    // User Type and Status
     type:
       | "client"
       | "vendor"
@@ -50,13 +68,17 @@ export interface User {
       | "admin"
       | "super_admin"
       | null;
-    // Array versions used in the form's multi-select/checkbox groups
-    countiesServed: string[];
-    timeNeeded: string[];
-    cateringBrokerage: string[];
-    provisions: string[];
-    headCount: number | null;
+    status?: "active" | "pending" | "deleted";
+    // Detail fields (using array types for form controls)
+    countiesServed: string[] | null; // For Vendors
+    counties: string[] | null;       // For Clients 
+    timeNeeded: string[] | null;     // For Vendor/Client
+    cateringBrokerage: string[] | null; // For Vendor
+    provisions: string[] | null;        // For Vendor
+    headCount: number | null; // Stored as Int?, used as number in form
     frequency: string | null;
+    // Other fields
+    sideNotes?: string | null; 
   }
   
   export interface UploadHook {

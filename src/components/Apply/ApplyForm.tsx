@@ -445,7 +445,7 @@ const JobApplicationForm = () => {
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="mx-auto max-w-4xl">
         <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-          <div className="bg-gradient-to-r from-yellow-400 to-amber-400 p-6">
+          <div className="bg-gradient-to-r from-yellow-400 to-amber-400 p-8">
             <h1 className="text-2xl font-bold text-white">
               Ready Set Career Application
             </h1>
@@ -455,41 +455,41 @@ const JobApplicationForm = () => {
           </div>
 
           {/* Progress Bar */}
-          <div className="p-6 pt-0">
-            <div className="flex items-center justify-between mb-2 px-2">
+          <div className="p-6 pt-4 pb-8 bg-gray-50 border-b border-gray-100">
+            <div className="flex items-center justify-between mb-6 px-4 max-w-3xl mx-auto">
               {FORM_STEPS.map((step) => (
                 <div key={step.id} className="flex flex-col items-center">
                   <div 
-                    className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium
+                    className={`w-10 h-10 flex items-center justify-center rounded-full text-base font-medium
                       ${currentStep >= step.id 
                         ? 'bg-yellow-400 text-white' 
-                        : 'bg-gray-200 text-gray-500'}`}
+                        : 'bg-white text-gray-500 border border-gray-200'}`}
                   >
                     {step.id}
                   </div>
-                  <span className={`text-xs mt-1 hidden sm:block ${currentStep >= step.id ? 'text-gray-800' : 'text-gray-400'}`}>
+                  <span className="text-xs mt-2 text-center">
                     {step.name}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div className="w-full bg-gray-200 rounded-full h-1 mb-0 max-w-3xl mx-auto">
               <div 
-                className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                className="bg-yellow-400 h-1 rounded-full transition-all duration-300"
                 style={{ width: `${((currentStep - 1) / (FORM_STEPS.length - 1)) * 100}%` }}
               ></div>
             </div>
           </div>
 
+          <h2 className="text-xl font-medium text-gray-800 mb-4 px-6 pt-6">
+            {FORM_STEPS.find(step => step.id === currentStep)?.name}
+          </h2>
+
           <form 
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6 p-6 pt-0"
+            className="space-y-6 px-6 pb-6"
             noValidate
           >
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              {FORM_STEPS.find(step => step.id === currentStep)?.name}
-            </h2>
-
             {/* Step 1: Position & Personal Info */}
             {currentStep === 1 && (
               <motion.div
@@ -506,7 +506,7 @@ const JobApplicationForm = () => {
                     <select
                       className={`block w-full rounded-md border ${
                         errors.role ? "border-red-500" : "border-gray-300"
-                      } appearance-none bg-white px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      } appearance-none bg-white px-3 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("role", {
                         required: "Please select a position",
                       })}
@@ -518,21 +518,21 @@ const JobApplicationForm = () => {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                    <ChevronDown className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
                   </div>
                   {renderError(errors.role)}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       First Name *
                     </label>
                     <input
                       type="text"
-                      className={`mt-1 block w-full rounded-md border ${
-                        errors.firstName ? "border-red-500" : "border-gray-300"
-                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      className={`block w-full rounded-md border ${
+                        errors.firstName ? "border-red-500" : "border-gray-200"
+                      } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("firstName", {
                         required: "First name is required",
                         minLength: {
@@ -544,14 +544,14 @@ const JobApplicationForm = () => {
                     {renderError(errors.firstName)}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Last Name *
                     </label>
                     <input
                       type="text"
-                      className={`mt-1 block w-full rounded-md border ${
-                        errors.lastName ? "border-red-500" : "border-gray-300"
-                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      className={`block w-full rounded-md border ${
+                        errors.lastName ? "border-red-500" : "border-gray-200"
+                      } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("lastName", {
                         required: "Last name is required",
                         minLength: {
@@ -566,14 +566,14 @@ const JobApplicationForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Email *
                     </label>
                     <input
                       type="email"
-                      className={`mt-1 block w-full rounded-md border ${
-                        errors.email ? "border-red-500" : "border-gray-300"
-                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      className={`block w-full rounded-md border ${
+                        errors.email ? "border-red-500" : "border-gray-200"
+                      } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("email", {
                         required: "Email is required",
                         pattern: {
@@ -586,14 +586,14 @@ const JobApplicationForm = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Phone
                     </label>
                     <input
                       type="tel"
-                      className={`mt-1 block w-full rounded-md border ${
-                        errors.phone ? "border-red-500" : "border-gray-300"
-                      } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      className={`block w-full rounded-md border ${
+                        errors.phone ? "border-red-500" : "border-gray-200"
+                      } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("phone", {
                         pattern: {
                           value: /^[\d\s-+()]*$/,
@@ -606,7 +606,7 @@ const JobApplicationForm = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Address *
                   </label>
                   <input
@@ -615,8 +615,8 @@ const JobApplicationForm = () => {
                     className={`block w-full rounded-md border ${
                       errors.address?.street
                         ? "border-red-500"
-                        : "border-gray-300"
-                    } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                        : "border-gray-200"
+                    } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                     {...register("address.street", {
                       required: "Street address is required",
                     })}
@@ -631,8 +631,8 @@ const JobApplicationForm = () => {
                         className={`block w-full rounded-md border ${
                           errors.address?.city
                             ? "border-red-500"
-                            : "border-gray-300"
-                        } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                            : "border-gray-200"
+                        } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                         {...register("address.city", {
                           required: "City is required",
                         })}
@@ -646,8 +646,8 @@ const JobApplicationForm = () => {
                         className={`block w-full rounded-md border ${
                           errors.address?.state
                             ? "border-red-500"
-                            : "border-gray-300"
-                        } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                            : "border-gray-200"
+                        } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                         {...register("address.state", {
                           required: "State is required",
                         })}
@@ -660,8 +660,8 @@ const JobApplicationForm = () => {
                     type="text"
                     placeholder="ZIP Code"
                     className={`block w-full rounded-md border ${
-                      errors.address?.zip ? "border-red-500" : "border-gray-300"
-                    } px-3 py-2 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                      errors.address?.zip ? "border-red-500" : "border-gray-200"
+                    } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                     {...register("address.zip", {
                       required: "ZIP code is required",
                       pattern: {
@@ -1051,7 +1051,7 @@ const JobApplicationForm = () => {
                 <button
                   type="button"
                   onClick={goToPrevStep}
-                  className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Previous
@@ -1064,7 +1064,7 @@ const JobApplicationForm = () => {
                 <button
                   type="button"
                   onClick={goToNextStep}
-                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="flex items-center px-5 py-2.5 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                 >
                   Next
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -1073,7 +1073,7 @@ const JobApplicationForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-400 disabled:opacity-50"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>

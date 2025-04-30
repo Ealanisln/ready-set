@@ -123,12 +123,6 @@ export const DriverStatusCard: React.FC<DriverStatusCardProps> = ({
 
   return (
     <Card className="mx-auto w-full max-w-5xl shadow-md hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-        <CardTitle className="flex items-center gap-2">
-          <Truck className="h-5 w-5 text-slate-700" />
-          Driver Status & Tracking
-        </CardTitle>
-      </CardHeader>
       <CardContent className="p-5">
         {driverInfo ? (
           <div className="space-y-5">

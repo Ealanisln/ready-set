@@ -31,7 +31,7 @@ const baseMenuItems: MenuItem[] = [
     submenu: [
       { id: 1031, title: "Logistics", path: "/logistics" },
       { id: 1032, title: "Virtual Assistant", path: "/va" },
-      { id: 1033, title: "Join Us", path: "/join-the-team" },
+      { id: 1033, title: "Join Us", path: "/apply" },
     ],
   },
   {

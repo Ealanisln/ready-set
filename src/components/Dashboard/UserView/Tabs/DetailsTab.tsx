@@ -267,6 +267,20 @@ interface ClientDetailsProps {
 }
 
 function ClientDetails({ control, isUserProfile }: ClientDetailsProps) {
+  // Helper function to safely convert potential string, array, or other JSON types to string array
+  const valueToArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+      // Check if array elements are strings, filter out others if necessary
+      return value.filter((item): item is string => typeof item === 'string');
+    }
+    if (typeof value === 'string' && value.trim() !== '') {
+      // Assume comma-separated for string fields (like timeNeeded from Prisma)
+      return value.split(',').map(s => s.trim()); 
+    }
+    // Handle other potential JSON types from Prisma if necessary, or default to empty
+    return [];
+  };
+
   return (
     <div className="space-y-6">
       {/* County Location */}
@@ -278,24 +292,30 @@ function ClientDetails({ control, isUserProfile }: ClientDetailsProps) {
           {COUNTIES.map((county) => (
             <div key={county} className="flex items-center space-x-2">
               <Controller
-                name="countiesServed"
+                name="counties" // Correct field name from Prisma/UserFormValues
                 control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id={`admin-county-${county}`}
-                    checked={field.value?.includes(county)}
-                    onCheckedChange={(checked) => {
-                      const currentValue = field.value || [];
-                      if (checked) {
-                        field.onChange([...currentValue, county]);
-                      } else {
-                        field.onChange(currentValue.filter((v) => v !== county));
-                      }
-                    }}
-                  />
-                )}
+                render={({ field }) => {
+                  // value from field.value could be Json? from Prisma (likely array) 
+                  const currentArrayValue = valueToArray(field.value); 
+                  return (
+                    <Checkbox
+                      id={`client-county-${county}`}
+                      checked={currentArrayValue.includes(county)}
+                      onCheckedChange={(checked) => {
+                        const updatedArray = checked
+                          ? [...currentArrayValue, county]
+                          : currentArrayValue.filter((v) => v !== county);
+                        field.onChange(updatedArray);
+                      }}
+                      disabled={isUserProfile}
+                    />
+                  );
+                }}
               />
-              <Label htmlFor={`admin-county-${county}`} className="text-sm font-normal">
+              <Label
+                htmlFor={`client-county-${county}`}
+                className="text-sm font-normal"
+              >
                 {county}
               </Label>
             </div>
@@ -305,31 +325,32 @@ function ClientDetails({ control, isUserProfile }: ClientDetailsProps) {
 
       {/* Time Needed */}
       <div className="space-y-3">
-        <h3 className="text-base font-medium text-slate-800">
-          Time Needed
-        </h3>
+        <h3 className="text-base font-medium text-slate-800">Time Needed</h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {TIME_NEEDED.map((time) => (
             <div key={time} className="flex items-center space-x-2">
               <Controller
-                name="timeNeeded"
+                name="timeNeeded" // Correct field name from Prisma/UserFormValues
                 control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id={`admin-time-${time}`}
-                    checked={field.value?.includes(time)}
-                    onCheckedChange={(checked) => {
-                      const currentValue = field.value || [];
-                      if (checked) {
-                        field.onChange([...currentValue, time]);
-                      } else {
-                        field.onChange(currentValue.filter((v) => v !== time));
-                      }
-                    }}
-                  />
-                )}
+                render={({ field }) => {
+                  // value from field.value could be String? from Prisma
+                  const currentArrayValue = valueToArray(field.value);
+                  return (
+                    <Checkbox
+                      id={`client-time-${time}`}
+                      checked={currentArrayValue.includes(time)}
+                      onCheckedChange={(checked) => {
+                        const updatedArray = checked
+                          ? [...currentArrayValue, time]
+                          : currentArrayValue.filter((v) => v !== time);
+                        field.onChange(updatedArray);
+                      }}
+                      disabled={isUserProfile}
+                    />
+                  );
+                }}
               />
-              <Label htmlFor={`admin-time-${time}`} className="text-sm font-normal">
+              <Label htmlFor={`client-time-${time}`} className="text-sm font-normal">
                 {time}
               </Label>
             </div>
