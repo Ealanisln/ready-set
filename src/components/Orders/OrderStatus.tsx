@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -79,6 +79,10 @@ export const OrderStatusCard: React.FC<OrderStatusProps> = ({
   onStatusChange,
 }) => {
   const [status, setStatus] = useState<OrderStatus>(initialStatus);
+
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
 
   const handleStatusChange = (newStatus: OrderStatus) => {
     setStatus(newStatus);

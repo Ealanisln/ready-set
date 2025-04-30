@@ -287,6 +287,11 @@ CREATE TABLE "job_applications" (
     "driversLicenseUrl" TEXT,
     "insuranceUrl" TEXT,
     "vehicleRegUrl" TEXT,
+    "foodHandlerUrl" TEXT,
+    "hipaaUrl" TEXT,
+    "driverPhotoUrl" TEXT,
+    "carPhotoUrl" TEXT,
+    "equipmentPhotoUrl" TEXT,
     "status" "ApplicationStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -486,3 +491,4 @@ ALTER TABLE "user_addresses" ADD CONSTRAINT "user_addresses_userId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "job_applications" ADD CONSTRAINT "job_applications_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "profiles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+

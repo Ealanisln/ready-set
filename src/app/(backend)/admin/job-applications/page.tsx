@@ -340,6 +340,77 @@ const ApplicationDetailDialog: React.FC<{
                 Vehicle Registration
               </Button>
             )}
+            {/* Additional document buttons */}
+            {application.foodHandlerUrl && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  const url = getDocumentUrl(application.foodHandlerUrl ?? null);
+                  openDocumentWithFallback(url);
+                }}
+                aria-label="View Food Handler Certificate"
+              >
+                <FileText className="h-4 w-4" />
+                Food Handler Certificate
+              </Button>
+            )}
+            {application.hipaaUrl && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  const url = getDocumentUrl(application.hipaaUrl ?? null);
+                  openDocumentWithFallback(url);
+                }}
+                aria-label="View HIPAA Certificate"
+              >
+                <FileText className="h-4 w-4" />
+                HIPAA Certificate
+              </Button>
+            )}
+            {application.driverPhotoUrl && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  const url = getDocumentUrl(application.driverPhotoUrl ?? null);
+                  openDocumentWithFallback(url);
+                }}
+                aria-label="View Driver Photo"
+              >
+                <FileText className="h-4 w-4" />
+                Driver Photo
+              </Button>
+            )}
+            {application.carPhotoUrl && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  const url = getDocumentUrl(application.carPhotoUrl ?? null);
+                  openDocumentWithFallback(url);
+                }}
+                aria-label="View Car Photo"
+              >
+                <FileText className="h-4 w-4" />
+                Car Photo
+              </Button>
+            )}
+            {application.equipmentPhotoUrl && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  const url = getDocumentUrl(application.equipmentPhotoUrl ?? null);
+                  openDocumentWithFallback(url);
+                }}
+                aria-label="View Equipment Photo"
+              >
+                <FileText className="h-4 w-4" />
+                Equipment Photo
+              </Button>
+            )}
           </div>
         </section>
 
@@ -523,7 +594,13 @@ export default function JobApplicationsPage() {
             errorData.error || `Failed to update status to ${newStatus}`,
           );
         }
-        updatedApp = (await response.json()) as JobApplication;
+        const responseData = await response.json();
+        if (!responseData.success || !responseData.application) {
+          throw new Error(
+            responseData.error || `Failed to update status to ${newStatus} (API success was false or application missing)`
+          );
+        }
+        updatedApp = responseData.application as JobApplication;
         resultMessage = `Application status updated to ${updatedApp.status}`;
         console.log("API update successful, new status:", updatedApp.status);
       }
@@ -556,6 +633,11 @@ export default function JobApplicationsPage() {
       });
 
       fetchStats();
+
+      // Close the dialog if the status was changed successfully via the dialog
+      if (selectedApplication && selectedApplication.id === id && (newStatus === ApplicationStatus.REJECTED || newStatus === ApplicationStatus.APPROVED)) {
+          setIsDetailDialogOpen(false);
+      }
 
     } catch (error: any) {
       console.error("Error updating application status:", error);
@@ -718,14 +800,14 @@ export default function JobApplicationsPage() {
                       </div>
                       <div className="p-2">
                         <Select
-                          value={positionFilter}
-                          onValueChange={setPositionFilter}
+                          value={positionFilter === "all" ? "all" : positionFilter}
+                          onValueChange={(value) => setPositionFilter(value === "all" ? "all" : value)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Position" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Positions</SelectItem>
+                            <SelectItem value="all">All Positions</SelectItem>
                             <SelectItem value="Driver for Catering Deliveries">
                               Driver
                             </SelectItem>
@@ -957,4 +1039,4 @@ export default function JobApplicationsPage() {
       />
     </div>
   );
-} 
+}

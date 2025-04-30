@@ -118,12 +118,28 @@ export async function POST(request: Request) {
       }
     }
 
-    // Send notification email to admin
+    // Send notification email to admin with full application details
     const recipient = "apply@readysetllc.com";
+    const subject = `New Job Application: ${applicationData.firstName} ${applicationData.lastName} - ${applicationData.position}`;
+
+    // Create a more detailed HTML body
+    let htmlBody = `<h1>New Job Application Received</h1>`;
+    htmlBody += `<p><strong>Application ID:</strong> ${application.id}</p>`;
+    htmlBody += `<h2>Applicant Details:</h2><ul>`;
+
+    // Iterate over applicationData to create list items
+    for (const [key, value] of Object.entries(applicationData)) {
+      // Simple formatting for key names
+      const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+      htmlBody += `<li><strong>${formattedKey}:</strong> ${value || 'N/A'}</li>`;
+    }
+
+    htmlBody += `</ul>`;
+
     await sendEmail({
       to: recipient,
-      subject: "New Job Application",
-      html: `New application received from ${data.firstName} ${data.lastName} for ${data.role} position. Application ID: ${application.id}`,
+      subject: subject, // Use the updated subject
+      html: htmlBody, // Use the detailed HTML body
     });
 
     return NextResponse.json({

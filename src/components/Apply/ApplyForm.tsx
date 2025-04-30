@@ -275,11 +275,13 @@ const JobApplicationForm = () => {
   // Helper function to validate required files
   const validateFiles = (role: string): string[] => {
     const errors: string[] = [];
-    
-    if (resumeUpload.uploadedFiles.length === 0) {
+
+    // Only require resume if NOT a driver role
+    if (role !== "Driver for Catering Deliveries" && resumeUpload.uploadedFiles.length === 0) {
       errors.push("Please upload your resume");
     }
 
+    // Driver-specific file requirements
     if (role === "Driver for Catering Deliveries") {
       if (licenseUpload.uploadedFiles.length === 0) {
         errors.push("Please upload your driver's license");

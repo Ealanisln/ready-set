@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm, UseFormReturn, UseFormHandleSubmit, UseFormSetValue } from "react-hook-form";
 import toast from "react-hot-toast";
 import { UserFormValues } from "../types";
 
@@ -13,11 +13,12 @@ interface UseUserFormReturn {
 
 export const useUserForm = (
   userId: string,
-  fetchUser: () => Promise<UserFormValues | null>
+  initialData: UserFormValues | null,
+  refetchData: () => Promise<any>
 ): UseUserFormReturn => {
   // Capture the full methods object
   const methods = useForm<UserFormValues>({
-    defaultValues: {
+    defaultValues: initialData || {
       id: "",
       displayName: "",
       email: "",
@@ -55,27 +56,18 @@ export const useUserForm = (
   const watchedValues = watch();
   const hasUnsavedChanges = isDirty;
   
-  // Load initial data
+  // Reset form when initialData changes
   useEffect(() => {
-    const loadUserData = async () => {
-      console.log("[useUserForm] Fetching user data...");
-      const userData = await fetchUser();
-      if (userData) {
-        console.log("[useUserForm] User data fetched, attempting reset with:", JSON.stringify(userData, null, 2));
-        try {
-          reset(userData);
-          console.log("[useUserForm] Form reset executed successfully.");
-        } catch (error) {
-          console.error("[useUserForm] Error during form reset:", error);
-        }
-        // console.log("Form reset with data:", userData); // Original log, can be removed or kept
-      } else {
-        console.log("[useUserForm] No user data fetched, skipping reset.");
-      }
-    };
-    
-    loadUserData();
-  }, [fetchUser, reset]);
+    if (initialData) {
+      console.log("[useUserForm] Initial data received, resetting form.");
+      // Reset the form with the new initialData
+      // keepDirty: false ensures that the form is no longer considered dirty after reset if data matches
+      reset(initialData, { keepDirty: false }); 
+    } else {
+      console.log("[useUserForm] No initial data provided, skipping reset.");
+    }
+    // Dependency array ensures this runs only when initialData or reset function identity changes
+  }, [initialData, reset]);
 
   // Form submission
   const onSubmit = async (data: UserFormValues) => {
@@ -145,7 +137,7 @@ export const useUserForm = (
       }
 
       await response.json();
-      await fetchUser();
+      await refetchData();
       toast.success("User saved successfully!");
     } catch (error) {
       console.error("Error updating user:", error);
@@ -156,10 +148,9 @@ export const useUserForm = (
   };
 
   return {
-    methods, // Return the whole methods object
+    methods,
     watchedValues,
     hasUnsavedChanges,
     onSubmit,
-    // Note: isDirty is available via methods.formState.isDirty
   };
 };

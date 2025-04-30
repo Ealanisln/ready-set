@@ -18,13 +18,11 @@ import DriverAssignmentDialog from "./ui/DriverAssignmentDialog";
 import OrderStatusCard from "./OrderStatus";
 import { usePathname, useRouter } from "next/navigation";
 import { OrderFilesManager } from "./ui/OrderFiles";
-import { Driver, Order, OrderStatus, OrderType, VehicleType } from "@/types/order";
+import { Driver, Order, OrderStatus, OrderType, VehicleType, DriverStatus } from "@/types/order";
 import { Skeleton } from "@/components/ui/skeleton"; // Added for loading states
 import { FileUpload } from '@/types/file';
 import { createClient } from "@/utils/supabase/client"; // Added for auth refresh
-
-// Extend the base order type to ensure id is string after serialization
-type SerializedOrder = Omit<Order, 'id'> & { id: string };
+import { syncOrderStatusWithBroker } from "@/lib/services/brokerSyncService"; // Import the new central sync service
 
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
@@ -284,12 +282,14 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     setSelectedDriver(driverId);
   };
 
-  const updateDriverStatus = async (newStatus: string) => {
+  const updateDriverStatus = async (newStatus: DriverStatus) => {
     if (!order) return;
 
     try {
       // Refresh auth session before making the request
       await supabase.auth.refreshSession();
+      
+      console.log(`Updating driver status for order ${order.orderNumber} to:`, newStatus);
       
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
@@ -314,8 +314,16 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       }
 
       const updatedOrder = await response.json();
+      console.log(`Driver status for order ${order.orderNumber} updated response:`, updatedOrder);
       setOrder(updatedOrder);
       toast.success("Driver status updated successfully!");
+
+      // If driver status is updated to completed, also update the main order status
+      console.log(`Checking if driver status '${newStatus}' requires order status update.`);
+      if (newStatus === DriverStatus.COMPLETED) {
+        console.log(`Triggering order status update to COMPLETED for order ${order.orderNumber}`);
+        await handleOrderStatusChange(OrderStatus.COMPLETED);
+      }
     } catch (error) {
       console.error("Error updating driver status:", error);
       toast.error(error instanceof Error ? error.message : "Failed to update driver status. Please try again.");
@@ -325,10 +333,12 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
   const handleOrderStatusChange = async (newStatus: OrderStatus) => {
     if (!order) return;
 
-    try {
+    const internalUpdatePromise = async () => {
       // Refresh auth session before making the request
       await supabase.auth.refreshSession();
-      
+
+      console.log(`Updating internal ORDER status for order ${order.orderNumber} to:`, newStatus);
+
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
@@ -339,7 +349,6 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       });
 
       if (!response.ok) {
-        // Get error details
         let errorText = '';
         try {
           const errorData = await response.json();
@@ -347,16 +356,32 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
         } catch (parseError) {
           errorText = '';
         }
-        
-        throw new Error(`Failed to update order status: ${errorText || response.statusText}`);
+        throw new Error(`Failed to update internal order status: ${errorText || response.statusText}`);
       }
+      const updatedOrderData = await response.json();
+       console.log(`Internal order status for order ${order.orderNumber} updated response:`, updatedOrderData);
+      // Ensure the returned data conforms to the Order type for the sync function
+      // You might need type assertion or validation depending on your API response structure
+      return updatedOrderData as Order; 
+    };
 
-      const updatedOrder = await response.json();
-      setOrder(updatedOrder);
-      toast.success("Order status updated successfully!");
+    try {
+      // Perform internal update first
+      const updatedOrder = await internalUpdatePromise();
+      setOrder(updatedOrder); // Update local state immediately after internal success
+      toast.success("Internal order status updated successfully!");
+
+      // ---- Sync with Broker (Replaced old CaterValley block) ----
+      // Pass the *updated* order object returned from the internal update
+      // This ensures the sync function has the latest data, including potentially the brokerage field.
+      await syncOrderStatusWithBroker(updatedOrder, newStatus);
+      // -----------------------------------------------------------
+
     } catch (error) {
-      console.error("Error updating order status:", error);
+      // Error during internal update
+      console.error("Error updating internal order status:", error);
       toast.error(error instanceof Error ? error.message : "Failed to update order status. Please try again.");
+      // Do not attempt Broker sync if internal update failed
     }
   };
 

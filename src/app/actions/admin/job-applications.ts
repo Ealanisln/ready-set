@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import { Prisma, PrismaClient, UserType } from '@prisma/client';
+import { Prisma, UserType } from '@prisma/client';
 import { prisma } from '../../../lib/prisma'; 
 import { createClient } from '@/utils/supabase/server';
 

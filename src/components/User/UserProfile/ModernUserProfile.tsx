@@ -43,7 +43,8 @@ export default function UserProfile({
     loading, 
     fetchUser, 
     handleUploadSuccess,
-    useUploadFileHook
+    useUploadFileHook,
+    userData
   } = useUserData(userId || "", refreshTrigger, setRefreshTrigger);
 
   // Destructure methods object and custom properties from the updated hook
@@ -52,7 +53,7 @@ export default function UserProfile({
     watchedValues,
     hasUnsavedChanges,
     onSubmit
-  } = useUserForm(userId || "", fetchUser);
+  } = useUserForm(userId || "", userData, fetchUser);
 
   // Destructure specific methods needed from the 'methods' object
   const { control, handleSubmit, reset, formState: { isDirty } } = methods;

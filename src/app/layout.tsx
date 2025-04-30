@@ -8,6 +8,7 @@ import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
 import { UserProvider } from "@/contexts/UserContext"; // Add this import
+import { Toaster } from "@/components/ui/toaster";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({
             <ClientLayout>{children}</ClientLayout>
           </UserProvider>
         </ErrorBoundary>
+        <Toaster />
         {/* {process.env.NODE_ENV === "development" && <VercelToolbar />} */}
         <Analytics />
         <CookieConsentBanner

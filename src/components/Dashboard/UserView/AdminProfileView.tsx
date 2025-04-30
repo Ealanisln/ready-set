@@ -1,6 +1,6 @@
-// src/components/Dashboard/UserView/ModernUserProfile.tsx
+// src/components/Dashboard/UserView/AdminProfileView.tsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
 import { Save, XCircle, ChevronLeft, AlertOctagon } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FormProvider } from "react-hook-form";
 import UserProfileTabs from "./UserProfileTabs";
 import UserHeader from "./UserHeader";
 import UserStatusCard from "./Sidebar/UserStatusCard";
@@ -31,46 +32,61 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
   const { session, isLoading: isUserLoading } = useUser();
 
   // Initialize user data hook first
-  const { 
-    loading, 
-    isUpdatingStatus, 
-    fetchUser, 
-    handleStatusChange: baseHandleStatusChange, 
+  const {
+    loading,
+    isUpdatingStatus,
+    fetchUser,
+    handleStatusChange: baseHandleStatusChange,
     handleRoleChange,
     handleUploadSuccess,
     useUploadFileHook
   } = useUserData(userId, refreshTrigger, setRefreshTrigger);
 
-  // Then initialize form with the fetchUser function
+  // Initialize form hook, passing only userId and fetchUser
+  const formMethods = useUserForm(userId, fetchUser);
   const {
     control,
     handleSubmit,
     watchedValues,
     hasUnsavedChanges,
-    isDirty,
-    reset,
     onSubmit,
-    setValue
-  } = useUserForm(userId, fetchUser);
-
-  // Create a wrapped handleStatusChange that uses both the base function and setValue
+    reset,
+    setValue,
+    formState: { isDirty }
+  } = formMethods;
+  
+  // Wrapped handleStatusChange
   const handleStatusChange = async (newStatus: NonNullable<UserFormValues["status"]>) => {
+    // baseHandleStatusChange triggers setRefreshTrigger -> fetchUser -> updates userData -> useEffect in useUserForm resets form
     await baseHandleStatusChange(newStatus);
-    setValue("status", newStatus, { shouldValidate: true, shouldDirty: true });
   };
 
-  // Effect to fetch data when component mounts or dependencies change
+  // Effect to fetch initial data only
   useEffect(() => {
-    if (!isUserLoading) {
+    if (!isUserLoading && userId) {
+      console.log("[AdminProfileView] useEffect triggered. Fetching initial user...");
       fetchUser();
+    } else {
+      console.log("[AdminProfileView] useEffect skipped. Conditions not met:", { isUserLoading, userId });
     }
-  }, [fetchUser, refreshTrigger, isUserLoading]);
+    // Dependencies: only run when auth state loads or the user ID/trigger changes.
+  }, [userId, refreshTrigger, isUserLoading, fetchUser]); // Keep fetchUser OUT to avoid re-fetching when its identity changes (should be stable anyway)
 
-  const handleDiscard = () => {
-    fetchUser();
+  // Memoize setActiveTab
+  const memoizedSetActivetab = useCallback((tab: string) => {
+    setActiveTab(tab);
+  }, []);
+
+  // Discard changes: refetch data and reset form using the 'reset' from useForm
+  const handleDiscard = async () => {
+    const fetchedData = await fetchUser(); // Refetch fresh data
+    if (fetchedData) {
+      reset(fetchedData, { keepDirty: false }); // Reset form state using react-hook-form's reset
+    }
     toast("Changes discarded", { icon: "🔄" });
   };
 
+  // Handle back navigation with unsaved changes check
   const handleBack = () => {
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(
@@ -93,81 +109,83 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
     general_files: useUploadFileHook("general_files"),
   };
 
-  // Loading states
-  if (isUserLoading) {
+  // --- Render Logic ---
+
+  // Loading state: Authentication check
+  if (isUserLoading && !session) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="flex items-center space-x-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-lg font-semibold">
-            Initializing authentication...
-          </p>
-        </div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
+  // Not authenticated state
   if (!session) {
     return <AuthenticationRequired router={router} />;
   }
 
-  if (loading && !isDirty) {
+  // Loading state: Initial data fetch
+  if (loading) {
     return <ProfileSkeleton />;
   }
 
+  // Main component render
   return (
-    <div className="bg-muted/20 min-h-screen pb-10">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Header with breadcrumbs */}
-        <HeaderNavigation 
-          handleBack={handleBack} 
-          handleDiscard={handleDiscard} 
-          handleSubmit={handleSubmit} 
-          onSubmit={onSubmit}
-          hasUnsavedChanges={hasUnsavedChanges}
-          loading={loading}
-        />
+    <FormProvider {...formMethods}>
+      <div className="bg-muted/20 min-h-screen pb-10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          {/* Header Navigation */}
+          <HeaderNavigation
+            handleBack={handleBack}
+            handleDiscard={handleDiscard}
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            hasUnsavedChanges={hasUnsavedChanges}
+            loading={loading || isUpdatingStatus}
+          />
 
-        {/* User Header Section */}
-        <UserHeader watchedValues={watchedValues} />
+          {/* User Header */}
+          <UserHeader watchedValues={watchedValues} />
 
-        {/* Main Content */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          {/* Left Column - Main Information */}
-          <div className="col-span-2 space-y-6">
-            <UserProfileTabs
-              userId={userId}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              watchedValues={watchedValues}
-              control={control}
-              refreshTrigger={refreshTrigger}
-              isUserProfile={isUserProfile}
-            />
-          </div>
+          {/* Main Content Grid */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            {/* Left Column: Tabs */}
+            <div className="col-span-2 space-y-6">
+              <UserProfileTabs
+                userId={userId}
+                activeTab={activeTab}
+                setActiveTab={memoizedSetActivetab}
+                watchedValues={watchedValues}
+                control={control}
+                refreshTrigger={refreshTrigger}
+                isUserProfile={isUserProfile}
+              />
+            </div>
 
-          {/* Right Column - Status & User Management */}
-          <div className="space-y-6">
-            <UserStatusCard 
-              watchedValues={watchedValues}
-              control={control}
-              isUpdatingStatus={isUpdatingStatus}
-              loading={loading}
-              handleStatusChange={handleStatusChange}
-              handleRoleChange={handleRoleChange}
-            />
+            {/* Right Column: Sidebar Cards */}
+            <div className="space-y-6">
+              <UserStatusCard
+                watchedValues={watchedValues}
+                control={control}
+                isUpdatingStatus={isUpdatingStatus}
+                loading={loading}
+                handleStatusChange={handleStatusChange}
+                handleRoleChange={handleRoleChange}
+              />
 
-            <UserDocumentsCard 
-              uploadHooks={uploadHooks}
-              userType={watchedValues.type ?? "client"}
-              setRefreshTrigger={setRefreshTrigger}
-            />
+              <UserDocumentsCard
+                uploadHooks={uploadHooks}
+                userType={watchedValues.type ?? "client"}
+                setRefreshTrigger={setRefreshTrigger}
+              />
 
-            <UserArchiveCard />
+              <UserArchiveCard />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </FormProvider>
   );
 }
 
@@ -214,11 +232,11 @@ const ProfileSkeleton = () => (
   </div>
 );
 
-// Header navigation component
+// Header navigation component specific to this view
 interface HeaderNavigationProps {
   handleBack: () => void;
   handleDiscard: () => void;
-  handleSubmit: any;
+  handleSubmit: any; // Consider using UseFormHandleSubmit<UserFormValues> for better type safety
   onSubmit: (data: UserFormValues) => Promise<void>;
   hasUnsavedChanges: boolean;
   loading: boolean;
@@ -232,55 +250,57 @@ const HeaderNavigation = ({
   hasUnsavedChanges,
   loading
 }: HeaderNavigationProps) => (
-  <div className="sticky top-0 z-10 bg-white py-4 shadow-sm">
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className="text-muted-foreground hover:text-foreground h-9 w-9"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <div className="text-muted-foreground text-sm">
-          <Link
-            href="/admin"
-            className="hover:text-foreground hover:underline"
+  <div className="sticky top-0 z-10 bg-white py-4 shadow-sm dark:bg-gray-800 border-b dark:border-gray-700 mb-6">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className="text-muted-foreground hover:text-foreground h-9 w-9 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            Dashboard
-          </Link>
-          {" / "}
-          <Link
-            href="/admin/users"
-            className="hover:text-foreground hover:underline"
-          >
-            Users
-          </Link>
-          {" / "}
-          <span className="text-foreground">Edit User</span>
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="text-muted-foreground text-sm dark:text-gray-400">
+            <Link
+              href="/admin"
+              className="hover:text-foreground hover:underline dark:hover:text-gray-200"
+            >
+              Dashboard
+            </Link>
+            {" / "}
+            <Link
+              href="/admin/users"
+              className="hover:text-foreground hover:underline dark:hover:text-gray-200"
+            >
+              Users
+            </Link>
+            {" / "}
+            <span className="text-foreground dark:text-gray-100">Edit User</span>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDiscard}
-          disabled={!hasUnsavedChanges || loading}
-          className="h-9"
-        >
-          <XCircle className="mr-1.5 h-4 w-4" />
-          Discard
-        </Button>
-        <Button
-          size="sm"
-          onClick={handleSubmit(onSubmit)}
-          disabled={!hasUnsavedChanges || loading}
-          className="h-9 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-        >
-          <Save className="mr-1.5 h-4 w-4" />
-          Save Changes
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDiscard}
+            disabled={!hasUnsavedChanges || loading}
+            className="h-9 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <XCircle className="mr-1.5 h-4 w-4" />
+            Discard
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSubmit(onSubmit)}
+            disabled={!hasUnsavedChanges || loading}
+            className="h-9 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800"
+          >
+            <Save className="mr-1.5 h-4 w-4" />
+            Save Changes
+          </Button>
+        </div>
       </div>
     </div>
   </div>

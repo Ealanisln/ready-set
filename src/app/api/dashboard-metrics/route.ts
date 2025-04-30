@@ -1,39 +1,104 @@
 // app/api/dashboard-metrics/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+// Import Prisma client, Decimal type, and the necessary Enums
+import { PrismaClient, Prisma, CateringStatus, UserType } from "@prisma/client"; 
 
 const prisma = new PrismaClient();
 
+// Define potential Enums if they exist in your schema - These are now imported above
+// import { OrderStatus, UserType } from '@prisma/client'; // Example if defined
+
 export async function GET() {
+  console.log("API Route /api/dashboard-metrics called."); // Log route entry
   try {
+    // It's often better to perform these sequentially if one depends on another
+    // or if you want finer-grained error handling. Promise.all is fine for independent queries.
+    
+    console.log("Fetching total revenue...");
+    const totalRevenuePromise = prisma.cateringRequest.aggregate({
+      _sum: {
+        orderTotal: true, // orderTotal is Decimal, Prisma handles sum
+      },
+    });
+
+    console.log("Fetching total delivery requests count...");
+    const deliveriesRequestsPromise = prisma.cateringRequest.count();
+
+    console.log("Fetching completed sales count...");
+    const salesTotalPromise = prisma.cateringRequest.count({
+      where: {
+        // Use the imported CateringStatus enum
+        status: CateringStatus.COMPLETED, 
+      },
+    });
+
+    console.log("Fetching total vendors count...");
+    const totalVendorsPromise = prisma.profile.count({
+      where: {
+        // Use the imported UserType enum
+        type: UserType.VENDOR, 
+      },
+    });
+
     const [totalRevenue, deliveriesRequests, salesTotal, totalVendors] =
       await Promise.all([
-        prisma.cateringRequest.aggregate({
-          _sum: {
-            orderTotal: true,
-          },
-        }),
-        prisma.cateringRequest.count(),
-        prisma.cateringRequest.count({
-          where: {
-            status: "COMPLETED",
-          },
-        }),
-        prisma.profile.count({
-          where: {
-            type: "VENDOR",
-          },
-        }),
+        totalRevenuePromise,
+        deliveriesRequestsPromise,
+        salesTotalPromise,
+        totalVendorsPromise,
       ]);
+      
+    console.log("Prisma queries completed successfully.");
+    console.log("Total Revenue Result:", totalRevenue);
+    console.log("Deliveries Requests Count:", deliveriesRequests);
+    console.log("Sales Total Count:", salesTotal);
+    console.log("Total Vendors Count:", totalVendors);
+
+    const revenueValue = totalRevenue._sum.orderTotal;
+    console.log("Raw Revenue Value:", revenueValue);
+
+    // Handle potential Decimal type from Prisma before converting
+    let finalRevenue = 0;
+    if (revenueValue instanceof Prisma.Decimal) {
+      finalRevenue = revenueValue.toNumber();
+    } else if (typeof revenueValue === 'number') {
+      // Although orderTotal is Decimal?, sum might return null if no records exist or all are null.
+      // Prisma's aggregate sum typically returns null in such cases, not 0. 
+      // The null case is handled because `revenueValue` would be null, not satisfying either condition.
+      // Let's explicitly check for null for clarity.
+      finalRevenue = revenueValue; // This branch might be less likely if schema enforces Decimal
+    } else if (revenueValue === null) {
+      finalRevenue = 0;
+    } 
+    // Consider adding an else block to log if revenueValue is an unexpected type
+    
+    console.log("Processed Revenue Value:", finalRevenue);
+
 
     return NextResponse.json({
-      totalRevenue: totalRevenue._sum.orderTotal?.toNumber() || 0,
+      totalRevenue: finalRevenue,
       deliveriesRequests,
       salesTotal,
       totalVendors,
     });
   } catch (error: any) {
-    console.error("Dashboard metrics error:", error);
-    return NextResponse.json({ error: "Failed to fetch dashboard metrics" }, { status: 500 });
+    // Log the specific error object
+    console.error("Dashboard metrics error occurred:", error);
+    console.error("Error Name:", error.name);
+    console.error("Error Message:", error.message);
+    console.error("Error Stack:", error.stack);
+    // If it's a Prisma error, it might have a 'code' property
+    if (error.code) {
+       console.error("Prisma Error Code:", error.code);
+    }
+    return NextResponse.json(
+      { error: "Failed to fetch dashboard metrics", details: error.message }, 
+      { status: 500 }
+    );
+  } finally {
+    // Optional: Disconnect Prisma client if not using long-running connections
+    // await prisma.$disconnect(); 
+    // Be cautious with this in serverless environments or frequent requests.
+    console.log("API Route /api/dashboard-metrics finished."); // Log route exit
   }
 }

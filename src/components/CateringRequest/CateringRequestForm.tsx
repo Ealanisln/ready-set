@@ -260,7 +260,17 @@ const BROKERAGE_OPTIONS = [
   { value: "Other", label: "Other" },
 ];
 
-const CateringRequestForm: React.FC = () => {
+/**
+ * CateringRequestForm
+ * @param client Optional client object (used in admin mode to submit on behalf of a client)
+ * @param isAdminMode If true, uses the provided client instead of the logged-in user
+ */
+interface CateringRequestFormProps {
+  client?: import("@/types/client").Client;
+  isAdminMode?: boolean;
+}
+
+const CateringRequestForm: React.FC<CateringRequestFormProps> = ({ client, isAdminMode = false }) => {
   const router = useRouter();
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -512,236 +522,69 @@ const CateringRequestForm: React.FC = () => {
       formData: { ...data, attachments: data.attachments?.length },
     });
 
-    if (!session?.user?.id) {
-      console.error("User not authenticated", { userId: session?.user?.id });
-      toast.error("You must be logged in to submit a request");
+    // In admin mode, require a client prop
+    if (isAdminMode && !client) {
+      toast.error("A client must be selected for admin submission.");
       return;
     }
-
-    // Validate required fields
-    const requiredFields: { [key: string]: string } = {
-      brokerage: "Brokerage",
-      orderNumber: "Order Number",
-      date: "Date",
-      pickupTime: "Pick Up Time",
-      arrivalTime: "Arrival Time",
-      headcount: "Headcount",
-      clientAttention: "Client/Attention",
-      orderTotal: "Order Total",
-    };
-
-    const missingFields = Object.entries(requiredFields)
-      .filter(([key]) => !data[key as keyof ExtendedCateringFormData])
-      .map(([_, label]) => label);
-
-    // Additional validation for host-related fields when host is needed
-    if (data.needHost === CateringNeedHost.YES) {
-      if (!data.hoursNeeded) missingFields.push("Hours Needed");
-      if (!data.numberOfHosts) missingFields.push("Number of Hosts");
-    }
-
-    // Validate addresses
-    if (!data.pickupAddress?.id) {
-      missingFields.push("Pickup Address");
-    }
-
-    if (!data.deliveryAddress?.id) {
-      missingFields.push("Delivery Address");
-    }
-
-    if (missingFields.length > 0) {
-      const errorMessage = `Please fill in the following required fields: ${missingFields.join(", ")}`;
-      setErrorMessage(errorMessage);
-      toast.error(errorMessage);
+    if (!isAdminMode && !session?.user?.id) {
+      setErrorMessage("Please log in to submit an order");
       return;
-    }
-
-    // Validate numeric fields
-    const numericFields = {
-      headcount: { min: 1, message: "Headcount must be at least 1" },
-      orderTotal: { min: 0, message: "Order total must be a positive number" },
-      tip: { min: 0, message: "Tip must be a positive number" },
-    };
-
-    for (const [field, validation] of Object.entries(numericFields)) {
-      const value = data[field as keyof Pick<ExtendedCateringFormData, 'headcount' | 'orderTotal' | 'tip'>];
-      if (field === 'tip' && !value) continue; // Skip tip validation if not provided
-      if (!value || isNaN(parseFloat(value)) || (validation.min !== undefined && parseFloat(value) < validation.min)) {
-        setErrorMessage(validation.message);
-        toast.error(validation.message);
-        return;
-      }
     }
 
     setIsSubmitting(true);
-    setErrorMessage(null);
-
-    // Clear the uploadedFileKeys to prevent cleanup during submission
-    const filesToKeep = [...uploadedFileKeys];
-    setUploadedFileKeys([]);
-
+    setErrorMessage("");
+    const userId = session?.user?.id;
     try {
-      console.log("Preparing order payload", {
-        orderType: "catering",
-        tipAmount: data.tip ? parseFloat(data.tip) : undefined,
-        attachmentCount: data.attachments?.length,
-      });
-
-      // Properly format dates by combining date and time
-      const formatDateTime = (date: string, time: string | null | undefined) => {
-        if (!date || !time) return null;
-        
-        // Validate time format
-        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(time)) {
-          throw new Error(`Invalid time format: ${time}. Please use HH:MM format (24-hour).`);
-        }
-
-        try {
-          const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
-          const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
-          
-          // Validate date components
-          if (isNaN(year) || isNaN(month) || isNaN(day)) {
-            throw new Error('Invalid date format');
-          }
-          
-          // Validate time components
-          if (isNaN(hours) || isNaN(minutes)) {
-            throw new Error('Invalid time format');
-          }
-
-          // Get the timezone offset for the delivery address state
-          const state = data.deliveryAddress?.state;
-          let timezone = 'America/Los_Angeles'; // Default to PST
-          if (state === 'TX') {
-            timezone = 'America/Chicago'; // CST for Texas
-          }
-
-          // Create date in the local timezone
-          const localDate = new Date(year, month - 1, day, hours, minutes);
-          
-          // Convert to UTC based on the timezone
-          const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: timezone }));
-          
-          // Validate the resulting date
-          if (isNaN(utcDate.getTime())) {
-            throw new Error('Invalid date/time combination');
-          }
-          
-          return utcDate.toISOString();
-        } catch (error) {
-          console.error('Date/time parsing error:', { date, time, error });
-          throw new Error(`Invalid date/time format: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      };
-
-      // Validate and format all times
-      let pickupDateTime: string | null = null;
-      let arrivalDateTime: string | null = null;
-      let completeDateTime: string | null = null;
-
-      try {
-        pickupDateTime = formatDateTime(data.date, data.pickupTime);
-        if (!pickupDateTime) {
-          throw new Error('Pickup date and time are required');
-        }
-
-        arrivalDateTime = formatDateTime(data.date, data.arrivalTime);
-        if (!arrivalDateTime) {
-          throw new Error('Arrival date and time are required');
-        }
-
-        // Complete time is optional
-        if (data.completeTime) {
-          completeDateTime = formatDateTime(data.date, data.completeTime);
-        }
-
-        // Validate time sequence
-        const pickup = new Date(pickupDateTime);
-        const arrival = new Date(arrivalDateTime);
-        const complete = completeDateTime ? new Date(completeDateTime) : null;
-
-        if (arrival < pickup) {
-          throw new Error('Arrival time cannot be earlier than pickup time');
-        }
-
-        if (complete && complete < arrival) {
-          throw new Error('Complete time cannot be earlier than arrival time');
-        }
-      } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
-        return;
-      }
-
-      const requestBody = {
-        userId: session.user.id,
-        pickupAddressId: data.pickupAddress?.id ?? '',
-        deliveryAddressId: data.deliveryAddress?.id ?? '',
-        order_type: "catering",
-        brokerage: data.brokerage,
-        orderNumber: data.orderNumber,
-        pickupDateTime,
-        arrivalDateTime,
-        completeDateTime,
-        headcount: data.headcount ? parseInt(data.headcount) : null,
-        needHost: data.needHost,
-        hoursNeeded: data.hoursNeeded ? parseFloat(data.hoursNeeded) : null,
-        numberOfHosts: data.numberOfHosts ? parseInt(data.numberOfHosts) : null,
-        clientAttention: data.clientAttention?.trim(),
-        pickupNotes: data.pickupNotes,
-        specialNotes: data.specialNotes,
-        orderTotal: data.orderTotal ? parseFloat(data.orderTotal) : null,
-        tip: data.tip ? parseFloat(data.tip) : undefined,
-        status: "ACTIVE",
-        attachments: data.attachments?.map((file) => ({
-          key: file.key,
-          name: file.name,
-          url: file.url,
-        })),
-      };
-
-      // Log the full request body for debugging
-      console.log("Full request body:", requestBody);
-
-      const response = await fetch("/api/orders", {
+      const response = await fetch("/api/catering-requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          ...data,
+          attachments: data.attachments,
+          userId,
+          clientId: isAdminMode && client ? client.id : undefined,
+        }),
       });
 
-      const responseData = await response.json();
-      
+      let responseData: any = null;
+      try {
+        responseData = await response.json();
+      } catch (jsonErr) {
+        responseData = {};
+      }
+
       if (!response.ok) {
-        // Check for specific error types from the API
         if (response.status === 400) {
           const errorMessage = responseData.message || 'Invalid request data';
           console.error('API validation error:', responseData);
-          throw new Error(errorMessage);
+          setErrorMessage(errorMessage);
+          return;
         } else if (response.status === 401) {
-          throw new Error('Please log in to submit an order');
+          setErrorMessage('Please log in to submit an order');
+          return;
         } else if (response.status === 409) {
-          throw new Error('This order number already exists');
+          setErrorMessage('This order number already exists');
+          return;
         } else {
           console.error('API error response:', responseData);
-          throw new Error(responseData.message || 'Failed to submit order');
+          setErrorMessage(responseData.message || 'Failed to submit order');
+          return;
         }
       }
 
       console.log("Order submitted successfully:", responseData);
-      
-      // Reset form and show success message
       reset();
       toast.success("Catering request submitted successfully!");
       setErrorMessage("");
 
-      // --- Add Redirect Logic ---
-      // Assuming session.user.role contains the user role ('client' or other)
-      // Adjust the check based on your actual user role structure
-      const userRole = session?.user?.app_metadata?.role || session?.user?.role; // Check app_metadata first, then root role
-
+      // --- Add Robust Redirect Logic ---
+      let userRole: string | undefined = undefined;
+      if (session && session.user) {
+        userRole = session.user.app_metadata?.role || session.user.role;
+      }
       if (userRole === 'client') {
         console.log("Redirecting client user to /client");
         router.push("/client");
@@ -749,8 +592,7 @@ const CateringRequestForm: React.FC = () => {
         console.log("Redirecting user to /dashboard");
         router.push("/dashboard");
       }
-      // --- End Redirect Logic ---
-
+      // --- End Robust Redirect Logic ---
     } catch (error) {
       console.error("Error submitting order:", error);
       setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred");
@@ -759,46 +601,9 @@ const CateringRequestForm: React.FC = () => {
     }
   };
 
-  // Show loading state while Supabase is initializing
-  if (isInitializing) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
-          <p className="mt-2 text-sm text-gray-500">Loading form...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show message if user is not authenticated
-  if (!session) {
-    return (
-      <div className="rounded-md bg-yellow-50 p-4">
-        <div className="flex">
-          <AlertCircle className="h-5 w-5 text-yellow-400" />
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800">
-              Authentication required
-            </h3>
-            <div className="mt-2 text-sm text-yellow-700">
-              <p>You must be signed in to submit catering requests.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // --- Return the form JSX ---
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="mx-auto w-full max-w-3xl rounded-lg border border-gray-200 bg-white p-8 shadow-sm"
-    >
-      <h2 className="mb-8 text-center text-2xl font-bold text-gray-800">
-        Catering Request
-      </h2>
-
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
       {errorMessage && (
         <div className="mb-6 flex rounded-md bg-red-50 p-4 text-red-700">
           <AlertCircle className="h-5 w-5 text-red-400" />
@@ -1005,7 +810,7 @@ const CateringRequestForm: React.FC = () => {
           />
         </div>
       </div>
-{/* 
+      {/*
       <div className="mb-8 space-y-4">
         <h3 className="mb-5 border-b border-gray-200 pb-3 text-lg font-medium text-gray-800">
           Attachments

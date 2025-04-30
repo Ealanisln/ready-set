@@ -24,6 +24,7 @@ import { CateringRequest, OrderStatus, isCateringRequest, isOnDemand } from "@/t
 import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
 import { ApplicationStatus, JobApplication } from "@/types/job-application";
+import { useUser } from "@/contexts/UserContext";
 
 // Add interface for Job Applications API response
 interface JobApplicationsApiResponse {
@@ -347,6 +348,12 @@ const ModernDashboardCard: React.FC<{
 
 // Redesigned DashboardHome Component
 export function ModernDashboardHome() {
+  const { 
+    user, 
+    isLoading: userLoading, 
+    error: userError 
+  } = useUser();
+  
   const [recentOrders, setRecentOrders] = useState<CateringRequest[]>([]);
   const [activeOrders, setActiveOrders] = useState<CateringRequest[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -361,74 +368,91 @@ export function ModernDashboardHome() {
   } = useDashboardMetrics();
 
   useEffect(() => {
+    if (userLoading || !user) {
+      if (!userLoading && !user) {
+        setLoading(false); 
+      }
+      return; 
+    }
+
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const ordersResponse = await fetch("/api/orders/catering-orders?recentOnly=true");
-        const usersResponse = await fetch("/api/users");
-        const applicationsResponse = await fetch("/api/admin/job-applications");
-        
-        if (!ordersResponse.ok) {
-          const errorText = await ordersResponse.text();
-          throw new Error(`Orders API failed: ${ordersResponse.status} - ${errorText}`);
+        const results = await Promise.allSettled([
+          fetch("/api/orders/catering-orders?recentOnly=true"),
+          fetch("/api/users"),
+          fetch("/api/admin/job-applications")
+        ]);
+
+        const ordersResult = results[0];
+        if (ordersResult.status === 'fulfilled') {
+          if (!ordersResult.value.ok) {
+            const errorText = await ordersResult.value.text();
+            throw new Error(`Orders API failed: ${ordersResult.value.status} - ${errorText}`);
+          }
+          const ordersData = await ordersResult.value.json() as OrdersApiResponse;
+          console.log('Orders data:', ordersData.orders);
+          setRecentOrders(ordersData.orders || []);
+          const activeOrdersList = (ordersData.orders || []).filter((order: CateringRequest) => 
+            [OrderStatus.ACTIVE, OrderStatus.ASSIGNED].includes(order.status)
+          );
+          setActiveOrders(activeOrdersList);
+        } else {
+          console.error("Failed to fetch orders:", ordersResult.reason);
+          throw new Error("Failed to fetch orders data.");
         }
-        
-        if (!usersResponse.ok) {
-          const errorText = await usersResponse.text();
-          throw new Error(`Users API failed: ${usersResponse.status} - ${errorText}`);
+
+        const usersResult = results[1];
+        if (usersResult.status === 'fulfilled') {
+          if (!usersResult.value.ok) {
+            const errorText = await usersResult.value.text();
+            throw new Error(`Users API failed: ${usersResult.value.status} - ${errorText}`);
+          }
+          const usersData = await usersResult.value.json() as UsersApiResponse;
+          setUsers(usersData.users || []);
+        } else {
+           console.error("Failed to fetch users:", usersResult.reason);
+          throw new Error("Failed to fetch users data.");
         }
-        
-        if (!applicationsResponse.ok) {
-          const errorText = await applicationsResponse.text();
-          throw new Error(`Applications API failed: ${applicationsResponse.status} - ${errorText}`);
+
+        const applicationsResult = results[2];
+        if (applicationsResult.status === 'fulfilled') {
+          if (!applicationsResult.value.ok) {
+            const errorText = await applicationsResult.value.text();
+            throw new Error(`Applications API failed: ${applicationsResult.value.status} - ${errorText}`);
+          }
+          const applicationsData = await applicationsResult.value.json() as JobApplicationsApiResponse;
+          console.log('Applications data:', applicationsData.applications);
+          setRecentApplications(applicationsData.applications || []);
+          const pendingAppsList = (applicationsData.applications || []).filter(
+            (app) => app.status === ApplicationStatus.PENDING
+          );
+          setPendingApplications(pendingAppsList);
+        } else {
+          console.error("Failed to fetch applications:", applicationsResult.reason);
+          throw new Error("Failed to fetch applications data.");
         }
-        
-        const ordersData = await ordersResponse.json() as OrdersApiResponse;
-        const usersData = await usersResponse.json() as UsersApiResponse;
-        const applicationsData = await applicationsResponse.json() as JobApplicationsApiResponse;
-        
-        console.log('Orders data:', ordersData.orders);
-        console.log('Applications data:', applicationsData.applications);
-        
-        // Extract orders array from the response
-        setRecentOrders(ordersData.orders || []);
-        
-        // Filter active orders
-        const activeOrdersList = (ordersData.orders || []).filter((order: CateringRequest) => 
-          [OrderStatus.ACTIVE, OrderStatus.ASSIGNED].includes(order.status)
-        );
-        setActiveOrders(activeOrdersList);
-        
-        // Use the users array from the response
-        setUsers(usersData.users || []);
-        
-        // Set applications data
-        setRecentApplications(applicationsData.applications || []);
-        
-        // Filter pending applications
-        const pendingAppsList = (applicationsData.applications || []).filter(
-          (app) => app.status === ApplicationStatus.PENDING
-        );
-        setPendingApplications(pendingAppsList);
-        
-        setLoading(false);
-        
-      } catch (error) {
-        console.error("Dashboard data fetch error:", error);
-        setError(error instanceof Error ? error.message : 'An unknown error occurred');
-        setLoading(false);
+
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred fetching dashboard data');
+      } finally {
+         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [userLoading, user]);
 
-  // Modern loading spinner
-  if (loading || metricsLoading) {
+  const combinedLoading = userLoading || loading || metricsLoading;
+  const combinedError = userError || error || metricsError;
+
+  if (combinedLoading) {
     return <LoadingDashboard />;
   }
 
-  // Modern error display
-  if (error || metricsError) {
+  if (combinedError) {
     return (
       <div className="flex h-screen items-center justify-center bg-red-50">
         <div className="rounded-lg bg-white p-8 shadow-lg max-w-md">
@@ -438,7 +462,7 @@ export function ModernDashboardHome() {
             </svg>
           </div>
           <h3 className="mb-2 text-xl font-semibold text-center text-gray-900">Error Loading Dashboard</h3>
-          <p className="text-sm text-center text-red-600">{error || metricsError}</p>
+          <p className="text-sm text-center text-red-600">{combinedError}</p> 
           <div className="mt-6 text-center">
             <Button 
               onClick={() => window.location.reload()}
@@ -452,18 +476,14 @@ export function ModernDashboardHome() {
     );
   }
 
-  // Calculate percentage changes for metrics
   const totalOrdersCount = Array.isArray(recentOrders) ? recentOrders.length : 0;
   const activeOrdersPercentage = ((activeOrders.length / (totalOrdersCount || 1)) * 100).toFixed(1);
   
-  // Calculate pending applications percentage
   const totalApplicationsCount = Array.isArray(recentApplications) ? recentApplications.length : 0;
   const pendingApplicationsPercentage = ((pendingApplications.length / (totalApplicationsCount || 1)) * 100).toFixed(1);
   
-  // Modern dashboard layout
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
-      {/* Top navigation bar */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
@@ -491,7 +511,6 @@ export function ModernDashboardHome() {
         </div>
       </div>
 
-      {/* Main content */}
       <main className="flex-1 px-6 py-8">
         <div className="mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Overview</h2>

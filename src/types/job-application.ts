@@ -27,6 +27,11 @@ export interface JobApplication {
   driversLicenseUrl: string | null;
   insuranceUrl: string | null;
   vehicleRegUrl: string | null;
+  foodHandlerUrl?: string | null;
+  hipaaUrl?: string | null;
+  driverPhotoUrl?: string | null;
+  carPhotoUrl?: string | null;
+  equipmentPhotoUrl?: string | null;
   status: ApplicationStatus;
   createdAt: Date;
   updatedAt: Date;

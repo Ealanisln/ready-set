@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       select: { type: true },
     });
 
-    if (!dbUser?.type || (dbUser.type !== UserType.ADMIN && dbUser.type !== UserType.SUPER_ADMIN)) {
+    if (!dbUser?.type || (dbUser.type !== UserType.ADMIN && dbUser.type !== UserType.SUPER_ADMIN && dbUser.type !== UserType.HELPDESK)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

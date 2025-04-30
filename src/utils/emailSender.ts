@@ -137,7 +137,7 @@ export async function sendOrderEmail(order: CateringOrder | OnDemandOrder) {
   try {
     await resend.emails.send({
       to: process.env.ADMIN_EMAIL || "info@ready-set.co",
-      from: process.env.EMAIL_FROM || "solutions@readysetllc.com",
+      from: process.env.EMAIL_FROM || "solutions@updates.readysetllc.com",
       subject: `New ${order.order_type.charAt(0).toUpperCase() + order.order_type.slice(1)} Order - ${order.order_number}`,
       html: body,
     });

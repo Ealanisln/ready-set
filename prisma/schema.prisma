@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Profile {
@@ -329,6 +330,11 @@ model JobApplication {
   driversLicenseUrl String?
   insuranceUrl      String?
   vehicleRegUrl     String?
+  foodHandlerUrl    String?
+  hipaaUrl          String?
+  driverPhotoUrl    String?
+  carPhotoUrl       String?
+  equipmentPhotoUrl String?
   status            ApplicationStatus @default(PENDING)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt

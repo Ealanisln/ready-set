@@ -1,4 +1,4 @@
-// src/components/Dashboard/UserView/hooks/useUserData.ts
+// src/components/User/UserProfile/hooks/useUserData.ts
 
 import { useState, useCallback } from "react";
 import { FileWithPath } from "react-dropzone"; // Keep this import for typing
@@ -7,14 +7,27 @@ import { useUser } from "@/contexts/UserContext";
 import { useUploadFile } from "@/hooks/use-upload-file"; // Keep this import
 import { UserFormValues } from "../types";
 
+// Define the explicit return type for the hook
+interface UseUserDataReturn {
+  loading: boolean;
+  isUpdatingStatus: boolean;
+  userData: UserFormValues | null;
+  fetchUser: () => Promise<UserFormValues | null>;
+  handleStatusChange: (newStatus: NonNullable<UserFormValues["status"]>) => Promise<void>;
+  handleRoleChange: (newRoleValue: string) => Promise<void>;
+  handleUploadSuccess: () => void;
+  useUploadFileHook: (category: string) => any; // Replace 'any' with a more specific type if available
+}
+
 export const useUserData = (
   userId: string,
   refreshTrigger: number,
   setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>
-) => {
+): UseUserDataReturn => {
   // State management
   const [loading, setLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [userData, setUserData] = useState<UserFormValues | null>(null); // Added state for user data
   
   // Auth context
   const { session } = useUser();
@@ -32,6 +45,7 @@ export const useUserData = (
   const fetchUser = useCallback(async () => {
     if (!userId) {
       console.log("No userId provided to fetchUser");
+      setUserData(null); // Ensure userData is null if no userId
       return null;
     }
 
@@ -110,10 +124,12 @@ export const useUserData = (
       };
       
       console.log("Transformed form data:", formData);
+      setUserData(formData); // Set the state with fetched data
       return formData;
     } catch (error) {
       console.error("Error in fetchUser:", error);
       toast.error("Failed to fetch user data. Please try again later.");
+      setUserData(null); // Reset user data on error
       return null;
     } finally {
       setLoading(false);
@@ -247,6 +263,7 @@ export const useUserData = (
   return {
     loading,
     isUpdatingStatus,
+    userData, // Return the user data state
     fetchUser,
     handleStatusChange,
     handleRoleChange,

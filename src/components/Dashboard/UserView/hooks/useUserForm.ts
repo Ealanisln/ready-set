@@ -3,19 +3,21 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { UserFormValues } from "../types";
 
+// Define a type that extends UseFormReturn with our custom properties
+import { UseFormReturn } from "react-hook-form";
+
+type ExtendedUseFormReturn = UseFormReturn<UserFormValues> & {
+  watchedValues: UserFormValues;
+  hasUnsavedChanges: boolean;
+  onSubmit: (data: UserFormValues) => Promise<void>;
+};
+
 export const useUserForm = (
   userId: string,
   fetchUser: () => Promise<UserFormValues | null>
-) => {
-  // Form setup with default values
-  const {
-    control,
-    handleSubmit,
-    watch,
-    reset,
-    formState: { errors, isDirty },
-    setValue,
-  } = useForm<UserFormValues>({
+): ExtendedUseFormReturn => {
+  // Create the form with react-hook-form
+  const methods = useForm<UserFormValues>({
     defaultValues: {
       id: "",
       displayName: "",
@@ -47,10 +49,6 @@ export const useUserForm = (
     },
   });
 
-  // Watch form values
-  const watchedValues = watch();
-  const hasUnsavedChanges = isDirty;
-  
   // Load initial data
   useEffect(() => {
     const loadUserData = async () => {
@@ -59,19 +57,18 @@ export const useUserForm = (
       if (userData) {
         console.log("[useUserForm] User data fetched, attempting reset with:", JSON.stringify(userData, null, 2));
         try {
-          reset(userData);
+          methods.reset(userData);
           console.log("[useUserForm] Form reset executed successfully.");
         } catch (error) {
           console.error("[useUserForm] Error during form reset:", error);
         }
-        // console.log("Form reset with data:", userData); // Original log, can be removed or kept
       } else {
         console.log("[useUserForm] No user data fetched, skipping reset.");
       }
     };
     
     loadUserData();
-  }, [fetchUser, reset]);
+  }, [fetchUser, methods]);
 
   // Form submission
   const onSubmit = async (data: UserFormValues) => {
@@ -151,14 +148,15 @@ export const useUserForm = (
     }
   };
 
+  // Watch form values
+  const watchedValues = methods.watch();
+  const hasUnsavedChanges = methods.formState.isDirty;
+  
+  // Return the complete form methods and our custom properties
   return {
-    control,
-    handleSubmit,
+    ...methods,
     watchedValues,
     hasUnsavedChanges,
-    isDirty,
-    reset,
-    onSubmit,
-    setValue
+    onSubmit
   };
 };
