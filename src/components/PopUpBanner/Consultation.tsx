@@ -146,7 +146,7 @@ const ClientSideConsultationBanner = () => {
                         </motion.div>
                       </motion.div>
                       <motion.p className="text-center text-lg" variants={textVariants} custom={3}>
-                        Limited-time offer from April 1 to 30, 2025.{' '}
+                        Limited-time offer from May 1 to 31, 2025.{' '}
                       </motion.p>
                     </div>
                   </CardContent>
