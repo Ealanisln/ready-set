@@ -6,7 +6,7 @@ interface DelicateBloomsProps {
 }
 
 const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
-  backgroundImage = '/images/flowers/deliverywoman.jpg',
+  backgroundImage = '/images/flowers/flower6.jpg',
 }) => {
   return (
     <div className="relative min-h-screen w-full overflow-y-auto overflow-x-hidden bg-gray-100">
@@ -42,7 +42,7 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
           {/* Card 1: Van */}
           <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
             <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
-              <div className="absolute -top-24 sm:-top-28">
+              <div className="absolute -top-24 scale-50 sm:-top-28 sm:scale-100">
                 <Image
                   src="/images/flowers/van.png"
                   alt="Delivery van"
@@ -67,8 +67,9 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
           <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
             {/* Keep card height */}
             <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
-              {/* Adjust vertical position slightly higher */}
-              <div className="absolute -top-40 sm:-top-44">
+              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
+              {/* Increase negative top offset slightly for mobile on the second card */}
+              <div className="absolute -top-36 scale-50 sm:-top-44 sm:scale-100">
                 <Image
                   src="/images/flowers/boxes.png"
                   alt="Storage box"
@@ -94,8 +95,9 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
           <div className="relative mt-4 w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
             {/* Match card height and image container padding from Card 1 */}
             <div className="relative flex h-16 w-full flex-col items-center justify-center pt-3 sm:h-20 sm:pt-4">
-              {/* Increase negative top offset slightly */}
-              <div className="absolute -top-40 sm:-top-44">
+              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
+              {/* Reduce scale for mobile on the third card */}
+              <div className="absolute -top-32 scale-50 sm:-top-44 sm:scale-100">
                 <Image
                   src="/images/flowers/container.png"
                   alt="Nursery pot"

@@ -19,17 +19,22 @@ const PackageDelivery = ({ onRequestQuote }: PackageDeliveryProps) => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-md shadow-md">
-      <div className="relative">
+    // Remove width constraints and overflow-hidden from this container
+    <div className="relative">
+      {/* Make the image container full width */}
+      <div className="relative h-full w-full">
         <Image
           src="/images/flowers/flower3.jpg"
           alt="Tulips"
           width={1200}
           height={400}
-          className="h-full min-h-[720px] w-full object-cover md:min-h-0"
+          // Use object-cover and make sure the image fills the container
+          className="h-full min-h-[720px] w-screen object-cover md:min-h-0"
+          // Add this to remove any constraints on the image
+          style={{ maxWidth: '100vw' }}
         />
 
-        {/* Transparent overlay with title and buttons - mobile optimized */}
+        {/* Keep overlay centered */}
         <div className="absolute left-0 right-0 top-[15%] z-10 flex w-full justify-center px-4 md:left-1/2 md:top-[35%] md:-translate-x-1/2 md:-translate-y-1/2 md:px-0">
           <div className="mx-auto flex w-full max-w-2xl flex-col items-center rounded-2xl bg-gray-900 bg-opacity-20 p-4 text-center shadow-2xl md:p-12">
             <h2 className="mb-4 text-2xl font-bold text-white md:mb-6 md:text-4xl">
@@ -51,7 +56,7 @@ const PackageDelivery = ({ onRequestQuote }: PackageDeliveryProps) => {
           </div>
         </div>
 
-        {/* White info box - Modified position with increased bottom padding */}
+        {/* White info box */}
         <div
           className="absolute bottom-[80px] left-0 right-0 flex w-full justify-center px-4 md:bottom-[40px] md:pb-6"
           style={{ zIndex: 20 }}

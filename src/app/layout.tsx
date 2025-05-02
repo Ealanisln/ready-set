@@ -1,23 +1,19 @@
 // src/app/layout.tsx
-import { Montserrat } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import Script from "next/script";
-import ClientLayout from "@/components/Clients/ClientLayout";
-import "../styles/index.css";
-import "../styles/prism-vsc-dark-plus.css";
-import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
-import CookieConsentBanner from "../components/Cookies/Banner";
+import { Montserrat } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
+import ClientLayout from '@/components/Clients/ClientLayout';
+import '../styles/index.css';
+import '../styles/prism-vsc-dark-plus.css';
+import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary';
+import CookieConsentBanner from '../components/Cookies/Banner';
 
 const montserrat = Montserrat({
-  subsets: ["latin"],
-  display: "swap",
+  subsets: ['latin'],
+  display: 'swap',
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       suppressHydrationWarning={true}
