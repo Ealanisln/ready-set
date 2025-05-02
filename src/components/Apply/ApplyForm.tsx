@@ -22,6 +22,7 @@ const IMAGE_PDF_TYPES = [".pdf", ".jpg", ".jpeg", ".png"];
 type FormStep = {
   id: number;
   name: string;
+  shortName?: string; // Add short name for mobile display
   fields: string[];
 };
 
@@ -30,22 +31,26 @@ const FORM_STEPS: FormStep[] = [
   {
     id: 1,
     name: "Position & Personal Info",
+    shortName: "Info",
     fields: ["role", "firstName", "lastName", "email", "phone", "address"],
   },
   {
     id: 2, 
     name: "Experience & Skills",
+    shortName: "Skills",
     fields: ["education", "workExperience", "skills", "coverLetter"],
   },
   {
     id: 3,
     name: "Documents",
+    shortName: "Docs",
     fields: ["resume", "driversLicense", "insurance", "vehicleRegistration", 
              "foodHandler", "hipaa", "driverPhoto", "carPhoto", "equipmentPhoto"],
   },
   {
     id: 4,
     name: "Review & Submit",
+    shortName: "Submit",
     fields: [],
   },
 ];
@@ -455,29 +460,40 @@ const JobApplicationForm = () => {
           </div>
 
           {/* Progress Bar */}
-          <div className="p-6 pt-4 pb-8 bg-gray-50 border-b border-gray-100">
-            <div className="flex items-center justify-between mb-6 px-4 max-w-3xl mx-auto">
-              {FORM_STEPS.map((step) => (
-                <div key={step.id} className="flex flex-col items-center">
-                  <div 
-                    className={`w-10 h-10 flex items-center justify-center rounded-full text-base font-medium
-                      ${currentStep >= step.id 
-                        ? 'bg-yellow-400 text-white' 
-                        : 'bg-white text-gray-500 border border-gray-200'}`}
-                  >
-                    {step.id}
+          <div className="p-6 pt-6 pb-8 bg-white">
+            {/* Step indicators */}
+            <div className="relative max-w-3xl mx-auto mb-8 px-6">
+              {/* Horizontal connecting line */}
+              <div className="absolute top-[20px] md:top-[25px] left-6 right-6 h-[2px] bg-gray-200" />
+              
+              {/* Steps */}
+              <div className="relative flex justify-between">
+                {FORM_STEPS.map((step) => (
+                  <div key={step.id} className="flex flex-col items-center px-1">
+                    <div 
+                      className={`relative z-10 w-[40px] h-[40px] md:w-[50px] md:h-[50px] flex items-center justify-center rounded-full text-lg md:text-xl font-semibold border-2 shadow-sm
+                        ${currentStep >= step.id 
+                          ? 'bg-yellow-400 border-yellow-400 text-white' 
+                          : 'bg-white border-gray-200 text-gray-400'}`}
+                    >
+                      {step.id}
+                    </div>
+                    <span className={`text-[10px] md:text-xs mt-2 md:mt-3 text-center w-full font-medium
+                      ${currentStep >= step.id ? 'text-gray-700' : 'text-gray-400'}`}>
+                      <span className="hidden md:inline">{step.name}</span>
+                      <span className="inline md:hidden">{step.shortName}</span>
+                    </span>
                   </div>
-                  <span className="text-xs mt-2 text-center">
-                    {step.name}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1 mb-0 max-w-3xl mx-auto">
+            
+            {/* Progress bar */}
+            <div className="w-full bg-gray-100 h-[4px] rounded-full max-w-3xl mx-auto px-6">
               <div 
-                className="bg-yellow-400 h-1 rounded-full transition-all duration-300"
+                className="bg-yellow-400 h-full rounded-full transition-all duration-300 shadow-sm"
                 style={{ width: `${((currentStep - 1) / (FORM_STEPS.length - 1)) * 100}%` }}
-              ></div>
+              />
             </div>
           </div>
 

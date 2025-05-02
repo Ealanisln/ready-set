@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { prisma } from "@/utils/prismaDB";
+import { PrismaClient } from "@prisma/client";
 
 // Define the bucket name in one place for easy updating
 const STORAGE_BUCKET = "user-assets"; // Matching the existing bucket name in Supabase
@@ -53,6 +53,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   console.log("File upload API endpoint called");
+
+  // Instantiate Prisma Client within the handler
+  const prisma = new PrismaClient();
 
   try {
     // Parse form data first to avoid issues with error handling
@@ -124,7 +127,7 @@ export async function POST(request: NextRequest) {
     // Use the standard URL for now, but keep the alternative as a backup
     const finalUrl = publicUrl;
 
-    // Create the database record using Prisma
+    // Create the database record using the locally instantiated Prisma client
     const fileUpload = await prisma.fileUpload.create({
       data: {
         fileName: file.name,
@@ -134,8 +137,8 @@ export async function POST(request: NextRequest) {
         uploadedAt: new Date(),
         updatedAt: new Date(),
         category,
-        isTemporary: true, // Mark as temporary until associated with a job application
-        jobApplicationId: null, // Will be updated later when the job application is created
+        isTemporary: true,
+        jobApplicationId: null,
       },
     });
 
@@ -150,26 +153,23 @@ export async function POST(request: NextRequest) {
         type: file.type,
         size: file.size,
         entityId: tempId,
-        entityType,
+        entityType: entityType,
         category,
         path: filePath,
         isTemporary: true,
       },
     });
-  } catch (error: any) {
-    console.error("Unexpected error in file upload:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected error occurred",
-        details: error.message || String(error),
-      },
-      { status: 500 },
-    );
+  } finally {
+    // Disconnect Prisma Client after use
+    await prisma.$disconnect();
   }
 }
 
 export async function DELETE(request: NextRequest) {
   console.log("File delete API endpoint called");
+
+  // Instantiate Prisma Client within the handler
+  const prisma = new PrismaClient();
 
   try {
     // Parse the request body first to avoid issues with error handling
@@ -261,5 +261,8 @@ export async function DELETE(request: NextRequest) {
       },
       { status: 500 },
     );
+  } finally {
+    // Disconnect Prisma Client after use
+    await prisma.$disconnect();
   }
 }

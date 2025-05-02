@@ -54,3 +54,6 @@ backups/*
 !.env.example
 
 /backups
+
+.github/
+.cursor/

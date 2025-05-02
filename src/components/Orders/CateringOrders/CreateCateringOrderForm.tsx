@@ -169,6 +169,7 @@ const BROKERAGE_OPTIONS = [
   { value: "Zero Cater", label: "Zero Cater" },
   { value: "Platterz", label: "Platterz" },
   { value: "Direct Delivery", label: "Direct Delivery" },
+  { value: "Cater Valley", label: "Cater Valley" },
   { value: "Other", label: "Other" },
 ];
 

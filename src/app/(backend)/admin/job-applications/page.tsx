@@ -53,6 +53,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   JobApplication,
   ApplicationStatus,
   JobApplicationStats,
@@ -283,133 +292,27 @@ const ApplicationDetailDialog: React.FC<{
             Documents
           </h3>
           <div className="flex flex-wrap gap-3">
-            {application.resumeUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  console.log("Resume URL (original):", application.resumeUrl);
-                  const url = getDocumentUrl(application.resumeUrl);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Resume"
-              >
-                <FileText className="h-4 w-4" />
-                Resume
-              </Button>
-            )}
-            {application.driversLicenseUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.driversLicenseUrl);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Driver's License"
-              >
-                <FileText className="h-4 w-4" />
-                Driver's License
-              </Button>
-            )}
-            {application.insuranceUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.insuranceUrl);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Insurance"
-              >
-                <FileText className="h-4 w-4" />
-                Insurance
-              </Button>
-            )}
-            {application.vehicleRegUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.vehicleRegUrl);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Vehicle Registration"
-              >
-                <FileText className="h-4 w-4" />
-                Vehicle Registration
-              </Button>
-            )}
-            {/* Additional document buttons */}
-            {application.foodHandlerUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.foodHandlerUrl ?? null);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Food Handler Certificate"
-              >
-                <FileText className="h-4 w-4" />
-                Food Handler Certificate
-              </Button>
-            )}
-            {application.hipaaUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.hipaaUrl ?? null);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View HIPAA Certificate"
-              >
-                <FileText className="h-4 w-4" />
-                HIPAA Certificate
-              </Button>
-            )}
-            {application.driverPhotoUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.driverPhotoUrl ?? null);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Driver Photo"
-              >
-                <FileText className="h-4 w-4" />
-                Driver Photo
-              </Button>
-            )}
-            {application.carPhotoUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.carPhotoUrl ?? null);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Car Photo"
-              >
-                <FileText className="h-4 w-4" />
-                Car Photo
-              </Button>
-            )}
-            {application.equipmentPhotoUrl && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  const url = getDocumentUrl(application.equipmentPhotoUrl ?? null);
-                  openDocumentWithFallback(url);
-                }}
-                aria-label="View Equipment Photo"
-              >
-                <FileText className="h-4 w-4" />
-                Equipment Photo
-              </Button>
+            {/* Iterate over fileUploads array */}
+            {application.fileUploads && application.fileUploads.length > 0 ? (
+              application.fileUploads.map((file) => (
+                <Button
+                  key={file.id} // Use file.id as the key
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    console.log(`Opening file: ${file.fileName}, URL: ${file.fileUrl}`);
+                    // Pass the fileUrl directly, no need for getDocumentUrl here
+                    openDocumentWithFallback(file.fileUrl || ''); 
+                  }}
+                  aria-label={`View ${file.category || file.fileName || 'Document'}`}
+                >
+                  <FileText className="h-4 w-4" />
+                  {/* Use category or fallback to filename */}
+                  {file.category ? file.category.charAt(0).toUpperCase() + file.category.slice(1) : file.fileName || 'Document'}
+                </Button>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No documents uploaded.</p>
             )}
           </div>
         </section>
@@ -441,36 +344,112 @@ const ApplicationDetailDialog: React.FC<{
 
 // Create a reusable function for opening documents with fallback
 const openDocumentWithFallback = async (url: string) => {
-  console.log("Document URL (resolved):", url);
+  console.log("Document URL (resolved, passed to openDocumentWithFallback):", url); // Log URL passed to function
+
+  if (!url) {
+    console.error("No URL provided to openDocumentWithFallback.");
+    toast({
+      title: "Error",
+      description: "Document URL is missing.",
+      variant: "destructive",
+    });
+    return;
+  }
   
   try {
     // First try to open the file directly
+    console.log("Attempting to open URL directly:", url);
     let win = window.open(url, "_blank");
     
-    // If the URL is a Supabase URL and we can extract the path,
-    // also try to get a signed URL as a fallback
-    if (url.includes('/storage/v1/object/public/') && !win) {
-      console.log("Direct URL might have failed, trying signed URL...");
-      const matches = url.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/);
-      
-      if (matches && matches.length === 3) {
-        const path = matches[2];
-        console.log("Trying to get signed URL for path:", path);
+    // Check if window.open returned null or if the window was closed immediately (common pop-up blocker behavior)
+    if (!win || win.closed || typeof win.closed === 'undefined') { 
+        console.warn("window.open might have been blocked or failed. URL:", url);
         
-        // Call our API to get a signed URL
-        const response = await fetch(`/api/file-uploads?path=${encodeURIComponent(path)}`);
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Got signed URL:", data.url);
-          window.open(data.url, "_blank");
+        // If the URL is a Supabase URL and we can extract the path,
+        // try to get a signed URL as a fallback
+        if (url.includes('/storage/v1/object/public/')) {
+            console.log("Direct URL might have failed, trying signed URL...");
+            const matches = url.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/);
+            
+            if (matches && matches.length === 3) {
+                const path = matches[2];
+                console.log("Trying to get signed URL for path:", path);
+                
+                try {
+                    const response = await fetch(`/api/file-uploads?path=${encodeURIComponent(path)}`);
+                    console.log("Signed URL API response status:", response.status);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("Got signed URL data:", data);
+                        if (data.url) {
+                            console.log("Attempting to open signed URL:", data.url);
+                            window.open(data.url, "_blank");
+                        } else {
+                            console.error("Signed URL missing in API response.");
+                            toast({ title: "Error", description: "Could not retrieve document link.", variant: "destructive" });
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error("Failed to get signed URL:", response.status, errorText);
+                        toast({ title: "Error", description: `Failed to get document link (${response.status}).`, variant: "destructive" });
+                    }
+                } catch (fetchError) {
+                    console.error("Error fetching signed URL:", fetchError);
+                    toast({ title: "Error", description: "Error contacting server for document link.", variant: "destructive" });
+                }
+            } else {
+                console.log("URL doesn't match expected Supabase public path format for signed URL fallback.");
+                 toast({ title: "Info", description: "Could not open document directly. Check pop-up blocker.", variant: "default" });
+            }
         } else {
-          console.error("Failed to get signed URL:", await response.text());
+             console.log("URL is not a Supabase public URL, not attempting signed URL fallback.");
+             toast({ title: "Info", description: "Could not open document directly. Check pop-up blocker.", variant: "default" });
         }
-      }
+    } else {
+        console.log("window.open seemed successful for:", url);
     }
   } catch (error) {
-    console.error("Error opening file:", error);
+    console.error("Error in openDocumentWithFallback:", error);
+    toast({ title: "Error", description: "An error occurred while trying to open the document.", variant: "destructive" });
   }
+};
+
+// Helper function to generate pagination items
+const getPaginationItems = (currentPage: number, totalPages: number, siblingCount = 1) => {
+  const totalPageNumbers = siblingCount + 5; // siblingCount + firstPage + lastPage + currentPage + 2*ellipsis
+
+  if (totalPageNumbers >= totalPages) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
+  const rightSiblingIndex = Math.min(currentPage + siblingCount, totalPages);
+
+  const shouldShowLeftEllipsis = leftSiblingIndex > 2;
+  const shouldShowRightEllipsis = rightSiblingIndex < totalPages - 1;
+
+  const firstPageIndex = 1;
+  const lastPageIndex = totalPages;
+
+  if (!shouldShowLeftEllipsis && shouldShowRightEllipsis) {
+    let leftItemCount = 3 + 2 * siblingCount;
+    let leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
+    return [...leftRange, '...', lastPageIndex];
+  }
+
+  if (shouldShowLeftEllipsis && !shouldShowRightEllipsis) {
+    let rightItemCount = 3 + 2 * siblingCount;
+    let rightRange = Array.from({ length: rightItemCount }, (_, i) => totalPages - rightItemCount + 1 + i);
+    return [firstPageIndex, '...', ...rightRange];
+  }
+
+  if (shouldShowLeftEllipsis && shouldShowRightEllipsis) {
+    let middleRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i);
+    return [firstPageIndex, '...', ...middleRange, '...', lastPageIndex];
+  }
+
+  // Should not happen based on the first if condition, but added for completeness
+  return Array.from({ length: totalPages }, (_, i) => i + 1);
 };
 
 // Main page component
@@ -552,6 +531,17 @@ export default function JobApplicationsPage() {
     fetchStats();
     fetchApplications();
   }, [fetchStats, fetchApplications]);
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      // Optional: Update URL query params if desired
+      // const params = new URLSearchParams(searchParams);
+      // params.set('page', newPage.toString());
+      // router.push(`${pathname}?${params.toString()}`);
+    }
+  };
 
   // Handle application status change
   const handleStatusChange = async (id: string, newStatus: ApplicationStatus) => {
@@ -655,6 +645,7 @@ export default function JobApplicationsPage() {
 
   // Handle view application details
   const handleViewApplication = (application: JobApplication) => {
+    console.log("Viewing application:", application); // Log the entire application object
     setSelectedApplication(application);
     setIsDetailDialogOpen(true);
   };
@@ -677,6 +668,8 @@ export default function JobApplicationsPage() {
       day: "numeric",
     });
   };
+
+  const paginationItems = getPaginationItems(page, totalPages);
 
   if (isLoading && !stats) {
     return <LoadingDashboard />;
@@ -801,7 +794,7 @@ export default function JobApplicationsPage() {
                       <div className="p-2">
                         <Select
                           value={positionFilter === "all" ? "all" : positionFilter}
-                          onValueChange={(value) => setPositionFilter(value === "all" ? "all" : value)}
+                          onValueChange={(value) => setPositionFilter(value === "all" ? "" : value)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Position" />
@@ -926,24 +919,52 @@ export default function JobApplicationsPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-500">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                <div className="mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page - 1);
+                          }}
+                          className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                          aria-disabled={page <= 1}
+                        />
+                      </PaginationItem>
+                      {paginationItems.map((item, index) => (
+                        <PaginationItem key={index}>
+                          {item === '...' ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(item as number);
+                              }}
+                              isActive={page === item}
+                              aria-current={page === item ? "page" : undefined}
+                            >
+                              {item}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page + 1);
+                          }}
+                          className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+                          aria-disabled={page >= totalPages}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               )}
             </CardContent>

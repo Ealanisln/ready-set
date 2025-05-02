@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { UserType } from '@prisma/client';
+import { UserType } from '@/types/user';  // Changed import to use local types
 
 // Define protected role-specific routes
 const PROTECTED_ROUTES: Record<UserType, RegExp> = {
@@ -66,7 +66,15 @@ export async function protectRoutes(request: Request) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  const userType = profile.type as UserType;
+  // Ensure the fetched type matches the enum value casing (lowercase)
+  const userType = profile.type.toLowerCase() as UserType;
+
+  // Check if the userType exists as a key in PROTECTED_ROUTES
+  if (!PROTECTED_ROUTES[userType]) {
+    console.error(`Invalid or unexpected user type '${userType}' found for user ${user.id}. Redirecting to home.`);
+    // Redirect to a generic home page or an error page might be better
+    return NextResponse.redirect(new URL('/', request.url)); 
+  }
 
   // Check if the current path matches the user's allowed routes
   const isAllowedRoute = PROTECTED_ROUTES[userType].test(pathname);
@@ -78,4 +86,4 @@ export async function protectRoutes(request: Request) {
   }
 
   return null;
-} 
+}

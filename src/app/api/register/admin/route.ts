@@ -17,6 +17,9 @@ interface AdminRegistrationRequest {
   city: string;
   state: string;
   zip: string;
+  notes?: string;
+  password?: string;
+  generateTemporaryPassword: boolean;
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -69,6 +72,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate password if custom password is provided
+    if (!body.generateTemporaryPassword) {
+      if (!body.password || body.password.length < 6) {
+        return NextResponse.json(
+          { error: "Password must be at least 6 characters long" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Check if user already exists
     const existingUser = await prisma.profile.findUnique({
       where: { email: body.email.toLowerCase() },
@@ -81,17 +94,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate temporary password and reset token
-    const temporaryPassword = crypto.randomBytes(4).toString("hex");
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
-    const passwordResetToken = crypto.randomBytes(32).toString("hex");
-    const passwordResetTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
+    // Get password to use
+    const password = body.generateTemporaryPassword 
+      ? crypto.randomBytes(4).toString("hex") 
+      : body.password;
+      
     // Create user in Supabase first
     const supabase = await createClient();
     const { data: authData, error: supabaseError } = await supabase.auth.admin.createUser({
       email: body.email.toLowerCase(),
-      password: temporaryPassword,
+      password: password,
       email_confirm: true
     });
 
@@ -123,7 +135,8 @@ export async function POST(request: Request) {
       city: body.city,
       state: body.state,
       zip: body.zip,
-      isTemporaryPassword: true,
+      sideNotes: body.notes,
+      isTemporaryPassword: body.generateTemporaryPassword,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -165,11 +178,11 @@ export async function POST(request: Request) {
     }
 
     // Check if email exists before sending registration email
-    if (newUser.email) {
-      // Send registration email
+    if (newUser.email && body.generateTemporaryPassword) {
+      // Only send email with password if using temporary password
       await sendRegistrationEmail(
         newUser.email,
-        temporaryPassword,
+        password as string
       );
     }
 

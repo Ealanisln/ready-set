@@ -1,3 +1,6 @@
+// src/app/(backend)/admin/catering-orders/new/page.tsx
+// Create order from admin side
+
 import React from 'react';
 import { Metadata } from 'next';
 import { PageHeader } from '@/components/Dashboard/ui/PageHeader';

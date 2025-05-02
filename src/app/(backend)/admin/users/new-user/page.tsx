@@ -1,19 +1,32 @@
-import Breadcrumb from '@/components/Common/Breadcrumb'
-import { BreadcrumbNavigation } from '@/components/Dashboard'
-import React from 'react'
-import DriverHelpdeskRegistrationForm from './ui/registration-form'
+import React from 'react';
+import { Metadata } from 'next';
+import { PageHeader } from '@/components/Dashboard/ui/PageHeader';
+import DriverHelpdeskRegistrationForm from './ui/registration-form';
+
+export const metadata: Metadata = {
+  title: 'New User | Admin Dashboard',
+  description: 'Create a new driver or helpdesk user account.',
+};
 
 const NewUserPage = () => {
   return (
-    <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-    <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-      <header className="bg-background sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-        <BreadcrumbNavigation />
-      </header>
-      <DriverHelpdeskRegistrationForm />
+    <div className="flex w-full flex-col">
+      <div className="p-6 pb-0">
+        <PageHeader
+          title="Create New User"
+          description="Register a new driver or helpdesk staff member"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/admin' },
+            { label: 'Users', href: '/admin/users' },
+            { label: 'New User', href: '/admin/users/new-user', active: true },
+          ]}
+        />
+      </div>
+      <div className="p-6">
+        <DriverHelpdeskRegistrationForm />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default NewUserPage
+export default NewUserPage;
