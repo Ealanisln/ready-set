@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Package } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import AppointmentDialog from '../VirtualAssistant/Appointment';
+import ScheduleDialog from '../Logistics/Schedule';
 import { FormType } from '../Logistics/QuoteRequest/types';
 
 interface PackageDeliveryProps {
@@ -42,9 +42,9 @@ const PackageDelivery = ({ onRequestQuote }: PackageDeliveryProps) => {
               >
                 Get a quote
               </button>
-              <AppointmentDialog
+              <ScheduleDialog
                 buttonText="Book a Call"
-                buttonClassName="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg transition-all duration-200 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 md:px-5 md:text-lg"
+                className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg transition-all duration-200 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 md:px-5 md:text-lg"
                 calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
               />
             </div>

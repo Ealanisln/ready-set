@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 // import '../../styles/popup.css';
 
@@ -27,8 +28,10 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, descriptio
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      <div
+      <motion.div
         className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none`}
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: 'spring', stiffness: 300 }}
       >
         <div className="flex h-full w-full flex-col items-center justify-start">
           <Image
@@ -42,7 +45,7 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, descriptio
             {adjustedTitle}
           </h3>
         </div>
-      </div>
+      </motion.div>
       <p className="font-your-custom-font mt-6 max-w-[320px] text-center text-base leading-snug text-black">
         {description}
       </p>

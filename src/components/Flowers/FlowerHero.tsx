@@ -74,7 +74,7 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
       </div>
 
       {/* Right content - Image */}
-      <div className="flex w-full items-center justify-center overflow-visible md:justify-end">
+      <div className="flex w-full -translate-x-16 items-center justify-center overflow-visible md:translate-x-0 md:justify-end">
         <FlowerImage />
       </div>
     </section>
