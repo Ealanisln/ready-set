@@ -44,7 +44,7 @@ const PackageDelivery = ({ onRequestQuote }: PackageDeliveryProps) => {
               </button>
               <AppointmentDialog
                 buttonText="Book a Call"
-                buttonClassName="bg-yellow-500 hover:bg-yellow-400 text-gray-900 px-4 py-2 text-sm md:px-5 md:text-lg rounded-lg shadow-lg font-bold flex items-center justify-center"
+                buttonClassName="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg transition-all duration-200 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 md:px-5 md:text-lg"
                 calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
               />
             </div>

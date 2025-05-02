@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-// import FlowerImage from './FlowerImage';
+import FlowerImage from './FlowerImage';
 import { useState, useEffect } from 'react';
 import ScheduleDialog from '../Logistics/Schedule';
 import { FormType } from '../Logistics/QuoteRequest/types';
@@ -48,13 +48,14 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
           delivery.
         </p>
         <p className="mb-3 cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          When the world changed, we adapted—partnering with neighborhood flower shops to keep joy
-          and connection alive. Today, we specialize in local floral delivery with a personal touch.
+          When the pandemic hit, we quickly adapted, partnering with neighborhood flower shops to
+          help keep joy and connection alive during challenging times.
         </p>
         <p className="cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          From San Francisco to Atlanta and Austin, our dedicated drivers ensure your blooms arrive
-          on time, every time. Each route is monitored in real-time and handled with care—because we
-          know it's more than just flowers. It's your shop's reputation in every bouquet.
+          Today, we specialize in local floral delivery with a personal touch. From San Francisco to
+          Atlanta and Austin, our dedicated drivers ensure your blooms arrive on time, every time.
+          Each route is monitored in real-time and handled carefully, because we know it's more than
+          just flowers. It's your shop's reputation in every bouquet.
         </p>
 
         <div className="flex flex-row flex-nowrap items-center justify-center gap-4 pt-4">
@@ -67,19 +68,14 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
           <ScheduleDialog
             buttonText="Book a call"
             calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
+            className="flex min-w-[120px] items-center justify-center rounded-full bg-yellow-400 px-6 py-3 font-[Montserrat] text-base font-bold text-[#23272E] shadow-sm transition-colors hover:bg-yellow-500"
           />
         </div>
       </div>
 
-      {/* Right content - Image with conditional styling */}
-      <div
-        className="flex w-full items-center justify-center overflow-visible md:justify-end"
-        style={{
-          marginLeft: isMobile ? '-110px' : '0',
-          paddingRight: isMobile ? '0' : '20px',
-        }}
-      >
-        {/* <FlowerImage /> */}
+      {/* Right content - Image */}
+      <div className="flex w-full items-center justify-center overflow-visible md:justify-end">
+        <FlowerImage />
       </div>
     </section>
   );

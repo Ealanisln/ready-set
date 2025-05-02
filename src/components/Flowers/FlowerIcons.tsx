@@ -24,18 +24,11 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, descriptio
     ) : (
       title
     );
-  const [selected, setSelected] = React.useState(false);
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      {/* Animated pop-up effect when selected */}
-      <button
-        type="button"
-        tabIndex={0}
-        aria-pressed={selected}
-        onClick={() => setSelected((s) => !s)}
-        className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl focus:scale-105 focus:shadow-2xl active:scale-95 ${selected ? 'animate-pop z-20 scale-110 shadow-2xl ring-4 ring-yellow-500' : ''}`}
-        style={{ boxShadow: selected ? '0 12px 48px 0 rgba(255, 208, 21, 0.5)' : undefined }}
+      <div
+        className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none`}
       >
         <div className="flex h-full w-full flex-col items-center justify-start">
           <Image
@@ -49,7 +42,7 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, descriptio
             {adjustedTitle}
           </h3>
         </div>
-      </button>
+      </div>
       <p className="font-your-custom-font mt-6 max-w-[320px] text-center text-base leading-snug text-black">
         {description}
       </p>

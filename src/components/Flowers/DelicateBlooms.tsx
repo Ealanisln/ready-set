@@ -35,24 +35,24 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
         </div>
       </div>
 
-      {/* Cards section - switched to relative positioning */}
-      <div className="relative z-30 mx-auto mt-6 w-full max-w-md px-4 pb-20 sm:mt-8 sm:max-w-6xl">
-        {/* Cards flex container - vertical on mobile, horizontal on larger screens */}
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-stretch">
+      {/* Cards section - Positioned absolutely near the bottom */}
+      <div className="absolute bottom-10 left-4 right-4 z-30">
+        {/* Re-apply mx-auto and max-w to the inner flex container for centering */}
+        <div className="mx-auto flex max-w-md flex-col items-center justify-between gap-4 sm:max-w-6xl sm:flex-row sm:items-stretch">
           {/* Card 1: Van */}
-          <div className="w-full flex-1 overflow-hidden rounded-3xl bg-yellow-300 shadow-lg">
-            {/* Image container with padding around */}
-            <div className="relative flex h-28 w-full items-center justify-center p-4 sm:h-52 sm:p-6">
-              <Image
-                src="/images/flowers/van.png"
-                alt="Delivery van"
-                width={200}
-                height={160}
-                className="object-contain"
-              />
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
+            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
+              <div className="absolute -top-24 sm:-top-28">
+                <Image
+                  src="/images/flowers/van.png"
+                  alt="Delivery van"
+                  width={600}
+                  height={520}
+                  className="object-contain"
+                />
+              </div>
             </div>
-            {/* Text content - title centered on all screen sizes */}
-            <div className="w-full px-4 pb-4">
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
               <h3 className="text-center text-base font-bold sm:text-xl">
                 Reliable vehicle (car or van)
               </h3>
@@ -63,22 +63,23 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Storage Box */}
-          <div className="mt-4 w-full flex-1 overflow-hidden rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
-            {/* Image container - adjusted padding and added margin-top for mobile only */}
-            <div className="relative flex h-32 w-full flex-col items-center justify-center p-4 sm:h-52 sm:p-6">
-              <div className="relative mt-6 sm:mt-0">
+          {/* Card 2: Storage Box - Restore content and adjust image position */}
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
+            {/* Keep card height */}
+            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
+              {/* Adjust vertical position slightly higher */}
+              <div className="absolute -top-40 sm:-top-44">
                 <Image
                   src="/images/flowers/boxes.png"
                   alt="Storage box"
-                  width={140}
-                  height={140}
+                  width={300}
+                  height={260}
                   className="object-contain"
                 />
               </div>
             </div>
-            {/* Text content - title centered on all screen sizes */}
-            <div className="w-full px-4 pb-4">
+            {/* Restore text content and keep padding */}
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
               <h3 className="text-center text-base font-bold sm:text-xl">Hefty 12gal Max Pro</h3>
               <ul className="mt-2 list-disc pl-5 text-sm sm:text-base">
                 <li>
@@ -89,31 +90,23 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Nursery Pot - made more compact */}
-          <div className="mt-4 w-full flex-1 overflow-hidden rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
-            {/* Image container with measurements */}
-            <div className="relative flex h-32 w-full flex-col items-center justify-center p-4 sm:h-52 sm:p-6">
-              <div className="relative">
-                {/* Simplified measurements */}
-                <div className="absolute left-1/4 top-0 text-xs font-semibold">
-                  <div className="flex flex-col items-center">
-                    <div className="h-1 w-12 bg-black"></div>
-                  </div>
-                </div>
-                <div className="absolute left-0 top-1/3 text-xs font-semibold">
-                  <div className="flex items-center"></div>
-                </div>
+          {/* Card 3: Nursery Pot - Keep existing correct styles */}
+          <div className="relative mt-4 w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
+            {/* Match card height and image container padding from Card 1 */}
+            <div className="relative flex h-16 w-full flex-col items-center justify-center pt-3 sm:h-20 sm:pt-4">
+              {/* Increase negative top offset slightly */}
+              <div className="absolute -top-40 sm:-top-44">
                 <Image
                   src="/images/flowers/container.png"
                   alt="Nursery pot"
-                  width={160}
-                  height={120}
-                  className="mt-4 object-contain"
+                  width={240} // Adjusted size for consistency
+                  height={200} // Adjusted size for consistency
+                  className="object-contain" // Removed mt-4
                 />
               </div>
             </div>
-            {/* Text content - title centered on all screen sizes */}
-            <div className="w-full px-4 pb-4">
+            {/* Match text padding from Card 1 */}
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
               <h3 className="text-center text-base font-bold sm:text-xl">
                 RAOOKIF 1 Gallon Nursery Pots
               </h3>
