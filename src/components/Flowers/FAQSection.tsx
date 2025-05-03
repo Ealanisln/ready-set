@@ -1,16 +1,42 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface FAQItem {
   question: string;
   answer: string | React.ReactNode;
 }
 
+interface ModalContent {
+  type: 'text' | 'image';
+  content: string;
+  title: string;
+}
+
 const FAQSection = () => {
   const [openModal, setOpenModal] = useState<
     null | 'flowerMap' | 'flowerService' | 'driversRequirements'
   >(null);
+
+  // Modal content configuration
+  const modalContent: Record<string, ModalContent> = {
+    flowerMap: {
+      type: 'image',
+      content: '/images/flowers/flowerareamap.png',
+      title: 'Flower Area Map',
+    },
+    flowerService: {
+      type: 'text',
+      content: 'This page is under development. Please check back soon for more information.',
+      title: 'Our Flower Service',
+    },
+    driversRequirements: {
+      type: 'text',
+      content: 'This page is under development. Please check back soon for more information.',
+      title: 'Drivers Requirements',
+    },
+  };
 
   const mileagePricing: FAQItem[] = [
     {
@@ -127,7 +153,6 @@ const FAQSection = () => {
 
         {/* Downloadable Resources Section - MODIFIED FOR MOBILE */}
         {/* This section provides buttons for users to access downloadable resources related to flower services. */}
-        {/*
         <div className="mt-12 rounded-lg border-2 border-dashed border-yellow-400 p-6">
           <h3 className="mb-6 text-center text-2xl font-bold">Downloadable Resources</h3>
           <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
@@ -157,21 +182,61 @@ const FAQSection = () => {
 
           {openModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="max-w-xs rounded-lg bg-white p-8 text-center shadow-lg">
-                <p className="mb-6">
-                  This page is under development. Please check back soon for more information.
-                </p>
-                <button
-                  className="mt-2 rounded bg-yellow-400 px-4 py-2 font-semibold text-gray-900 hover:bg-yellow-500"
-                  onClick={() => setOpenModal(null)}
-                >
-                  Close
-                </button>
+              <div className="mx-4 w-full max-w-4xl rounded-lg bg-white shadow-2xl">
+                <div className="flex items-center justify-between border-b p-4">
+                  <h4 className="text-2xl font-bold">{modalContent[openModal].title}</h4>
+                  <button
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => setOpenModal(null)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {modalContent[openModal].type === 'image' ? (
+                  <div className="flex justify-center">
+                    <div className="relative h-[70vh] w-full">
+                      <Image
+                        src={modalContent[openModal].content}
+                        alt={modalContent[openModal].title}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, 80vw"
+                        priority
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6">
+                    <p>{modalContent[openModal].content}</p>
+                  </div>
+                )}
+
+                <div className="border-t p-4 text-center">
+                  <button
+                    className="rounded bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-colors hover:bg-yellow-500"
+                    onClick={() => setOpenModal(null)}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
-        */}
       </div>
     </div>
   );
