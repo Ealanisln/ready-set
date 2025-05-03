@@ -74,7 +74,16 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
       </div>
 
       {/* Right content - Image */}
-      <div className="flex w-full -translate-x-16 items-center justify-center overflow-visible md:translate-x-0 md:justify-end">
+      <div
+        className={`flex w-full overflow-visible md:items-center md:justify-end ${
+          isMobile
+            ? ''
+            : window.innerWidth >= 768 && window.innerWidth < 1024
+              ? '-translate-x-20' // Ajuste para tablet
+              : '-translate-x-40' // Ajuste para escritorio
+        }`}
+        style={{ justifyContent: 'center', alignItems: 'center' }}
+      >
         <FlowerImage />
       </div>
     </section>
