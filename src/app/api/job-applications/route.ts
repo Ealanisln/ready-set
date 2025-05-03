@@ -126,7 +126,15 @@ export async function POST(request: Request) {
         
         // Sanitize fileName: remove potentially problematic characters, replace spaces
         const sanitizedFileName = file.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_').replace(/\s+/g, '_');
-        const newPath = `job-applications/${application.id}/${sanitizedFileName}`;
+        
+        // Add a timestamp to ensure uniqueness even for files with the same name
+        const timestamp = Date.now();
+        const fileNameParts = sanitizedFileName.split('.');
+        const fileExtension = fileNameParts.pop() || '';
+        const fileNameWithoutExtension = fileNameParts.join('.');
+        const uniqueFileName = `${fileNameWithoutExtension}_${timestamp}.${fileExtension}`;
+        
+        const newPath = `job-applications/${application.id}/${uniqueFileName}`;
         
         console.log(`Attempting to move file: ${oldPath} -> ${newPath}`);
 
@@ -174,9 +182,69 @@ export async function POST(request: Request) {
       
       console.log(`Finished processing ${temporaryFileUploads.length} files.`);
       
-      // Optional: Update the JobApplication record with the *final* permanent paths if your schema requires it
-      // This would involve another prisma.jobApplication.update() call here, mapping processedFilesInfo back
-      // For now, we rely on the relation through FileUpload records.
+      // Update the JobApplication record with the final permanent paths
+      if (processedFilesInfo.length > 0) {
+        console.log("Updating JobApplication with file paths...");
+        
+        // Map file categories to the corresponding file path fields in the JobApplication model
+        const filePathUpdates: Record<string, string> = {};
+        
+        for (const file of temporaryFileUploads) {
+          const processedFile = processedFilesInfo.find(p => p.id === file.id);
+          if (!processedFile) continue;
+          
+          // Map category to the appropriate *FilePath field
+          switch (file.category) {
+            case 'resume':
+              filePathUpdates.resumeFilePath = processedFile.newPath;
+              break;
+            case 'license':
+              filePathUpdates.driversLicenseFilePath = processedFile.newPath;
+              break;
+            case 'insurance':
+              filePathUpdates.insuranceFilePath = processedFile.newPath;
+              break;
+            case 'registration':
+              filePathUpdates.vehicleRegFilePath = processedFile.newPath;
+              break;
+            case 'food_handler':
+              filePathUpdates.foodHandlerFilePath = processedFile.newPath;
+              break;
+            case 'hipaa':
+              filePathUpdates.hipaaFilePath = processedFile.newPath;
+              break;
+            case 'driver_photo':
+              filePathUpdates.driverPhotoFilePath = processedFile.newPath;
+              break;
+            case 'car_photo':
+              filePathUpdates.carPhotoFilePath = processedFile.newPath;
+              break;
+            case 'equipment_photo':
+              filePathUpdates.equipmentPhotoFilePath = processedFile.newPath;
+              break;
+          }
+        }
+        
+        // Update the application with file paths
+        if (Object.keys(filePathUpdates).length > 0) {
+          console.log("Updating JobApplication with file paths:", filePathUpdates);
+          try {
+            await prisma.jobApplication.update({
+              where: { id: application.id },
+              data: filePathUpdates
+            });
+            console.log("JobApplication updated with file paths successfully");
+          } catch (updateError: any) {
+            console.error("Error updating JobApplication with file paths:", {
+              error: updateError.message,
+              stack: updateError.stack,
+              filePathUpdates
+            });
+          }
+        } else {
+          console.log("No file paths to update for JobApplication");
+        }
+      }
 
     } else {
       console.log("No temporary files to process for JobApplication ID:", application.id);

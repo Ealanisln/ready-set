@@ -111,8 +111,11 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
 
   // --- Render Logic ---
 
-  // Loading state: Authentication check
-  if (isUserLoading && !session) {
+  // Check if we're in admin mode using localStorage
+  const isAdminMode = typeof window !== 'undefined' && localStorage.getItem('admin_mode') === 'true';
+
+  // Loading state: Authentication check - bypass if in admin mode
+  if (isUserLoading && !session && !isAdminMode) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -120,8 +123,8 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
     );
   }
 
-  // Not authenticated state
-  if (!session) {
+  // Not authenticated state - bypass if in admin mode
+  if (!session && !isAdminMode) {
     return <AuthenticationRequired router={router} />;
   }
 

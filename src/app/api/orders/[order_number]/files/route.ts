@@ -77,7 +77,17 @@ export async function GET(
       // Fetch files for on_demand
       const files = await prisma.fileUpload.findMany({
         where: {
-          onDemandId: onDemandRequest.id.toString()
+          OR: [
+            // Lookup by specific onDemandId
+            {
+              onDemandId: onDemandRequest.id.toString()
+            },
+            // Also look for files with this catering request and the on-demand category
+            {
+              category: "on-demand",
+              onDemandId: onDemandRequest.id.toString() 
+            }
+          ]
         },
         orderBy: {
           uploadedAt: 'desc'
@@ -93,7 +103,17 @@ export async function GET(
     // Fetch files for catering_request
     const files = await prisma.fileUpload.findMany({
       where: {
-        cateringRequestId: cateringRequest.id.toString()
+        OR: [
+          // Lookup by specific cateringRequestId
+          {
+            cateringRequestId: cateringRequest.id.toString()
+          },
+          // Also look for files with this catering request and the catering-order category
+          {
+            category: "catering-order",
+            cateringRequestId: cateringRequest.id.toString()
+          }
+        ]
       },
       orderBy: {
         uploadedAt: 'desc'

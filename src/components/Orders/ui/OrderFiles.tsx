@@ -35,43 +35,6 @@ export function OrderFilesManager({
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const { toast } = useToast();
 
-  // Create an array of file data for the useUploadFile hook
-  const safeInitialFiles = initialFiles.map((file) => ({
-    key: file.id,
-    name: file.fileName,
-    url: file.fileUrl,
-    size: file.fileSize,
-    type: file.fileType || "",
-    entityId: file.entityId,
-    category: file.category || order_type,
-  }));
-
-  // Updated to use single object parameter
-  const { 
-    onUpload, 
-    uploadedFiles, 
-    progresses, 
-    isUploading 
-  } = useUploadFile({
-    bucketName: "fileUploader",
-    defaultUploadedFiles: safeInitialFiles,
-    category: order_type,
-    entityType: order_type,
-    entityId: orderId,
-    maxFileCount: 10,
-    maxFileSize: 4 * 1024 * 1024,
-    allowedFileTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.ms-excel",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ],
-  });
-
   useEffect(() => {
     const fetchFiles = async () => {
       if (!orderNumber) return;
@@ -109,7 +72,7 @@ export function OrderFilesManager({
             fileUrl: file.fileUrl || "",
             entityType: file.entityType || order_type,
             entityId: file.entityId || orderId,
-            category: file.category, // Optional field
+            category: file.category || "catering-order", // Use "catering-order" as the default category
             uploadedAt: new Date(file.uploadedAt || Date.now()),
             updatedAt: new Date(file.updatedAt || file.uploadedAt || Date.now()),
             userId: file.userId, // Optional field
@@ -134,6 +97,53 @@ export function OrderFilesManager({
 
     fetchFiles();
   }, [orderNumber, orderId, order_type, toast]);
+
+  // Create an array of file data for the useUploadFile hook
+  const safeInitialFiles = initialFiles.map((file) => ({
+    key: file.id,
+    name: file.fileName,
+    url: file.fileUrl,
+    size: file.fileSize,
+    type: file.fileType || "",
+    entityId: file.entityId,
+    category: file.category || "catering-order", // Use "catering-order" as the consistent category
+  }));
+
+  // Add console logs for debugging
+  console.log(`OrderFilesManager - Order type: ${order_type}, Order ID: ${orderId}`);
+
+  // Updated to use single object parameter
+  const { 
+    onUpload, 
+    uploadedFiles, 
+    progresses, 
+    isUploading 
+  } = useUploadFile({
+    bucketName: "user-assets",
+    defaultUploadedFiles: safeInitialFiles,
+    category: "catering-order", // Fixed category to ensure consistency
+    entityType: order_type === "catering" ? "catering" : order_type === "on_demand" ? "on_demand" : order_type,
+    entityId: orderId,
+    maxFileCount: 10,
+    maxFileSize: 4 * 1024 * 1024,
+    allowedFileTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+  });
+  
+  // Add a console log to see what entity type we're passing to the FileUploader
+  console.log("FileUploader props:", {
+    category: order_type,
+    entityType: order_type,
+    entityId: orderId,
+  });
 
   useEffect(() => {
     if (uploadedFiles.length > 0) {
@@ -230,8 +240,8 @@ export function OrderFilesManager({
             onUpload={handleUpload}
             progresses={progresses}
             isUploading={isUploading}
-            category={order_type}
-            entityType={order_type}
+            category="catering-order"
+            entityType="catering"
             entityId={orderId}
             accept={{
               "image/*": [],

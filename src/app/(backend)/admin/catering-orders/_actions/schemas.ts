@@ -32,17 +32,90 @@ export const createCateringOrderSchema = z.object({
   pickupDateTime: z.date({ required_error: "Pickup date and time are required" }),
   arrivalDateTime: z.date({ required_error: "Arrival date and time are required" }),
   completeDateTime: z.date().optional().nullable(),
-  headcount: z.number().int().positive("Headcount must be a positive number").optional().nullable(),
+  headcount: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined || Number.isNaN(Number(val))) {
+        return null;
+      }
+      return Number(val);
+    },
+    z.number().int().positive("Headcount must be a positive integer").nullable()
+  ),
   needHost: CateringNeedHostEnum,
-  hoursNeeded: z.number().positive("Hours must be positive").optional().nullable(),
-  numberOfHosts: z.number().int().positive("Number of hosts must be positive").optional().nullable(),
+  // Modify these fields to handle null values properly
+  hoursNeeded: z.preprocess(
+    (val) => (val === '' || val === null || Number.isNaN(val) ? null : Number(val)),
+    z.union([
+      z.number().positive("Hours must be positive"),
+      z.null()
+    ])
+  ),
+  numberOfHosts: z.preprocess(
+    (val) => (val === '' || val === null || Number.isNaN(val) ? null : Number(val)),
+    z.union([
+      z.number().int().positive("Number of hosts must be a positive integer"),
+      z.null()
+    ])
+  ),
   clientAttention: z.string().optional().nullable(),
   pickupNotes: z.string().optional().nullable(),
   specialNotes: z.string().optional().nullable(),
-  orderTotal: z.number().positive("Order total must be positive").optional().nullable(),
-  tip: z.number().nonnegative("Tip cannot be negative").optional().nullable(),
+  orderTotal: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined || Number.isNaN(Number(val))) {
+        return null;
+      }
+      return Number(val);
+    },
+    z.number().positive("Order total must be positive").nullable()
+  ),
+  tip: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined || Number.isNaN(Number(val))) {
+        return null;
+      }
+      return Number(val);
+    },
+    z.number().nonnegative("Tip cannot be negative").nullable()
+  ),
   pickupAddress: addressSchema,
   deliveryAddress: addressSchema,
+}).superRefine((data, ctx) => {
+  // Only validate hoursNeeded and numberOfHosts when needHost is YES
+  if (data.needHost === 'YES') {
+    if (data.hoursNeeded === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Hours needed is required when Need Host is set to Yes",
+        path: ["hoursNeeded"]
+      });
+    }
+    
+    if (data.numberOfHosts === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Number of hosts is required when Need Host is set to Yes",
+        path: ["numberOfHosts"]
+      });
+    }
+  }
+  // When needHost is NO, ensure hoursNeeded and numberOfHosts are null
+  if (data.needHost === 'NO') {
+    if (data.hoursNeeded !== null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Hours needed must be null when Need Host is set to No",
+        path: ["hoursNeeded"]
+      });
+    }
+    if (data.numberOfHosts !== null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Number of hosts must be null when Need Host is set to No",
+        path: ["numberOfHosts"]
+      });
+    }
+  }
 });
 
 // Type inferred from the schema

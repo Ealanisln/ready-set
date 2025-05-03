@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-
-// TypeScript interface for the stats response
-export interface JobApplicationStats {
-  total: number;
-  pending: number;
-  approved: number;
-  rejected: number;
-  applicationsByPosition: Record<string, number>;
-}
+import { JobApplicationStats, JobApplication } from '@/types/job-application';
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +10,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Count by status
-    const [pending, approved, rejected] = await Promise.all([
+    const [pending, approved, rejected, interviewing] = await Promise.all([
       prisma.jobApplication.count({
         where: { deletedAt: null, status: 'PENDING' },
       }),
@@ -27,6 +19,9 @@ export async function GET(req: NextRequest) {
       }),
       prisma.jobApplication.count({
         where: { deletedAt: null, status: 'REJECTED' },
+      }),
+      prisma.jobApplication.count({
+        where: { deletedAt: null, status: 'INTERVIEWING' },
       }),
     ]);
 
@@ -43,12 +38,31 @@ export async function GET(req: NextRequest) {
       applicationsByPosition[item.position] = item._count.position;
     });
 
+    // Get recent applications
+    const recentApplicationsData = await prisma.jobApplication.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      include: {
+        fileUploads: true,
+      },
+    });
+
+    // Convert to JobApplication[] type
+    const recentApplications = recentApplicationsData.map(app => {
+      // Use as JobApplication to tell TypeScript we'll handle the conversion
+      return app as unknown as JobApplication;
+    });
+
+    // Create response with correct property names
     const stats: JobApplicationStats = {
-      total,
-      pending,
-      approved,
-      rejected,
+      totalApplications: total,
+      pendingApplications: pending,
+      approvedApplications: approved,
+      rejectedApplications: rejected,
+      interviewingApplications: interviewing,
       applicationsByPosition,
+      recentApplications,
     };
 
     return NextResponse.json(stats, { status: 200 });

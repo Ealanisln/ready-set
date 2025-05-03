@@ -24,6 +24,9 @@ import { FileUpload } from '@/types/file';
 import { createClient } from "@/utils/supabase/client";
 import { syncOrderStatusWithBroker } from "@/lib/services/brokerSyncService";
 
+// Make sure the bucket name is user-assets 
+const STORAGE_BUCKET = "user-assets";
+
 interface SingleOrderProps {
   onDeleteSuccess: () => void;
   showHeader?: boolean;
@@ -104,6 +107,62 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
   const orderNumber = (pathname ?? '').split("/").pop() || "";
   const supabase = createClient();
 
+  // Check for bucket existence but don't try to create it (requires admin privileges)
+  const ensureStorageBucketExists = useCallback(async () => {
+    try {
+      console.log("Checking storage bucket configuration:", STORAGE_BUCKET);
+      
+      // Refresh auth session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("Authentication error:", sessionError?.message);
+        return;
+      }
+      
+      // Check if the bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error("Error listing buckets:", bucketsError.message);
+        
+        // Don't try to create the bucket - just log the error
+        if (bucketsError.message.includes("permission")) {
+          console.log("Permission error listing buckets - this is expected for non-admin users");
+        }
+        return;
+      }
+      
+      // Just check if the bucket exists, don't try to create it
+      const bucketExists = buckets && Array.isArray(buckets) && buckets.some(bucket => bucket.name === STORAGE_BUCKET);
+      console.log("Available buckets:", buckets?.map(b => b.name).join(", ") || "none");
+      
+      if (!bucketExists) {
+        console.log(`Bucket '${STORAGE_BUCKET}' not found in the list, but it might still exist with restricted permissions`);
+        
+        // Test accessing the bucket to see if it's actually accessible
+        const { data, error: accessError } = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .list();
+          
+        if (accessError) {
+          if (accessError.message.includes("not found")) {
+            console.error(`Bucket '${STORAGE_BUCKET}' does not exist or is not accessible`);
+            toast.error("File storage is not configured properly. Please contact support.");
+          } else {
+            console.log(`Cannot access bucket contents but it might exist: ${accessError.message}`);
+          }
+        } else {
+          console.log(`Bucket '${STORAGE_BUCKET}' exists and is accessible`);
+        }
+      } else {
+        console.log(`Bucket '${STORAGE_BUCKET}' exists in the list`);
+      }
+    } catch (error) {
+      console.error("Error checking storage bucket:", error);
+    }
+  }, [supabase, toast]);
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -123,13 +182,24 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
 
     try {
       // Refresh auth session before making the request
-      await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // Fetch order details
+      if (sessionError || !session) {
+        console.error("Authentication error:", sessionError?.message);
+        toast.error("Authentication error. Please try logging in again.");
+        router.push('/auth/login'); // Redirect to login if session is invalid
+        return;
+      }
+
+      // Fetch order details with auth header
       const orderResponse = await fetch(
         `/api/orders/${orderNumber}?include=dispatch.driver`,
         {
-          credentials: 'include' // Ensure cookies are sent with the request
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          }
         }
       );
 
@@ -139,6 +209,13 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
         try {
           const errorData = await orderResponse.json();
           errorText = JSON.stringify(errorData);
+          
+          // If unauthorized, redirect to login
+          if (orderResponse.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            router.push('/auth/login');
+            return;
+          }
         } catch (parseError) {
           errorText = 'Could not parse error response';
         }
@@ -175,7 +252,11 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       try {
         console.log(`Fetching files for order: ${orderNumber}`);
         const filesResponse = await fetch(`/api/orders/${orderNumber}/files`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          }
         });
 
         if (!filesResponse.ok) {
@@ -211,27 +292,43 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     } finally {
       setIsLoading(false);
     }
-  }, [orderNumber, supabase.auth, setIsLoading, setOrder, setDriverInfo, setIsDriverAssigned, setFiles]);
+  }, [orderNumber, supabase.auth, router, setIsLoading, setOrder, setDriverInfo, setIsDriverAssigned, setFiles]);
 
   // Fetch order details on mount
   useEffect(() => {
     fetchOrderDetails();
-  }, [fetchOrderDetails]);
+    ensureStorageBucketExists(); // Add this line to check the bucket on mount
+  }, [fetchOrderDetails, ensureStorageBucketExists]);
 
   // Fetch drivers on mount
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        // Refresh auth session before making the request 
-        await supabase.auth.refreshSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          console.error("Authentication error:", sessionError?.message);
+          toast.error("Authentication error. Please try logging in again.");
+          router.push('/auth/login');
+          return;
+        }
         
         const response = await fetch("/api/drivers", {
-          credentials: 'include'
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          }
         });
         if (response.ok) {
           const data = await response.json();
           setDrivers(data);
         } else {
+          if (response.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            router.push('/auth/login');
+            return;
+          }
           console.error("Failed to fetch drivers");
           toast.error("Failed to load available drivers");
         }
@@ -242,7 +339,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     };
 
     fetchDrivers();
-  }, [setDrivers, supabase.auth]);
+  }, [setDrivers, supabase.auth, router]);
 
   const handleOpenDriverDialog = () => {
     setIsDriverDialogOpen(true);
@@ -255,12 +352,21 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order || !selectedDriver) return;
 
     try {
-      // Refresh auth session before making the request
-      await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("Authentication error:", sessionError?.message);
+        toast.error("Authentication error. Please try logging in again.");
+        router.push('/auth/login');
+        return;
+      }
       
       const response = await fetch("/api/orders/assignDriver", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
         body: JSON.stringify({
           orderId: order.id,
@@ -270,6 +376,12 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          router.push('/auth/login');
+          return;
+        }
+        
         // Get error details
         let errorText = '';
         try {
@@ -303,21 +415,34 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order) return;
 
     try {
-      // Refresh auth session before making the request
-      await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("Authentication error:", sessionError?.message);
+        toast.error("Authentication error. Please try logging in again.");
+        router.push('/auth/login');
+        return;
+      }
       
       console.log(`Updating driver status for order ${order.orderNumber} to:`, newStatus);
       
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({ driverStatus: newStatus }),
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          router.push('/auth/login');
+          return;
+        }
+        
         // Get error details
         let errorText = '';
         try {
@@ -351,21 +476,34 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     if (!order) return;
 
     const internalUpdatePromise = async () => {
-      // Refresh auth session before making the request
-      await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("Authentication error:", sessionError?.message);
+        toast.error("Authentication error. Please try logging in again.");
+        router.push('/auth/login');
+        return;
+      }
 
       console.log(`Updating internal ORDER status for order ${order.orderNumber} to:`, newStatus);
 
       const response = await fetch(`/api/orders/${order.orderNumber}`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          router.push('/auth/login');
+          return;
+        }
+        
         let errorText = '';
         try {
           const errorData = await response.json();
@@ -376,14 +514,15 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
         throw new Error(`Failed to update internal order status: ${errorText || response.statusText}`);
       }
       const updatedOrderData = await response.json();
-       console.log(`Internal order status for order ${order.orderNumber} updated response:`, updatedOrderData);
-      // Ensure the returned data conforms to the Order type for the sync function
-      return updatedOrderData as Order; 
+      console.log(`Internal order status for order ${order.orderNumber} updated response:`, updatedOrderData);
+      return updatedOrderData as Order;
     };
 
     try {
       // Perform internal update first
       const updatedOrder = await internalUpdatePromise();
+      if (!updatedOrder) return; // Handle case where promise returns undefined due to auth error
+      
       setOrder(updatedOrder); // Update local state immediately after internal success
       toast.success("Order status updated successfully!");
 

@@ -579,6 +579,19 @@ const CateringRequestForm: React.FC<CateringRequestFormProps> = ({ client, isAdm
       }
 
       console.log("Order submitted successfully:", responseData);
+      
+      // IMPORTANT FIX: Update the file entity IDs to link them to the catering request
+      if (responseData.orderId && uploadedFiles.length > 0) {
+        console.log(`Updating file entity IDs to associate with catering request ID: ${responseData.orderId}`);
+        try {
+          await updateEntityId(responseData.orderId);
+          console.log("Files successfully linked to catering request");
+        } catch (fileUpdateError) {
+          console.error("Error linking files to catering request:", fileUpdateError);
+          // Don't fail the whole submission, just log the error
+        }
+      }
+      
       reset();
       toast.success("Catering request submitted successfully!");
       setErrorMessage("");

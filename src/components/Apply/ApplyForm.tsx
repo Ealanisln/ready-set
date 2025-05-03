@@ -78,7 +78,7 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phone: string;
   address?: {
     street?: string;
     city?: string;
@@ -107,7 +107,7 @@ interface SubmissionData {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
+  phone: string;
   address: {
     street: string;
     city: string;
@@ -283,21 +283,41 @@ const JobApplicationForm = () => {
   }, [selectedRole, isDirty, trigger]);
 
   // Handle step navigation
-  const goToNextStep = async () => {
-    // Get fields for current step
-    const currentFields = FORM_STEPS.find(step => step.id === currentStep)?.fields || [];
-    
-    // Validate fields for current step before proceeding
-    const isStepValid = await trigger(currentFields as any);
-    
-    if (isStepValid) {
-      setCurrentStep(prev => Math.min(prev + 1, FORM_STEPS.length));
-      // Scroll to top when changing steps
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const goToNextStep = async (event?: React.MouseEvent) => {
+    // Prevent any default form submission
+    if (event) {
+      event.preventDefault();
     }
+    
+    // *** Keep file validation specifically before moving from Step 3 ***
+    if (currentStep === 3) {
+      const role = watch("role"); // Get the selected role
+      const fileValidationErrors = validateFiles(role);
+      if (fileValidationErrors.length > 0) {
+        // If file validation fails, show errors and stop navigation
+        fileValidationErrors.forEach(error => {
+          toast({
+            title: "Missing Documents",
+            description: error,
+            variant: "destructive",
+          });
+        });
+        return; // Stop navigation
+      }
+    }
+    
+    // If step-specific validation passes (only file check for step 3), proceed
+    setCurrentStep(prev => Math.min(prev + 1, FORM_STEPS.length));
+    // Scroll to top when changing steps
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const goToPrevStep = () => {
+  const goToPrevStep = (event?: React.MouseEvent) => {
+    // Prevent any default form submission
+    if (event) {
+      event.preventDefault();
+    }
+    
     setCurrentStep(prev => Math.max(prev - 1, 1));
     // Scroll to top when changing steps
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -345,25 +365,34 @@ const JobApplicationForm = () => {
           state: address?.state || "",
           zip: address?.zip || ""
         },
-        resumeFilePath: resumeUpload.uploadedFiles[0]?.path || null,
-        driversLicenseFilePath: licenseUpload.uploadedFiles[0]?.path || null,
-        insuranceFilePath: insuranceUpload.uploadedFiles[0]?.path || null,
-        vehicleRegFilePath: registrationUpload.uploadedFiles[0]?.path || null,
-        foodHandlerFilePath: foodHandlerUpload.uploadedFiles[0]?.path || null,
-        hipaaFilePath: hipaaUpload.uploadedFiles[0]?.path || null,
-        driverPhotoFilePath: driverPhotoUpload.uploadedFiles[0]?.path || null,
-        carPhotoFilePath: carPhotoUpload.uploadedFiles[0]?.path || null,
-        equipmentPhotoFilePath: equipmentPhotoUpload.uploadedFiles[0]?.path || null,
-        resumeFileId: resumeUpload.uploadedFiles[0]?.key || null,
-        driversLicenseFileId: licenseUpload.uploadedFiles[0]?.key || null,
-        insuranceFileId: insuranceUpload.uploadedFiles[0]?.key || null,
-        vehicleRegFileId: registrationUpload.uploadedFiles[0]?.key || null,
-        foodHandlerFileId: foodHandlerUpload.uploadedFiles[0]?.key || null,
-        hipaaFileId: hipaaUpload.uploadedFiles[0]?.key || null,
-        driverPhotoFileId: driverPhotoUpload.uploadedFiles[0]?.key || null,
-        carPhotoFileId: carPhotoUpload.uploadedFiles[0]?.key || null,
-        equipmentPhotoFileId: equipmentPhotoUpload.uploadedFiles[0]?.key || null,
+        // Log the first file of each category to help debug
+        resumeFilePath: resumeUpload.uploadedFiles[0] ? resumeUpload.uploadedFiles[0].path : null,
+        driversLicenseFilePath: licenseUpload.uploadedFiles[0] ? licenseUpload.uploadedFiles[0].path : null,
+        insuranceFilePath: insuranceUpload.uploadedFiles[0] ? insuranceUpload.uploadedFiles[0].path : null,
+        vehicleRegFilePath: registrationUpload.uploadedFiles[0] ? registrationUpload.uploadedFiles[0].path : null,
+        foodHandlerFilePath: foodHandlerUpload.uploadedFiles[0] ? foodHandlerUpload.uploadedFiles[0].path : null,
+        hipaaFilePath: hipaaUpload.uploadedFiles[0] ? hipaaUpload.uploadedFiles[0].path : null,
+        driverPhotoFilePath: driverPhotoUpload.uploadedFiles[0] ? driverPhotoUpload.uploadedFiles[0].path : null,
+        carPhotoFilePath: carPhotoUpload.uploadedFiles[0] ? carPhotoUpload.uploadedFiles[0].path : null,
+        equipmentPhotoFilePath: equipmentPhotoUpload.uploadedFiles[0] ? equipmentPhotoUpload.uploadedFiles[0].path : null,
+        resumeFileId: resumeUpload.uploadedFiles[0] ? resumeUpload.uploadedFiles[0].key : null,
+        driversLicenseFileId: licenseUpload.uploadedFiles[0] ? licenseUpload.uploadedFiles[0].key : null,
+        insuranceFileId: insuranceUpload.uploadedFiles[0] ? insuranceUpload.uploadedFiles[0].key : null,
+        vehicleRegFileId: registrationUpload.uploadedFiles[0] ? registrationUpload.uploadedFiles[0].key : null,
+        foodHandlerFileId: foodHandlerUpload.uploadedFiles[0] ? foodHandlerUpload.uploadedFiles[0].key : null,
+        hipaaFileId: hipaaUpload.uploadedFiles[0] ? hipaaUpload.uploadedFiles[0].key : null,
+        driverPhotoFileId: driverPhotoUpload.uploadedFiles[0] ? driverPhotoUpload.uploadedFiles[0].key : null,
+        carPhotoFileId: carPhotoUpload.uploadedFiles[0] ? carPhotoUpload.uploadedFiles[0].key : null,
+        equipmentPhotoFileId: equipmentPhotoUpload.uploadedFiles[0] ? equipmentPhotoUpload.uploadedFiles[0].key : null,
       };
+      
+      // Print out the uploaded files from each hook for debugging
+      console.log("Resume Files:", resumeUpload.uploadedFiles);
+      console.log("License Files:", licenseUpload.uploadedFiles);
+      console.log("Insurance Files:", insuranceUpload.uploadedFiles);
+      console.log("Registration Files:", registrationUpload.uploadedFiles);
+      console.log("Driver Photo Files:", driverPhotoUpload.uploadedFiles);
+      console.log("Car Photo Files:", carPhotoUpload.uploadedFiles);
 
       console.log("Submitting application data:", submissionData);
 
@@ -604,6 +633,7 @@ const JobApplicationForm = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Phone
+                      <span className="text-red-500 ml-1">*</span>
                     </label>
                     <input
                       type="tel"
@@ -611,6 +641,7 @@ const JobApplicationForm = () => {
                         errors.phone ? "border-red-500" : "border-gray-200"
                       } px-4 py-2.5 focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 text-gray-700`}
                       {...register("phone", {
+                        required: "Phone number is required",
                         pattern: {
                           value: /^[\d\s-+()]*$/,
                           message: "Invalid phone number format",
@@ -1066,7 +1097,7 @@ const JobApplicationForm = () => {
               {currentStep > 1 ? (
                 <button
                   type="button"
-                  onClick={goToPrevStep}
+                  onClick={(e) => goToPrevStep(e)}
                   className="flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -1079,7 +1110,7 @@ const JobApplicationForm = () => {
               {currentStep < FORM_STEPS.length ? (
                 <button
                   type="button"
-                  onClick={goToNextStep}
+                  onClick={(e) => goToNextStep(e)}
                   className="flex items-center px-5 py-2.5 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                 >
                   Next
@@ -1087,7 +1118,8 @@ const JobApplicationForm = () => {
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  type="button" 
+                  onClick={handleSubmit(onSubmit)}
                   disabled={isSubmitting}
                   className="px-5 py-2.5 text-sm font-medium text-white bg-yellow-400 border border-transparent rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-400 disabled:opacity-50"
                 >

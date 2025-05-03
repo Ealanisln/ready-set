@@ -26,6 +26,10 @@ export const useUserData = (
 
     try {
       setLoading(true);
+      
+      // Check for admin mode
+      const isAdminMode = typeof window !== 'undefined' && localStorage.getItem('admin_mode') === 'true';
+      
       // Add a timestamp and request id to prevent caching
       const cacheKey =
         Date.now().toString() + Math.random().toString(36).substring(7);
@@ -34,13 +38,31 @@ export const useUserData = (
         headers: {
           "Cache-Control": "no-cache, no-store, must-revalidate",
           Pragma: "no-cache",
-          "x-request-source": "ModernUserProfile",
+          "x-request-source": isAdminMode ? "AdminPanel" : "ModernUserProfile",
+          "x-admin-mode": isAdminMode ? "true" : "false"
         },
         credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user");
+        // Check if we got redirected to sign-in page
+        if (response.redirected && response.url.includes('sign-in')) {
+          if (isAdminMode) {
+            console.log("Admin mode active but got redirected to sign-in. Attempting to recover...");
+            // Try to reload the page while preserving admin mode
+            window.location.reload();
+            return null;
+          }
+          throw new Error("Authentication required - please sign in");
+        }
+        
+        // Try to get the error message from the response body
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch user");
+        } catch (jsonError) {
+          throw new Error(`Failed to fetch user: ${response.status} ${response.statusText}`);
+        }
       }
 
       const data = await response.json();

@@ -14,9 +14,12 @@ import {
   Menu,
   Search,
   Bell,
-  Briefcase 
+  Briefcase,
+  LayoutDashboard,
+  ArrowUpRight,
+  Loader2
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User } from "@/types/user";
@@ -25,6 +28,8 @@ import { useDashboardMetrics } from "@/components/Dashboard/DashboardMetrics";
 import { LoadingDashboard } from "../ui/loading";
 import { ApplicationStatus, JobApplication } from "@/types/job-application";
 import { useUser } from "@/contexts/UserContext";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Add interface for Job Applications API response
 interface JobApplicationsApiResponse {
@@ -63,20 +68,24 @@ const ModernMetricCard: React.FC<{
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-      <div className={`h-1 ${accent}`}></div>
-      <CardContent className="p-6">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div className={`rounded-full p-3 ${accent.replace('bg-', 'bg-opacity-10 text-')}`}>
+          <div className={`rounded-full p-2 ${accent.replace('bg-', 'bg-opacity-15 text-')}`}>
             <Icon className="h-5 w-5" />
           </div>
-          <div className="flex items-center space-x-1">
-            <p className={`text-xs ${trendConfig[trend].color}`}>{change}</p>
+          <div className="flex items-center text-xs font-medium px-2 py-1 rounded-full bg-gray-50">
+            <span className={`mr-1 ${trendConfig[trend].color}`}>{change}</span>
             {trendConfig[trend].icon}
           </div>
         </div>
-        <div className="mt-3">
+      </CardHeader>
+      <CardContent className="py-0">
+        <div className="space-y-1">
           <p className="text-3xl font-bold">{value}</p>
-          <p className="text-sm text-gray-500 mt-1">{title}</p>
+          <p className="text-sm text-gray-500">{title}</p>
+        </div>
+        <div className="mt-4 h-1">
+          <div className={`h-full w-2/3 rounded-full ${accent}`}></div>
         </div>
       </CardContent>
     </Card>
@@ -85,19 +94,24 @@ const ModernMetricCard: React.FC<{
 
 // Action Card Component
 const ActionCard: React.FC = () => (
-  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-    <div className="h-1 bg-yellow-400"></div>
-    <CardContent className="p-6">
-      <h3 className="text-sm font-medium text-gray-500 mb-4">Quick Actions</h3>
+  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md flex flex-col h-full">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-gray-700">Quick Actions</CardTitle>
+      <CardDescription className="text-xs text-gray-500">
+        Common operations you might need
+      </CardDescription>
+    </CardHeader>
+    <CardContent className="flex-grow">
       <div className="space-y-3">
         <Link href="/catering-request" className="block w-full">
-          <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-white transition-all duration-200">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center justify-center gap-2">
             Create new order
+            <ArrowUpRight className="h-4 w-4" />
           </Button>
         </Link>
         <Link href="/admin/users/new" className="block w-full">
           <Button 
-            className="w-full border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition-all duration-200"
+            className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 transition-all duration-200"
             variant="outline"
           >
             Create new user
@@ -105,19 +119,47 @@ const ActionCard: React.FC = () => (
         </Link>
       </div>
     </CardContent>
+    <CardFooter className="pt-0 pb-4">
+      <div className="w-full pt-3 border-t border-gray-100">
+        <Link href="/admin/dashboard/settings" className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-end">
+          Dashboard settings
+          <ChevronRight className="h-3 w-3 ml-1" />
+        </Link>
+      </div>
+    </CardFooter>
   </Card>
 );
 
 // Application Status Badge Component
 const ApplicationStatusBadge: React.FC<{status: ApplicationStatus}> = ({ status }) => {
-  const config: Record<string, { bg: string, text: string }> = {
-    [ApplicationStatus.PENDING]: { bg: "bg-yellow-100", text: "text-yellow-700" },
-    [ApplicationStatus.APPROVED]: { bg: "bg-green-100", text: "text-green-700" },
-    [ApplicationStatus.REJECTED]: { bg: "bg-red-100", text: "text-red-700" },
-    [ApplicationStatus.INTERVIEWING]: { bg: "bg-blue-100", text: "text-blue-700" }
+  const config: Record<string, { bg: string, text: string, icon: React.ReactNode }> = {
+    [ApplicationStatus.PENDING]: { 
+      bg: "bg-amber-100", 
+      text: "text-amber-700",
+      icon: <Clock className="h-3 w-3 mr-1" />
+    },
+    [ApplicationStatus.APPROVED]: { 
+      bg: "bg-green-100", 
+      text: "text-green-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    },
+    [ApplicationStatus.REJECTED]: { 
+      bg: "bg-red-100", 
+      text: "text-red-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    },
+    [ApplicationStatus.INTERVIEWING]: { 
+      bg: "bg-indigo-100", 
+      text: "text-indigo-700",
+      icon: <Users className="h-3 w-3 mr-1" />
+    }
   };
 
-  const style = config[status] || { bg: "bg-gray-100", text: "text-gray-700" };
+  const style = config[status] || { bg: "bg-gray-100", text: "text-gray-700", icon: null };
   
   const label = {
     [ApplicationStatus.PENDING]: "Pending",
@@ -127,7 +169,8 @@ const ApplicationStatusBadge: React.FC<{status: ApplicationStatus}> = ({ status 
   }[status];
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {style.icon}
       {label}
     </span>
   );
@@ -135,20 +178,53 @@ const ApplicationStatusBadge: React.FC<{status: ApplicationStatus}> = ({ status 
 
 // Status Badge Component
 const StatusBadge: React.FC<{status: string}> = ({ status }) => {
-  const config: Record<string, { bg: string, text: string }> = {
-    active: { bg: "bg-purple-100", text: "text-purple-700" },
-    pending: { bg: "bg-yellow-100", text: "text-yellow-700" },
-    confirmed: { bg: "bg-blue-100", text: "text-blue-700" },
-    in_progress: { bg: "bg-indigo-100", text: "text-indigo-700" },
-    completed: { bg: "bg-green-100", text: "text-green-700" },
-    cancelled: { bg: "bg-red-100", text: "text-red-700" }
+  const config: Record<string, { bg: string, text: string, icon: React.ReactNode }> = {
+    active: { 
+      bg: "bg-blue-100", 
+      text: "text-blue-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg> 
+    },
+    pending: { 
+      bg: "bg-amber-100", 
+      text: "text-amber-700", 
+      icon: <Clock className="h-3 w-3 mr-1" /> 
+    },
+    confirmed: { 
+      bg: "bg-indigo-100", 
+      text: "text-indigo-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg> 
+    },
+    in_progress: { 
+      bg: "bg-purple-100", 
+      text: "text-purple-700", 
+      icon: <Loader2 className="h-3 w-3 mr-1 animate-spin" /> 
+    },
+    completed: { 
+      bg: "bg-green-100", 
+      text: "text-green-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg> 
+    },
+    cancelled: { 
+      bg: "bg-red-100", 
+      text: "text-red-700", 
+      icon: <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg> 
+    }
   };
 
-  const style = config[status.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-700" };
+  const style = config[status.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-700", icon: null };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {style.icon}
+      {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
     </span>
   );
 };
@@ -156,19 +232,19 @@ const StatusBadge: React.FC<{status: string}> = ({ status }) => {
 // User Type Badge Component
 const UserTypeBadge: React.FC<{type: string}> = ({ type }) => {
   const config: Record<string, { bg: string, text: string }> = {
-    admin: { bg: "bg-purple-100", text: "text-purple-700" },
-    super_admin: { bg: "bg-indigo-100", text: "text-indigo-700" },
+    admin: { bg: "bg-indigo-100", text: "text-indigo-700" },
+    super_admin: { bg: "bg-purple-100", text: "text-purple-700" },
     vendor: { bg: "bg-blue-100", text: "text-blue-700" },
     client: { bg: "bg-green-100", text: "text-green-700" },
-    driver: { bg: "bg-yellow-100", text: "text-yellow-700" },
-    helpdesk: { bg: "bg-orange-100", text: "text-orange-700" }
+    driver: { bg: "bg-amber-100", text: "text-amber-700" },
+    helpdesk: { bg: "bg-teal-100", text: "text-teal-700" }
   };
 
   const style = config[type.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-700" };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-      {type.charAt(0).toUpperCase() + type.slice(1)}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+      {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
     </span>
   );
 };
@@ -188,7 +264,7 @@ const ModernJobApplicationsTable: React.FC<{applications: JobApplication[]}> = (
     <div className="overflow-hidden">
       {applications.length > 0 ? (
         <div className="min-w-full divide-y divide-gray-200">
-          <div className="bg-gray-50">
+          <div className="bg-gray-50/80">
             <div className="grid grid-cols-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div>Applicant</div>
               <div>Position</div>
@@ -196,19 +272,19 @@ const ModernJobApplicationsTable: React.FC<{applications: JobApplication[]}> = (
               <div>Applied</div>
             </div>
           </div>
-          <div className="bg-white divide-y divide-gray-200">
+          <div className="bg-white divide-y divide-gray-100">
             {applications.map((app) => (
-              <div key={app.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
-                <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                  <Link href={`/admin/job-applications?id=${app.id}`}>
+              <div key={app.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50/50 transition-colors duration-150">
+                <div className="text-sm font-medium">
+                  <Link href={`/admin/job-applications?id=${app.id}`} className="text-blue-600 hover:text-blue-800 hover:underline flex items-center">
                     {app.firstName} {app.lastName}
                   </Link>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-600">
                   {app.position}
                 </div>
                 <div><ApplicationStatusBadge status={app.status} /></div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-600">
                   {formatDate(app.createdAt)}
                 </div>
               </div>
@@ -216,9 +292,12 @@ const ModernJobApplicationsTable: React.FC<{applications: JobApplication[]}> = (
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+        <div className="flex flex-col items-center justify-center py-10 text-gray-500 bg-gray-50/50 rounded-lg">
           <Briefcase className="h-10 w-10 text-gray-300 mb-2" />
-          <p>No job applications at this moment</p>
+          <p className="text-sm">No job applications at this moment</p>
+          <Button variant="ghost" size="sm" className="mt-2 text-xs">
+            Post a new job opening
+          </Button>
         </div>
       )}
     </div>
@@ -230,7 +309,7 @@ const ModernOrdersTable: React.FC<{orders: CateringRequest[]}> = ({ orders }) =>
   <div className="overflow-hidden">
     {orders.length > 0 ? (
       <div className="min-w-full divide-y divide-gray-200">
-        <div className="bg-gray-50">
+        <div className="bg-gray-50/80">
           <div className="grid grid-cols-4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             <div>Order</div>
             <div>Type</div>
@@ -238,15 +317,15 @@ const ModernOrdersTable: React.FC<{orders: CateringRequest[]}> = ({ orders }) =>
             <div>Total</div>
           </div>
         </div>
-        <div className="bg-white divide-y divide-gray-200">
+        <div className="bg-white divide-y divide-gray-100">
           {orders.map((order) => (
-            <div key={order.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
-              <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                <Link href={`/admin/catering-orders/${order.orderNumber}`}>
-                  {order.orderNumber}
+            <div key={order.id} className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50/50 transition-colors duration-150">
+              <div className="text-sm font-medium">
+                <Link href={`/admin/catering-orders/${order.orderNumber}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                  #{order.orderNumber}
                 </Link>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-600">
                 {isCateringRequest(order) ? "Catering" : isOnDemand(order) ? "On Demand" : "Catering"}
               </div>
               <div><StatusBadge status={order.status} /></div>
@@ -262,9 +341,14 @@ const ModernOrdersTable: React.FC<{orders: CateringRequest[]}> = ({ orders }) =>
         </div>
       </div>
     ) : (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+      <div className="flex flex-col items-center justify-center py-10 text-gray-500 bg-gray-50/50 rounded-lg">
         <ClipboardList className="h-10 w-10 text-gray-300 mb-2" />
-        <p>No active orders at this moment</p>
+        <p className="text-sm">No active orders at this moment</p>
+        <Link href="/catering-request">
+          <Button variant="ghost" size="sm" className="mt-2 text-xs">
+            Create new order
+          </Button>
+        </Link>
       </div>
     )}
   </div>
@@ -276,20 +360,20 @@ const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
     {users.length > 0 ? (
       <div className="min-w-full divide-y divide-gray-200">
         {/* Header - hidden on small screens, grid on medium+ */}
-        <div className="hidden md:grid md:grid-cols-3 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div className="hidden md:grid md:grid-cols-3 bg-gray-50/80 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           <div>Name</div>
           <div>Email</div>
           <div>Type</div>
         </div>
         {/* User Rows */}
-        <div className="bg-white divide-y divide-gray-200">
+        <div className="bg-white divide-y divide-gray-100">
           {users.map((user) => (
             // Stack vertically on small screens, grid on medium+
-            <div key={user.id} className="px-4 py-4 md:px-6 md:grid md:grid-cols-3 md:gap-4 hover:bg-gray-50 transition-colors duration-150 items-center">
+            <div key={user.id} className="px-4 py-4 md:px-6 md:grid md:grid-cols-3 md:gap-4 hover:bg-gray-50/50 transition-colors duration-150 items-center">
               {/* Name */}
               <div className="flex justify-between items-center md:block">
                  <span className="text-xs font-medium text-gray-500 uppercase md:hidden mr-2">Name:</span>
-                 <div className="text-sm font-medium text-blue-600 hover:text-blue-800 truncate">
+                 <div className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline truncate">
                    <Link href={`/admin/users/${user.id}`}>
                      {user.name || user.contactName || "Unnamed User"}
                    </Link>
@@ -298,7 +382,7 @@ const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
               {/* Email */}
               <div className="mt-2 md:mt-0 flex justify-between items-center md:block">
                  <span className="text-xs font-medium text-gray-500 uppercase md:hidden mr-2">Email:</span>
-                 <div className="text-sm text-gray-500 truncate">{user.email}</div>
+                 <div className="text-sm text-gray-600 truncate">{user.email}</div>
               </div>
               {/* Type */}
               <div className="mt-2 md:mt-0 flex justify-between items-center md:block">
@@ -310,9 +394,14 @@ const ModernUsersTable: React.FC<{users: User[]}> = ({ users }) => (
         </div>
       </div>
     ) : (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+      <div className="flex flex-col items-center justify-center py-10 text-gray-500 bg-gray-50/50 rounded-lg">
         <Users className="h-10 w-10 text-gray-300 mb-2" />
-        <p>No users found</p>
+        <p className="text-sm">No users found</p>
+        <Link href="/admin/users/new">
+          <Button variant="ghost" size="sm" className="mt-2 text-xs">
+            Create new user
+          </Button>
+        </Link>
       </div>
     )}
   </div>
@@ -326,21 +415,23 @@ const ModernDashboardCard: React.FC<{
   linkHref: string;
   icon?: React.ElementType;
 }> = ({ title, children, linkText, linkHref, icon: Icon }) => (
-  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-    <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
-      <div className="flex items-center space-x-2">
-        {Icon && <Icon className="h-5 w-5 text-gray-400" />}
-        <h3 className="font-medium">{title}</h3>
+  <Card className="overflow-hidden transition-all duration-200 hover:shadow-md h-full flex flex-col">
+    <CardHeader className="pb-3 space-y-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+          <CardTitle className="text-base font-medium">{title}</CardTitle>
+        </div>
+        <Link 
+          href={linkHref} 
+          className="text-xs text-blue-600 hover:text-blue-800 flex items-center group"
+        >
+          {linkText}
+          <ChevronRight className="h-3.5 w-3.5 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </Link>
       </div>
-      <Link 
-        href={linkHref} 
-        className="text-sm text-blue-600 hover:text-blue-800 flex items-center group"
-      >
-        {linkText}
-        <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" />
-      </Link>
-    </div>
-    <CardContent className="p-0">
+    </CardHeader>
+    <CardContent className="p-0 flex-grow">
       {children}
     </CardContent>
   </Card>
@@ -484,13 +575,16 @@ export function ModernDashboardHome() {
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
-        <div className="flex justify-between items-center">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10 shadow-sm">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            <div className="flex items-center">
+              <LayoutDashboard className="h-6 w-6 text-primary mr-2 hidden sm:block" />
+              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative rounded-md shadow-sm hidden md:block">
@@ -499,7 +593,7 @@ export function ModernDashboardHome() {
               </div>
               <input
                 type="text"
-                className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="focus:ring-primary focus:border-primary block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm"
                 placeholder="Search..."
               />
             </div>
@@ -511,10 +605,10 @@ export function ModernDashboardHome() {
         </div>
       </div>
 
-      <main className="flex-1 px-6 py-8">
+      <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-7xl mx-auto w-full">
         <div className="mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Overview</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <ModernMetricCard
               title="Active Orders"
               value={activeOrders.length}
@@ -529,7 +623,7 @@ export function ModernDashboardHome() {
               icon={Briefcase}
               change={`${pendingApplicationsPercentage}% of total`}
               trend={Number(pendingApplicationsPercentage) > 30 ? "up" : "neutral"}
-              accent="bg-yellow-500"
+              accent="bg-indigo-500"
             />
             <ModernMetricCard
               title="Total Vendors"
@@ -543,7 +637,7 @@ export function ModernDashboardHome() {
           </div>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           <ModernDashboardCard
             title="Active Catering Orders"
             linkText="View All Orders"

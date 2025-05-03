@@ -31,7 +31,7 @@ interface UseUploadFileOptions {
 }
 
 export function useUploadFile({
-  bucketName = "fileUploader",
+  bucketName = "user-assets",
   defaultUploadedFiles = [],
   maxFileCount = 5,
   maxFileSize = 10 * 1024 * 1024, // 10MB by default
@@ -124,25 +124,215 @@ export function useUploadFile({
   // Handle file uploads to Supabase Storage and register in database via API
   const onUpload = useCallback(
     async (files: FileWithPath[]): Promise<UploadedFile[]> => {
+      // Check if adding these files would exceed the limit
+      if (uploadedFiles.length + files.length > maxFileCount) {
+        toast.error(`Cannot upload ${files.length} more files. Maximum ${maxFileCount} allowed.`);
+        return [];
+      }
+
+      console.log("Starting file upload process...");
+      console.log("Upload context:", { 
+        bucketName, 
+        entityType, 
+        entityId: entityId || tempEntityId, 
+        category,
+        fileCount: files.length 
+      });
+
       setIsUploading(true);
       const newProgresses = { ...progresses };
+      const uploadedFilesList: UploadedFile[] = [];
 
       try {
-        // Temporary maintenance message
-        toast.error("File uploads are temporarily disabled for maintenance. Please try again later.");
-        throw new Error("File uploads are temporarily disabled for maintenance");
+        if (!files || files.length === 0) {
+          toast.error("Please select at least one file to upload.");
+          // No return here, let finally handle setIsUploading
+        } else {
+          // Loop through each file to upload
+          for (const file of files) {
+            console.log(`Processing file: ${file.name} (${file.size} bytes, type: ${file.type})`);
+            
+            // Check file size and type
+             if (file.size > maxFileSize) {
+              toast.error(`${file.name} exceeds the maximum file size of ${maxFileSize / (1024 * 1024)}MB.`);
+              continue; // Skip this file
+            }
+            if (allowedFileTypes.length > 0 && !allowedFileTypes.some(type => file.type.startsWith(type))) {
+              toast.error(`${file.name} has an unsupported file type.`);
+              continue; // Skip this file
+            }
+
+            const fileKey = `${userId || 'anonymous'}/${entityType || 'general'}/${category || 'uncategorized'}/${uuidv4()}-${file.name}`;
+            newProgresses[fileKey] = 0; // Use a unique key for progress tracking
+            setProgresses({ ...newProgresses });
+
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // Use entityId state, fallback to tempEntityId if entity doesn't exist yet
+            const currentEntityId = entityId || tempEntityId;
+            console.log("Using entity ID:", currentEntityId);
+            
+            if (currentEntityId) {
+              formData.append('entityId', currentEntityId);
+            }
+            if (entityType) {
+              formData.append('entityType', entityType);
+            }
+            if (category) {
+              formData.append('category', category);
+            }
+            if (userId) {
+              formData.append('userId', userId);
+            }
+             if (bucketName) {
+              formData.append('bucketName', bucketName);
+            }
+
+            // Log form data entries
+            console.log("FormData entries:");
+            for (const [key, value] of formData.entries()) {
+              console.log(`- ${key}: ${value instanceof File ? `File: ${value.name}` : value}`);
+            }
+
+            // Update progress simulation
+            newProgresses[fileKey] = 50;
+            setProgresses({ ...newProgresses });
+
+            // Check for admin mode
+            const isAdminMode = typeof window !== 'undefined' && localStorage.getItem('admin_mode') === 'true';
+
+            // Upload via the API route
+            console.log("Sending request to file upload API...");
+            const response = await fetch("/api/file-uploads", {
+              method: "POST",
+              headers: {
+                // Add admin mode headers
+                ...(isAdminMode ? {
+                  "x-request-source": "AdminPanel",
+                  "x-admin-mode": "true"
+                } : {})
+              },
+              body: formData,
+            });
+
+            console.log("Upload API response status:", response.status);
+             
+             if (!response.ok) {
+               let errorData;
+               try {
+                 errorData = await response.json();
+                 console.error("Upload error response:", errorData);
+               } catch (e) {
+                 // If response is not JSON
+                 errorData = { error: response.statusText || "Upload failed" };
+                 console.error("Failed to parse error response:", e);
+               }
+               
+               // Format error message based on the response
+               let errorMessage = errorData.error || "Upload failed";
+               
+               // Handle specific cases like bucket not found
+               if (errorMessage.includes("Bucket not found") || errorMessage.includes("not found")) {
+                 errorMessage = `Storage bucket unavailable. Please contact support.`;
+               } else if (errorMessage.includes("permission") || errorMessage.includes("policy")) {
+                 errorMessage = `Permission denied to upload files. Please contact support.`;
+               }
+               
+               toast.error(`Upload failed for ${file.name}: ${errorMessage}`);
+               delete newProgresses[fileKey]; // Remove progress for failed upload
+               setProgresses({ ...newProgresses });
+               continue; // Skip this file, proceed with others
+             }
+
+            const result = await response.json();
+            console.log("Upload API success response:", result);
+
+             if (!result.success || !result.file) {
+              console.error("Upload API returned success:false or no file data:", result);
+              toast.error(`Upload failed for ${file.name}: Invalid server response.`);
+              delete newProgresses[fileKey];
+              setProgresses({...newProgresses});
+              continue;
+             }
+
+            // Create the file record from API response
+            const uploadedFile: UploadedFile = {
+              key: result.file.id, // Assuming the API returns 'id' as the key
+              name: result.file.name,
+              url: result.file.url,
+              path: result.file.path,
+              size: result.file.size,
+              type: result.file.type,
+              entityId: result.file.entityId,
+              category: result.file.category,
+              bucketName: result.file.bucketName, // Ensure API returns this
+            };
+
+            uploadedFilesList.push(uploadedFile);
+            newProgresses[fileKey] = 100;
+            setProgresses({ ...newProgresses });
+
+            // Optional: Short delay before removing progress bar
+            setTimeout(() => {
+              setProgresses((prev) => {
+                const updated = { ...prev };
+                delete updated[fileKey];
+                return updated;
+              });
+            }, 1000);
+
+            toast.success(`${file.name} uploaded successfully`);
+          }
+        }
+        
+        console.log("All files processed. Upload complete.");
+
+        // Update the list of uploaded files in the state
+        setUploadedFiles((prev) => [...prev, ...uploadedFilesList]);
+        return uploadedFilesList;
+
       } catch (error: any) {
-        console.error("Error uploading files:", error);
+        console.error("Error during the upload process:", error);
         toast.error(`Upload error: ${error.message || "Unknown error"}`);
-        throw error;
+        // Depending on the desired behavior, you might want to re-throw the error
+        // or return an empty array / handle it differently.
+        // For now, return the files that were successfully uploaded before the error.
+         return uploadedFilesList;
       } finally {
         setIsUploading(false);
+         // Clear progresses for files that didn't finish? Or rely on timeout removal?
+         // setProgresses({}); // Maybe clear all progresses here? Depends on UX choice.
       }
     },
-    [progresses]
+    [
+      progresses,
+      uploadedFiles.length, // Add dependency
+      maxFileCount,        // Add dependency
+      maxFileSize,         // Add dependency
+      allowedFileTypes,    // Add dependency
+      entityId,            // Add dependency
+      tempEntityId,        // Add dependency
+      entityType,          // Add dependency
+      category,            // Add dependency
+      userId,              // Add dependency
+      bucketName,          // Add dependency
+      // initSupabase,     // Remove if not directly used inside onUpload
+    ]
   );
 
-  // Update the entity ID for all uploaded files
+  // Function to generate a temporary entity ID if one doesn't exist
+  const ensureTempEntityId = useCallback(() => {
+    if (!entityId && !tempEntityId) {
+      const newTempId = uuidv4();
+      console.log("Generating temporary entity ID:", newTempId);
+      setTempEntityId(newTempId);
+      return newTempId;
+    }
+    return entityId || tempEntityId;
+  }, [entityId, tempEntityId]);
+
+  // Update the entity ID for all uploaded files (using tempEntityId if needed)
   const updateEntityId = useCallback(
     async (newEntityId: string) => {
       try {
@@ -252,7 +442,7 @@ export function useUploadFile({
         }
 
         // Extract the file path from the URL using regex
-        const fileUrlMatch = fileInfo.fileUrl.match(/fileUploader\/([^?#]+)/);
+        const fileUrlMatch = fileInfo.fileUrl.match(/user-assets\/([^?#]+)/);
         const filePath = fileUrlMatch?.[1];
 
         if (!filePath) {
@@ -261,7 +451,7 @@ export function useUploadFile({
 
         // Delete file from Supabase Storage
         const { data, error } = await client.storage
-          .from("fileUploader")
+          .from(bucketName)
           .remove([filePath]);
 
         if (error) {
@@ -294,7 +484,7 @@ export function useUploadFile({
         throw error;
       }
     },
-    [initSupabase],
+    [initSupabase, bucketName],
   );
 
   return {

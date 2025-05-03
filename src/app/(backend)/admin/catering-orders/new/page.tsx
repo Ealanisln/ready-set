@@ -48,6 +48,7 @@ const NewCateringOrderPage = async () => {
     );
   }
 
+  // Revert back to original type casting as filtering isn't possible with current data
   const clients = clientResult as ClientListItem[]; // Type cast after error check
 
   return (
@@ -63,7 +64,7 @@ const NewCateringOrderPage = async () => {
         />
       </div>
       <div className="p-6">
-        {/* Render the form component, passing the fetched clients */}
+        {/* Render the form component, passing the fetched (unfiltered) clients */}
         <CreateCateringOrderForm clients={clients} />
       </div>
     </div>

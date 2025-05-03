@@ -263,7 +263,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         setIsLoading(false);
       }
     },
-    [supabase, fetchAddresses, onError],
+    [supabase, supabase.auth, fetchAddresses, onError],
   );
 
   const handleToggleAddForm = () => {

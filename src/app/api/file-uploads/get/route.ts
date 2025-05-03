@@ -22,17 +22,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const whereClause: any = {
-      category: category || undefined,
-    };
+    // Build where clause for DB query
+    const whereClause: any = {};
 
-    if (entityType === "user") {
-      whereClause.userId = entityId;
-    } else if (entityType === "catering") {
+    // Handle category normalization
+    if (category) {
+      // Map category variations to consistent values
+      const normalizedCategory = category.toLowerCase();
+      whereClause.category = normalizedCategory;
+    }
+
+    // Handle entity type normalization
+    const normalizedEntityType = entityType.toLowerCase();
+    console.log('Normalized entity type:', normalizedEntityType);
+    
+    // Critical fix: If category is catering-order and entityType is user, we need to query by cateringRequestId
+    if (category?.toLowerCase() === "catering-order") {
+      // For catering orders, regardless of entityType parameter, use cateringRequestId
       whereClause.cateringRequestId = entityId;
-    } else if (entityType === "onDemand") {
+      console.log('Using cateringRequestId for catering-order category');
+    } else if (normalizedEntityType === "user") {
+      whereClause.userId = entityId;
+    } else if (normalizedEntityType === "catering" || normalizedEntityType === "catering-order") {
+      whereClause.cateringRequestId = entityId;
+    } else if (normalizedEntityType === "on_demand" || normalizedEntityType === "ondemand") {
       whereClause.onDemandId = entityId;
-    } else if (entityType === "jobApplication") {
+    } else if (normalizedEntityType === "job_application" || normalizedEntityType === "jobapplication") {
       whereClause.jobApplicationId = entityId;
     } else {
       console.warn('Unknown entityType:', entityType);

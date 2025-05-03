@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useState, useTransition, useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
@@ -39,7 +39,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { CalendarIcon, Loader2, Check, ChevronsUpDown, Plus, X } from 'lucide-react';
+import { CalendarIcon, Loader2, Check, ChevronsUpDown, Plus, X, AlertCircle } from 'lucide-react';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils"; // For conditional classes
 import AddressManager from "@/components/AddressManager";
@@ -175,8 +175,8 @@ const BROKERAGE_OPTIONS = [
 
 export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = ({ clients }) => {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientComboboxOpen, setClientComboboxOpen] = useState(false);
   const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [pickupAddresses, setPickupAddresses] = useState<Address[]>([]);
@@ -245,7 +245,16 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
       orderNumber: '', // Add order number
       brokerage: '', // Add brokerage field
       userId: undefined, // Initialize userId
+      hoursNeeded: null, // Initialize host-related fields
+      numberOfHosts: null,
+      headcount: null,
+      orderTotal: null,
+      tip: null,
+      clientAttention: '',
+      pickupNotes: '',
+      specialNotes: '',
     },
+    mode: 'onTouched', // Show validation errors as soon as a field is touched
   });
 
   const { register, handleSubmit, control, formState: { errors }, setValue, watch } = form;
@@ -253,6 +262,16 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
   // Watch needHost to conditionally show host-related fields
   const needHostValue = watch("needHost");
   const currentUserId = watch("userId");
+
+  // Effect to handle needHost changes
+  useEffect(() => {
+    if (needHostValue === 'NO') {
+      // When NO, set host fields to null and clear any validation errors
+      form.setValue('hoursNeeded', null, { shouldValidate: true });
+      form.setValue('numberOfHosts', null, { shouldValidate: true });
+      form.clearErrors(['hoursNeeded', 'numberOfHosts']);
+    }
+  }, [needHostValue, form]);
 
   // Wrap prop handlers in useCallback
   const handlePickupAddressesLoaded = useCallback((addresses: Address[]) => {
@@ -327,7 +346,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
   useEffect(() => {
     // Cleanup uploaded files on unmount if not submitted
     return () => {
-      if (uploadedFileKeys.length > 0 && !isPending) {
+      if (uploadedFileKeys.length > 0 && !isSubmitting) {
         const cleanup = async () => {
           try {
             console.log("Cleaning up uploaded files on unmount:", uploadedFileKeys);
@@ -350,44 +369,32 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
         cleanup();
       }
     };
-  }, [uploadedFileKeys, isPending, tempEntityId]);
+  }, [uploadedFileKeys, isSubmitting, tempEntityId]);
 
-  const onSubmit = (data: CreateCateringOrderInput) => {
+  // Add the scrollToTop utility function
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const handleFormSubmit = async (data: CreateCateringOrderInput) => {
+    setIsSubmitting(true);
     setGeneralError(null);
-    startTransition(async () => {
-      try {
-        const result = await createCateringOrder(data);
-        
-        // If we have uploaded files, update the tempEntityId
-        if (uploadedFiles.length > 0 && result.success && result.orderId) {
-          try {
-            await updateEntityId(result.orderId);
-          } catch (error) {
-            console.error("Failed to update entity ID for uploaded files:", error);
-          }
-        }
-        
-        if (result.success && result.orderNumber) {
-          console.log(`Order ${result.orderNumber} created successfully!`);
-          
-          // Redirect to the new order's detail page
-          router.push(`/admin/catering-orders/${result.orderNumber}`);
-        } else {
-          // Handle validation errors specifically if provided
-          if (result.fieldErrors) {
-             console.error("Field Validation Errors:", result.fieldErrors);
-             console.error(result.error || "Validation failed. Please check the form.");
-          } else {
-            // Handle general server errors
-            setGeneralError(result.error || 'An unexpected error occurred.');
-            console.error(result.error || 'Failed to create order.');
-          }
-        }
-      } catch (error) {
-        console.error("Error creating order:", error);
-        setGeneralError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    
+    try {
+      const result = await createCateringOrder(data);
+      
+      if (result.error) {
+        setGeneralError(result.error);
+        scrollToTop();
+        return;
       }
-    });
+
+      router.push('/admin/catering-orders');
+    } catch (err) {
+      console.error('Form submission error:', err);
+      setGeneralError('An unexpected error occurred. Please try again.');
+      scrollToTop();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Check authentication status on mount and set up auth state listener
@@ -613,15 +620,194 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
     }
   };
 
+  // Add effect to reset form state on page load or when returning to the form
+  useEffect(() => {
+    // Clear any previous error states
+    setGeneralError(null);
+    form.clearErrors();
+    
+    return () => {
+      // Cleanup function when component unmounts
+      setGeneralError(null);
+    };
+  }, [form]);
+
+  // Add a direct debug submit function
+  const debugSubmit = () => {
+    console.log("Debug submit clicked");
+    
+    // Log the current form state
+    const formData = form.getValues();
+    console.log("Current form state:", formData);
+    
+    // Handle needHost validation manually
+    if (formData.needHost === 'NO') {
+      // If needHost is NO, ensure hoursNeeded and numberOfHosts are set to null
+      formData.hoursNeeded = null;
+      formData.numberOfHosts = null;
+      
+      // Update the form values
+      form.setValue("hoursNeeded", null);
+      form.setValue("numberOfHosts", null);
+    }
+    
+    // Try to manually trigger validation
+    form.trigger().then(isValid => {
+      console.log("Manual validation result:", isValid);
+      
+      if (!isValid) {
+        // Alert about validation errors
+        alert("Form validation failed. Please check the form for errors.");
+        console.log("Validation errors:", form.formState.errors);
+      } else {
+        // If valid, try to manually submit
+        console.log("Attempting manual submission with data:", formData);
+        
+        // Show submission in progress
+        setIsSubmitting(true);
+        
+        // Directly call the server action
+        createCateringOrder(formData)
+          .then(result => {
+            console.log("Server action result:", result);
+            if (result.success) {
+              alert("Order created successfully!");
+              router.push(`/admin/catering-orders/${result.orderNumber}`);
+            } else {
+              alert("Order creation failed: " + (result.error || "Unknown error"));
+              setGeneralError(result.error || "Unknown error");
+              setIsSubmitting(false);
+            }
+          })
+          .catch(error => {
+            console.error("Manual submission error:", error);
+            alert("Error submitting: " + error.message);
+            setGeneralError("Error: " + error.message);
+            setIsSubmitting(false);
+          });
+      }
+    });
+  };
+
+  // Development mode flag for debugging tools
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Direct manual submit that bypasses the form's validation
+  const manualDirectSubmit = async () => {
+    try {
+      console.log("Manual direct submit clicked");
+      setIsSubmitting(true);
+      setGeneralError(null);
+
+      // Get form data
+      const formData = form.getValues();
+      console.log("Submitting with data:", formData);
+
+      // Ensure required fields are present
+      if (!formData.userId) {
+        alert("Please select a client");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.pickupDateTime || !formData.arrivalDateTime) {
+        alert("Please select pickup and arrival dates");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Handle needHost validation explicitly
+      if (formData.needHost === 'NO') {
+        // If needHost is NO, ensure hoursNeeded and numberOfHosts are null
+        formData.hoursNeeded = null;
+        formData.numberOfHosts = null;
+        
+        // Update the form values too
+        form.setValue("hoursNeeded", null);
+        form.setValue("numberOfHosts", null);
+      } else if (formData.needHost === 'YES') {
+        // If needHost is YES, make sure hoursNeeded and numberOfHosts are provided
+        if (!formData.hoursNeeded || !formData.numberOfHosts) {
+          alert("Hours needed and number of hosts are required when Need Host is Yes");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Call server action directly
+      const result = await createCateringOrder(formData);
+      console.log("Server action result:", result);
+
+      if (result.success) {
+        alert("Order created successfully!");
+        if (result.orderId && uploadedFiles.length > 0) {
+          await updateEntityId(result.orderId);
+        }
+        router.push(`/admin/catering-orders/${result.orderNumber}`);
+      } else {
+        alert("Failed to create order: " + (result.error || "Unknown error"));
+        setGeneralError(result.error || "Unknown error");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error in manual submit:", error);
+      setGeneralError("Error: " + (error instanceof Error ? error.message : String(error)));
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {generalError && (
-          <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-            <span className="font-medium">Error:</span> {generalError}
+      {/* Direct debug button outside the form - only in development mode */}
+      {isDevelopment && (
+        <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded flex justify-between items-center">
+          <span className="text-sm text-amber-600">Troubleshooting: Button outside form</span>
+          <button 
+            type="button" 
+            className="px-3 py-1 bg-amber-100 hover:bg-amber-200 rounded text-sm"
+            onClick={() => {
+              console.log("External debug button clicked");
+              debugSubmit();
+            }}
+          >
+            External Debug
+          </button>
+        </div>
+      )}
+      
+      {/* Display General Errors */}
+      {generalError && (
+        <div className="sticky top-0 z-10 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p className="font-medium">{generalError}</p>
+          </div>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setGeneralError(null)}
+            className="text-red-700 hover:bg-red-200"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <form 
+        onSubmit={form.handleSubmit(handleFormSubmit)} 
+        className="space-y-8"
+      >
+        {/* Test submit button - only in development mode */}
+        {isDevelopment && (
+          <div className="p-2 bg-red-50 border border-red-200 rounded flex justify-between items-center">
+            <span className="text-sm text-red-600">Troubleshooting: Try this native submit button</span>
+            <button type="submit" className="px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm">
+              Native Submit
+            </button>
           </div>
         )}
-
+        
         {/* Client Selection Combobox */}
         <div className="space-y-2">
           <Label htmlFor="userId">Client</Label>
@@ -652,7 +838,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         onSelect={(currentValue: string) => {
                           const selectedClientId = clients.find(c => c.name.toLowerCase() === currentValue.toLowerCase())?.id;
                           if (selectedClientId) {
-                             setValue("userId", selectedClientId);
+                             form.setValue("userId", selectedClientId);
                              setSelectedClientName(client.name);
                           }
                           setClientComboboxOpen(false);
@@ -681,7 +867,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
           <div className="space-y-2">
             <Label htmlFor="brokerage">Brokerage / Direct</Label>
             <Select 
-              onValueChange={(value) => setValue('brokerage', value)} 
+              onValueChange={(value) => form.setValue('brokerage', value)} 
               defaultValue={form.getValues("brokerage") === null 
                 ? undefined 
                 : form.getValues("brokerage") || ""}
@@ -736,7 +922,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                   selected={watch('pickupDateTime')}
                   onSelect={(date) => {
                     if (!date) {
-                      setValue('pickupDateTime', undefined as unknown as Date);
+                      form.setValue('pickupDateTime', undefined as unknown as Date);
                       return;
                     }
                     
@@ -750,12 +936,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         0,
                         0
                       );
-                      setValue('pickupDateTime', newDate);
+                      form.setValue('pickupDateTime', newDate);
                     } else {
                       // Set default time (noon) if no previous time
                       const newDate = new Date(date);
                       newDate.setHours(12, 0, 0, 0);
-                      setValue('pickupDateTime', newDate);
+                      form.setValue('pickupDateTime', newDate);
                     }
                   }}
                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disable past dates
@@ -789,12 +975,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         if (currentDate) {
                           const newDate = new Date(currentDate);
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('pickupDateTime', newDate);
+                          form.setValue('pickupDateTime', newDate);
                         } else {
                           // If no date selected, use today with the selected time
                           const newDate = new Date();
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('pickupDateTime', newDate);
+                          form.setValue('pickupDateTime', newDate);
                         }
                       }}
                     />
@@ -827,7 +1013,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                   selected={watch('arrivalDateTime')}
                   onSelect={(date) => {
                     if (!date) {
-                      setValue('arrivalDateTime', undefined as unknown as Date);
+                      form.setValue('arrivalDateTime', undefined as unknown as Date);
                       return;
                     }
                     
@@ -841,12 +1027,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         0,
                         0
                       );
-                      setValue('arrivalDateTime', newDate);
+                      form.setValue('arrivalDateTime', newDate);
                     } else {
                       // Set default time (noon) if no previous time
                       const newDate = new Date(date);
                       newDate.setHours(12, 0, 0, 0);
-                      setValue('arrivalDateTime', newDate);
+                      form.setValue('arrivalDateTime', newDate);
                     }
                   }}
                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disable past dates
@@ -880,12 +1066,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         if (currentDate) {
                           const newDate = new Date(currentDate);
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('arrivalDateTime', newDate);
+                          form.setValue('arrivalDateTime', newDate);
                         } else {
                           // If no date selected, use today with the selected time
                           const newDate = new Date();
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('arrivalDateTime', newDate);
+                          form.setValue('arrivalDateTime', newDate);
                         }
                       }}
                     />
@@ -920,7 +1106,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                   selected={watch('completeDateTime') as Date | undefined}
                   onSelect={(date) => {
                     if (!date) {
-                      setValue('completeDateTime', undefined);
+                      form.setValue('completeDateTime', undefined);
                       return;
                     }
                     
@@ -934,12 +1120,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         0,
                         0
                       );
-                      setValue('completeDateTime', newDate);
+                      form.setValue('completeDateTime', newDate);
                     } else {
                       // Set default time (noon) if no previous time
                       const newDate = new Date(date);
                       newDate.setHours(12, 0, 0, 0);
-                      setValue('completeDateTime', newDate);
+                      form.setValue('completeDateTime', newDate);
                     }
                   }}
                   disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} // Disable past dates
@@ -973,12 +1159,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         if (currentDate) {
                           const newDate = new Date(currentDate);
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('completeDateTime', newDate);
+                          form.setValue('completeDateTime', newDate);
                         } else {
                           // If no date selected, use today with the selected time
                           const newDate = new Date();
                           newDate.setHours(hours, minutes, 0, 0);
-                          setValue('completeDateTime', newDate);
+                          form.setValue('completeDateTime', newDate);
                         }
                       }}
                     />
@@ -992,21 +1178,71 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
           {/* Headcount */}
           <div className="space-y-2">
             <Label htmlFor="headcount">Headcount (Optional)</Label>
-            <Input id="headcount" type="number" {...register('headcount', { valueAsNumber: true })} placeholder="e.g., 50" />
+            <Controller
+              name="headcount"
+              control={control}
+              render={({ field: { onChange, value, ...field } }) => (
+                <Input 
+                  {...field}
+                  id="headcount" 
+                  type="number"
+                  value={value === null ? '' : value}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onChange(val === '' ? null : Number(val));
+                  }}
+                  placeholder="e.g., 50" 
+                />
+              )}
+            />
             {errors.headcount && <p className="text-sm text-red-500">{errors.headcount.message}</p>}
           </div>
 
           {/* Order Total */}
           <div className="space-y-2">
             <Label htmlFor="orderTotal">Order Total (Optional)</Label>
-            <Input id="orderTotal" type="number" step="0.01" {...register('orderTotal', { valueAsNumber: true })} placeholder="e.g., 1250.50" />
+            <Controller
+              name="orderTotal"
+              control={control}
+              render={({ field: { onChange, value, ...field } }) => (
+                <Input 
+                  {...field}
+                  id="orderTotal" 
+                  type="number"
+                  step="0.01"
+                  value={value === null ? '' : value}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onChange(val === '' ? null : Number(val));
+                  }}
+                  placeholder="e.g., 1250.50" 
+                />
+              )}
+            />
             {errors.orderTotal && <p className="text-sm text-red-500">{errors.orderTotal.message}</p>}
           </div>
 
           {/* Tip */}
           <div className="space-y-2">
             <Label htmlFor="tip">Tip (Optional)</Label>
-            <Input id="tip" type="number" step="0.01" {...register('tip', { valueAsNumber: true })} placeholder="e.g., 100.00" />
+            <Controller
+              name="tip"
+              control={control}
+              render={({ field: { onChange, value, ...field } }) => (
+                <Input 
+                  {...field}
+                  id="tip" 
+                  type="number"
+                  step="0.01"
+                  value={value === null ? '' : value}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    onChange(val === '' ? null : Number(val));
+                  }}
+                  placeholder="e.g., 100.00" 
+                />
+              )}
+            />
             {errors.tip && <p className="text-sm text-red-500">{errors.tip.message}</p>}
           </div>
         </div>
@@ -1017,14 +1253,28 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="needHost">Need Host?</Label>
-                <Select onValueChange={(value) => setValue('needHost', value as 'YES' | 'NO')} defaultValue={form.getValues("needHost")}>
+                <Select 
+                  onValueChange={(value) => {
+                    const newValue = value as 'YES' | 'NO';
+                    form.setValue('needHost', newValue, { shouldValidate: true });
+                    
+                    // Clear any existing validation errors
+                    form.clearErrors(['hoursNeeded', 'numberOfHosts']);
+                    
+                    if (newValue === 'NO') {
+                      // When NO, set host fields to null
+                      form.setValue('hoursNeeded', null, { shouldValidate: true });
+                      form.setValue('numberOfHosts', null, { shouldValidate: true });
+                    }
+                  }} 
+                  defaultValue={form.getValues("needHost")}
+                >
                   <SelectTrigger id="needHost">
                     <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="NO">No</SelectItem>
                     <SelectItem value="YES">Yes</SelectItem>
-                    <SelectItem value="MAYBE">Maybe</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.needHost && <p className="text-sm text-red-500">{errors.needHost.message}</p>}
@@ -1034,13 +1284,46 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
               {needHostValue === 'YES' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="hoursNeeded">Hours Needed (Optional)</Label>
-                    <Input id="hoursNeeded" type="number" step="0.1" {...register('hoursNeeded', { valueAsNumber: true })} placeholder="e.g., 4.5" />
+                    <Label htmlFor="hoursNeeded">Hours Needed</Label>
+                    <Controller
+                      name="hoursNeeded"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <Input 
+                          {...field}
+                          id="hoursNeeded" 
+                          type="number" 
+                          step="0.1" 
+                          value={value === null ? '' : value}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            onChange(val === '' ? null : parseFloat(val));
+                          }}
+                          placeholder="e.g., 4.5" 
+                        />
+                      )}
+                    />
                     {errors.hoursNeeded && <p className="text-sm text-red-500">{errors.hoursNeeded.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="numberOfHosts">Number of Hosts (Optional)</Label>
-                    <Input id="numberOfHosts" type="number" {...register('numberOfHosts', { valueAsNumber: true })} placeholder="e.g., 2"/>
+                    <Label htmlFor="numberOfHosts">Number of Hosts</Label>
+                    <Controller
+                      name="numberOfHosts"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <Input 
+                          {...field}
+                          id="numberOfHosts" 
+                          type="number" 
+                          value={value === null ? '' : value}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            onChange(val === '' ? null : parseInt(val, 10));
+                          }}
+                          placeholder="e.g., 2"
+                        />
+                      )}
+                    />
                     {errors.numberOfHosts && <p className="text-sm text-red-500">{errors.numberOfHosts.message}</p>}
                   </div>
                 </>
@@ -1158,7 +1441,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                 multiple
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
                 className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isUploading || isPending}
+                disabled={isUploading || isSubmitting}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Maximum 5 files. Supported formats: PDF, Word, JPEG, PNG, WebP. Max size: 10MB per file.
@@ -1186,7 +1469,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                   variant="ghost" 
                   size="sm"
                   onClick={() => removeFile(file)}
-                  disabled={isUploading || isPending}
+                  disabled={isUploading || isSubmitting}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -1196,13 +1479,51 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isPending} className="min-w-[120px]">
-            {isPending ? (
+        <div className="flex justify-end gap-2">
+          {generalError && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                form.reset();
+                setGeneralError(null);
+                // Reset any other form state
+                setUploadedFileKeys([]);
+              }}
+            >
+              Reset Form
+            </Button>
+          )}
+          {isDevelopment && (
+            <Button 
+              type="button" 
+              variant="outline"
+              className="bg-amber-100 hover:bg-amber-200"
+              onClick={debugSubmit}
+            >
+              Debug Submit
+            </Button>
+          )}
+          <Button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className="min-w-[120px]"
+          >
+            {isSubmitting ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
             ) : (
               'Create Order'
             )}
+          </Button>
+          
+          {/* Direct submit button as a fallback */}
+          <Button 
+            type="button"
+            onClick={manualDirectSubmit}
+            disabled={isSubmitting}
+            className="min-w-[120px] bg-green-600 hover:bg-green-700 text-white"
+          >
+            Direct Submit
           </Button>
         </div>
       </form>

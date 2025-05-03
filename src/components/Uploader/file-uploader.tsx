@@ -39,7 +39,7 @@ export function FileUploader({
 }: FileUploaderProps) {
   const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isTemporarilyDisabled] = useState(true); // Temporary disable flag
+  const [isTemporarilyDisabled] = useState(false); // Changed from true to false to enable file uploads
 
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
@@ -83,6 +83,14 @@ export function FileUploader({
     try {
       if (selectedFiles.length === 0) return;
       
+      // Debug log to see parameters
+      console.log("FileUploader handleUpload - Parameters:", {
+        entityType,
+        entityId,
+        category,
+        files: selectedFiles.map(f => ({name: f.name, size: f.size, type: f.type}))
+      });
+      
       setError(null);
       await onUpload(selectedFiles);
       // Only clear selected files if upload was successful
@@ -95,7 +103,7 @@ export function FileUploader({
         setError("Failed to upload. Please try again.");
       }
     }
-  }, [selectedFiles, onUpload]);
+  }, [selectedFiles, onUpload, entityType, entityId, category]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -107,13 +115,6 @@ export function FileUploader({
 
   return (
     <div className="space-y-4">
-      {isTemporarilyDisabled && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-          <p className="text-yellow-800 text-sm">
-            File uploads are temporarily disabled for maintenance. Please try again later.
-          </p>
-        </div>
-      )}
       <div
         {...getRootProps()}
         className={cn(

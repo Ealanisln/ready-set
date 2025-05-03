@@ -15,6 +15,9 @@ import {
   Calendar,
   Briefcase,
   UserCircle2,
+  BarChart4,
+  PieChart as PieChartIcon,
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,30 +73,30 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { approveJobApplication } from '@/app/actions/admin/job-applications';
 
 
-const COLORS = ["#4f46e5", "#10b981", "#ef4444", "#f59e0b"];
+const COLORS = ["#3b82f6", "#10b981", "#ef4444", "#6366f1"];
 
 // Status badge component
 const StatusBadge: React.FC<{ status: ApplicationStatus }> = ({ status }) => {
   const statusConfig = {
     [ApplicationStatus.PENDING]: {
       label: "Pending",
-      variant: "default",
-      className: "bg-yellow-500 hover:bg-yellow-600",
+      className: "bg-amber-100 text-amber-700 border border-amber-200",
+      icon: <Clock className="h-3 w-3 mr-1" />
     },
     [ApplicationStatus.APPROVED]: {
       label: "Approved",
-      variant: "default",
-      className: "bg-green-500 hover:bg-green-600",
+      className: "bg-green-100 text-green-700 border border-green-200",
+      icon: <CheckCircle className="h-3 w-3 mr-1" />
     },
     [ApplicationStatus.REJECTED]: {
       label: "Rejected",
-      variant: "default",
-      className: "bg-red-500 hover:bg-red-600",
+      className: "bg-red-100 text-red-700 border border-red-200",
+      icon: <XCircle className="h-3 w-3 mr-1" />
     },
     [ApplicationStatus.INTERVIEWING]: {
       label: "Interviewing",
-      variant: "default",
-      className: "bg-blue-500 hover:bg-blue-600",
+      className: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+      icon: <Users className="h-3 w-3 mr-1" />
     },
   };
 
@@ -101,7 +104,10 @@ const StatusBadge: React.FC<{ status: ApplicationStatus }> = ({ status }) => {
 
   return (
     <Badge className={config.className}>
-      {config.label}
+      <span className="flex items-center">
+        {config.icon}
+        {config.label}
+      </span>
     </Badge>
   );
 };
@@ -112,21 +118,45 @@ const MetricCard: React.FC<{
   value: number;
   icon: React.ReactNode;
   color: string;
-}> = ({ title, value, icon, color }) => (
-  <Card>
-    <CardContent className="flex flex-row items-center p-6">
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-full ${color}`}
-      >
-        {icon}
-      </div>
-      <div className="ml-4">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-        <p className="text-3xl font-bold">{value}</p>
-      </div>
-    </CardContent>
-  </Card>
-);
+  totalApplications: number;
+}> = ({ title, value, icon, color, totalApplications }) => {
+  const percentage = totalApplications > 0 ? (value / totalApplications) * 100 : 0;
+  
+  return (
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md flex flex-col h-full">
+      <div className={`h-1 ${color}`}></div>
+      <CardContent className="p-6 flex-grow flex flex-col justify-between">
+        <div className="flex items-center justify-between mb-2">
+          <div className={`rounded-full p-3 ${color} bg-opacity-15 text-white`}>
+            {icon}
+          </div>
+        </div>
+        <div className="mt-3 mb-4">
+          <div className="flex items-center justify-between">
+            <p className="text-3xl font-bold">{value}</p>
+            {value > 0 && totalApplications > 0 && (
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-50">
+                {percentage.toFixed(0)}%
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mt-2">{title}</p>
+        </div>
+        
+        {value > 0 && totalApplications > 0 && (
+          <div className="mt-auto w-full">
+            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className={`h-full ${color}`} 
+                style={{ width: `${Math.min(percentage, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 // Application detail dialog
 const ApplicationDetailDialog: React.FC<{
@@ -294,23 +324,50 @@ const ApplicationDetailDialog: React.FC<{
           <div className="flex flex-wrap gap-3">
             {/* Iterate over fileUploads array */}
             {application.fileUploads && application.fileUploads.length > 0 ? (
-              application.fileUploads.map((file) => (
-                <Button
-                  key={file.id} // Use file.id as the key
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => {
-                    console.log(`Opening file: ${file.fileName}, URL: ${file.fileUrl}`);
-                    // Pass the fileUrl directly, no need for getDocumentUrl here
-                    openDocumentWithFallback(file.fileUrl || ''); 
-                  }}
-                  aria-label={`View ${file.category || file.fileName || 'Document'}`}
-                >
-                  <FileText className="h-4 w-4" />
-                  {/* Use category or fallback to filename */}
-                  {file.category ? file.category.charAt(0).toUpperCase() + file.category.slice(1) : file.fileName || 'Document'}
-                </Button>
-              ))
+              application.fileUploads.map((file) => {
+                // Create more descriptive document labels based on category
+                let documentLabel = file.category || file.fileName || 'Document';
+                
+                // Map standard categories to more readable labels
+                const categoryLabels: Record<string, string> = {
+                  'resume': 'Resume',
+                  'license': 'Driver\'s License',
+                  'insurance': 'Insurance',
+                  'registration': 'Vehicle Registration',
+                  'food_handler': 'Food Handler Card',
+                  'hipaa': 'HIPAA Certification',
+                  'driver_photo': 'Driver Photo',
+                  'car_photo': 'Car Photo',
+                  'equipment_photo': 'Equipment Photo'
+                };
+                
+                if (file.category && categoryLabels[file.category]) {
+                  documentLabel = categoryLabels[file.category];
+                } else if (file.category) {
+                  // Format any other category string
+                  documentLabel = file.category
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                }
+                
+                return (
+                  <Button
+                    key={file.id} // Use file.id as the key
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => {
+                      console.log(`Opening file: ${file.fileName}, URL: ${file.fileUrl}`);
+                      // Pass the fileUrl directly, no need for getDocumentUrl here
+                      window.open(file.fileUrl || '', '_blank');
+                    }}
+                    aria-label={`View ${documentLabel}`}
+                  >
+                    <FileText className="h-4 w-4" />
+                    {documentLabel}
+                  </Button>
+                );
+              })
             ) : (
               <p className="text-sm text-gray-500">No documents uploaded.</p>
             )}
@@ -477,9 +534,11 @@ export default function JobApplicationsPage() {
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/job-applications/stats");
+      
       if (!response.ok) {
         throw new Error("Failed to fetch stats");
       }
+      
       const data: JobApplicationStats = await response.json();
       setStats(data);
     } catch (error) {
@@ -701,51 +760,99 @@ export default function JobApplicationsPage() {
             Manage and review candidate applications
           </p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
+        <div className="flex items-center gap-3">
+          {stats && (
+            <div className="rounded-md bg-blue-50 px-3 py-1.5 text-sm text-blue-700 border border-blue-100">
+              <span className="font-semibold mr-1.5">{stats.totalApplications}</span>
+              Total Applications
+            </div>
+          )}
+          <Button variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button 
+            variant="default" 
+            className="flex items-center gap-2"
+            onClick={() => {
+              fetchStats();
+              fetchApplications();
+            }}
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span className="sr-only">Refresh</span>
           </Button>
         </div>
       </div>
 
       {stats && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            title="Total Applications"
-            value={stats.totalApplications}
-            icon={<ClipboardList className="h-6 w-6 text-white" />}
-            color="bg-blue-600"
-          />
-          <MetricCard
-            title="Pending Review"
-            value={stats.pendingApplications}
-            icon={<Clock className="h-6 w-6 text-white" />}
-            color="bg-yellow-500"
-          />
-          <MetricCard
-            title="Approved"
-            value={stats.approvedApplications}
-            icon={<CheckCircle className="h-6 w-6 text-white" />}
-            color="bg-green-600"
-          />
-          <MetricCard
-            title="Rejected"
-            value={stats.rejectedApplications}
-            icon={<XCircle className="h-6 w-6 text-white" />}
-            color="bg-red-600"
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div className="bg-white p-4 rounded-md border border-l-4 border-l-blue-600">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-700">Total Applications</h3>
+                <div className="rounded-full p-2 bg-blue-100">
+                  <ClipboardList className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold mt-2">{stats?.totalApplications ?? 0}</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-md border border-l-4 border-l-amber-500">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-700">Pending Review</h3>
+                <div className="rounded-full p-2 bg-amber-100">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold mt-2">{stats?.pendingApplications ?? 0}</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-md border border-l-4 border-l-green-600">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-700">Approved</h3>
+                <div className="rounded-full p-2 bg-green-100">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold mt-2">{stats?.approvedApplications ?? 0}</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-md border border-l-4 border-l-red-600">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-700">Rejected</h3>
+                <div className="rounded-full p-2 bg-red-100">
+                  <XCircle className="h-5 w-5 text-red-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold mt-2">{stats?.rejectedApplications ?? 0}</p>
+            </div>
+          </div>
+        </>
       )}
 
-      <Tabs defaultValue="applications">
-        <TabsList>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="applications" className="w-full mt-6">
+        <div className="border-b mb-6">
+          <TabsList className="w-auto bg-transparent border-b-0 p-0 mb-0 flex">
+            <TabsTrigger 
+              value="applications" 
+              className="text-sm py-2 px-4 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:shadow-none"
+            >
+              <ClipboardList className="h-4 w-4 mr-2" />
+              Applications
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="text-sm py-2 px-4 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:shadow-none"
+            >
+              <BarChart4 className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="applications" className="mt-6">
-          <Card>
+          <Card className="overflow-hidden shadow-sm">
             <CardContent className="p-6">
               <div className="mb-6 flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
                 <div className="flex flex-1 space-x-2">
@@ -972,14 +1079,51 @@ export default function JobApplicationsPage() {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="mb-4 text-lg font-medium">
-                  Application Status Distribution
-                </h3>
-                <div className="h-64">
-                  {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <div className="mb-5 flex items-center">
+                <Briefcase className="h-6 w-6 text-indigo-600 mr-2" />
+                <h3 className="text-xl font-medium">Applications by Position</h3>
+              </div>
+              <div className="space-y-6">
+                {stats?.applicationsByPosition &&
+                  Object.entries(stats.applicationsByPosition).map(
+                    ([position, count]) => (
+                      <div key={position}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <div className="h-6 w-6 text-gray-500 mr-2">
+                              <Briefcase className="h-5 w-5" />
+                            </div>
+                            <span className="text-lg">{position}</span>
+                          </div>
+                          <span className="text-xl font-bold">{count}</span>
+                        </div>
+                        <div className="h-2 w-full bg-indigo-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-indigo-600 rounded-full"
+                            style={{
+                              width: `${Math.min(
+                                (count / (stats?.totalApplications ?? 1)) * 100,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  )}
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="mb-5 flex items-center">
+                <PieChartIcon className="h-6 w-6 text-indigo-600 mr-2" />
+                <h3 className="text-xl font-medium">Applications by Status</h3>
+              </div>
+              <div className="flex flex-col items-center justify-center" style={{ height: 300 }}>
+                {chartData.length > 0 ? (
+                  <>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -990,60 +1134,32 @@ export default function JobApplicationsPage() {
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
-                          label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
-                          }
                         >
                           {chartData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={COLORS[index % COLORS.length]}
-                            />
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip
-                          formatter={(value) => [`${value} applications`, ""]}
-                        />
+                        <Tooltip formatter={(value) => [`${value} Applications`, '']} />
                       </PieChart>
                     </ResponsiveContainer>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="mb-4 text-lg font-medium">
-                  Applications by Position
-                </h3>
-                <div className="space-y-4">
-                  {stats?.applicationsByPosition &&
-                    Object.entries(stats.applicationsByPosition).map(
-                      ([position, count]) => (
-                        <div key={position}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <Briefcase className="mr-2 h-4 w-4 text-gray-500" />
-                              <span>{position}</span>
-                            </div>
-                            <span className="font-medium">{count}</span>
-                          </div>
-                          <div className="mt-1 h-2 w-full rounded-full bg-gray-200">
-                            <div
-                              className="h-2 rounded-full bg-blue-600"
-                              style={{
-                                width: `${Math.min(
-                                  (count / stats.totalApplications) * 100,
-                                  100
-                                )}%`,
-                              }}
-                            ></div>
-                          </div>
+                    <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2">
+                      {chartData.map((entry, index) => (
+                        <div key={`legend-${index}`} className="flex items-center">
+                          <div
+                            className="w-4 h-4 mr-2"
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          />
+                          <span>{entry.name}: {entry.value}</span>
                         </div>
-                      )
-                    )}
-                </div>
-              </CardContent>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    No data available
+                  </div>
+                )}
+              </div>
             </Card>
           </div>
         </TabsContent>
