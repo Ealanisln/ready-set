@@ -2,6 +2,9 @@
 
 import React from "react";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import CateringOrdersPage from "@/components/Orders/CateringOrders/CateringOrdersPage";
 import { PageHeader } from "@/components/Dashboard/ui/PageHeader"; // Adjust import path if needed
 
@@ -10,7 +13,29 @@ export const metadata: Metadata = {
   description: "Manage and track all catering orders across the platform",
 };
 
-const Orders = () => {
+const Orders = async () => {
+  // Server-side authentication check to prevent unauthorized access
+  const supabase = await createClient();
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    // Redirect to login if not authenticated
+    redirect("/sign-in?returnTo=/admin/catering-orders");
+  }
+
+  // Check user role to ensure they have admin privileges
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("type")
+    .eq("id", session.user.id)
+    .single();
+
+  if (!profile || !["admin", "super_admin"].includes(profile.type.toLowerCase())) {
+    // Redirect to appropriate page if not an admin
+    redirect("/");
+  }
+
   return (
     // This outer div might not be strictly necessary if the layout handles background
     // Keeping it simple here.

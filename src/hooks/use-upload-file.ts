@@ -31,7 +31,7 @@ interface UseUploadFileOptions {
 }
 
 export function useUploadFile({
-  bucketName = "user-assets",
+  bucketName = "fileUploader",
   defaultUploadedFiles = [],
   maxFileCount = 5,
   maxFileSize = 10 * 1024 * 1024, // 10MB by default
@@ -48,6 +48,15 @@ export function useUploadFile({
   const [progresses, setProgresses] = useState<Record<string, number>>({});
   const [entityId, setEntityId] = useState<string>(initialEntityId || "");
   const [tempEntityId, setTempEntityId] = useState<string>("");
+
+  // Generate a temporary entity ID on initialization if none exists
+  useEffect(() => {
+    if (!entityId && !tempEntityId) {
+      const newTempId = `temp-${uuidv4()}`;
+      console.log("Initializing temporary entity ID:", newTempId);
+      setTempEntityId(newTempId);
+    }
+  }, [entityId, tempEntityId]);
 
   // Initialize Supabase client if not already initialized
   const initSupabase = useCallback(async () => {
@@ -162,7 +171,19 @@ export function useUploadFile({
               continue; // Skip this file
             }
 
-            const fileKey = `${userId || 'anonymous'}/${entityType || 'general'}/${category || 'uncategorized'}/${uuidv4()}-${file.name}`;
+            // Generate a proper path structure for order uploads
+            let fileKey;
+            // For catering orders, use a consistent path structure
+            if (entityType === 'catering' || category === 'catering-order') {
+              const currentId = entityId || tempEntityId;
+              // Ensure consistent format for temporary entity IDs in storage paths
+              const pathEntityId = currentId.startsWith('temp-') ? currentId : `temp-${currentId}`;
+              fileKey = `catering_order/${pathEntityId}/${Date.now()}-${uuidv4().substring(0, 8)}`;
+              console.log(`Generated catering file path: ${fileKey}`);
+            } else {
+              fileKey = `${userId || 'anonymous'}/${entityType || 'general'}/${category || 'uncategorized'}/${uuidv4().substring(0, 8)}-${file.name}`;
+            }
+            
             newProgresses[fileKey] = 0; // Use a unique key for progress tracking
             setProgresses({ ...newProgresses });
 

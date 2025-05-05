@@ -4,15 +4,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/utils/prismaDB";
 import { AddressFormData } from "@/types/address";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET handler for fetching addresses
  */
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Authentication required - Invalid authorization header" },
+        { status: 401 },
+      );
+    }
 
-    if (!currentUser?.id) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !currentUser?.id) {
+      console.error("Auth error:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },
@@ -100,9 +118,26 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Authentication required - Invalid authorization header" },
+        { status: 401 },
+      );
+    }
 
-    if (!currentUser?.id) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !currentUser?.id) {
+      console.error("Auth error:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },
@@ -163,9 +198,26 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Authentication required - Invalid authorization header" },
+        { status: 401 },
+      );
+    }
 
-    if (!currentUser?.id) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !currentUser?.id) {
+      console.error("Auth error:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },
@@ -255,9 +307,26 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Authentication required - Invalid authorization header" },
+        { status: 401 },
+      );
+    }
 
-    if (!currentUser?.id) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !currentUser?.id) {
+      console.error("Auth error:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },

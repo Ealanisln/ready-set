@@ -151,6 +151,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       return;
     }
 
+    // Get current session with refresh if needed
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
@@ -165,12 +166,13 @@ const AddressManager: React.FC<AddressManagerProps> = ({
     isRequestPending.current = true;
     setIsLoading(true);
     setError(null);
-  
+
     try {
       console.log(`Fetching addresses with filter=${filterType}`);
       const response = await fetch(`/api/addresses?filter=${filterType}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
         },
       });
       
@@ -231,9 +233,9 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         const response = await fetch("/api/addresses", {
           method: "POST",
           headers: {
-             "Content-Type": "application/json",
-             'Authorization': `Bearer ${session.access_token}`,
-           },
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${session.access_token}`,
+          },
           body: JSON.stringify({ ...newAddress, createdBy: session.user.id }),
         });
 
@@ -250,20 +252,24 @@ const AddressManager: React.FC<AddressManagerProps> = ({
               onError(`Failed to add address: ${response.statusText}`);
             }
           }
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+          return;
         }
 
-        const addedAddress = await response.json();
-        console.log("Successfully added address:", addedAddress);
+        // Address added successfully
         setShowAddForm(false);
-        await fetchAddresses();
+        // Refetch addresses
+        fetchAddresses();
       } catch (err) {
-        console.error("Add Address Catch Block:", err);
+        console.error("Error adding address:", err);
+        setError("Error adding address. Please try again.");
+        if (onError) {
+          onError("Error adding address. Please try again.");
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [fetchAddresses, onError, supabase.auth],
+    [fetchAddresses, onError, setUser, supabase.auth]
   );
 
   const handleToggleAddForm = () => {

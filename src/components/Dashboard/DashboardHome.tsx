@@ -30,6 +30,7 @@ import { ApplicationStatus, JobApplication } from "@/types/job-application";
 import { useUser } from "@/contexts/UserContext";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createClient } from "@/utils/supabase/client";
 
 // Add interface for Job Applications API response
 interface JobApplicationsApiResponse {
@@ -470,10 +471,24 @@ export function ModernDashboardHome() {
       setLoading(true);
       setError(null);
       try {
+        // Get the current session for authentication
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          throw new Error("Authentication required: No active session");
+        }
+        
+        // Prepare the auth headers for all API requests
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        };
+
         const results = await Promise.allSettled([
-          fetch("/api/orders/catering-orders?recentOnly=true"),
-          fetch("/api/users"),
-          fetch("/api/admin/job-applications")
+          fetch("/api/orders/catering-orders?recentOnly=true", { headers }),
+          fetch("/api/users", { headers }),
+          fetch("/api/admin/job-applications", { headers })
         ]);
 
         const ordersResult = results[0];

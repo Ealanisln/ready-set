@@ -93,7 +93,6 @@ const UploadedFilesViewer: React.FC<UploadedFilesViewerProps> = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[300px]">Name</TableHead>
-              <TableHead>Category</TableHead>
               <TableHead>Size</TableHead>
               <TableHead>Uploaded</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -107,11 +106,6 @@ const UploadedFilesViewer: React.FC<UploadedFilesViewerProps> = ({
                     {getFileIcon(file.fileType)}
                     <span className="truncate max-w-[250px]">{file.fileName}</span>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="capitalize">
-                    {file.category || "general"}
-                  </Badge>
                 </TableCell>
                 <TableCell>{formatFileSize(file.fileSize)}</TableCell>
                 <TableCell>

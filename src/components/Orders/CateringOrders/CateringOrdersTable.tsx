@@ -3,13 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Order, StatusFilter } from "./types";
+import { Order, StatusFilter, UserRole } from "./types";
+import DeleteCateringOrder from "./DeleteCateringOrder";
 
 interface CateringOrdersTableProps {
   orders: Order[];
   isLoading: boolean;
   statusFilter: StatusFilter;
   onStatusFilterChange: (status: StatusFilter) => void;
+  userRoles: UserRole;
+  onOrderDeleted?: () => void;
 }
 
 export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
@@ -17,6 +20,8 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
   isLoading,
   statusFilter,
   onStatusFilterChange,
+  userRoles,
+  onOrderDeleted,
 }) => {
   console.log("CateringOrdersTable rendered with:", { orders, isLoading, statusFilter });
 
@@ -38,6 +43,9 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
               <TableHead className="hidden sm:table-cell">Status</TableHead>
               <TableHead className="hidden md:table-cell">Date</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              {(userRoles.isAdmin || userRoles.isSuperAdmin) && (
+                <TableHead className="w-10"></TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,6 +80,16 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
                     ? parseFloat(order.order_total).toFixed(2)
                     : order.order_total.toFixed(2)}
                 </TableCell>
+                {(userRoles.isAdmin || userRoles.isSuperAdmin) && (
+                  <TableCell className="text-right p-0 pr-2">
+                    <DeleteCateringOrder
+                      orderId={order.id}
+                      orderNumber={order.order_number}
+                      userRoles={userRoles}
+                      onDeleted={onOrderDeleted}
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

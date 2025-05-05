@@ -6,13 +6,26 @@ import { createClient } from "@/utils/supabase/server";
 // GET handler for fetching job applications with filters and pagination
 export async function GET(request: NextRequest) {
   try {
-    // Check if user is authorized (admin or helpdesk)
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Unauthorized - Invalid authorization header" },
+        { status: 401 }
+      );
+    }
+
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
     const supabase = await createClient();
     
-    // const { data: { session } } = await supabase.auth.getSession(); // Deprecated usage
-    const { data: { user } } = await supabase.auth.getUser(); // Use getUser() for server-side auth
-    
-    if (!user) { // Check for user instead of session
+    // Verify the token by getting the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('Auth error:', authError);
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -23,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('type')
-      .eq('email', user.email) // Use user.email
+      .eq('id', user.id)
       .single();
       
     if (!userProfile || !["ADMIN", "HELPDESK", "SUPER_ADMIN"].includes(userProfile.type)) {

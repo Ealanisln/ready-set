@@ -38,17 +38,27 @@ export async function GET(req: NextRequest) {
   try {
     console.log('Catering orders API called');
     
-    const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-
-    if (!authUser || !authUser.id) {
-      console.log('Unauthorized request - no user found');
+    // Get the authorization header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Unauthorized request - invalid authorization header');
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Optional: Fetch Profile based on authUser.id if needed for role checks
-    // const userProfile = await prisma.profile.findUnique({ where: { id: authUser.id } });
-    // if (!userProfile || userProfile.type !== 'ADMIN') { ... } // Example admin check
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authUser || !authUser.id) {
+      console.log('Unauthorized request - invalid token or user not found');
+      console.error('Auth error:', authError);
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
 
     console.log('Authenticated user:', authUser.id);
 

@@ -10,7 +10,8 @@ import {
   Download, 
   Printer, 
   RefreshCw,
-  ArrowUpDown
+  ArrowUpDown,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardHeader } from "@/components/ui/card";
@@ -58,6 +59,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (date: string | Date | null): string => {
     if (!date) return "N/A";
@@ -79,30 +81,63 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   };
 
   const getApiOrderType = (type: OrderType): string => {
-    return type === "on_demand" ? "onDemand" : type;
+    // Ensure we always return a valid value for the API
+    if (type === "on_demand") {
+      return "onDemand";
+    } else if (type === "catering") {
+      return "catering";
+    } else {
+      // Fallback to prevent undefined values being sent to API
+      console.warn(`Unknown order type: ${type}, defaulting to "catering"`);
+      return "catering";
+    }
   };
 
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = async (e: React.MouseEvent) => {
+    // Prevent default behavior to ensure dialog doesn't automatically close
+    e.preventDefault();
+    
+    setIsDeleting(true);
+    
+    // Create a minimum delay timer to ensure loading state is visible
+    const minDelay = new Promise(resolve => setTimeout(resolve, 800));
+    
     try {
       const apiOrderType = getApiOrderType(order_type);
-      const response = await fetch(
+      
+      // For debugging - remove in production
+      console.log(`Deleting order: ${orderId}, type: ${order_type}, apiType: ${apiOrderType}`);
+      
+      const deletePromise = fetch(
         `/api/orders/delete?orderId=${orderId.toString()}&orderType=${apiOrderType}`,
         {
           method: "DELETE",
-        },
+        }
       );
+      
+      // Wait for both the API response and minimum delay
+      const [response] = await Promise.all([deletePromise, minDelay]);
 
-      if (response.ok) {
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
         toast.success("Order deleted successfully");
+        // First close the dialog, then call the success handler
+        setIsDeleteDialogOpen(false);
         onDeleteSuccess();
       } else {
-        throw new Error("Failed to delete order");
+        // Get error message from response when available
+        const errorMessage = data.error || "Failed to delete order";
+        console.error("Delete order error:", errorMessage);
+        toast.error(errorMessage);
+        // Keep the dialog open for error cases
       }
     } catch (error) {
       console.error("Error deleting order:", error);
       toast.error("Failed to delete order. Please try again.");
+      // Keep the dialog open for error cases
     } finally {
-      setIsDeleteDialogOpen(false);
+      setIsDeleting(false);
     }
   };
 
@@ -223,10 +258,24 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-red-600 hover:text-red-700 cursor-pointer"
+                className={`text-red-600 ${
+                  isDeleting 
+                    ? 'opacity-60 cursor-not-allowed' 
+                    : 'hover:text-red-700 hover:bg-red-50 cursor-pointer'
+                }`}
+                disabled={isDeleting}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Delete Order</span>
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete Order</span>
+                  </>
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -235,7 +284,14 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
 
       <AlertDialog
         open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+        onOpenChange={(open) => {
+          // Only allow manually closing the dialog if we're not deleting
+          if (!open && !isDeleting) {
+            setIsDeleteDialogOpen(false);
+          } else if (open) {
+            setIsDeleteDialogOpen(true);
+          }
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -246,13 +302,26 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteOrder}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            <AlertDialogCancel 
+              className="border-slate-200" 
+              disabled={isDeleting}
             >
-              Delete Order
-            </AlertDialogAction>
+              Cancel
+            </AlertDialogCancel>
+            <Button 
+              onClick={(e) => handleDeleteOrder(e)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Order'
+              )}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

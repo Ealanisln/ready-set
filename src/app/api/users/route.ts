@@ -8,10 +8,23 @@ import { Prisma, UserStatus, UserType } from "@prisma/client"; // Import Prisma 
 // GET: Fetch users with pagination, search, sort, filter
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: "Unauthorized - Invalid authorization header" }, { status: 401 });
+    }
 
-    if (!authUser) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authUser) {
+      console.error('Auth error:', authError);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -127,10 +140,23 @@ export async function GET(request: NextRequest) {
 // POST: Create a new user
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: "Unauthorized - Invalid authorization header" }, { status: 401 });
+    }
 
-    if (!authUser) {
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authUser) {
+      console.error('Auth error:', authError);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

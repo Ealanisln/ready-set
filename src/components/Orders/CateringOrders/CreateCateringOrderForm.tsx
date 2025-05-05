@@ -379,6 +379,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
     setGeneralError(null);
     
     try {
+      // Include the tempEntityId in the submitted data if available
+      if (tempEntityId) {
+        data.tempEntityId = tempEntityId;
+        console.log(`Including tempEntityId in form submission: ${tempEntityId}`);
+      }
+      
       const result = await createCateringOrder(data);
       
       if (result.error) {

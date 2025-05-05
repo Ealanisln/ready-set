@@ -119,10 +119,10 @@ export function OrderFilesManager({
     progresses, 
     isUploading 
   } = useUploadFile({
-    bucketName: "user-assets",
+    bucketName: "fileUploader",  // Use the fileUploader bucket consistently
     defaultUploadedFiles: safeInitialFiles,
     category: "catering-order", // Fixed category to ensure consistency
-    entityType: order_type === "catering" ? "catering" : order_type === "on_demand" ? "on_demand" : order_type,
+    entityType: "catering",     // Always use "catering" for proper DB association
     entityId: orderId,
     maxFileCount: 10,
     maxFileSize: 4 * 1024 * 1024,
@@ -140,8 +140,8 @@ export function OrderFilesManager({
   
   // Add a console log to see what entity type we're passing to the FileUploader
   console.log("FileUploader props:", {
-    category: order_type,
-    entityType: order_type,
+    category: "catering-order",
+    entityType: "catering",
     entityId: orderId,
   });
 

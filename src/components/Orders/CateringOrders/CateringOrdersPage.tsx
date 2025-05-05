@@ -55,6 +55,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Order, StatusFilter, UserRole } from "./types";
+import { CateringOrdersTable } from "./CateringOrdersTable";
+import { createClient } from "@/utils/supabase/client";
 
 // --- Interface, Type, Configs, Skeleton ---
 enum CateringNeedHost {
@@ -186,6 +189,10 @@ const CateringOrdersPage: React.FC = () => {
   const [sortField, setSortField] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [limit] = useState(10); // Default limit for pagination
+  const [userRoles, setUserRoles] = useState<UserRole>({
+    isAdmin: false,
+    isSuperAdmin: false
+  });
 
   // Add status tabs
   const statusTabs = [
@@ -214,7 +221,18 @@ const CateringOrdersPage: React.FC = () => {
           queryParams.append('search', searchTerm);
         }
 
-        const response = await fetch(`/api/orders/catering-orders?${queryParams}`);
+        // Get current session to include auth token
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Make API call with authentication
+        const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
+          }
+        });
+        
         if (!response.ok) {
           throw new Error('Failed to fetch orders');
         }
@@ -232,6 +250,38 @@ const CateringOrdersPage: React.FC = () => {
 
     fetchOrders();
   }, [page, statusFilter, searchTerm, sortField, sortDirection, limit]);
+
+  // New useEffect to fetch user roles
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        // Get current session to include auth token
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Make API call with authentication
+        const response = await fetch('/api/auth/user-role', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user role');
+        }
+        const data = await response.json();
+        setUserRoles({
+          isAdmin: data.isAdmin || data.isSuperAdmin,
+          isSuperAdmin: data.isSuperAdmin
+        });
+      } catch (err) {
+        console.error('Error fetching user role:', err);
+      }
+    };
+
+    fetchUserRoles();
+  }, []);
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -291,6 +341,77 @@ const CateringOrdersPage: React.FC = () => {
     }).format(amount);
   };
 
+  // Add refresh handler for when an order is deleted
+  const handleOrderDeleted = () => {
+    // Refetch orders
+    const fetchOrders = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // Construct the query parameters
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+          sort: sortField,
+          direction: sortDirection,
+          status: statusFilter,
+        });
+
+        // Add search term if present
+        if (searchTerm) {
+          queryParams.append('search', searchTerm);
+        }
+
+        // Get current session to include auth token
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Make API call with authentication
+        const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+
+        const data: CateringOrdersApiResponse = await response.json();
+        setOrders(data.orders);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while fetching orders');
+        console.error('Error fetching orders:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrders();
+  };
+
+  // Add a function to map CateringOrder to Order
+  const mapToOrderType = (orders: CateringOrder[]): Order[] => {
+    return orders.map(order => ({
+      id: order.id,
+      order_number: order.orderNumber,
+      status: order.status.toLowerCase(),
+      date: order.pickupDateTime || order.createdAt,
+      order_total: order.orderTotal || 0,
+      client_attention: order.clientAttention || undefined,
+      user: order.user ? {
+        id: order.user.id,
+        name: order.user.name || 'N/A',
+        email: order.user.email,
+        contactNumber: order.user.contactNumber
+      } : undefined,
+      pickupAddress: order.pickupAddress,
+      deliveryAddress: order.deliveryAddress
+    }));
+  };
+
   return (
     <div className="p-6 space-y-6"> 
       
@@ -330,7 +451,7 @@ const CateringOrdersPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Card containing filters and table */}
+      {/* Card containing filters and the CateringOrdersTable */}
       <Card className="shadow-sm rounded-xl border-slate-200 overflow-hidden">
         <CardContent className="p-0">
           
@@ -386,7 +507,7 @@ const CateringOrdersPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Table Section */}
+          {/* CateringOrdersTable Component */}
           <div className="mt-0">
             {isLoading ? (
               <LoadingSkeleton />
@@ -399,72 +520,14 @@ const CateringOrdersPage: React.FC = () => {
                 </Alert>
               </div>
             ) : orders.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent bg-slate-50">
-                      <TableHead className="w-[180px] cursor-pointer" onClick={() => handleSort("order_number")}>
-                        <div className="flex items-center">Order #{getSortIcon("order_number")}</div>
-                      </TableHead>
-                      <TableHead className="w-[120px]">Status</TableHead>
-                      <TableHead className="cursor-pointer" onClick={() => handleSort("date")}>
-                        <div className="flex items-center"><Calendar className="h-4 w-4 mr-1 text-slate-400" />Event Date{getSortIcon("date")}</div>
-                      </TableHead>
-                      <TableHead className="cursor-pointer" onClick={() => handleSort("user.name")}>
-                        <div className="flex items-center"><User className="h-4 w-4 mr-1 text-slate-400" />Client{getSortIcon("user.name")}</div>
-                      </TableHead>
-                      <TableHead className="text-right cursor-pointer" onClick={() => handleSort("order_total")}>
-                        <div className="flex items-center justify-end"><DollarSign className="h-4 w-4 mr-1 text-slate-400" />Total{getSortIcon("order_total")}</div>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <AnimatePresence>
-                      {orders.map((order) => (
-                        <motion.tr
-                          key={order.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="group hover:bg-slate-50"
-                        >
-                          <TableCell>
-                            <Link 
-                              href={`/admin/catering-orders/${order.orderNumber}`}
-                              className="font-medium text-slate-800 hover:text-amber-600 transition-colors group-hover:underline"
-                            >
-                              {order.orderNumber}
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${getStatusConfig(order.status).className} flex items-center w-fit gap-1 px-2 py-0.5 font-semibold text-xs capitalize`}>
-                              {getStatusConfig(order.status).icon}
-                              {order.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-slate-600">
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {formatDate(order.pickupDateTime || order.createdAt)}
-                              </span>
-                              <span className="text-sm text-slate-500">
-                                {formatTime(order.pickupDateTime || order.createdAt)}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium text-slate-700">{order.user.name}</TableCell>
-                          <TableCell className="text-right font-semibold text-slate-800">
-                            <span className="group-hover:text-amber-700 transition-colors">
-                              {formatCurrency(Number(order.orderTotal))}
-                            </span>
-                          </TableCell>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </TableBody>
-                </Table>
-              </div>
+              <CateringOrdersTable 
+                orders={mapToOrderType(orders)}
+                isLoading={isLoading}
+                statusFilter={statusFilter.toLowerCase() as StatusFilter}
+                onStatusFilterChange={(status) => handleStatusFilter(status.toUpperCase() as OrderStatus)}
+                userRoles={userRoles}
+                onOrderDeleted={handleOrderDeleted}
+              />
             ) : (
               // Empty State
               <div className="flex flex-col items-center justify-center py-16 text-center">
