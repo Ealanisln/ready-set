@@ -205,7 +205,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
       setIsLoading(false);
       isRequestPending.current = false;
     }
-  }, [user, filterType, onAddressesLoaded, onError, MAX_FETCH_ATTEMPTS]);
+  }, [user, filterType, onAddressesLoaded, onError, MAX_FETCH_ATTEMPTS, supabase.auth]);
 
   useEffect(() => {
     if (user) {
@@ -263,7 +263,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({
         setIsLoading(false);
       }
     },
-    [supabase, supabase.auth, fetchAddresses, onError],
+    [fetchAddresses, onError, supabase.auth],
   );
 
   const handleToggleAddForm = () => {

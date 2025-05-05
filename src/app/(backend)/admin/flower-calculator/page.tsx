@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 // Define TypeScript interfaces for our data structures
 interface DeliveryZone {
@@ -36,7 +36,7 @@ const FlowerCalculator = () => {
   });
 
   // Data from spreadsheet
-  const deliveryZones: DeliveryZone[] = [
+  const deliveryZones = useMemo<DeliveryZone[]>(() => [
     { id: 1, name: "SF", area: "San Francisco Area - 11", readySetFee: 10.00, driverPay: 8.00, clientFee: 10.00, stops: 3, toll: 8.00 },
     { id: 2, name: "SF", area: "North Peninsula Area - 09", readySetFee: 10.00, driverPay: 8.00, clientFee: 11.00, stops: 2, toll: 0 },
     { id: 3, name: "SF", area: "East Bay Oakland/Alameda Area", readySetFee: 10.00, driverPay: 8.00, clientFee: 11.00, stops: 1, toll: 8.00 },
@@ -49,20 +49,15 @@ const FlowerCalculator = () => {
     { id: 10, name: "SF", area: "East Bay Concord Area - 04", readySetFee: 10.00, driverPay: 8.00, clientFee: 14.00, stops: 0, toll: 8.00 },
     { id: 11, name: "PENN", area: "San Jose East Area - 01", readySetFee: 11.00, driverPay: 9.00, clientFee: 14.00, stops: 0, toll: 0 },
     { id: 12, name: "PENN", area: "", readySetFee: 11.00, driverPay: 9.00, clientFee: 0, stops: 0, toll: 0 }
-  ];
-
-  // Calculate totals when inputs change
-  useEffect(() => {
-    calculateTotals();
-  }, [selectedZone, extraStops, mileage]);
+  ], []);
 
   // Find the selected zone data
-  const getSelectedZone = (): DeliveryZone => {
+  const getSelectedZone = useCallback((): DeliveryZone => {
     return deliveryZones.find(zone => zone.id === selectedZone) || deliveryZones[0];
-  };
+  }, [selectedZone, deliveryZones]);
 
   // Calculate the totals based on inputs
-  const calculateTotals = () => {
+  const calculateTotals = useCallback(() => {
     const zone = getSelectedZone();
     
     // Calculate mileage costs
@@ -83,7 +78,12 @@ const FlowerCalculator = () => {
       total: totalClientFee,
       driverTotal
     });
-  };
+  }, [getSelectedZone, mileage, mileageAllowance, mileageRate, extraStops]);
+
+  // Calculate totals when inputs change
+  useEffect(() => {
+    calculateTotals();
+  }, [calculateTotals]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">

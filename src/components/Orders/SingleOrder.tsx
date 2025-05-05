@@ -161,7 +161,7 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
     } catch (error) {
       console.error("Error checking storage bucket:", error);
     }
-  }, [supabase, toast]);
+  }, [supabase]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
