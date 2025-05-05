@@ -46,7 +46,7 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, descriptio
           </h3>
         </div>
       </motion.div>
-      <p className="font-your-custom-font mt-6 max-w-[320px] text-center text-base leading-snug text-black">
+      <p className="font-your-custom-font mt-6 max-w-[320px] text-justify text-base leading-snug text-black">
         {description}
       </p>
     </div>

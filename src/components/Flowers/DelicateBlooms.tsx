@@ -21,39 +21,43 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
 
       {/* Semi-transparent header overlay - moved to relative positioning */}
       <div className="relative z-20 mx-auto mt-8 w-full max-w-4xl px-4">
-        <div className="mx-auto rounded-3xl bg-gray-800/60 px-6 py-6 text-center shadow-xl sm:px-12 sm:py-10">
-          <h1 className="text-2xl font-extrabold text-white sm:text-4xl md:text-5xl">
+        <div className="mx-auto rounded-3xl bg-gray-800/60 px-6 py-8 text-center shadow-xl sm:px-12 sm:py-10">
+          <h1 className="text-2xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl">
             Delicate Blooms Deserve
-            <br />
+            <br className="hidden sm:block" />
             Gentle Hands
           </h1>
           <p className="mt-4 text-base font-medium text-white sm:text-xl">
             Flowers Are Delicate, So We Deliver Them
-            <br />
+            <br className="hidden sm:block" />
             with Extra Care
           </p>
         </div>
       </div>
 
       {/* Cards section - Positioned absolutely near the bottom */}
-      <div className="absolute bottom-10 left-4 right-4 z-30">
-        {/* Re-apply mx-auto and max-w to the inner flex container for centering */}
-        <div className="mx-auto flex max-w-md flex-col items-center justify-between gap-4 sm:max-w-6xl sm:flex-row sm:items-stretch">
+      <div className="absolute bottom-0 left-0 right-0 z-30 p-4 sm:p-10">
+        {/* Re-apply mx-auto and max-w to the inner flex container for centering and responsive layout */}
+        <div className="mx-auto flex max-w-md flex-col items-center gap-4 sm:max-w-6xl sm:flex-row sm:items-stretch">
           {/* Card 1: Van */}
-          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
-            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
-              <div className="absolute -top-24 scale-50 sm:-top-28 sm:scale-100">
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 pb-6 shadow-lg sm:pb-8">
+            <div className="relative flex justify-center pt-8 sm:pt-10">
+              {' '}
+              {/* Increased paddingTop */}
+              <div className="absolute -top-20 scale-75 sm:-top-28 sm:scale-100">
                 <Image
                   src="/images/flowers/van.png"
                   alt="Delivery van"
-                  width={600}
-                  height={520}
+                  width={500}
+                  height={433}
                   className="object-contain"
                 />
               </div>
             </div>
-            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
-              <h3 className="text-center text-base font-bold sm:text-xl">
+            <div className="px-4 pt-16 sm:pt-20">
+              {' '}
+              {/* Increased paddingTop */}
+              <h3 className="text-center text-lg font-bold sm:text-xl">
                 Reliable vehicle (car or van)
               </h3>
               <ul className="mt-2 list-disc pl-5 text-sm sm:text-base">
@@ -63,25 +67,25 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Storage Box - Restore content and adjust image position */}
-          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
-            {/* Keep card height */}
-            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
-              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
-              {/* Increase negative top offset slightly for mobile on the second card */}
-              <div className="absolute -top-36 scale-50 sm:-top-44 sm:scale-100">
+          {/* Card 2: Storage Box */}
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 pb-6 shadow-lg sm:pb-8">
+            <div className="relative flex justify-center pt-8 sm:pt-10">
+              {' '}
+              {/* Increased paddingTop */}
+              <div className="absolute -top-24 scale-75 sm:-top-36 sm:scale-100">
                 <Image
                   src="/images/flowers/boxes.png"
                   alt="Storage box"
-                  width={300}
-                  height={260}
+                  width={260}
+                  height={225}
                   className="object-contain"
                 />
               </div>
             </div>
-            {/* Restore text content and keep padding */}
-            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
-              <h3 className="text-center text-base font-bold sm:text-xl">Hefty 12gal Max Pro</h3>
+            <div className="px-4 pt-16 sm:pt-20">
+              {' '}
+              {/* Increased paddingTop */}
+              <h3 className="text-center text-lg font-bold sm:text-xl">Hefty 12gal Max Pro</h3>
               <ul className="mt-2 list-disc pl-5 text-sm sm:text-base">
                 <li>
                   Storage Tote Gray: Plastic Utility Bin with Locking Handles & Latches, Universal
@@ -91,25 +95,25 @@ const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Nursery Pot - Keep existing correct styles */}
-          <div className="relative mt-4 w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
-            {/* Match card height and image container padding from Card 1 */}
-            <div className="relative flex h-16 w-full flex-col items-center justify-center pt-3 sm:h-20 sm:pt-4">
-              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
-              {/* Reduce scale for mobile on the third card */}
-              <div className="absolute -top-32 scale-50 sm:-top-44 sm:scale-100">
+          {/* Card 3: Nursery Pot */}
+          <div className="relative mt-4 w-full flex-1 rounded-3xl bg-yellow-300 pb-6 shadow-lg sm:mt-0 sm:pb-8">
+            <div className="relative flex justify-center pt-8 sm:pt-10">
+              {' '}
+              {/* Increased paddingTop */}
+              <div className="absolute -top-20 scale-75 sm:-top-32 sm:scale-100">
                 <Image
                   src="/images/flowers/container.png"
                   alt="Nursery pot"
-                  width={240} // Adjusted size for consistency
-                  height={200} // Adjusted size for consistency
-                  className="object-contain" // Removed mt-4
+                  width={200}
+                  height={167}
+                  className="object-contain"
                 />
               </div>
             </div>
-            {/* Match text padding from Card 1 */}
-            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
-              <h3 className="text-center text-base font-bold sm:text-xl">
+            <div className="px-4 pt-16 sm:pt-20">
+              {' '}
+              {/* Increased paddingTop */}
+              <h3 className="text-center text-lg font-bold sm:text-xl">
                 RAOOKIF 1 Gallon Nursery Pots
               </h3>
               <ul className="mt-1 list-disc pl-5 text-sm sm:text-base">

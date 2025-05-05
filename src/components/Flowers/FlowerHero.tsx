@@ -13,17 +13,32 @@ interface FlowerHeroProps {
 
 const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [translateClass, setTranslateClass] = useState('');
 
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const updateDimensions = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+
+      // Set the translate class based on window width
+      if (width < 768) {
+        setTranslateClass('');
+      } else if (width >= 768 && width < 1024) {
+        setTranslateClass('-translate-x-20');
+      } else {
+        setTranslateClass('-translate-x-40');
+      }
     };
 
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
+    // Initial check
+    updateDimensions();
 
+    // Add event listener
+    window.addEventListener('resize', updateDimensions);
+
+    // Cleanup
     return () => {
-      window.removeEventListener('resize', checkIfMobile);
+      window.removeEventListener('resize', updateDimensions);
     };
   }, []);
 
@@ -43,19 +58,12 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
         </h1>
 
         <p className="mb-3 cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          Operating since <span className="font-bold text-yellow-400">2019</span>, Ready Set began
-          in the Bay Area with a mission to serve local communities through reliable, thoughtful
-          delivery.
-        </p>
-        <p className="mb-3 cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          When the pandemic hit, we quickly adapted, partnering with neighborhood flower shops to
-          help keep joy and connection alive during challenging times.
-        </p>
-        <p className="cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          Today, we specialize in local floral delivery with a personal touch. From San Francisco to
-          Atlanta and Austin, our dedicated drivers ensure your blooms arrive on time, every time.
-          Each route is monitored in real-time and handled carefully, because we know it's more than
-          just flowers. It's your shop's reputation in every bouquet.
+          We started in <span className="font-bold text-yellow-400">2019</span> in the Bay Area,
+          focusing on reliable, thoughtful catering deliveries. During the pandemic, we partnered
+          with local flower shops to help bring joy and connection to communities. Today, we
+          specialize in local floral deliveries across cities like San Francisco, Atlanta, and
+          Austin, with real-time tracking and careful handling to ensure your blooms arrive on time
+          and reflect your shop's reputation.
         </p>
 
         <div className="flex flex-row flex-nowrap items-center justify-center gap-4 pt-4">
@@ -75,13 +83,7 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
 
       {/* Right content - Image */}
       <div
-        className={`flex w-full overflow-visible md:items-center md:justify-end ${
-          isMobile
-            ? ''
-            : window.innerWidth >= 768 && window.innerWidth < 1024
-              ? '-translate-x-20' // Ajuste para tablet
-              : '-translate-x-40' // Ajuste para escritorio
-        }`}
+        className={`flex w-full overflow-visible md:items-center md:justify-end ${translateClass}`}
         style={{ justifyContent: 'center', alignItems: 'center' }}
       >
         <FlowerImage />
