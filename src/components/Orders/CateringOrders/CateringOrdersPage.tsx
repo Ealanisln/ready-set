@@ -223,14 +223,14 @@ const CateringOrdersPage: React.FC = () => {
 
         // Get current user for auth token
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
         
         // Make API call with authentication
         const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
           headers: {
             'Content-Type': 'application/json',
-            // Pass user ID in header for API to validate
-            'Authorization': user ? `Bearer ${user.id}` : '',
+            // Use session access_token instead of user.id
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
           }
         });
         
@@ -258,13 +258,13 @@ const CateringOrdersPage: React.FC = () => {
       try {
         // Get current user for auth token
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
         
         // Make API call with authentication
         const response = await fetch('/api/auth/user-role', {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': user ? `Bearer ${user.id}` : '',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
           }
         });
         
@@ -365,13 +365,13 @@ const CateringOrdersPage: React.FC = () => {
 
         // Get current user for auth token
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
         
         // Make API call with authentication
         const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': user ? `Bearer ${user.id}` : '',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
           }
         });
         
