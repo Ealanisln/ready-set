@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import FlowerImage from './FlowerImage';
 import { useState, useEffect } from 'react';
 import ScheduleDialog from '../Logistics/Schedule';
@@ -22,7 +20,7 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
 
       // Set the translate class based on window width
       if (width < 768) {
-        setTranslateClass('');
+        setTranslateClass('-translate-x-16'); // Slight left adjustment for mobile
       } else if (width >= 768 && width < 1024) {
         setTranslateClass('-translate-x-20');
       } else {
@@ -83,8 +81,7 @@ const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
 
       {/* Right content - Image */}
       <div
-        className={`flex w-full overflow-visible md:items-center md:justify-end ${translateClass}`}
-        style={{ justifyContent: 'center', alignItems: 'center' }}
+        className={`flex w-full items-center justify-center md:justify-end ${translateClass} transition-transform duration-300`}
       >
         <FlowerImage />
       </div>
