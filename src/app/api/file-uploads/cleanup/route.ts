@@ -4,7 +4,14 @@ import { prisma } from "@/utils/prismaDB";
 
 export async function POST(request: NextRequest) {
   try {
-    const { fileKeys, entityId, entityType } = await request.json();
+    const { fileKeys, entityId, entityType, userId } = await request.json();
+
+    console.log("Cleanup request received:", {
+      fileKeys: Array.isArray(fileKeys) ? fileKeys.length : "none",
+      entityId,
+      entityType,
+      userId
+    });
 
     if (!fileKeys && !entityId) {
       return NextResponse.json(
@@ -15,76 +22,63 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         { error: "Unauthorized: No active session" },
         { status: 401 },
       );
     }
 
-    console.log("Cleanup request received:", {
-      fileKeys: Array.isArray(fileKeys) ? fileKeys.length : "none",
-      entityId,
-      entityType,
-      userId: session.user.id,
-    });
-
     // Check if this entityId is associated with an actual order already
     if (entityId) {
       // Check if this is a catering request
-      if (entityType === "catering_request") {
-        const numericId = parseInt(entityId);
-        if (!isNaN(numericId)) {
-          // Check if a catering request with this ID exists
-          const existingOrder = await prisma.cateringRequest.findUnique({
-            where: {
-              id: numericId.toString()
-            },
-            select: {
-              id: true,
-            },
-          });
+      if (entityType === "catering_request" || entityType === "catering_order" || entityType === "catering-order") {
+        // Check if a catering request with this ID exists
+        const existingOrder = await prisma.cateringRequest.findUnique({
+          where: {
+            id: entityId
+          },
+          select: {
+            id: true,
+          },
+        });
 
-          if (existingOrder) {
-            console.log(
-              `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
-            );
-            return NextResponse.json({
-              success: false,
-              message: "Cleanup canceled: Files belong to an existing order",
-              deletedCount: 0,
-            });
-          }
+        if (existingOrder) {
+          console.log(
+            `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
+          );
+          return NextResponse.json({
+            success: false,
+            message: "Cleanup canceled: Files belong to an existing order",
+            deletedCount: 0,
+          });
         }
       }
 
       // Check if this is an on-demand request
       if (entityType === "on_demand") {
-        const numericId = parseInt(entityId);
-        if (!isNaN(numericId)) {
-          // Check if an on_demand order with this ID exists
-          const existingOrder = await prisma.onDemand.findUnique({
-            where: {
-              id: numericId.toString()
-            },
-            select: {
-              id: true,
-            },
-          });
+        // Check if an on_demand order with this ID exists
+        const existingOrder = await prisma.onDemand.findUnique({
+          where: {
+            id: entityId
+          },
+          select: {
+            id: true,
+          },
+        });
 
-          if (existingOrder) {
-            console.log(
-              `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
-            );
-            return NextResponse.json({
-              success: false,
-              message: "Cleanup canceled: Files belong to an existing order",
-              deletedCount: 0,
-            });
-          }
+        if (existingOrder) {
+          console.log(
+            `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
+          );
+          return NextResponse.json({
+            success: false,
+            message: "Cleanup canceled: Files belong to an existing order",
+            deletedCount: 0,
+          });
         }
       }
     }
@@ -97,7 +91,7 @@ export async function POST(request: NextRequest) {
           id: {
             in: fileKeys,
           },
-          userId: session.user.id, // Security check - only delete own files
+          userId: userId || user.id, // Use provided userId or fall back to authenticated user
           // Don't delete files linked to real orders
           cateringRequestId: null,
           onDemandId: null,
@@ -154,7 +148,7 @@ export async function POST(request: NextRequest) {
           id: {
             in: safeToDeleteIds,
           },
-          userId: session.user.id, // Security check - only delete own files
+          userId: userId || user.id, // Security check - only delete own files
         },
       });
 
@@ -167,16 +161,47 @@ export async function POST(request: NextRequest) {
 
     // If entityId is provided, delete all files for that entity
     if (entityId) {
+      // Build the where clause
+      let whereClause: any = {
+        userId: userId || user.id,
+        cateringRequestId: null,
+        onDemandId: null
+      };
+
+      // If entityType is provided, add category filter
+      if (entityType) {
+        // Convert entityType to corresponding category
+        let categoryName = entityType;
+        
+        // Map entity types to category names
+        if (entityType === "catering_request" || entityType === "catering") {
+          categoryName = "catering-order";
+        } else if (entityType === "on_demand") {
+          categoryName = "on-demand";
+        }
+        
+        // Create OR condition to match both exact category and compound categories
+        whereClause.OR = [
+          // Exact match
+          { category: categoryName },
+          // Starts with match for compound categories
+          { category: { startsWith: `${categoryName}::` } },
+          // Match for category with temp ID in it
+          { category: { contains: `${entityId}` } }
+        ];
+        
+        console.log(`Searching for files with category related to ${categoryName} and entity ID ${entityId}`);
+      }
+      
+      console.log('File cleanup query:', whereClause);
+
       // Step 1: Get file records for the entity
       const fileRecords = await prisma.fileUpload.findMany({
-        where: {
-          userId: session.user.id,
-          cateringRequestId: null,
-          onDemandId: null
-        },
+        where: whereClause,
         select: {
           id: true,
           fileUrl: true,
+          category: true,
         },
       });
 
@@ -191,6 +216,7 @@ export async function POST(request: NextRequest) {
 
       console.log(
         `Found ${fileRecords.length} files to clean up for entity ${entityId}`,
+        fileRecords.map(f => ({ id: f.id, category: f.category }))
       );
 
       if (fileRecords.length === 0) {
@@ -214,9 +240,12 @@ export async function POST(request: NextRequest) {
       }
 
       // Step 3: Delete records from the database
-      await prisma.fileUpload.deleteMany({
+      const deleteResult = await prisma.fileUpload.deleteMany({
         where: {
-          userId: session.user.id,
+          id: {
+            in: fileRecords.map(f => f.id)
+          },
+          userId: userId || user.id,
           cateringRequestId: null,
           onDemandId: null
         }
@@ -224,8 +253,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        deletedCount: fileRecords.length,
-        message: `Cleaned up ${fileRecords.length} files for entity ${entityId}`,
+        deletedCount: deleteResult.count,
+        message: `Cleaned up ${deleteResult.count} files for entity ${entityId}`,
       });
     }
 

@@ -34,6 +34,7 @@ const Signin = ({
   const [loginMethod, setLoginMethod] = useState<"password" | "magic">(
     "password",
   );
+  const [showAlternativeMethods, setShowAlternativeMethods] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: "",
@@ -184,6 +185,37 @@ const Signin = ({
                 </div>
               )}
 
+              {/* Primary option: Google login */}
+              <div className="mb-5">
+                <h3 className="mb-4 text-base font-medium text-dark dark:text-white">
+                  Sign in with
+                </h3>
+                <GoogleAuthButton />
+              </div>
+
+              {/* Sign up link */}
+              <div className="mb-5">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Don't have an account?{" "}
+                  <Link
+                    href="/sign-up"
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="relative mb-5 flex items-center">
+                <div className="flex-grow border-t border-gray-300 dark:border-dark-3"></div>
+                <span className="mx-4 flex-shrink text-xs uppercase text-gray-500 dark:text-gray-400">
+                  Or continue with
+                </span>
+                <div className="flex-grow border-t border-gray-300 dark:border-dark-3"></div>
+              </div>
+              
+              {/* Secondary options: Email/Password or Magic Link */}
               <div className="mb-5 flex rounded border">
                 <button
                   onClick={() => setLoginMethod("password")}
@@ -249,11 +281,11 @@ const Signin = ({
                     )}
                   </div>
 
-                  <div className="mb-5 flex space-x-4">
+                  <div className="mb-5">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 cursor-pointer rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="w-full cursor-pointer rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {loading ? (
                         <>
@@ -264,13 +296,6 @@ const Signin = ({
                         "Sign In"
                       )}
                     </button>
-
-                    <Link
-                      href="/sign-up"
-                      className="flex flex-1 cursor-pointer items-center justify-center rounded-md border border-gray-300 bg-transparent px-5 py-3 text-base text-dark transition duration-300 ease-in-out hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2/80"
-                    >
-                      Sign Up
-                    </Link>
                   </div>
                 </form>
               ) : (
@@ -332,30 +357,7 @@ const Signin = ({
                   )}
                 </form>
               )}
-
-              {!(loginMethod === "magic" && magicLinkSent) && (
-                <>
-                  <div className="relative mb-5 flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500 dark:bg-dark-2">
-                      Or
-                    </span>
-                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-300 dark:bg-dark-3"></div>
-                  </div>
-
-                  <div className="mb-5">
-                    <GoogleAuthButton />
-                  </div>
-                </>
-              )}
-
-              <div className="mt-6 rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
-                <p>
-                  <strong>Important:</strong> If you're a returning user from
-                  our previous system and can't log in, please use the "Magic
-                  Link" option to sign in.
-                </p>
-              </div>
-
+              
               <div>
                 <span className="absolute right-1 top-1">
                   <svg

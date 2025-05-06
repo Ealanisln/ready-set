@@ -1484,16 +1484,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
               Reset Form
             </Button>
           )}
-          {isDevelopment && (
-            <Button 
-              type="button" 
-              variant="outline"
-              className="bg-amber-100 hover:bg-amber-200"
-              onClick={debugSubmit}
-            >
-              Debug Submit
-            </Button>
-          )}
+      
           <Button 
             type="submit" 
             disabled={isSubmitting} 
@@ -1506,15 +1497,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
             )}
           </Button>
           
-          {/* Direct submit button as a fallback */}
-          <Button 
-            type="button"
-            onClick={manualDirectSubmit}
-            disabled={isSubmitting}
-            className="min-w-[120px] bg-green-600 hover:bg-green-700 text-white"
-          >
-            Direct Submit
-          </Button>
+      
         </div>
       </form>
 

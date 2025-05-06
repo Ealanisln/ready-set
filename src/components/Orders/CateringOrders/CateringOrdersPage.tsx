@@ -221,15 +221,16 @@ const CateringOrdersPage: React.FC = () => {
           queryParams.append('search', searchTerm);
         }
 
-        // Get current session to include auth token
+        // Get current user for auth token
         const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user } } = await supabase.auth.getUser();
         
         // Make API call with authentication
         const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': session ? `Bearer ${session.access_token}` : '',
+            // Pass user ID in header for API to validate
+            'Authorization': user ? `Bearer ${user.id}` : '',
           }
         });
         
@@ -255,15 +256,15 @@ const CateringOrdersPage: React.FC = () => {
   useEffect(() => {
     const fetchUserRoles = async () => {
       try {
-        // Get current session to include auth token
+        // Get current user for auth token
         const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user } } = await supabase.auth.getUser();
         
         // Make API call with authentication
         const response = await fetch('/api/auth/user-role', {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': session ? `Bearer ${session.access_token}` : '',
+            'Authorization': user ? `Bearer ${user.id}` : '',
           }
         });
         
@@ -362,15 +363,15 @@ const CateringOrdersPage: React.FC = () => {
           queryParams.append('search', searchTerm);
         }
 
-        // Get current session to include auth token
+        // Get current user for auth token
         const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user } } = await supabase.auth.getUser();
         
         // Make API call with authentication
         const response = await fetch(`/api/orders/catering-orders?${queryParams}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': session ? `Bearer ${session.access_token}` : '',
+            'Authorization': user ? `Bearer ${user.id}` : '',
           }
         });
         

@@ -74,7 +74,7 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
 
   // Get Supabase client for session information and file operations
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
   
   // Extract temp entity ID from form data if it exists
   // This is the temp ID used for file uploads before the order was created
@@ -129,7 +129,7 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
     console.log("Transaction completed successfully");
     
     // 3. Update any temporary file associations
-    if (tempEntityId && session) {
+    if (tempEntityId && user) {
       try {
         console.log(`Attempting to update file associations from temp ID ${tempEntityId} to order ID ${newOrder.id}`);
         

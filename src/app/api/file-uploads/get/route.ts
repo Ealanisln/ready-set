@@ -29,7 +29,14 @@ export async function GET(request: NextRequest) {
     if (category) {
       // Map category variations to consistent values
       const normalizedCategory = category.toLowerCase();
-      whereClause.category = normalizedCategory;
+      
+      // Use startsWith to handle compound categories like "catering-order::temp-123..."
+      // This ensures we find both exact matches and subcategories
+      whereClause.category = {
+        startsWith: normalizedCategory
+      };
+      
+      console.log(`Using startsWith condition for category: ${normalizedCategory}`);
     }
 
     // Handle entity type normalization

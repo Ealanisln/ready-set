@@ -17,9 +17,9 @@ const Orders = async () => {
   // Server-side authentication check to prevent unauthorized access
   const supabase = await createClient();
   
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!session) {
+  if (!user) {
     // Redirect to login if not authenticated
     redirect("/sign-in?returnTo=/admin/catering-orders");
   }
@@ -28,7 +28,7 @@ const Orders = async () => {
   const { data: profile } = await supabase
     .from("profiles")
     .select("type")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single();
 
   if (!profile || !["admin", "super_admin"].includes(profile.type.toLowerCase())) {

@@ -45,22 +45,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Extract the token
-    const token = authHeader.split(' ')[1];
+    // Extract the user ID from header
+    const userId = authHeader.split(' ')[1];
     
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Verify the token by getting the user
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+    // Verify the user session server-side
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !authUser || !authUser.id) {
-      console.log('Unauthorized request - invalid token or user not found');
+    if (authError || !user || !user.id || user.id !== userId) {
+      console.log('Unauthorized request - user not found or ID mismatch');
       console.error('Auth error:', authError);
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    console.log('Authenticated user:', authUser.id);
+    console.log('Authenticated user:', user.id);
 
     const url = new URL(req.url);
     const limit = parseInt(url.searchParams.get('limit') || `${ITEMS_PER_PAGE}`, 10);
@@ -101,6 +101,7 @@ export async function GET(req: NextRequest) {
     // Adjust sort fields based on Profile relation
     const validSortFields: { [key: string]: Prisma.CateringRequestOrderByWithRelationInput } = {
       pickupDateTime: { pickupDateTime: 'desc' },
+      date: { pickupDateTime: 'desc' }, // Add 'date' as an alias for pickupDateTime
       orderTotal: { orderTotal: 'desc' },
       orderNumber: { orderNumber: 'desc' },
       'user.name': { user: { name: 'desc' } }, // Sort by Profile name via relation
@@ -112,6 +113,9 @@ export async function GET(req: NextRequest) {
     if (validSortFields[sortField]) {
         if (sortField === 'user.name') {
             orderByClause = { user: { name: effectiveSortDirection } }; // Sort by Profile name
+        } else if (sortField === 'date') {
+            // Map 'date' to 'pickupDateTime' for sorting
+            orderByClause = { pickupDateTime: effectiveSortDirection };
         } else {
             // Ensure sortField is a valid key of CateringRequest
             const validKeys: (keyof CateringRequest)[] = ['pickupDateTime', 'orderTotal', 'orderNumber', 'createdAt', 'status'];
