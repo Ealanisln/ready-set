@@ -4,10 +4,10 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { PageHeader } from '@/components/Dashboard/ui/PageHeader';
-import { CreateCateringOrderForm } from '@/components/Orders/CateringOrders/CreateCateringOrderForm'; // Import the form
-import { getClients } from '../_actions/catering-orders'; // Only import the action
-import { ClientListItem } from '../_actions/schemas'; // Import type from schemas
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // For showing errors
+import { CreateCateringOrderForm } from '@/components/Orders/CateringOrders/CreateCateringOrderForm';
+import { getClients } from '../_actions/catering-orders';
+import { ClientListItem } from '../_actions/schemas';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -15,13 +15,9 @@ export const metadata: Metadata = {
   description: 'Create a new catering order.',
 };
 
-// This page is a Server Component, so we can directly call async functions
 const NewCateringOrderPage = async () => {
-
-  // Fetch clients server-side
   const clientResult = await getClients();
 
-  // Check for errors fetching clients
   if ('error' in clientResult) {
     return (
       <div className="flex w-full flex-col">
@@ -40,7 +36,7 @@ const NewCateringOrderPage = async () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error Loading Clients</AlertTitle>
             <AlertDescription>
-              {clientResult.error} Could not load client list. Please try again later.
+              Could not load client list. Please try again later.
             </AlertDescription>
           </Alert>
         </div>
@@ -48,8 +44,7 @@ const NewCateringOrderPage = async () => {
     );
   }
 
-  // Revert back to original type casting as filtering isn't possible with current data
-  const clients = clientResult as ClientListItem[]; // Type cast after error check
+  const clients = clientResult as ClientListItem[];
 
   return (
     <div className="flex w-full flex-col">
@@ -64,7 +59,6 @@ const NewCateringOrderPage = async () => {
         />
       </div>
       <div className="p-6">
-        {/* Render the form component, passing the fetched (unfiltered) clients */}
         <CreateCateringOrderForm clients={clients} />
       </div>
     </div>

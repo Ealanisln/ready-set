@@ -173,13 +173,17 @@ const UsersPage: React.FC = () => {
       try {
         // Attempt to get the session. Proceed even if it fails initially, 
         // relying on cookie-based auth in the API route.
-        const { error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-            console.warn("Error fetching session:", sessionError.message);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            console.warn("No active session found");
         }
         
         const response = await fetch(apiUrl, {
-          credentials: 'include' 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': session ? `Bearer ${session.access_token}` : '',
+          },
+          credentials: 'include'
         });
 
         if (!response.ok) {
@@ -277,8 +281,17 @@ const UsersPage: React.FC = () => {
   const handleDelete = async (userId: string) => {
     setIsDeleting(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("No active session found");
+      }
+      
       const response = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       });
 
       if (!response.ok) {

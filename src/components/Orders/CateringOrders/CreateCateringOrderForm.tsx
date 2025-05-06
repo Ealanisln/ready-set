@@ -200,6 +200,9 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
   // Get and store the session for userId in useUploadFile
   const [session, setSession] = useState<any>(null);
   
+  // Development mode flag for debugging tools
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -638,9 +641,81 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
     };
   }, [form]);
 
+  // Direct manual submit that bypasses the form's validation
+  const manualDirectSubmit = async () => {
+    try {
+      console.log("Manual direct submit clicked");
+      setIsSubmitting(true);
+      setGeneralError(null);
+
+      // Get form data
+      const formData = form.getValues();
+      console.log("Submitting with data:", formData);
+
+      // Ensure required fields are present
+      if (!formData.userId) {
+        alert("Please select a client");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.pickupDateTime || !formData.arrivalDateTime) {
+        alert("Please select pickup and arrival dates");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Handle needHost validation explicitly
+      if (formData.needHost === 'NO') {
+        // If needHost is NO, ensure hoursNeeded and numberOfHosts are null
+        formData.hoursNeeded = null;
+        formData.numberOfHosts = null;
+        
+        // Update the form values too
+        form.setValue("hoursNeeded", null);
+        form.setValue("numberOfHosts", null);
+      } else if (formData.needHost === 'YES') {
+        // If needHost is YES, make sure hoursNeeded and numberOfHosts are provided
+        if (!formData.hoursNeeded || !formData.numberOfHosts) {
+          alert("Hours needed and number of hosts are required when Need Host is Yes");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Include the tempEntityId in the submitted data if available
+      if (tempEntityId) {
+        formData.tempEntityId = tempEntityId;
+        console.log(`Including tempEntityId in manual submission: ${tempEntityId}`);
+      }
+
+      // Call server action directly
+      const result = await createCateringOrder(formData);
+      console.log("Server action result:", result);
+
+      if (result.success) {
+        // If we have uploaded files, update their entity ID
+        if (uploadedFiles.length > 0 && result.orderId) {
+          console.log(`Updating file entities from temp ID to actual order ID: ${result.orderId}`);
+          await updateEntityId(result.orderId);
+        }
+        
+        alert("Order created successfully!");
+        router.push(`/admin/catering-orders/${result.orderNumber}`);
+      } else {
+        alert("Failed to create order: " + (result.error || "Unknown error"));
+        setGeneralError(result.error || "Unknown error");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error in manual submit:", error);
+      setGeneralError("Error: " + (error instanceof Error ? error.message : String(error)));
+      setIsSubmitting(false);
+    }
+  };
+
   // Add a direct debug submit function
   const debugSubmit = () => {
-    console.log("Debug submit clicked");
     
     // Log the current form state
     const formData = form.getValues();
@@ -695,92 +770,9 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
     });
   };
 
-  // Development mode flag for debugging tools
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-
-  // Direct manual submit that bypasses the form's validation
-  const manualDirectSubmit = async () => {
-    try {
-      console.log("Manual direct submit clicked");
-      setIsSubmitting(true);
-      setGeneralError(null);
-
-      // Get form data
-      const formData = form.getValues();
-      console.log("Submitting with data:", formData);
-
-      // Ensure required fields are present
-      if (!formData.userId) {
-        alert("Please select a client");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!formData.pickupDateTime || !formData.arrivalDateTime) {
-        alert("Please select pickup and arrival dates");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Handle needHost validation explicitly
-      if (formData.needHost === 'NO') {
-        // If needHost is NO, ensure hoursNeeded and numberOfHosts are null
-        formData.hoursNeeded = null;
-        formData.numberOfHosts = null;
-        
-        // Update the form values too
-        form.setValue("hoursNeeded", null);
-        form.setValue("numberOfHosts", null);
-      } else if (formData.needHost === 'YES') {
-        // If needHost is YES, make sure hoursNeeded and numberOfHosts are provided
-        if (!formData.hoursNeeded || !formData.numberOfHosts) {
-          alert("Hours needed and number of hosts are required when Need Host is Yes");
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      // Call server action directly
-      const result = await createCateringOrder(formData);
-      console.log("Server action result:", result);
-
-      if (result.success) {
-        alert("Order created successfully!");
-        if (result.orderId && uploadedFiles.length > 0) {
-          await updateEntityId(result.orderId);
-        }
-        router.push(`/admin/catering-orders/${result.orderNumber}`);
-      } else {
-        alert("Failed to create order: " + (result.error || "Unknown error"));
-        setGeneralError(result.error || "Unknown error");
-        setIsSubmitting(false);
-      }
-    } catch (error) {
-      console.error("Error in manual submit:", error);
-      setGeneralError("Error: " + (error instanceof Error ? error.message : String(error)));
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <>
-      {/* Direct debug button outside the form - only in development mode */}
-      {isDevelopment && (
-        <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded flex justify-between items-center">
-          <span className="text-sm text-amber-600">Troubleshooting: Button outside form</span>
-          <button 
-            type="button" 
-            className="px-3 py-1 bg-amber-100 hover:bg-amber-200 rounded text-sm"
-            onClick={() => {
-              console.log("External debug button clicked");
-              debugSubmit();
-            }}
-          >
-            External Debug
-          </button>
-        </div>
-      )}
-      
+    
       {/* Display General Errors */}
       {generalError && (
         <div className="sticky top-0 z-10 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-between">
@@ -804,15 +796,7 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
         onSubmit={form.handleSubmit(handleFormSubmit)} 
         className="space-y-8"
       >
-        {/* Test submit button - only in development mode */}
-        {isDevelopment && (
-          <div className="p-2 bg-red-50 border border-red-200 rounded flex justify-between items-center">
-            <span className="text-sm text-red-600">Troubleshooting: Try this native submit button</span>
-            <button type="submit" className="px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm">
-              Native Submit
-            </button>
-          </div>
-        )}
+       
         
         {/* Client Selection Combobox */}
         <div className="space-y-2">

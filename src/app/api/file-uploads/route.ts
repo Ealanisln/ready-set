@@ -14,14 +14,38 @@ const STORAGE_BUCKETS = {
 // Add a new route to get a signed URL for a file
 export async function GET(request: NextRequest) {
   try {
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Unauthorized - Invalid authorization header" },
+        { status: 401 }
+      );
+    }
+
+    // Extract the token
+    const token = authHeader.split(' ')[1];
+    
+    // Initialize Supabase client
+    const supabase = await createClient();
+    
+    // Verify the token by getting the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
     const { searchParams } = new URL(request.url);
     const path = searchParams.get('path');
     
     if (!path) {
       return NextResponse.json({ error: 'Path parameter is required' }, { status: 400 });
     }
-    
-    const supabase = await createClient();
     
     // First try to create a signed URL (works for private buckets)
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage

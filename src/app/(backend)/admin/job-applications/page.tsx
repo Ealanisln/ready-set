@@ -71,6 +71,7 @@ import {
 } from "@/types/job-application";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { approveJobApplication } from '@/app/actions/admin/job-applications';
+import { createClient } from "@/utils/supabase/client";
 
 
 const COLORS = ["#3b82f6", "#10b981", "#ef4444", "#6366f1"];
@@ -433,7 +434,18 @@ const openDocumentWithFallback = async (url: string) => {
                 console.log("Trying to get signed URL for path:", path);
                 
                 try {
-                    const response = await fetch(`/api/file-uploads?path=${encodeURIComponent(path)}`);
+                    const supabase = createClient();
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (!session?.access_token) {
+                      throw new Error("No active session - please log in");
+                    }
+                    
+                    const response = await fetch(`/api/file-uploads?path=${encodeURIComponent(path)}`, {
+                      headers: {
+                        Authorization: `Bearer ${session.access_token}`
+                      }
+                    });
                     console.log("Signed URL API response status:", response.status);
                     if (response.ok) {
                         const data = await response.json();
@@ -533,7 +545,18 @@ export default function JobApplicationsPage() {
   // Wrap fetchStats in useCallback
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch("/api/admin/job-applications/stats");
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error("No active session - please log in");
+      }
+
+      const response = await fetch("/api/admin/job-applications/stats", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error("Failed to fetch stats");
@@ -557,6 +580,13 @@ export default function JobApplicationsPage() {
     setIsLoading(true);
     setError(null);
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error("No active session - please log in");
+      }
+      
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "10",
@@ -564,7 +594,13 @@ export default function JobApplicationsPage() {
         status: statusFilter === "all" ? "" : statusFilter,
         position: positionFilter,
       });
-      const response = await fetch(`/api/admin/job-applications?${params.toString()}`);
+      
+      const response = await fetch(`/api/admin/job-applications?${params.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+      
       if (!response.ok) {
         throw new Error("Failed to fetch applications");
       }
@@ -624,10 +660,19 @@ export default function JobApplicationsPage() {
 
       } else {
         console.log(`Attempting to update status for ${id} to ${newStatus} via API`);
+        
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+          throw new Error("No active session - please log in");
+        }
+        
         const response = await fetch(`/api/admin/job-applications/${id}/status`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`
           },
           body: JSON.stringify({ status: newStatus }),
         });
