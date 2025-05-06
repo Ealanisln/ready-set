@@ -1,24 +1,39 @@
 // src/app/(site)/profile/page.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import ModernUserProfile from "@/components/User/UserProfile/ModernUserProfile";
 import { BackButton } from "@/components/Common/BackButton";
+import AdminProfileView from "@/components/Dashboard/UserView/AdminProfileView";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { session, isLoading: isUserLoading, user } = useUser();
+  const [userReady, setUserReady] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !session) {
       router.push('/sign-in');
+    } else if (!isUserLoading && session && user) {
+      setUserReady(true);
     }
-  }, [session, isUserLoading, router]);
+  }, [session, isUserLoading, router, user]);
 
-  if (isUserLoading || !user) {
+  // Add a special flag to localStorage to indicate user mode (not admin mode)
+  useEffect(() => {
+    if (user?.id) {
+      try {
+        // Remove admin_mode flag if it exists to ensure normal user mode
+        localStorage.removeItem('admin_mode');
+      } catch (error) {
+        console.error("Error managing localStorage:", error);
+      }
+    }
+  }, [user]);
+
+  if (isUserLoading || !userReady) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +56,9 @@ export default function ProfilePage() {
     );
   }
 
-  const userId = user.id;
+  // If we get this far, userReady is true, which means user is guaranteed to exist
+  // But TypeScript still needs explicit check
+  const userId = user?.id;
 
   if (!userId) {
     console.error("User ID not found in context despite user object existing.");
@@ -65,7 +82,8 @@ export default function ProfilePage() {
           <BackButton className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors" />
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-          <ModernUserProfile userId={userId} isUserProfile />
+          {/* Use the AdminProfileView component with isUserProfile=true to show only user-relevant features */}
+          <AdminProfileView userId={userId} isUserProfile={true} />
         </div>
       </div>
     </div>

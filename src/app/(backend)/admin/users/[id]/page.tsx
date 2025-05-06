@@ -1,4 +1,5 @@
 // src/app/(backend)/admin/users/[id]/page.tsx
+// user admin profile page
 
 "use client";
 

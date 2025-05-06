@@ -146,6 +146,7 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
             onSubmit={onSubmit}
             hasUnsavedChanges={hasUnsavedChanges}
             loading={loading || isUpdatingStatus}
+            isUserProfile={isUserProfile}
           />
 
           {/* User Header */}
@@ -243,6 +244,7 @@ interface HeaderNavigationProps {
   onSubmit: (data: UserFormValues) => Promise<void>;
   hasUnsavedChanges: boolean;
   loading: boolean;
+  isUserProfile?: boolean; // Added prop to conditionally hide breadcrumb
 }
 
 const HeaderNavigation = ({ 
@@ -251,7 +253,8 @@ const HeaderNavigation = ({
   handleSubmit,
   onSubmit,
   hasUnsavedChanges,
-  loading
+  loading,
+  isUserProfile = false
 }: HeaderNavigationProps) => (
   <div className="sticky top-0 z-10 bg-white py-4 shadow-sm dark:bg-gray-800 border-b dark:border-gray-700 mb-6">
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -265,23 +268,28 @@ const HeaderNavigation = ({
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div className="text-muted-foreground text-sm dark:text-gray-400">
-            <Link
-              href="/admin"
-              className="hover:text-foreground hover:underline dark:hover:text-gray-200"
-            >
-              Dashboard
-            </Link>
-            {" / "}
-            <Link
-              href="/admin/users"
-              className="hover:text-foreground hover:underline dark:hover:text-gray-200"
-            >
-              Users
-            </Link>
-            {" / "}
-            <span className="text-foreground dark:text-gray-100">Edit User</span>
-          </div>
+          {!isUserProfile && (
+            <div className="text-muted-foreground text-sm dark:text-gray-400">
+              <Link
+                href="/admin"
+                className="hover:text-foreground hover:underline dark:hover:text-gray-200"
+              >
+                Dashboard
+              </Link>
+              {" / "}
+              <Link
+                href="/admin/users"
+                className="hover:text-foreground hover:underline dark:hover:text-gray-200"
+              >
+                Users
+              </Link>
+              {" / "}
+              <span className="text-foreground dark:text-gray-100">Edit User</span>
+            </div>
+          )}
+          {isUserProfile && (
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">My Profile</h1>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
