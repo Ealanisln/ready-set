@@ -18,22 +18,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Extract the user ID from header
-    const userId = authHeader.split(' ')[1];
+    // Extract the token from header
+    const token = authHeader.split(' ')[1];
     
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Verify the user session server-side
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Verify the token by passing it to getUser
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !user || !user.id || user.id !== userId) {
+    if (authError || !user) {
       console.error("Auth error:", authError);
       return NextResponse.json(
         { 
           isAdmin: false, 
           isSuperAdmin: false,
-          error: "Unauthorized - User not authenticated or ID mismatch"
+          error: "Unauthorized - Invalid JWT token" 
         }, 
         { status: 401 }
       );

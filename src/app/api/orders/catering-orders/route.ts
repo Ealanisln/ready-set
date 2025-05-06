@@ -45,17 +45,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Extract the user ID from header
-    const userId = authHeader.split(' ')[1];
+    // Extract the token from header
+    const token = authHeader.split(' ')[1];
     
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Verify the user session server-side
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Verify the token by passing it to getUser
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !user || !user.id || user.id !== userId) {
-      console.log('Unauthorized request - user not found or ID mismatch');
+    if (authError || !user) {
+      console.log('Unauthorized request - token validation failed');
       console.error('Auth error:', authError);
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }

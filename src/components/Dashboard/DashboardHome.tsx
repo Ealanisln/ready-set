@@ -473,16 +473,16 @@ export function ModernDashboardHome() {
       try {
         // Get the current user for authentication
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!user) {
+        if (!session) {
           throw new Error("Authentication required: No active session");
         }
         
         // Prepare the auth headers for all API requests
         const headers = {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}`
+          'Authorization': `Bearer ${session.access_token}`
         };
 
         const results = await Promise.allSettled([
