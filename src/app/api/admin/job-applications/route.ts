@@ -159,6 +159,12 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    console.log("API: Fetched applications with fileUploads:", applications.map(app => ({
+      id: app.id,
+      hasFileUploads: !!app.fileUploads,
+      fileUploadCount: app.fileUploads?.length || 0
+    })));
+
     return NextResponse.json({
       applications,
       totalCount,

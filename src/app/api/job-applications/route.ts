@@ -33,14 +33,21 @@ export async function POST(request: Request) {
         temporaryFileUploads = await prisma.fileUpload.findMany({
             where: {
                 id: { in: fileIdsToProcess },
-                isTemporary: true // Ensure we only fetch temporary files
+                // Don't restrict by isTemporary flag - some files may not be marked correctly
+                // but we still want to process them
             }
         });
-        console.log("Fetched temporary FileUploads:", temporaryFileUploads.map(f => ({ id: f.id, url: f.fileUrl, name: f.fileName })));
+        console.log("Fetched file uploads:", temporaryFileUploads.map(f => ({ 
+          id: f.id, 
+          url: f.fileUrl, 
+          name: f.fileName,
+          isTemporary: f.isTemporary,
+          category: f.category
+        })));
         
-        // Optional: Check if all requested IDs were found as temporary files
+        // Optional: Check if all requested IDs were found
         if (temporaryFileUploads.length !== fileIdsToProcess.length) {
-            console.warn("Mismatch between requested file IDs and found temporary files. Some files might already be processed or IDs are invalid.");
+            console.warn("Mismatch between requested file IDs and found files. Some files might not exist or IDs are invalid.");
             // Decide if this should be a hard error or just a warning
         }
     } else {
@@ -93,7 +100,7 @@ export async function POST(request: Request) {
     // --- Step 4: Move Files and Update FileUpload Records ---
     const processedFilesInfo: { id: string; newPath: string; newUrl: string }[] = [];
     if (temporaryFileUploads.length > 0) {
-      console.log(`Processing ${temporaryFileUploads.length} temporary files for application ${application.id}...`);
+      console.log(`Processing ${temporaryFileUploads.length} files for application ${application.id}...`);
       
       for (const file of temporaryFileUploads) {
         // Ensure fileUrl and fileName exist before proceeding
@@ -162,9 +169,8 @@ export async function POST(request: Request) {
           await prisma.fileUpload.update({
             where: { id: file.id },
             data: {
-              jobApplicationId: application.id,
-              isTemporary: false,
-              // filePath: newPath, // NO filePath field exists
+              jobApplicationId: application.id, // Critical: Associate with the job application
+              isTemporary: false, // Mark as no longer temporary
               fileUrl: newPublicUrl, // Store the new public URL
             },
           });
@@ -196,30 +202,39 @@ export async function POST(request: Request) {
           // Map category to the appropriate *FilePath field
           switch (file.category) {
             case 'resume':
+            case 'job-applications/temp/resume':
               filePathUpdates.resumeFilePath = processedFile.newPath;
               break;
             case 'license':
+            case 'job-applications/temp/license':
               filePathUpdates.driversLicenseFilePath = processedFile.newPath;
               break;
             case 'insurance':
+            case 'job-applications/temp/insurance':
               filePathUpdates.insuranceFilePath = processedFile.newPath;
               break;
             case 'registration':
+            case 'job-applications/temp/registration':
               filePathUpdates.vehicleRegFilePath = processedFile.newPath;
               break;
             case 'food_handler':
+            case 'job-applications/temp/food_handler':
               filePathUpdates.foodHandlerFilePath = processedFile.newPath;
               break;
             case 'hipaa':
+            case 'job-applications/temp/hipaa':
               filePathUpdates.hipaaFilePath = processedFile.newPath;
               break;
             case 'driver_photo':
+            case 'job-applications/temp/driver_photo':
               filePathUpdates.driverPhotoFilePath = processedFile.newPath;
               break;
             case 'car_photo':
+            case 'job-applications/temp/car_photo':
               filePathUpdates.carPhotoFilePath = processedFile.newPath;
               break;
             case 'equipment_photo':
+            case 'job-applications/temp/equipment_photo':
               filePathUpdates.equipmentPhotoFilePath = processedFile.newPath;
               break;
           }
@@ -231,7 +246,10 @@ export async function POST(request: Request) {
           try {
             await prisma.jobApplication.update({
               where: { id: application.id },
-              data: filePathUpdates
+              data: filePathUpdates,
+              include: {
+                fileUploads: true  // Include file uploads in the returned data
+              }
             });
             console.log("JobApplication updated with file paths successfully");
           } catch (updateError: any) {

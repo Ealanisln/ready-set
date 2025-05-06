@@ -104,13 +104,13 @@ const ActionCard: React.FC = () => (
     </CardHeader>
     <CardContent className="flex-grow">
       <div className="space-y-3">
-        <Link href="/catering-request" className="block w-full">
+        <Link href="/admin/catering-orders/new" className="block w-full">
           <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center justify-center gap-2">
             Create new order
             <ArrowUpRight className="h-4 w-4" />
           </Button>
         </Link>
-        <Link href="/admin/users/new" className="block w-full">
+        <Link href="/admin/users/new-user" className="block w-full">
           <Button 
             className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 transition-all duration-200"
             variant="outline"
@@ -120,14 +120,14 @@ const ActionCard: React.FC = () => (
         </Link>
       </div>
     </CardContent>
-    <CardFooter className="pt-0 pb-4">
+    {/* <CardFooter className="pt-0 pb-4">
       <div className="w-full pt-3 border-t border-gray-100">
         <Link href="/admin/dashboard/settings" className="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-end">
           Dashboard settings
           <ChevronRight className="h-3 w-3 ml-1" />
         </Link>
       </div>
-    </CardFooter>
+    </CardFooter> */}
   </Card>
 );
 

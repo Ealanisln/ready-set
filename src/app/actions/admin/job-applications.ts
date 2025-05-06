@@ -152,4 +152,96 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
   };
 };
 
+/**
+ * Server action to delete a job application and its associated files.
+ */
+export const deleteJobApplication = async (jobApplicationId: string): Promise<{ success: boolean; message: string }> => {
+  // --- Authorization Check using Supabase --- 
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("Auth Error:", userError);
+    throw new Error("Unauthorized: Could not retrieve user session.");
+  }
+
+  // Get user type from profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("type")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) {
+    console.error("Profile Fetch Error:", profileError);
+    throw new Error("Unauthorized: Could not retrieve user profile.");
+  }
+
+  const userType = profile?.type;
+  // Only allow ADMIN and SUPER_ADMIN to delete applications
+  const isAuthorized = userType === UserType.ADMIN || userType === UserType.SUPER_ADMIN;
+
+  if (!isAuthorized) {
+    console.warn(`Unauthorized deletion attempt by user ${user.id} with type ${userType}`);
+    throw new Error("Unauthorized: Only Admin or Super Admin can delete job applications.");
+  }
+  // --- End Authorization Check ---
+
+  // --- Basic Input Validation ---
+  if (!jobApplicationId || typeof jobApplicationId !== 'string') {
+    throw new Error("Invalid input: jobApplicationId is required.");
+  }
+  // --- End Input Validation ---
+
+  try {
+    // Find the application to ensure it exists
+    const application = await prisma.jobApplication.findUnique({
+      where: { id: jobApplicationId },
+      include: { fileUploads: true }
+    });
+
+    if (!application) {
+      throw new Error("Job application not found.");
+    }
+
+    // Use a transaction to delete the application and associated files
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // First delete all associated file uploads if they exist
+      if (application.fileUploads && application.fileUploads.length > 0) {
+        await tx.fileUpload.deleteMany({
+          where: {
+            jobApplicationId: jobApplicationId
+          }
+        });
+      }
+
+      // Then soft delete the job application
+      await tx.jobApplication.update({
+        where: { id: jobApplicationId },
+        data: {
+          deletedAt: new Date()
+        }
+      });
+    });
+
+    // Revalidate the path to update the UI
+    revalidatePath('/admin/job-applications');
+
+    return {
+      success: true,
+      message: "Job application deleted successfully."
+    };
+  } catch (error) {
+    console.error('Failed to delete job application:', error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      throw new Error(
+        `Database error during deletion: ${error.code}. Please try again or contact support.`
+      );
+    } else if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred while deleting the application.');
+  }
+};
+
 // Removed placeholders for safe-action and email

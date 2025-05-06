@@ -32,6 +32,18 @@ export interface JobApplication {
   driverPhotoUrl?: string | null;
   carPhotoUrl?: string | null;
   equipmentPhotoUrl?: string | null;
+  
+  // Legacy direct file path fields
+  resumeFilePath?: string | null;
+  driversLicenseFilePath?: string | null;
+  insuranceFilePath?: string | null;
+  vehicleRegFilePath?: string | null;
+  foodHandlerFilePath?: string | null;
+  hipaaFilePath?: string | null;
+  driverPhotoFilePath?: string | null;
+  carPhotoFilePath?: string | null;
+  equipmentPhotoFilePath?: string | null;
+  
   status: ApplicationStatus;
   createdAt: Date;
   updatedAt: Date;

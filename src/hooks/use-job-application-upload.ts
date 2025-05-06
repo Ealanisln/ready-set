@@ -91,7 +91,16 @@ export function useJobApplicationUpload({
 
           const formData = new FormData();
           formData.append('file', file);
-          formData.append('entityId', entityId || '');
+          
+          // If this is a job application upload with a temporary ID, format it consistently
+          // Use a format that won't be mistaken for a UUID by Prisma
+          let uploadEntityId = entityId;
+          if (entityType === 'job_application' && uploadEntityId && uploadEntityId.startsWith('temp_')) {
+            // Keep the ID as-is, don't modify it - the file-uploads handler will handle it
+            console.log(`Using temporary job application ID: ${uploadEntityId}`);
+          }
+          
+          formData.append('entityId', uploadEntityId || '');
           formData.append('entityType', entityType || '');
           formData.append('category', category || '');
           formData.append('userId', userId || '');
@@ -107,11 +116,25 @@ export function useJobApplicationUpload({
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to upload file");
+            let errorMessage = "Failed to upload file";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorMessage;
+            } catch (parseError) {
+              console.error("Error parsing error response:", parseError);
+            }
+            
+            console.error(`File upload error: ${errorMessage}, Status: ${response.status}`);
+            throw new Error(errorMessage);
           }
 
           const result = await response.json();
+          console.log("File upload successful:", {
+            id: result.file.id,
+            name: result.file.name,
+            category: result.file.category,
+            path: result.file.path
+          });
 
           // Create the file record
           const uploadedFile: UploadedFile = {

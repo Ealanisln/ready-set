@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { validateAdminRole } from "@/middleware/authMiddleware";
 import { Resend } from "resend";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { Prisma, UserType, UserStatus } from "@prisma/client";
 
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       : body.password;
       
     // Create user in Supabase first
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data: authData, error: supabaseError } = await supabase.auth.admin.createUser({
       email: body.email.toLowerCase(),
       password: password,

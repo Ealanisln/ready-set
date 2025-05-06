@@ -18,6 +18,8 @@ import {
   BarChart4,
   PieChart as PieChartIcon,
   RefreshCw,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,7 +72,7 @@ import {
   JobApplicationStats,
 } from "@/types/job-application";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { approveJobApplication } from '@/app/actions/admin/job-applications';
+import { approveJobApplication, deleteJobApplication } from '@/app/actions/admin/job-applications';
 import { createClient } from "@/utils/supabase/client";
 
 
@@ -165,10 +167,18 @@ const ApplicationDetailDialog: React.FC<{
   open: boolean;
   onClose: () => void;
   onStatusChange: (id: string, status: ApplicationStatus) => void;
+  onDeleteClick?: (application: JobApplication) => void;
   isSubmitting?: boolean;
   error?: string | null;
-}> = ({ application, open, onClose, onStatusChange, isSubmitting, error }) => {
+}> = ({ application, open, onClose, onStatusChange, onDeleteClick, isSubmitting, error }) => {
   if (!application) return null;
+  
+  console.log("ApplicationDetailDialog render:", {
+    applicationId: application.id,
+    hasFileUploads: !!application.fileUploads,
+    fileUploadCount: application.fileUploads?.length || 0,
+    fileUploads: application.fileUploads
+  });
 
   const handleStatusChange = (status: ApplicationStatus) => {
     onStatusChange(application.id, status);
@@ -323,7 +333,7 @@ const ApplicationDetailDialog: React.FC<{
             Documents
           </h3>
           <div className="flex flex-wrap gap-3">
-            {/* Iterate over fileUploads array */}
+            {/* First try to display files from fileUploads array */}
             {application.fileUploads && application.fileUploads.length > 0 ? (
               application.fileUploads.map((file) => {
                 // Create more descriptive document labels based on category
@@ -339,14 +349,28 @@ const ApplicationDetailDialog: React.FC<{
                   'hipaa': 'HIPAA Certification',
                   'driver_photo': 'Driver Photo',
                   'car_photo': 'Car Photo',
-                  'equipment_photo': 'Equipment Photo'
+                  'equipment_photo': 'Equipment Photo',
+                  // Add mappings for categories with the job-applications/temp prefix
+                  'job-applications/temp/resume': 'Resume',
+                  'job-applications/temp/license': 'Driver\'s License',
+                  'job-applications/temp/insurance': 'Insurance',
+                  'job-applications/temp/registration': 'Vehicle Registration',
+                  'job-applications/temp/food_handler': 'Food Handler Card',
+                  'job-applications/temp/hipaa': 'HIPAA Certification',
+                  'job-applications/temp/driver_photo': 'Driver Photo',
+                  'job-applications/temp/car_photo': 'Car Photo',
+                  'job-applications/temp/equipment_photo': 'Equipment Photo'
                 };
                 
                 if (file.category && categoryLabels[file.category]) {
                   documentLabel = categoryLabels[file.category];
                 } else if (file.category) {
+                  // Extract the core category name if it includes a path structure
+                  const categoryParts = file.category.split('/');
+                  const coreCategoryName = categoryParts[categoryParts.length - 1];
+                  
                   // Format any other category string
-                  documentLabel = file.category
+                  documentLabel = coreCategoryName
                     .split('_')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
@@ -370,7 +394,121 @@ const ApplicationDetailDialog: React.FC<{
                 );
               })
             ) : (
-              <p className="text-sm text-gray-500">No documents uploaded.</p>
+              // Fallback to legacy direct URL fields if there are no fileUploads
+              <>
+                {/* Check for direct file paths and display them if available */}
+                {application.resumeFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.resumeFilePath || '', '_blank')}
+                    aria-label="View Resume"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Resume
+                  </Button>
+                )}
+                {application.driversLicenseFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.driversLicenseFilePath || '', '_blank')}
+                    aria-label="View Driver's License"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Driver's License
+                  </Button>
+                )}
+                {application.insuranceFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.insuranceFilePath || '', '_blank')}
+                    aria-label="View Insurance"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Insurance
+                  </Button>
+                )}
+                {application.vehicleRegFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.vehicleRegFilePath || '', '_blank')}
+                    aria-label="View Vehicle Registration"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Vehicle Registration
+                  </Button>
+                )}
+                {application.foodHandlerFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.foodHandlerFilePath || '', '_blank')}
+                    aria-label="View Food Handler Card"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Food Handler Card
+                  </Button>
+                )}
+                {application.hipaaFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.hipaaFilePath || '', '_blank')}
+                    aria-label="View HIPAA Certification"
+                  >
+                    <FileText className="h-4 w-4" />
+                    HIPAA Certification
+                  </Button>
+                )}
+                {application.driverPhotoFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.driverPhotoFilePath || '', '_blank')}
+                    aria-label="View Driver Photo"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Driver Photo
+                  </Button>
+                )}
+                {application.carPhotoFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.carPhotoFilePath || '', '_blank')}
+                    aria-label="View Car Photo"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Car Photo
+                  </Button>
+                )}
+                {application.equipmentPhotoFilePath && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => window.open(application.equipmentPhotoFilePath || '', '_blank')}
+                    aria-label="View Equipment Photo"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Equipment Photo
+                  </Button>
+                )}
+                {/* If no files found, show "No documents" message */}
+                {!application.resumeFilePath && 
+                 !application.driversLicenseFilePath && 
+                 !application.insuranceFilePath && 
+                 !application.vehicleRegFilePath && 
+                 !application.foodHandlerFilePath && 
+                 !application.hipaaFilePath && 
+                 !application.driverPhotoFilePath && 
+                 !application.carPhotoFilePath && 
+                 !application.equipmentPhotoFilePath && (
+                  <p className="text-sm text-gray-500">No documents uploaded.</p>
+                )}
+              </>
             )}
           </div>
         </section>
@@ -380,21 +518,51 @@ const ApplicationDetailDialog: React.FC<{
           <Button
             variant="destructive"
             disabled={isSubmitting}
-            onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
-            aria-label="Reject Application"
+            onClick={() => onDeleteClick && onDeleteClick(application)}
+            aria-label="Delete Application"
           >
-            Reject
-          </Button>
-          <Button
-            variant="default"
-            className="bg-green-600 hover:bg-green-700 text-white"
-            disabled={isSubmitting}
-            onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
-            aria-label="Approve Application"
-          >
-            Approve
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Application
           </Button>
         </section>
+
+        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
+            className="mt-3 sm:mt-0"
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Reject
+          </Button>
+
+          {application.status !== ApplicationStatus.INTERVIEWING && (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
+              onClick={() => handleStatusChange(ApplicationStatus.INTERVIEWING)}
+              disabled={isSubmitting}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Interview
+            </Button>
+          )}
+
+          {application.status !== ApplicationStatus.APPROVED && (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
+              onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
+              disabled={isSubmitting}
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Approve
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -541,6 +709,9 @@ export default function JobApplicationsPage() {
     useState<JobApplication | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [applicationToDelete, setApplicationToDelete] = useState<JobApplication | null>(null);
+  const [isDeletingApplication, setIsDeletingApplication] = useState(false);
 
   // Wrap fetchStats in useCallback
   const fetchStats = useCallback(async () => {
@@ -605,6 +776,15 @@ export default function JobApplicationsPage() {
         throw new Error("Failed to fetch applications");
       }
       const data = await response.json();
+      console.log("Applications API response:", {
+        totalCount: data.totalCount,
+        applicationCount: data.applications.length,
+        fileUploadSummary: data.applications.map((app: JobApplication) => ({
+          id: app.id,
+          hasFileUploads: !!app.fileUploads,
+          fileUploadCount: app.fileUploads?.length || 0
+        }))
+      });
       setApplications(data.applications);
       setTotalPages(data.totalPages);
     } catch (err) {
@@ -750,8 +930,63 @@ export default function JobApplicationsPage() {
   // Handle view application details
   const handleViewApplication = (application: JobApplication) => {
     console.log("Viewing application:", application); // Log the entire application object
+    console.log("File uploads data:", {
+      hasFileUploads: !!application.fileUploads,
+      fileUploadCount: application.fileUploads?.length || 0,
+      fileUploads: application.fileUploads
+    });
     setSelectedApplication(application);
     setIsDetailDialogOpen(true);
+  };
+
+  // Handle application deletion
+  const handleDeleteApplication = async (id: string) => {
+    setIsDeletingApplication(true);
+    setError(null);
+
+    try {
+      console.log(`Attempting to delete application ID: ${id}`);
+      const result = await deleteJobApplication(id);
+      console.log("Server action result:", result);
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to delete application");
+      }
+
+      // Remove the deleted application from the list
+      setApplications((prevApps) =>
+        prevApps.filter((app) => app.id !== id)
+      );
+
+      toast({
+        title: "Success",
+        description: result.message || "Application deleted successfully",
+        variant: "default",
+      });
+
+      // Refresh stats
+      fetchStats();
+      
+    } catch (error: any) {
+      console.error("Error deleting application:", error);
+      const description = error.message || "An unexpected error occurred. Please try again.";
+      setError(description);
+      toast({
+        title: "Error",
+        description: description,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingApplication(false);
+      setIsDeleteDialogOpen(false);
+      setApplicationToDelete(null);
+    }
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteConfirmation = (application: JobApplication) => {
+    setApplicationToDelete(application);
+    setIsDeleteDialogOpen(true);
   };
 
   // Prepare chart data
@@ -1059,6 +1294,14 @@ export default function JobApplicationsPage() {
                                     <Calendar className="mr-2 h-4 w-4 text-blue-500" />
                                     Schedule Interview
                                   </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => openDeleteConfirmation(application)}
+                                    disabled={isDeletingApplication}
+                                    className="text-red-600 focus:bg-red-50"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                    Delete
+                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -1216,9 +1459,71 @@ export default function JobApplicationsPage() {
         open={isDetailDialogOpen}
         onClose={() => setIsDetailDialogOpen(false)}
         onStatusChange={handleStatusChange}
+        onDeleteClick={(application) => openDeleteConfirmation(application)}
         isSubmitting={isSubmitting}
         error={error}
       />
+
+      {/* Add delete confirmation dialog */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setIsDeleteDialogOpen(false);
+            if (!isDeletingApplication) {
+              setApplicationToDelete(null);
+            }
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the job application for{" "}
+              <span className="font-medium">
+                {applicationToDelete?.firstName} {applicationToDelete?.lastName}
+              </span>
+              ? This action cannot be undone and all associated files will be deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row sm:justify-end gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setApplicationToDelete(null);
+              }}
+              disabled={isDeletingApplication}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                if (applicationToDelete) {
+                  handleDeleteApplication(applicationToDelete.id);
+                }
+              }}
+              disabled={isDeletingApplication}
+            >
+              {isDeletingApplication ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Application"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
