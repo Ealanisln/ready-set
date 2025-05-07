@@ -5,7 +5,8 @@
   ],
   "build": {
     "env": {
-      "NODE_OPTIONS": "--experimental-json-modules"
+      "NODE_OPTIONS": "--experimental-json-modules",
+      "NEXT_TYPECHECK_CONFIG": "tsconfig.vercel.json"
     }
   }
 } 

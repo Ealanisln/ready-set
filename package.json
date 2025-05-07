@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "dotenv -e .env.local -- next dev",
-    "build": "node scripts/create-case-links.js && prisma generate && next build",
+    "build": "node scripts/build-wrapper.js",
     "start": "next start",
     "lint": "next lint",
     "check:case": "node src/scripts/check-case-sensitivity.js",
