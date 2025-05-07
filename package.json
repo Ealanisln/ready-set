@@ -8,6 +8,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "check:case": "node src/scripts/check-case-sensitivity.js",
+    "prebuild": "npm run check:case",
     "backup": "dotenv -e .env.production tsx src/scripts/backup-db.ts",
     "db:sync": "tsx scripts/db-sync.ts",
     "db:reset": "npx prisma migrate reset",
