@@ -1,15 +1,14 @@
 // src/app/(site)/flowers/page.tsx
 'use client';
 
-import {
-  FlowerHero,
-  FlowerIcons,
-  PackageDelivery,
-  DeliveryWork,
-  DelicateBlooms,
-  ExpertSupportSection,
-  FAQSection
-} from '@/components/Flowers';
+// Direct imports without using the barrel file
+import FlowerHero from '@/components/Flowers/FlowerHero';
+import FlowerIcons from '@/components/Flowers/FlowerIcons';
+import PackageDelivery from '@/components/Flowers/PackageDelivery';
+import DeliveryWork from '@/components/Flowers/DeliveryWork';
+import DelicateBlooms from '@/components/Flowers/DelicateBlooms';
+import ExpertSupportSection from '@/components/Flowers/ExpertSupportSection';
+import FAQSection from '@/components/Flowers/FAQSection';
 import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
 import { FormType } from '@/components/Logistics/QuoteRequest/types';
 
