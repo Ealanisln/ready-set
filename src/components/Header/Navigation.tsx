@@ -153,7 +153,7 @@ const Navigation: React.FC<NavigationProps> = ({
         {!user && (
           <>
             <AuthLink
-              href="/sign-in"
+              href="/signin"
               title="Sign In"
               navbarToggleHandler={navbarToggleHandler}
               isDesktop={true}
