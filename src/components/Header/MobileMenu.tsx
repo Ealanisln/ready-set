@@ -336,14 +336,14 @@ const MobileMenuOverlay: React.FC<{
                 ) : (
                   <div className="space-y-3">
                     <Link
-                      href="/sign-in"
+                      href="/signin"
                       className="block w-full rounded-lg bg-gray-100 px-6 py-3 text-center text-base font-medium text-dark transition duration-300 ease-in-out hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                       onClick={closeNavbarOnNavigate}
                     >
                       Sign In
                     </Link>
                     <Link
-                      href="/sign-up"
+                      href="/signup"
                       className="block w-full rounded-lg bg-amber-400 px-6 py-3 text-center text-base font-medium text-black transition duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                       onClick={closeNavbarOnNavigate}
                     >
@@ -603,7 +603,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <Link
                           onClick={closeNavbarOnNavigate}
-                          href="/sign-in"
+                          href="/signin"
                           className="block w-full rounded-lg bg-amber-100 px-4 py-3 text-center font-medium text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:hover:bg-amber-400/20"
                         >
                           Sign In
@@ -612,7 +612,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <Link
                           onClick={closeNavbarOnNavigate}
-                          href="/sign-up"
+                          href="/signup"
                           className="block w-full rounded-lg bg-amber-400 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-amber-500 dark:bg-amber-500 dark:hover:bg-amber-600"
                         >
                           Sign Up

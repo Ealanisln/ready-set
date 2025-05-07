@@ -92,6 +92,12 @@ export const rsSubsidiariesMenuItem: MenuItem = {
       path: "/apply",
       newTab: false,
     },
+    {
+      id: 18,
+      title: "Flowers",
+      path: "/flowers",
+      newTab: false,
+    }
   ],
 };
 
@@ -130,7 +136,7 @@ const menuData: MenuItem[] = [
   {
     id: 7,
     title: "Sign In",
-    path: "/sign-in",
+    path: "/signin",
     newTab: false,
   },
   {

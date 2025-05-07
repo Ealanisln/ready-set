@@ -144,7 +144,7 @@ const SignOutButton: React.FC<ButtonProps> = ({ sticky, pathUrl }) => {
 
 const SignInButton: React.FC<ButtonProps> = ({ sticky, pathUrl }) => (
   <Link
-    href="/sign-in"
+    href="/signin"
     className={`px-7 py-3 text-base font-medium hover:opacity-70 ${
       pathUrl !== "/" || sticky
         ? "dark:text-white"
