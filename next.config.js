@@ -6,7 +6,12 @@ const nextConfig = {
     }
   },
   // Remove webpack configuration if not needed
-  webpack: undefined
+  webpack: undefined,
+  
+  // Add images configuration to allow Sanity.io domain
+  images: {
+    domains: ['cdn.sanity.io'],
+  }
 }
 
 module.exports = nextConfig 

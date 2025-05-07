@@ -3,9 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 // Solo importa el CSS desde la ruta correcta
-import "../../styles/popup.css";
+// import "../../styles/popup.css";
 
 interface ServiceFeatureProps {
   icon: string;
@@ -29,22 +30,15 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({
     ) : (
       title
     );
-  const [selected, setSelected] = React.useState(false);
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      {/* Animated pop-up effect when selected */}
-      <button
-        type="button"
-        tabIndex={0}
-        aria-pressed={selected}
-        onClick={() => setSelected((s) => !s)}
-        className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none transition-all duration-300 ease-in-out
-        hover:scale-105 hover:shadow-2xl focus:scale-105 focus:shadow-2xl active:scale-95
-        ${selected ? 'z-20 scale-110 shadow-2xl ring-4 ring-yellow-500 animate-pop' : ''}`}
-        style={{ boxShadow: selected ? '0 12px 48px 0 rgba(255, 208, 21, 0.5)' : undefined }}
+      <motion.div
+        className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none`}
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 300 }}
       >
-        <div className="flex flex-col items-center justify-start h-full w-full">
+        <div className="flex h-full w-full flex-col items-center justify-start">
           <Image
             src={icon}
             alt={typeof title === "string" ? title : ""}
@@ -52,11 +46,11 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({
             height={140}
             className="mb-8"
           />
-          <h3 className="flex h-auto flex-grow items-start justify-center px-2 text-center text-2xl font-black leading-tight tracking-tight mt-4">
+          <h3 className="mt-4 flex h-auto flex-grow items-start justify-center px-2 text-center text-2xl font-black leading-tight tracking-tight">
             {adjustedTitle}
           </h3>
         </div>
-      </button>
+      </motion.div>
       <p className="font-your-custom-font mt-6 max-w-[320px] text-center text-base leading-snug text-black">
         {description}
       </p>
@@ -93,9 +87,13 @@ const FlowerIcons: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6 text-center">
-        <h2 className="mb-2 text-4xl font-bold">It's Not Just What We Do</h2>
-        <h2 className="mb-0 text-4xl font-bold">It's How We Do It</h2>
+      <div className="mb-6 px-4 text-center">
+        <h2 className="mb-2 text-[clamp(1.5rem,5vw,2.25rem)] font-bold leading-tight">
+          It's Not Just What We Do
+        </h2>
+        <h2 className="mb-0 text-[clamp(1.5rem,5vw,2.25rem)] font-bold leading-tight">
+          It's How We Do It
+        </h2>
       </div>
 
       <div className="flex flex-col items-stretch justify-between gap-8 md:flex-row">

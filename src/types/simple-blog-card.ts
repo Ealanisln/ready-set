@@ -6,6 +6,11 @@ interface MainImage {
   _type: string;
 }
 
+interface Category {
+  title: string;
+  _id?: string;
+}
+
 export interface SimpleBlogCard {
   _id: string;
   _updatedAt: string;
@@ -17,6 +22,7 @@ export interface SimpleBlogCard {
     _createdAt: string;
   };
   mainImage?: MainImage;
+  categories?: Category[];
 }
 
 export interface FullPost {

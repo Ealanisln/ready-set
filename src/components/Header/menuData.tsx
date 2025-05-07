@@ -89,15 +89,9 @@ export const rsSubsidiariesMenuItem: MenuItem = {
     {
       id: 17,
       title: "Join Us",
-      path: "/apply",
+      path: "/join-the-team",
       newTab: false,
     },
-    {
-      id: 18,
-      title: "Flowers",
-      path: "/flowers",
-      newTab: false,
-    }
   ],
 };
 
@@ -117,32 +111,38 @@ const menuData: MenuItem[] = [
   rsSubsidiariesMenuItem,
   {
     id: 4,
+    title: "Flowers",
+    path: "/flowers",
+    newTab: false,
+  },
+  {
+    id: 5,
     title: "Contact",
     path: "/contact",
     newTab: false,
   },
   {
-    id: 5,
+    id: 6,
     title: "Blog",
     path: "/blog",
     newTab: false,
   },
   {
-    id: 6,
+    id: 7,
     title: "Resources",
     path: "/free-resources",
     newTab: false,
   },
   {
-    id: 7,
+    id: 8,
     title: "Sign In",
-    path: "/signin",
+    path: "/sign-in",
     newTab: false,
   },
   {
-    id: 8,
+    id: 9,
     title: "Sign Up",
-    path: "/signup",
+    path: "/sign-up",
     newTab: false,
   },
 ];

@@ -8,7 +8,9 @@ interface FAQItem {
 }
 
 const FAQSection = () => {
-  const [openModal, setOpenModal] = useState<null | 'flowerMap' | 'flowerService' | 'driversRequirements'>(null);
+  const [openModal, setOpenModal] = useState<
+    null | 'flowerMap' | 'flowerService' | 'driversRequirements'
+  >(null);
 
   const mileagePricing: FAQItem[] = [
     {
@@ -56,16 +58,13 @@ const FAQSection = () => {
           Each delivery location is charged a flat rate, but larger or more complex orders may incur
           additional fees.
           <div className="mt-2">
-            {' '}
-            {/* Aquí se agregó el <div> */}
             <ul className="list-disc pl-5">
               <li>
                 Sprays and wreaths are charged at twice the standard delivery fee due to their size
                 and handling requirements.
               </li>
             </ul>
-          </div>{' '}
-          {/* Cierre del <div> agregado */}
+          </div>
         </>
       ),
     },
@@ -87,21 +86,13 @@ const FAQSection = () => {
     },
   ];
 
-  const FAQSectionComponent = ({
-    // Renombramos para evitar confusión con la constante
-    title,
-    items,
-  }: {
-    title: string;
-    items: FAQItem[];
-  }) => (
+  const FAQSectionComponent = ({ title, items }: { title: string; items: FAQItem[] }) => (
     <div className="mb-8">
       <h3 className="mb-4 text-xl font-bold text-gray-800">{title}</h3>
       <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index} className="space-y-2">
             <p className="font-medium">Q: {item.question}</p>
-            {/* Solo renderiza como <p> si es string, si no, usa un <div> para evitar errores de anidamiento */}
             {typeof item.answer === 'string' ? (
               <p className="text-gray-600">A: {item.answer}</p>
             ) : (
@@ -134,36 +125,42 @@ const FAQSection = () => {
           </div>
         </div>
 
-        {/* Downloadable Resources Section */}
+        {/* Downloadable Resources Section - MODIFIED FOR MOBILE */}
+        {/* This section provides buttons for users to access downloadable resources related to flower services. */}
+        {/*
         <div className="mt-12 rounded-lg border-2 border-dashed border-yellow-400 p-6">
           <h3 className="mb-6 text-center text-2xl font-bold">Downloadable Resources</h3>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
             <button
-              className="rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-all hover:bg-yellow-500"
+              className="rounded-lg bg-yellow-400 px-3 py-2 text-sm font-semibold text-gray-900 transition-all hover:bg-yellow-500 sm:px-6 sm:py-3 sm:text-base"
               onClick={() => setOpenModal('flowerMap')}
             >
               Flower Area Map
             </button>
             <button
-              className="rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-all hover:bg-yellow-500"
+              className="rounded-lg bg-yellow-400 px-3 py-2 text-sm font-semibold text-gray-900 transition-all hover:bg-yellow-500 sm:px-6 sm:py-3 sm:text-base"
               onClick={() => setOpenModal('flowerService')}
             >
               Our Flower Service
             </button>
             <button
-              className="rounded-lg bg-yellow-400 px-6 py-3 font-semibold text-gray-900 transition-all hover:bg-yellow-500"
+              className="rounded-lg bg-yellow-400 px-3 py-2 font-semibold text-gray-900 transition-all hover:bg-yellow-500 sm:px-6 sm:py-3"
               onClick={() => setOpenModal('driversRequirements')}
             >
-              Drivers Requirements
-              <span className="ml-2 text-sm"></span>
+              <span className="inline-block text-xs leading-tight sm:text-base">
+                Drivers
+                <br />
+                Requirements
+              </span>
             </button>
           </div>
 
-          {/* Modal para Flower Area Map */}
           {openModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-8 rounded-lg shadow-lg max-w-xs text-center">
-                <p className="mb-6">This page is under development. Please check back soon for more information.</p>
+              <div className="max-w-xs rounded-lg bg-white p-8 text-center shadow-lg">
+                <p className="mb-6">
+                  This page is under development. Please check back soon for more information.
+                </p>
                 <button
                   className="mt-2 rounded bg-yellow-400 px-4 py-2 font-semibold text-gray-900 hover:bg-yellow-500"
                   onClick={() => setOpenModal(null)}
@@ -174,6 +171,7 @@ const FAQSection = () => {
             </div>
           )}
         </div>
+        */}
       </div>
     </div>
   );

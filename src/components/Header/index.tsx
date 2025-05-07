@@ -31,21 +31,26 @@ const baseMenuItems: MenuItem[] = [
     submenu: [
       { id: 1031, title: "Logistics", path: "/logistics" },
       { id: 1032, title: "Virtual Assistant", path: "/va" },
-      { id: 1033, title: "Join Us", path: "/apply" },
+      { id: 1033, title: "Join Us", path: "/join-the-team" },
     ],
   },
   {
     id: 104,
+    title: "Flowers",
+    path: "/flowers",
+  },
+  {
+    id: 105,
     title: "Contact",
     path: "/contact",
   },
   {
-    id: 105,
+    id: 106,
     title: "Blog",
     path: "/blog",
   },
   {
-    id: 106,
+    id: 107,
     title: "Resources",
     path: "/resources",
   },
@@ -285,7 +290,7 @@ const Header: React.FC = () => {
                   {pathUrl !== "/" || isVirtualAssistantPage ? (
                     <div className="flex items-center gap-3">
                       <Link
-                        href="/signin"
+                        href="/sign-in"
                         className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 lg:block
                           ${sticky 
                             ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
@@ -298,7 +303,7 @@ const Header: React.FC = () => {
                         Sign In
                       </Link>
                       <Link
-                        href="/signup"
+                        href="/sign-up"
                         className="hidden rounded-lg bg-amber-400 px-6 py-3 text-base font-medium text-black duration-300 ease-in-out hover:bg-amber-500 dark:bg-white/10 dark:hover:bg-white/20 lg:block"
                       >
                         Sign Up
@@ -307,7 +312,7 @@ const Header: React.FC = () => {
                   ) : (
                     <>
                       <Link
-                        href="/signin"
+                        href="/sign-in"
                         className={`hidden rounded-lg px-7 py-3 text-base font-semibold transition-all duration-300 md:block 
                           ${sticky 
                             ? "bg-white/90 text-dark shadow-md hover:bg-white dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
@@ -318,7 +323,7 @@ const Header: React.FC = () => {
                         Sign In
                       </Link>
                       <Link
-                        href="/signup"
+                        href="/sign-up"
                         className={`hidden rounded-lg px-6 py-3 text-base font-medium text-white duration-300 ease-in-out md:block ${
                           sticky
                             ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"

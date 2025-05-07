@@ -1,27 +1,33 @@
 import React from 'react';
 import Image from 'next/image';
 
-const DelicateBlooms: React.FC = () => {
+interface DelicateBloomsProps {
+  backgroundImage?: string;
+}
+
+const DelicateBlooms: React.FC<DelicateBloomsProps> = ({
+  backgroundImage = '/images/flowers/flower6.jpg',
+}) => {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gray-100">
-      {/* Imagen de fondo */}
+    <div className="relative min-h-screen w-full overflow-y-auto overflow-x-hidden bg-gray-100">
+      {/* Background image */}
       <Image
-        src="/images/flowers/deliverywoman.jpg"
-        alt="Delivery background"
+        src={backgroundImage}
+        alt="Delivery background with person handling flowers"
         fill
-        className="object-cover brightness-90 saturate-150"
+        className="object-cover"
         priority
       />
 
-      {/* Overlay oscuro para el encabezado */}
-      <div className="absolute left-1/2 top-16 z-20 flex w-full -translate-x-1/2 flex-col items-center">
-        <div className="mx-auto max-w-[950px] rounded-[2.5rem] bg-black/60 px-16 py-10 text-center shadow-2xl">
-          <h1 className="text-4xl font-extrabold text-white md:text-5xl">
+      {/* Semi-transparent header overlay - moved to relative positioning */}
+      <div className="relative z-20 mx-auto mt-8 w-full max-w-4xl px-4">
+        <div className="mx-auto rounded-3xl bg-gray-800/60 px-6 py-6 text-center shadow-xl sm:px-12 sm:py-10">
+          <h1 className="text-2xl font-extrabold text-white sm:text-4xl md:text-5xl">
             Delicate Blooms Deserve
             <br />
             Gentle Hands
           </h1>
-          <p className="mt-4 text-xl font-medium text-white">
+          <p className="mt-4 text-base font-medium text-white sm:text-xl">
             Flowers Are Delicate, So We Deliver Them
             <br />
             with Extra Care
@@ -29,83 +35,89 @@ const DelicateBlooms: React.FC = () => {
         </div>
       </div>
 
-      {/* Tarjetas amarillas */}
-      <div className="absolute bottom-0 left-0 z-30 flex w-full flex-row items-end justify-center gap-6 px-4 pb-8">
-        {/* Tarjeta 1: Van */}
-        <div className="relative flex w-[340px] min-h-[340px] flex-col items-center overflow-visible rounded-[3rem] bg-yellow-300 px-8 pb-8 pt-12 shadow-xl">
-          {/* Imagen van centrada y sobresaliente */}
-          <div className="relative z-10 flex flex-col items-center w-full justify-center">
-            <Image
-              src="/images/flowers/van.png"
-              alt="Van"
-              width={260}
-              height={140}
-              className="drop-shadow-xl"
-              style={{ objectFit: 'contain', marginBottom: '-18px' }}
-            />
-          </div>
-          <div className="w-full text-center">
-            <div className="text-lg font-extrabold text-black">Reliable vehicle (car or van)</div>
-            <ul className="mt-2 list-inside list-disc space-y-2 px-4 text-left text-base font-medium text-black">
-              <li>GPS or navigation app (Google Maps, Waze)</li>
-              <li>Cooler or climate control (if needed for hot weather)</li>
-            </ul>
-          </div>
-        </div>
-        {/* Tarjeta 2: Caja */}
-        <div className="relative flex w-[340px] min-h-[340px] flex-col items-center overflow-visible rounded-[3rem] bg-yellow-300 px-8 pb-8 pt-12 shadow-xl">
-          {/* Imagen caja centrada y medidas */}
-          <div className="relative z-10 flex flex-col items-center w-full justify-center">
-            <Image
-              src="/images/flowers/boxes.png"
-              alt="Storage Box"
-              width={120}
-              height={65}
-              className="drop-shadow-xl"
-              style={{ objectFit: 'contain', marginBottom: '-10px' }}
-            />
-            <div className="flex w-full flex-row justify-between gap-8">
-              <span className="ml-2 text-xs font-bold text-black">23.46-in</span>
-              <span className="mr-2 text-xs font-bold text-black">18.30-in</span>
+      {/* Cards section - Positioned absolutely near the bottom */}
+      <div className="absolute bottom-10 left-4 right-4 z-30">
+        {/* Re-apply mx-auto and max-w to the inner flex container for centering */}
+        <div className="mx-auto flex max-w-md flex-col items-center justify-between gap-4 sm:max-w-6xl sm:flex-row sm:items-stretch">
+          {/* Card 1: Van */}
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
+            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
+              <div className="absolute -top-24 scale-50 sm:-top-28 sm:scale-100">
+                <Image
+                  src="/images/flowers/van.png"
+                  alt="Delivery van"
+                  width={600}
+                  height={520}
+                  className="object-contain"
+                />
+              </div>
+            </div>
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
+              <h3 className="text-center text-base font-bold sm:text-xl">
+                Reliable vehicle (car or van)
+              </h3>
+              <ul className="mt-2 list-disc pl-5 text-sm sm:text-base">
+                <li>GPS or navigation app (Google Maps, Waze)</li>
+                <li>Cooler or climate control (if needed for hot weather)</li>
+              </ul>
             </div>
           </div>
-          <div className="w-full text-center">
-            <div className="text-lg font-extrabold text-black">Hefty 12gal Max Pro</div>
-            <div className="mt-1 text-sm font-medium text-black">
-              Storage Tote Gray: Plastic Utility Bin with Locking Handles & Latches,
-              <br />
-              Universal Storage Solution.
+
+          {/* Card 2: Storage Box - Restore content and adjust image position */}
+          <div className="relative w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg">
+            {/* Keep card height */}
+            <div className="relative flex h-16 w-full justify-center pt-3 sm:h-20 sm:pt-4">
+              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
+              {/* Increase negative top offset slightly for mobile on the second card */}
+              <div className="absolute -top-36 scale-50 sm:-top-44 sm:scale-100">
+                <Image
+                  src="/images/flowers/boxes.png"
+                  alt="Storage box"
+                  width={300}
+                  height={260}
+                  className="object-contain"
+                />
+              </div>
+            </div>
+            {/* Restore text content and keep padding */}
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
+              <h3 className="text-center text-base font-bold sm:text-xl">Hefty 12gal Max Pro</h3>
+              <ul className="mt-2 list-disc pl-5 text-sm sm:text-base">
+                <li>
+                  Storage Tote Gray: Plastic Utility Bin with Locking Handles & Latches, Universal
+                  Storage Solution
+                </li>
+              </ul>
             </div>
           </div>
-        </div>
-        {/* Tarjeta 3: Maceta */}
-        <div className="relative flex w-[340px] min-h-[340px] flex-col items-center overflow-visible rounded-[3rem] bg-yellow-300 px-8 pb-8 pt-12 shadow-xl">
-          {/* Medidas y líneas arriba */}
-          <div className="flex w-full flex-row justify-between px-8 mb-1">
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-extrabold text-black">6.5"</span>
-              <div className="h-12 w-px bg-black mt-1"></div>
+
+          {/* Card 3: Nursery Pot - Keep existing correct styles */}
+          <div className="relative mt-4 w-full flex-1 rounded-3xl bg-yellow-300 shadow-lg sm:mt-0">
+            {/* Match card height and image container padding from Card 1 */}
+            <div className="relative flex h-16 w-full flex-col items-center justify-center pt-3 sm:h-20 sm:pt-4">
+              {/* Apply responsive top offset and scaling: higher/smaller for mobile, original for sm+ */}
+              {/* Reduce scale for mobile on the third card */}
+              <div className="absolute -top-32 scale-50 sm:-top-44 sm:scale-100">
+                <Image
+                  src="/images/flowers/container.png"
+                  alt="Nursery pot"
+                  width={240} // Adjusted size for consistency
+                  height={200} // Adjusted size for consistency
+                  className="object-contain" // Removed mt-4
+                />
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-extrabold text-black">6.7"</span>
-              <div className="h-16 w-px bg-black mt-1"></div>
-            </div>
-          </div>
-          {/* Imagen maceta centrada y dentro del contenedor */}
-          <div className="relative z-10 flex flex-col items-center w-full justify-center">
-            <Image
-              src="/images/flowers/container.png"
-              alt="Nursery Pot"
-              width={70}
-              height={90}
-              className="drop-shadow-xl"
-              style={{ objectFit: 'contain', marginBottom: '-10px' }}
-            />
-          </div>
-          <div className="w-full text-center">
-            <div className="text-lg font-extrabold text-black">RAOOKIF 1 Gallon Nursery Pots</div>
-            <div className="mt-1 text-sm font-medium text-black">
-              Flexible 1 Gallon Posts for Plants, 1 Gallon Plastic Plant Pots for Seedling, Cuttings, Succulents, Transplanting
+            {/* Match text padding from Card 1 */}
+            <div className="w-full px-4 pb-4 pt-10 sm:pt-8">
+              <h3 className="text-center text-base font-bold sm:text-xl">
+                RAOOKIF 1 Gallon Nursery Pots
+              </h3>
+              <ul className="mt-1 list-disc pl-5 text-sm sm:text-base">
+                <li>
+                  Flexible 1 Gallon Posts for Plants, 1 Gallon Plastic Plant Pots for Seedling,
+                  Cuttings, Succulents, Transpanting
+                </li>
+              </ul>
             </div>
           </div>
         </div>

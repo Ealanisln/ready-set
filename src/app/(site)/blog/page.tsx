@@ -2,7 +2,6 @@
 import SingleBlog from "@/components/Blog/SingleBlog";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
-import NewsLetterSignup from "@/components/Resources/ui/NewsLetterSignUp";
 import { client } from "@/sanity/lib/client";
 import { postPathsQuery } from "@/sanity/lib/queries";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
@@ -61,7 +60,7 @@ async function getData() {
     slug,
     mainImage,
     smallDescription,
-    categories[]->{ title }
+    categories[]->{ title, _id }
   }  
   `;
   const data = await client.fetch(query);
@@ -133,14 +132,26 @@ export default async function Blog() {
         </div>
       </div>
 
-      {/* Existing visual content */}
+      {/* Visual content */}
       <Breadcrumb pageName="Welcome to our blog" />
-      <section className="pb-10 pt-20 lg:pb-20 lg:pt-[120px]">
+      
+      <section className="pb-16 pt-12 lg:pb-24 lg:pt-16">
         <div className="container mx-auto">
-          <div className="-mx-4 flex flex-wrap justify-center sm:px-4">
+          <div className="mb-12 text-center">
+            <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl lg:text-5xl">
+              Ready Set Blog
+            </h1>
+            <p className="mx-auto max-w-3xl text-gray-600 dark:text-gray-300">
+              Expert insights on logistics, virtual assistant services, and business solutions 
+              in the Bay Area. Stay updated with industry trends and best practices.
+            </p>
+          </div>
+          
+          <div className="-mx-4 flex flex-wrap justify-center px-4">
             <SingleBlog data={data} basePath="blog" />
-            <div className="mt-20 w-full">
-            <NewsletterForm />
+            
+            <div className="mt-20 w-full rounded-xl bg-gray-50 p-8 shadow-sm dark:bg-gray-800/30">
+              <NewsletterForm />
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Carousel,
@@ -100,24 +100,67 @@ const DeliveryWork: React.FC = () => {
 
   const [api, setApi] = useState<CarouselApi | undefined>();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const onSelect = useCallback((api: CarouselApi | undefined) => {
-    if (!api) return;
-    setSelectedIndex(api.selectedScrollSnap());
+  // Add mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
+
+  const onSelect = useCallback(() => {
+    if (!api) return;
+    setCurrentStep(api.selectedScrollSnap());
+  }, [api]);
 
   React.useEffect(() => {
     if (!api) return;
-    setScrollSnaps(api.scrollSnapList());
-    setSelectedIndex(api.selectedScrollSnap());
-    const handler = () => onSelect(api);
-    api.on('select', handler);
-    const currentApi = api;
+    setCurrentStep(api.selectedScrollSnap());
+
+    // Set up event listener for carousel changes
+    api.on('select', onSelect);
+
     return () => {
-      currentApi.off('select', handler);
+      api.off('select', onSelect);
     };
   }, [api, onSelect]);
+
+  // Set number of dots based on screen size
+  const totalDots = isMobile ? 7 : 5;
+  const activeDotIndex = Math.min(currentStep, totalDots - 1);
+
+  // Updated helper function to handle different behavior for mobile
+  const getActiveDotForCurrentSlide = (
+    currentSlide: number,
+    totalSlides: number,
+    totalDots: number,
+  ): number => {
+    // On mobile, show all 7 dots with direct mapping
+    if (isMobile) {
+      return currentSlide;
+    }
+
+    // For desktop: slides 0-4, dot index is the same as slide index
+    if (currentSlide < totalDots - 1) {
+      return currentSlide;
+    }
+
+    // For desktop: slides 5 and 6, always highlight the last dot (index 4)
+    return totalDots - 1;
+  };
 
   return (
     <section className="bg-[#fdfcf7] py-20">
@@ -152,38 +195,57 @@ const DeliveryWork: React.FC = () => {
               ))}
             </CarouselContent>
           </Carousel>
-          <div className="flex justify-center mt-8 gap-4 items-center">
-            {/* Botón Flecha Izquierda */}
+          <div className="mt-8 flex items-center justify-center gap-4">
+            {/* Left Arrow Button */}
             <button
-              className="text-7xl font-extrabold text-[#222] px-4 hover:text-[#e2b13c] transition-colors disabled:opacity-40"
+              className={`${isMobile ? 'px-2 text-5xl' : 'px-4 text-7xl'} font-extrabold text-[#222] transition-colors hover:text-[#e2b13c] disabled:opacity-40`}
               onClick={() => api?.scrollPrev()}
-              aria-label="Anterior"
-              disabled={selectedIndex === 0}
+              aria-label="Previous"
+              disabled={currentStep === 0}
               type="button"
             >
               &#60;
             </button>
-            {/* Puntos de navegación */}
-            <div className="flex gap-5">
-              {scrollSnaps.map((_, idx) => (
+            {/* Navigation dots - Shows different number based on screen size */}
+            <div className={`flex ${isMobile ? 'gap-2' : 'gap-5'}`}>
+              {Array.from({ length: totalDots }, (_, idx) => (
                 <button
                   key={idx}
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200
-                    ${selectedIndex === idx ? 'bg-[#222] border-[#222]' : 'bg-transparent border-[#222]'}`}
-                  onClick={() => api?.scrollTo(idx)}
+                  className={`flex items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+                    getActiveDotForCurrentSlide(currentStep, deliverySteps.length, totalDots) ===
+                    idx
+                      ? 'border-[#222] bg-[#222]'
+                      : 'border-[#222] bg-transparent'
+                  } ${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`}
+                  onClick={() => {
+                    // Map dot index to slides appropriately for mobile or desktop
+                    const targetSlide = isMobile
+                      ? idx
+                      : idx === totalDots - 1
+                        ? deliverySteps.length - 1
+                        : idx;
+                    api?.scrollTo(targetSlide);
+                  }}
                   aria-label={`Go to slide ${idx + 1}`}
                   type="button"
                 >
-                  <span className={`block w-4 h-4 rounded-full ${selectedIndex === idx ? 'bg-[#222]' : 'bg-transparent'}`} />
+                  <span
+                    className={`block rounded-full ${
+                      getActiveDotForCurrentSlide(currentStep, deliverySteps.length, totalDots) ===
+                      idx
+                        ? 'bg-[#222]'
+                        : 'bg-transparent'
+                    } ${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`}
+                  />
                 </button>
               ))}
             </div>
-            {/* Botón Flecha Derecha */}
+            {/* Right Arrow Button */}
             <button
-              className="text-7xl font-extrabold text-[#222] px-4 hover:text-[#e2b13c] transition-colors disabled:opacity-40"
+              className={`${isMobile ? 'px-2 text-5xl' : 'px-4 text-7xl'} font-extrabold text-[#222] transition-colors hover:text-[#e2b13c] disabled:opacity-40`}
               onClick={() => api?.scrollNext()}
-              aria-label="Siguiente"
-              disabled={selectedIndex === scrollSnaps.length - 1}
+              aria-label="Next"
+              disabled={currentStep === deliverySteps.length - 1}
               type="button"
             >
               &#62;
