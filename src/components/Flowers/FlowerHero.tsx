@@ -1,88 +1,112 @@
-'use client';
-
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import FlowerImage from './FlowerImage';
-import { useState, useEffect } from 'react';
-import ScheduleDialog from '../Logistics/Schedule';
-import { FormType } from '../Logistics/QuoteRequest/types';
+import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
 
 interface FlowerHeroProps {
-  onRequestQuote: (formType: FormType) => void;
+  headline?: string;
+  subheadline?: string;
+  imagePath?: string;
 }
 
-const FlowerHero = ({ onRequestQuote }: FlowerHeroProps) => {
-  const [isMobile, setIsMobile] = useState(false);
-
+const FlowerHero: React.FC<FlowerHeroProps> = ({
+  imagePath = "/images/flowers/flower1.png"
+}) => {
+  const [isTextAnimated, setIsTextAnimated] = useState(false);
+  // Initialize the FormManager
+  const { openForm, DialogForm } = FormManager();
+  
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
+    // Trigger text animation when component mounts
+    setIsTextAnimated(true);
   }, []);
 
-  const handleQuoteClick = () => {
-    console.log('FlowerHero - Get a quote clicked');
-    onRequestQuote('flower');
+  const handleQuoteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openForm('flower');
   };
 
+  // Split subheadline into paragraphs for better readability
+  const paragraphs = [
+    "Operating since 2019, Ready Set began in the Bay Area with a mission to serve local communities through reliable, thoughtful delivery.",
+    "When the pandemic hit, we quickly adapted, partnering with neighborhood flower shops to help keep joy and connection alive during challenging times.",
+    "Today, we specialize in local floral delivery with a personal touch. From San Francisco to Atlanta and Austin, our dedicated drivers ensure your blooms arrive on time, every time.",
+    "Each route is monitored in real-time and handled carefully, because we know it's more than just flowers. It's your shop's reputation in every bouquet."
+  ];
+  
   return (
-    <section className="relative flex w-full max-w-7xl flex-col items-center justify-between gap-8 px-4 py-12 md:grid md:grid-cols-2 md:items-center md:py-16 lg:py-20">
-      {/* Left content - Text */}
-      <div className="relative z-10 flex w-full max-w-xl flex-col space-y-6 px-6 md:px-10 lg:px-14 xl:px-20">
-        <h1 className="mb-6 cursor-pointer font-[Montserrat] text-2xl font-black leading-tight text-gray-800 transition-transform duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-3xl lg:text-4xl">
-          Not Just Flowers—
-          <br />
-          We Carry Your Standards.
-        </h1>
-
-        <p className="mb-3 cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          Operating since <span className="font-bold text-yellow-400">2019</span>, Ready Set began
-          in the Bay Area with a mission to serve local communities through reliable, thoughtful
-          delivery.
-        </p>
-        <p className="mb-3 cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          When the pandemic hit, we quickly adapted, partnering with neighborhood flower shops to
-          help keep joy and connection alive during challenging times.
-        </p>
-        <p className="cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
-          Today, we specialize in local floral delivery with a personal touch. From San Francisco to
-          Atlanta and Austin, our dedicated drivers ensure your blooms arrive on time, every time.
-          Each route is monitored in real-time and handled carefully, because we know it's more than
-          just flowers. It's your shop's reputation in every bouquet.
-        </p>
-
-        <div className="flex flex-row flex-nowrap items-center justify-center gap-4 pt-4">
-          <button
-            onClick={handleQuoteClick}
-            className="flex min-w-[120px] items-center justify-center rounded-full bg-yellow-400 px-6 py-3 font-[Montserrat] text-base font-bold text-[#23272E] shadow-sm transition-colors hover:bg-yellow-500"
-          >
-            <span className="font-bold">Get a quote</span>
-          </button>
-          <ScheduleDialog
-            buttonText="Book a call"
-            calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
-            customButton={
-              <button className="flex min-w-[120px] items-center justify-center rounded-full bg-yellow-400 px-6 py-3 font-[Montserrat] text-base font-bold text-[#23272E] shadow-sm transition-colors hover:bg-yellow-500">
-                Book a call
-              </button>
-            }
-          />
+    <section className="w-full bg-gradient-to-br from-white via-white to-yellow-50 flex items-start md:items-center justify-center min-h-[100dvh] md:min-h-screen sm:mt-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-0">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-10 lg:gap-16">
+            {/* Text Content */}
+            <div className="w-full md:w-5/12 mb-2 md:mb-0">
+              <div 
+                className={`transition-all duration-700 ease-in-out ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+              >
+                <h1 className="text-3xl sm:text-5xl font-bold text-gray-800 leading-tight tracking-tight mb-3 md:mb-8">
+                  <span className="block text-gray-900">Not Just Flowers—</span>
+                  <span className="block text-gray-800">We Carry Your</span>
+                  <span className="block bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-yellow-500">Standards.</span>
+                </h1>
+              </div>
+              
+              <div className="space-y-2 md:space-y-5">
+                {paragraphs.map((paragraph, index) => (
+                  <p 
+                    key={index}
+                    className={`text-gray-700 text-sm md:text-base leading-relaxed font-medium transition-all duration-700 delay-${200 + (index * 100)} ease-in-out ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+              
+              {/* CTA Buttons */}
+              <div 
+                className={`flex flex-wrap gap-3 md:gap-5 mt-4 md:mt-10 transition-all duration-700 delay-700 ease-in-out ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+              >
+                <button
+                  onClick={handleQuoteClick}
+                  className="bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 text-gray-800 font-medium py-2.5 md:py-3 px-6 md:px-8 sm:px-10 rounded-md transition-all duration-300 text-base shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  Get a Quote
+                </button>
+                <Link href="/book-call" passHref>
+                  <button className="bg-transparent border-2 border-yellow-400 hover:border-yellow-500 text-yellow-600 hover:text-yellow-700 font-medium py-2.5 md:py-3 px-6 md:px-8 sm:px-10 rounded-md transition-all duration-300 text-base hover:shadow-md transform hover:-translate-y-1">
+                    Book a Call
+                  </button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Flower Image */}
+            <div 
+              className={`w-full md:w-7/12 flex items-center justify-center transition-all duration-1000 delay-300 ease-in-out ${isTextAnimated ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`}
+            >
+              <div className="relative w-full" style={{ 
+                height: 'min(50vh, 600px)',
+                maxHeight: '600px',
+                minHeight: '300px'
+              }}>
+                <Image
+                  src={imagePath}
+                  alt="Colorful flower bouquet"
+                  fill
+                  priority
+                  style={{ objectFit: 'contain', objectPosition: 'center' }}
+                  sizes="(max-width: 768px) 100vw, 58vw"
+                  className="scale-110 md:scale-110 drop-shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Right content - Image */}
-      <div className="flex w-full -translate-x-16 items-center justify-center overflow-visible md:translate-x-0 md:justify-end">
-        <FlowerImage />
-      </div>
+      {/* Render the dialog form */}
+      {DialogForm}
     </section>
   );
 };
 
-export default FlowerHero; 
+export default FlowerHero;

@@ -6,14 +6,6 @@ import {
   FormType,
 } from "@/components/Logistics/QuoteRequest/types";
 import { v4 as uuidv4 } from "uuid";
-import { $Enums } from "@prisma/client";
-
-enum FormSubmissionType {
-  food = "food",
-  flower = "flower",
-  bakery = "bakery",
-  specialty = "specialty",
-}
 
 const normalizeValue = (value: any): string => {
   if (Array.isArray(value)) {
@@ -33,13 +25,6 @@ export class FormSubmissionService {
     if (!data.formType) {
       throw new Error("Form type is required");
     }
-
-    const formTypeMap: Record<string, FormSubmissionType> = {
-      food: FormSubmissionType.food,
-      flower: FormSubmissionType.flower,
-      bakery: FormSubmissionType.bakery,
-      specialty: FormSubmissionType.specialty,
-    };
 
     try {
       console.log(
@@ -64,7 +49,7 @@ export class FormSubmissionService {
         data: {
           id: uuidv4(),
           updatedAt: new Date(),
-          formType: data.formType.toLowerCase() as $Enums.FormType,
+          formType: data.formType.toUpperCase() as any, // Convert to uppercase to match enum
           companyName: normalizeValue(companyName),
           contactName: normalizeValue(contactName),
           email: normalizeValue(email),

@@ -96,6 +96,30 @@ const DeliveryWork: React.FC = () => {
         'Inbound and outbound voice call and text options available for status updates.',
       ],
     },
+    {
+      id: '10',
+      title: 'Recruiting / Onboarding',
+      subtitle: 'Maintain ATS, Obtain Required Documents and Signatures',
+      points: [
+        'Extraction of Applicants from Indeed and Facebook',
+        'Using Google Voice to get additional information and main source of communication.',
+        'Sending PDF file for applicants to fill out using apply@ready-set.co.',
+        'Adding applicants data on the Availability & Recruiting Spreadsheet.',
+        'Sending of schedule for "Daily and Weekly" basis.',
+      ],
+    },
+    {
+      id: '11',
+      title: 'Virtual Assistants',
+      subtitle: 'Various Tasks Upon Request',
+      points: [
+        'Available 24/7, making them the perfect solution for people who need help outside of regular business hours.',
+        'Save a lot of time.',
+        'Much more cost-effective, and you only pay for the time they spend working on your tasks.',
+        'Tailor services to fit specific needs and preferences.',
+        'Continuously handles multiple tasks at once.',
+      ],
+    },
   ];
 
   const [api, setApi] = useState<CarouselApi | undefined>();
@@ -139,7 +163,7 @@ const DeliveryWork: React.FC = () => {
   }, [api, onSelect]);
 
   // Set number of dots based on screen size
-  const totalDots = isMobile ? 7 : 5;
+  const totalDots = isMobile ? deliverySteps.length : 5;
   const activeDotIndex = Math.min(currentStep, totalDots - 1);
 
   // Updated helper function to handle different behavior for mobile
@@ -148,7 +172,7 @@ const DeliveryWork: React.FC = () => {
     totalSlides: number,
     totalDots: number,
   ): number => {
-    // On mobile, show all 7 dots with direct mapping
+    // On mobile, show all dots with direct mapping
     if (isMobile) {
       return currentSlide;
     }
@@ -158,7 +182,7 @@ const DeliveryWork: React.FC = () => {
       return currentSlide;
     }
 
-    // For desktop: slides 5 and 6, always highlight the last dot (index 4)
+    // For desktop: slides 5 and beyond, always highlight the last dot
     return totalDots - 1;
   };
 
@@ -166,7 +190,7 @@ const DeliveryWork: React.FC = () => {
     <section className="bg-[#fdfcf7] py-20">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <h2 className="mb-16 text-center text-4xl font-semibold text-[#222]">
-          Service We Can <br /> Provide
+          Services We Can <br /> Provide
         </h2>
         <div className="relative">
           <Carousel setApi={setApi}>
