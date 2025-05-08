@@ -1,7 +1,7 @@
 // src/app/(site)/flowers/page.tsx
 'use client';
 
-// Direct imports using lowercase filenames for better case-sensitivity compatibility
+// Import components with their original filenames
 import FlowerHero from '@/components/Flowers/FlowerHero';
 import FlowerIcons from '@/components/Flowers/FlowerIcons';
 import PackageDelivery from '@/components/Flowers/PackageDelivery';

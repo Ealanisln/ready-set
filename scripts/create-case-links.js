@@ -1,4 +1,4 @@
-// This script creates case-insensitive symbolic links for components
+// This script creates case-insensitive aliases for components
 // to ensure compatibility with case-sensitive environments like Linux/Vercel
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +16,7 @@ const componentsToLink = [
   'FAQSection.tsx'
 ];
 
-// For each component, create a lowercase copy
+// For each component, create a lowercase copy in the same directory
 componentsToLink.forEach(filename => {
   const lowercaseFilename = filename.toLowerCase();
   const sourcePath = path.join(flowersDir, filename);

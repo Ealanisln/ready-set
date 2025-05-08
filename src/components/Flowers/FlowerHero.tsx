@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
+import ScheduleDialog from '../Logistics/Schedule';
 
 interface FlowerHeroProps {
   headline?: string;
@@ -72,11 +73,15 @@ const FlowerHero: React.FC<FlowerHeroProps> = ({
                 >
                   Get a Quote
                 </button>
-                <Link href="/book-call" passHref>
-                  <button className="bg-transparent border-2 border-yellow-400 hover:border-yellow-500 text-yellow-600 hover:text-yellow-700 font-medium py-2.5 md:py-3 px-6 md:px-8 sm:px-10 rounded-md transition-all duration-300 text-base hover:shadow-md transform hover:-translate-y-1">
-                    Book a Call
-                  </button>
-                </Link>
+                <ScheduleDialog
+                  buttonText="Book a call"
+                  calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
+                  customButton={
+                    <button className="border border-yellow-500 text-yellow-600 font-medium py-2.5 md:py-3 px-6 md:px-8 sm:px-10 rounded-md transition-all duration-300 text-base hover:bg-yellow-50 shadow-sm hover:shadow-md">
+                      Book a call
+                    </button>
+                  }
+                />
               </div>
             </div>
             
