@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "dotenv -e .env.local -- next dev",
-    "build": "node scripts/build-wrapper.js",
+    "build": "npm run fix:case && node scripts/build-wrapper.js",
     "start": "next start",
     "lint": "next lint",
     "check:case": "node scripts/check-case-sensitivity.js",
@@ -24,6 +24,7 @@
     "fix:job-files": "dotenv -e .env.local -- tsx prisma/fix-file-uploads.ts",
     "fix:specific-files": "dotenv -e .env.local -- tsx prisma/update-specific-files.ts",
     "fix:move-job-files": "dotenv -e .env.local -- tsx prisma/move-and-fix-files.ts",
+    "fix:case": "node scripts/ensure-lowercase-files.js",
     "test": "dotenv -e .env.test -- vitest run",
     "test:watch": "dotenv -e .env.test -- vitest",
     "studio": "dotenv -e .env.local -- npx prisma studio",

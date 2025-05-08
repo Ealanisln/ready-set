@@ -6,7 +6,24 @@ const fs = require('fs');
 const path = require('path');
 
 try {
-  // Run the file copy script first
+  // Log environment for debugging
+  console.log('🔍 Build environment:');
+  console.log(`  - Current directory: ${process.cwd()}`);
+  console.log(`  - Is Vercel: ${process.env.VERCEL === '1' ? 'Yes' : 'No'}`);
+  console.log(`  - Node version: ${process.version}`);
+  
+  // Verify component directory structure
+  const flowersDir = path.join(process.cwd(), 'src', 'components', 'Flowers');
+  console.log(`📂 Checking component directory: ${flowersDir}`);
+  if (fs.existsSync(flowersDir)) {
+    console.log('  Component directory exists');
+    const files = fs.readdirSync(flowersDir);
+    console.log(`  Files (${files.length}): ${files.join(', ')}`);
+  } else {
+    console.error('❌ Component directory does not exist!');
+  }
+  
+  // Run the file copy script
   console.log('📁 Creating case-insensitive file copies for Vercel compatibility...');
   require('./create-case-links');
 
@@ -27,6 +44,27 @@ try {
     // Use regular build for local
     buildCommand += 'next build';
   }
+
+  // Verify that lowercase files exist before building
+  const importantFiles = [
+    'flowerhero.tsx',
+    'flowericons.tsx', 
+    'packagedelivery.tsx',
+    'deliverywork.tsx',
+    'delicateblooms.tsx',
+    'expertsupportsection.tsx',
+    'faqsection.tsx'
+  ];
+  
+  console.log('🔍 Verifying lowercase files before building:');
+  importantFiles.forEach(file => {
+    const filePath = path.join(flowersDir, file);
+    if (fs.existsSync(filePath)) {
+      console.log(`  ✅ ${file} exists`);
+    } else {
+      console.error(`  ❌ ${file} is missing!`);
+    }
+  });
 
   // Execute the build
   console.log(`Executing: ${buildCommand}`);
