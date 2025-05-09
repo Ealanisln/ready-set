@@ -5,8 +5,10 @@ import {
   updateCaterValleyOrderStatus,
   ALLOWED_STATUSES,
   type OrderStatus,
+  mapCaterValleyStatusToDriverStatus,
   type CaterValleyApiResponse, // Keep for potential future use if needed
 } from '@/services/caterValleyService'; // Import from the new service file
+import { prisma } from '@/lib/prisma';
 
 // Interface for the request body expected by this route handler
 interface UpdateStatusRequestBody {
@@ -53,12 +55,54 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // --- Security Note ---
-    // Add authentication/authorization checks here if this endpoint
-    // needs to be protected. Verify the caller has permission to update this order.
-    // Example: const session = await getServerSession(authOptions); if (!session) { return NextResponse.json({ message: 'Unauthorized' }, { status: 401 }); }
+    // Check if this is a webhook from CaterValley
+    const partnerHeader = request.headers.get('partner');
+    if (partnerHeader === 'cater-valley') {
+      // This is a webhook from CaterValley, update our internal order
+      try {
+        // Find the order in our system
+        const order = await prisma.cateringRequest.findFirst({
+          where: { orderNumber }
+        });
 
+        if (!order) {
+          return NextResponse.json(
+            { message: `Order ${orderNumber} not found in our system` },
+            { status: 404 }
+          );
+        }
 
+        // Map the CaterValley status to our internal driver status
+        const driverStatus = mapCaterValleyStatusToDriverStatus(status);
+
+        // Update the order status
+        await prisma.cateringRequest.update({
+          where: { id: order.id },
+          data: {
+            driverStatus: driverStatus as any, // Casting to any since the enum might not match exactly
+            updatedAt: new Date()
+          }
+        });
+
+        return NextResponse.json({
+          result: true,
+          message: "Order status updated successfully",
+          data: {}
+        });
+      } catch (error) {
+        console.error('Error updating order from CaterValley webhook:', error);
+        return NextResponse.json(
+          { 
+            result: false, 
+            message: error instanceof Error ? error.message : 'Unknown error updating order status',
+            data: {}
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    // If not a webhook, it's our internal system updating CaterValley
     // 3. Call the External API via the service function
     // The core logic is now in the service function
     const caterValleyResponse = await updateCaterValleyOrderStatus(

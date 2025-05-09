@@ -131,6 +131,7 @@
     "rimraf": "6.0.1",
     "sanity": "^3.71.2",
     "sanity-plugin-seo": "1.2.6-alpha",
+    "sonner": "^2.0.3",
     "stripe": "^17.5.0",
     "styled-components": "^6.1.13",
     "tailgrids": "^2.2.7",

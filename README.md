@@ -21,6 +21,12 @@ This platform allows users to register as drivers, vendors, and clients, facilit
 - Quick pickup and delivery
 - Experienced and trained couriers
 
+### Real-time Order Tracking
+- Live driver status updates for both catering and on-demand orders
+- Visual progress tracking with estimated delivery times
+- Status transitions: Assigned → At Vendor → En Route → Arrived → Completed
+- Secure API endpoints for updating order status
+
 ### Catering Delivery & Setup
 - Event planning assistance
 - Food transport and presentation services
@@ -44,6 +50,24 @@ This platform allows users to register as drivers, vendors, and clients, facilit
 - **Backend**: Next.js API routes
 - **Database**: PostgreSQL with Prisma ORM
 - **UI Components**: Shadcn
+- **State Management**: React Hooks with custom hook patterns
+- **Notifications**: Sonner toast notifications
+
+## Architecture
+
+### Components
+- Reusable UI components following React Server Component patterns
+- Client components for interactive elements
+- TypeScript interfaces for type safety
+
+### API Endpoints
+- RESTful API design with Next.js App Router
+- Status updates via `/api/driver/update-status`
+- Proper authentication and authorization checks
+
+### Hooks
+- Custom hooks for data fetching and state management
+- `useDriverStatus` for handling order status updates
 
 ## Getting Started
 

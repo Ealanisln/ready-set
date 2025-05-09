@@ -30,6 +30,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "src/scripts/sync-users.mts", "src/app/(backend)/admin/drives-calculator"  ],
+, "src/scripts/sync-users.mts", "src/app/(backend)/admin/food-calculator"  ],
   "exclude": ["node_modules"]
 }

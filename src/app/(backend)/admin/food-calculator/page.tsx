@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import { useState } from 'react';
 
 type ClientType = 'foodee' | 'catervalley' | 'graceBillion' | 'destino' | 'hy';

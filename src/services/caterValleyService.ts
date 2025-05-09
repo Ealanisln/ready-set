@@ -10,24 +10,24 @@ export const ALLOWED_STATUSES = [
     'REFUNDED',
   ] as const; // Use 'as const' for stricter type checking
   
-  // Type for the allowed statuses
+// Type for the allowed statuses
 export type OrderStatus = (typeof ALLOWED_STATUSES)[number];
-  
-  // Interface for the response from the CaterValley API
+
+// Interface for the response from the CaterValley API
 export interface CaterValleyApiResponse {
     result: boolean;
     message: string;
     data: Record<string, never>; // Empty object based on docs
 }
-  
-  /**
-   * Updates the order status via the CaterValley API.
-   * 
-   * @param orderNumber - The CaterValley order number.
-   * @param status - The new status to set.
-   * @returns The response from the CaterValley API.
-   * @throws Error if the API call fails or input is invalid.
-   */
+
+/**
+ * Updates the order status via the CaterValley API.
+ * 
+ * @param orderNumber - The CaterValley order number.
+ * @param status - The new status to set.
+ * @returns The response from the CaterValley API.
+ * @throws Error if the API call fails or input is invalid.
+ */
 export async function updateCaterValleyOrderStatus(
     orderNumber: string,
     status: OrderStatus
@@ -114,4 +114,82 @@ export async function updateCaterValleyOrderStatus(
       }
       throw new Error(`An unknown error occurred while updating CaterValley order status for ${orderNumber}.`);
     }
-} 
+}
+
+/**
+ * Calculate the delivery fee based on order data
+ * @param orderData Order data from CaterValley
+ * @returns Calculated delivery fee
+ */
+export async function calculateDeliveryFee(orderData: any): Promise<number> {
+  // Basic pricing logic - can be expanded based on business rules
+  let baseFee = 42.50; // Default delivery fee
+  
+  // Adjust fee based on order subtotal
+  if (orderData.priceTotal > 300) {
+    baseFee += 10;
+  }
+  
+  // Estimate headcount based on total items
+  const estimatedHeadcount = Math.ceil(orderData.totalItem / 1.5);
+  if (estimatedHeadcount > 25) {
+    baseFee += 15;
+  }
+  
+  return baseFee;
+}
+
+/**
+ * Maps internal driver status to CaterValley status
+ * @param driverStatus Our internal driver status
+ * @returns CaterValley status
+ */
+export function mapDriverStatusToCaterValley(driverStatus: string): OrderStatus {
+  switch (driverStatus) {
+    case 'ASSIGNED':
+      return 'CONFIRM';
+    
+    case 'ARRIVED_AT_VENDOR':
+      return 'READY';
+    
+    case 'EN_ROUTE_TO_CLIENT':
+      return 'ON_THE_WAY';
+    
+    case 'ARRIVED_TO_CLIENT':
+    case 'COMPLETED':
+      return 'COMPLETED';
+    
+    default:
+      throw new Error(`Unsupported driver status mapping: ${driverStatus}`);
+  }
+}
+
+/**
+ * Maps CaterValley status to our internal driver status
+ * @param caterValleyStatus CaterValley API status
+ * @returns Our internal driver status
+ */
+export function mapCaterValleyStatusToDriverStatus(caterValleyStatus: OrderStatus): string {
+  switch (caterValleyStatus) {
+    case 'CONFIRM':
+      return 'ASSIGNED';
+    
+    case 'READY':
+      return 'ARRIVED_AT_VENDOR';
+    
+    case 'ON_THE_WAY':
+      return 'EN_ROUTE_TO_CLIENT';
+    
+    case 'COMPLETED':
+      return 'COMPLETED';
+    
+    case 'CANCELLED':
+      return 'CANCELLED';
+    
+    case 'REFUNDED':
+      return 'CANCELLED'; // Map to the closest matching status
+    
+    default:
+      throw new Error(`Unsupported CaterValley status mapping: ${caterValleyStatus}`);
+  }
+}
