@@ -1,433 +1,325 @@
 "use client";
 
-"use client";
+import { useState, useEffect } from 'react';
 
-import { useState } from 'react';
-
-type ClientType = 'foodee' | 'catervalley' | 'graceBillion' | 'destino' | 'hy';
-
-interface PricingTier {
-  headcountRange: [number, number];
-  costRange: [number, number];
-  priceWithTip: number | string;
-  priceWithoutTip: number | string;
+// Location types and their pricing
+interface LocationPricing {
+  clientRate: number;
+  driverRate: number;
+  tollFee: number;
 }
 
-// Define pricing tiers for different clients
-const PRICING_TIERS: Record<ClientType, PricingTier[]> = {
-  foodee: [
-    { headcountRange: [0, 24], costRange: [0, 299], priceWithTip: 30.00, priceWithoutTip: 40.00 },
-    { headcountRange: [25, 49], costRange: [300, 399], priceWithTip: 42.50, priceWithoutTip: 50.00 },
-    { headcountRange: [50, 74], costRange: [400, 599], priceWithTip: 42.50, priceWithoutTip: 50.00 },
-    { headcountRange: [75, 99], costRange: [600, 899], priceWithTip: 50.00, priceWithoutTip: 60.00 },
-    { headcountRange: [100, 124], costRange: [900, 1199], priceWithTip: 60.00, priceWithoutTip: 70.00 },
-    { headcountRange: [125, Infinity], costRange: [1200, Infinity], priceWithTip: "9%", priceWithoutTip: "9%" }
-  ],
-  catervalley: [
-    { headcountRange: [0, 24], costRange: [0, 299], priceWithTip: 35.00, priceWithoutTip: 42.50 },
-    { headcountRange: [25, 49], costRange: [300, 599], priceWithTip: 45.00, priceWithoutTip: 52.50 },
-    { headcountRange: [50, 74], costRange: [600, 899], priceWithTip: 55.00, priceWithoutTip: 62.50 },
-    { headcountRange: [75, 99], costRange: [900, 1199], priceWithTip: 65.00, priceWithoutTip: 72.50 },
-    { headcountRange: [100, Infinity], costRange: [1200, Infinity], priceWithTip: "9%", priceWithoutTip: "10%" }
-  ],
-  graceBillion: [
-    { headcountRange: [0, 24], costRange: [0, 299], priceWithTip: 35.00, priceWithoutTip: 42.50 },
-    { headcountRange: [25, 49], costRange: [300, 599], priceWithTip: 45.00, priceWithoutTip: 52.50 },
-    { headcountRange: [50, 74], costRange: [600, 899], priceWithTip: 55.00, priceWithoutTip: 62.50 },
-    { headcountRange: [75, 99], costRange: [900, 1199], priceWithTip: 65.00, priceWithoutTip: 72.50 },
-    { headcountRange: [100, Infinity], costRange: [1200, Infinity], priceWithTip: "9%", priceWithoutTip: "10%" }
-  ],
-  destino: [
-    { headcountRange: [0, 24], costRange: [0, 299], priceWithTip: 0, priceWithoutTip: 60.00 },
-    { headcountRange: [25, 49], costRange: [300, 599], priceWithTip: 0, priceWithoutTip: 70.00 },
-    { headcountRange: [50, 74], costRange: [600, 899], priceWithTip: 0, priceWithoutTip: 90.00 },
-    { headcountRange: [75, 99], costRange: [900, 1199], priceWithTip: 0, priceWithoutTip: 100.00 },
-    { headcountRange: [100, 124], costRange: [1200, 1499], priceWithTip: 0, priceWithoutTip: 120.00 },
-    { headcountRange: [125, Infinity], costRange: [1500, Infinity], priceWithTip: 0, priceWithoutTip: "10%" }
-  ],
-  hy: [
-    { headcountRange: [0, Infinity], costRange: [0, Infinity], priceWithTip: 0, priceWithoutTip: 50.00 }
-  ],
+interface LocationCounts {
+  [key: string]: number;
+}
+
+// Improved type safety with more descriptive region types
+type Region = 'SF' | 'PenNorth' | 'PenSouth' | 'PenCoast' | 'Oakland' | 'Richmond' | 'Hayward' | 'Marine' | 'EastBayConcord' | 'WestSJ';
+
+// More descriptive pricing configuration
+const LOCATION_PRICING: Record<Region, LocationPricing> = {
+  'SF': { clientRate: 10.00, driverRate: 8.00, tollFee: 0 },
+  'PenNorth': { clientRate: 11.00, driverRate: 9.00, tollFee: 0 },
+  'PenSouth': { clientRate: 11.00, driverRate: 9.00, tollFee: 0 },
+  'PenCoast': { clientRate: 11.00, driverRate: 9.00, tollFee: 0 },
+  'Oakland': { clientRate: 12.00, driverRate: 10.00, tollFee: 8.00 },
+  'Richmond': { clientRate: 12.00, driverRate: 10.00, tollFee: 8.00 },
+  'Hayward': { clientRate: 12.00, driverRate: 10.00, tollFee: 0 },
+  'Marine': { clientRate: 11.50, driverRate: 9.50, tollFee: 0 },
+  'EastBayConcord': { clientRate: 10.00, driverRate: 8.00, tollFee: 0 },
+  'WestSJ': { clientRate: 11.00, driverRate: 9.00, tollFee: 0 },
 };
 
-// Driver compensation tiers
-const DRIVER_COMPENSATION: { headcountRange: [number, number]; costRange: [number, number]; rate: number }[] = [
-  { headcountRange: [0, 24], costRange: [0, 299], rate: 35 },
-  { headcountRange: [25, 49], costRange: [300, 599], rate: 40 },
-  { headcountRange: [50, 74], costRange: [600, 899], rate: 50 },
-  { headcountRange: [75, 99], costRange: [900, 1099], rate: 60 },
-  // Adding high-tier case that was missing
-  { headcountRange: [100, Infinity], costRange: [1100, Infinity], rate: 75 } // FIX #6: Added high-tier case
-];
+// Configuration constants
+const MILES_PER_STOP = 10;
+const BASE_MILES_ALLOWANCE = 10; // Additional allowance for the client
+const CLIENT_MILEAGE_RATE = 2.0; // $2/mile for client extra mileage
+const DRIVER_MILEAGE_RATE = 1.0; // $1/mile for driver extra mileage
 
-// Custom tier selection strategy type
-type TierSelectionStrategy = 'exact' | 'headcount-priority' | 'cost-priority' | 'lower-rate';
+// Define clear calculation output types
+interface CalculationResults {
+  clientPay: number;
+  driverPay: number;
+  totalStops: number;
+  mileageAllowanceClient: number;
+  mileageAllowanceDriver: number;
+  extraMileageClient: number;
+  extraMileageChargeClient: number;
+  extraMileageDriver: number;
+  extraMileageChargeDriver: number;
+  tollFees: number;
+  locationBreakdown: LocationBreakdown[];
+}
 
-const FoodDeliveryCalculator = () => {
-  const [clientType, setClientType] = useState<ClientType>('foodee');
-  const [headcount, setHeadcount] = useState<number>(0);
-  const [orderValue, setOrderValue] = useState<number>(0);
-  const [hasTip, setHasTip] = useState<boolean>(false);
-  const [tipAmount, setTipAmount] = useState<number>(0);
-  const [mileage, setMileage] = useState<number>(0);
-  const [tollFee, setTollFee] = useState<number>(0);
-  const [multipleOrders, setMultipleOrders] = useState<number>(1);
-  // FIX #1: Added tier selection strategy option
-  const [tierStrategy, setTierStrategy] = useState<TierSelectionStrategy>('lower-rate');
-  const [calculatedResults, setCalculatedResults] = useState<{
-    clientPrice: number | string;
-    driverPay: number;
-    baseDeliveryFee: number | string;
-    mileageFee: number;
-    totalFee: number | string;
-    discount: number;
-    tipAmount: number;
-  } | null>(null);
+interface LocationBreakdown {
+  location: Region;
+  count: number;
+  clientCharge: number;
+  driverPay: number;
+}
 
-  const handleCalculate = () => {
-    // Find the appropriate pricing tier based on headcount and order value
-    const clientTiers = PRICING_TIERS[clientType];
+const FlowerDeliveryCalculator = () => {
+  // Initialize location counts with proper typing
+  const [locationCounts, setLocationCounts] = useState<Record<Region, number>>(
+    Object.keys(LOCATION_PRICING).reduce((acc, location) => {
+      acc[location as Region] = 0;
+      return acc;
+    }, {} as Record<Region, number>)
+  );
+  
+  const [totalMileage, setTotalMileage] = useState<number>(0);
+  const [calculatedResults, setCalculatedResults] = useState<CalculationResults | null>(null);
+
+  // Type-safe update function
+  const updateLocationCount = (location: Region, count: number) => {
+    setLocationCounts(prev => ({
+      ...prev,
+      [location]: Math.max(0, count) // Ensure count is not negative
+    }));
+  };
+
+  // Extracted calculation functions for clarity
+  const calculateTotalStops = (counts: Record<Region, number>): number => {
+    return Object.values(counts).reduce((sum, count) => sum + count, 0);
+  };
+
+  const calculateMileageAllowances = (totalStops: number): { client: number, driver: number } => {
+    return {
+      client: (totalStops * MILES_PER_STOP) + BASE_MILES_ALLOWANCE,
+      driver: totalStops * MILES_PER_STOP
+    };
+  };
+
+  const calculateExtraMileage = (
+    totalMileage: number, 
+    allowances: { client: number, driver: number }
+  ): { client: number, driver: number } => {
+    return {
+      client: Math.max(0, totalMileage - allowances.client),
+      driver: Math.max(0, totalMileage - allowances.driver)
+    };
+  };
+
+  const calculateExtraMileageCharges = (
+    extraMileage: { client: number, driver: number }
+  ): { client: number, driver: number } => {
+    return {
+      client: extraMileage.client * CLIENT_MILEAGE_RATE,
+      driver: extraMileage.driver * DRIVER_MILEAGE_RATE
+    };
+  };
+
+  const calculateLocationCharges = (
+    counts: Record<Region, number>
+  ): { 
+    clientCharge: number, 
+    driverPay: number, 
+    tollFees: number, 
+    breakdown: LocationBreakdown[] 
+  } => {
+    let clientCharge = 0;
+    let driverPay = 0;
+    let tollFees = 0;
+    const tollLocations = new Set<string>();
     
-    let selectedTier: PricingTier | undefined;
-    
-    // FIX #1: Improved tier selection logic with multiple strategies
-    // First, try to find an exact match
-    for (const tier of clientTiers) {
-      const [minHeadcount, maxHeadcount] = tier.headcountRange;
-      const [minCost, maxCost] = tier.costRange;
-      
-      if (
-        headcount >= minHeadcount && 
-        headcount <= maxHeadcount && 
-        orderValue >= minCost && 
-        orderValue <= maxCost
-      ) {
-        selectedTier = tier;
-        break;
-      }
-    }
-    
-    // If no exact match, use the selected strategy
-    if (!selectedTier) {
-      // Find based on headcount
-      const headcountTier = clientTiers.find(
-        tier => headcount >= tier.headcountRange[0] && headcount <= tier.headcountRange[1]
-      );
-      
-      // Find based on cost
-      const costTier = clientTiers.find(
-        tier => orderValue >= tier.costRange[0] && orderValue <= tier.costRange[1]
-      );
-      
-      if (headcountTier && costTier) {
-        switch (tierStrategy) {
-          case 'headcount-priority':
-            selectedTier = headcountTier;
-            break;
-          case 'cost-priority':
-            selectedTier = costTier;
-            break;
-          case 'lower-rate':
-          default:
-            // Compare numeric rates or use cost tier for percentage rates
-            if (typeof headcountTier.priceWithoutTip === 'number' && typeof costTier.priceWithoutTip === 'number') {
-              selectedTier = headcountTier.priceWithoutTip < costTier.priceWithoutTip ? headcountTier : costTier;
-            } else {
-              selectedTier = costTier; // Default to cost tier for percentage rates
-            }
-            break;
+    const breakdown = Object.entries(counts)
+      .filter(([_, count]) => count > 0)
+      .map(([location, count]) => {
+        const locationKey = location as Region;
+        const pricing = LOCATION_PRICING[locationKey];
+        const locationClientCharge = pricing.clientRate * count;
+        const locationDriverPay = pricing.driverRate * count;
+        
+        // Only count toll fee once per location
+        if (pricing.tollFee > 0 && !tollLocations.has(location)) {
+          tollFees += pricing.tollFee;
+          tollLocations.add(location);
         }
-      } else {
-        selectedTier = headcountTier || costTier;
-      }
-    }
+        
+        clientCharge += locationClientCharge;
+        driverPay += locationDriverPay;
+        
+        return {
+          location: locationKey,
+          count,
+          clientCharge: locationClientCharge,
+          driverPay: locationDriverPay
+        };
+      });
     
-    if (!selectedTier) {
-      // If still no match, use the highest tier
-      selectedTier = clientTiers[clientTiers.length - 1];
-    }
-    
-    // Calculate base delivery fee
-    // FIX #2: Updated tip handling with better client-specific logic
-    const baseDeliveryFee = (clientType === 'destino' || clientType === 'hy') 
-      ? selectedTier.priceWithoutTip  // These clients don't use the tip system
-      : (hasTip ? selectedTier.priceWithTip : selectedTier.priceWithoutTip);
-    
-    // FIX #3: Configurable base miles and confirmation of mileage rates
-    // Calculate mileage fee - Base rate includes first 10 miles
-    const baseMiles = 10;
-    // $0.70 per mile for Foodee, $3 for direct clients
-    const mileageRate = clientType === 'foodee' ? 0.70 : 3.00; 
-    const extraMiles = Math.max(0, mileage - baseMiles);
-    const mileageFee = extraMiles * mileageRate;
-    
-    // FIX #4: Updated discount logic with better organization and clarity
-    // Calculate discount for multiple orders
-    let discount = 0;
-    if (clientType === 'destino') {
-      if (multipleOrders === 2) {
-        discount = 5;
-      } else if (multipleOrders === 3) {
-        discount = 10;
-      } else if (multipleOrders >= 4) {
-        discount = 15;
-      }
-    } else if (clientType === 'foodee' && multipleOrders > 1) {
-      // Added example discount logic for Foodee multi-orders
-      discount = multipleOrders * 2; // $2 discount per order
-    }
-    // Can add discount logic for other clients here
-    
-    // FIX #5: Fixed percentage pricing to include discount
-    // Calculate client price
-    let clientPrice: number | string;
-    if (typeof baseDeliveryFee === 'string') {
-      // Handle percentage pricing
-      const percentage = parseFloat(baseDeliveryFee);
-      const percentageFee = orderValue * percentage / 100;
-      clientPrice = percentageFee + mileageFee + tollFee - discount; // Added discount to percentage pricing
-    } else {
-      clientPrice = baseDeliveryFee + mileageFee + tollFee - discount;
-    }
-    
-    // Calculate driver pay
-    // FIX #6: Improved driver compensation logic to better handle high tiers
-    let driverRate = 0;
-    let matchedTier = false;
+    return {
+      clientCharge,
+      driverPay,
+      tollFees,
+      breakdown
+    };
+  };
 
-    // First, try to find an exact match for both headcount and cost
-    for (const tier of DRIVER_COMPENSATION) {
-      const [minHeadcount, maxHeadcount] = tier.headcountRange;
-      const [minCost, maxCost] = tier.costRange;
-      
-      const headcountMatch = headcount >= minHeadcount && headcount <= maxHeadcount;
-      const costMatch = orderValue >= minCost && orderValue <= maxCost;
-      
-      if (headcountMatch && costMatch) {
-        driverRate = tier.rate;
-        matchedTier = true;
-        break;
-      }
+  // Main calculation function
+  const calculateResults = () => {
+    const totalStops = calculateTotalStops(locationCounts);
+    
+    // Early return if no stops
+    if (totalStops === 0) {
+      alert("Please add at least one stop before calculating.");
+      return;
     }
     
-    // If no exact match, prioritize higher tier to ensure better driver compensation
-    if (!matchedTier) {
-      let headcountTier = null;
-      let costTier = null;
-      
-      // Find the matching headcount tier
-      for (const tier of DRIVER_COMPENSATION) {
-        if (headcount >= tier.headcountRange[0] && headcount <= tier.headcountRange[1]) {
-          if (!headcountTier || tier.rate > headcountTier.rate) {
-            headcountTier = tier;
-          }
-        }
-      }
-      
-      // Find the matching cost tier
-      for (const tier of DRIVER_COMPENSATION) {
-        if (orderValue >= tier.costRange[0] && orderValue <= tier.costRange[1]) {
-          if (!costTier || tier.rate > costTier.rate) {
-            costTier = tier;
-          }
-        }
-      }
-      
-      // Use the higher rate between headcount and cost tiers
-      if (headcountTier && costTier) {
-        driverRate = Math.max(headcountTier.rate, costTier.rate);
-      } else if (headcountTier) {
-        driverRate = headcountTier.rate;
-      } else if (costTier) {
-        driverRate = costTier.rate;
-      } else {
-        // If still no match, use the highest tier
-        driverRate = DRIVER_COMPENSATION[DRIVER_COMPENSATION.length - 1].rate;
-      }
-    }
+    const mileageAllowances = calculateMileageAllowances(totalStops);
+    const extraMileage = calculateExtraMileage(totalMileage, mileageAllowances);
+    const extraMileageCharges = calculateExtraMileageCharges(extraMileage);
     
-    // Calculate driver mileage fee (over base miles)
-    const driverMileageFee = extraMiles * 0.70; // Always $0.70 per mile for drivers
+    const locationCharges = calculateLocationCharges(locationCounts);
     
-    // Set the calculated results
+    // Calculate final totals
+    const clientPay = locationCharges.clientCharge + extraMileageCharges.client + locationCharges.tollFees;
+    const driverPay = locationCharges.driverPay + extraMileageCharges.driver + locationCharges.tollFees;
+    
     setCalculatedResults({
-      clientPrice: typeof clientPrice === 'number' 
-        ? Number(clientPrice.toFixed(2)) 
-        : Number(parseFloat(clientPrice as string).toFixed(2)),
-      driverPay: Number((driverRate + driverMileageFee + tollFee).toFixed(2)),
-      baseDeliveryFee,
-      mileageFee: Number(mileageFee.toFixed(2)),
-      totalFee: typeof clientPrice === 'string' ? parseFloat(clientPrice) : clientPrice,
-      discount: Number(discount.toFixed(2)),
-      tipAmount: hasTip ? Number(tipAmount.toFixed(2)) : 0
+      clientPay,
+      driverPay,
+      totalStops,
+      mileageAllowanceClient: mileageAllowances.client,
+      mileageAllowanceDriver: mileageAllowances.driver,
+      extraMileageClient: extraMileage.client,
+      extraMileageChargeClient: extraMileageCharges.client,
+      extraMileageDriver: extraMileage.driver,
+      extraMileageChargeDriver: extraMileageCharges.driver,
+      tollFees: locationCharges.tollFees,
+      locationBreakdown: locationCharges.breakdown
     });
+  };
+
+  // Add a function to reset all counts
+  const resetCounts = () => {
+    setLocationCounts(
+      Object.keys(LOCATION_PRICING).reduce((acc, location) => {
+        acc[location as Region] = 0;
+        return acc;
+      }, {} as Record<Region, number>)
+    );
+    setTotalMileage(0);
+    setCalculatedResults(null);
+  };
+
+  // Group locations by region for better organization
+  const locationsByRegion = {
+    "San Francisco": ["SF"],
+    "Peninsula": ["PenNorth", "PenSouth", "PenCoast"],
+    "East Bay": ["Oakland", "Richmond", "Hayward", "EastBayConcord"],
+    "Other": ["Marine", "WestSJ"]
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Food Delivery Pricing Calculator</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Flower Delivery Pricing Calculator</h1>
       
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2">Client Type</label>
-        <select 
-          className="w-full p-2 border rounded-md"
-          value={clientType}
-          onChange={(e) => setClientType(e.target.value as ClientType)}
-        >
-          <option value="foodee">Foodee</option>
-          <option value="catervalley">Cater Valley</option>
-          <option value="graceBillion">Grace Billion</option>
-          <option value="destino">Destino</option>
-          <option value="hy">HY (Fixed Price)</option>
-        </select>
-      </div>
-      
-      {/* FIX #1: Added tier selection strategy option */}
-      <div className="mb-6">
-        <label className="block text-gray-700 mb-2">Tier Selection Strategy</label>
-        <select 
-          className="w-full p-2 border rounded-md"
-          value={tierStrategy}
-          onChange={(e) => setTierStrategy(e.target.value as TierSelectionStrategy)}
-        >
-          <option value="lower-rate">Use Lower Rate (Default)</option>
-          <option value="headcount-priority">Prioritize Headcount</option>
-          <option value="cost-priority">Prioritize Order Value</option>
-        </select>
-        <p className="text-sm text-gray-500 mt-1">
-          This determines how to select a pricing tier when headcount and order value fall into different tiers.
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <label className="block text-gray-700 mb-2">Headcount</label>
-          <input 
-            type="number" 
-            className="w-full p-2 border rounded-md"
-            value={headcount}
-            onChange={(e) => setHeadcount(parseInt(e.target.value) || 0)}
-            min="0"
-          />
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold text-gray-700">Delivery Locations</h2>
+          <button 
+            className="text-sm text-blue-600 hover:text-blue-800"
+            onClick={resetCounts}
+          >
+            Reset All
+          </button>
         </div>
         
-        <div>
-          <label className="block text-gray-700 mb-2">Order Value ($)</label>
-          <input 
-            type="number" 
-            className="w-full p-2 border rounded-md"
-            value={orderValue}
-            onChange={(e) => setOrderValue(parseFloat(e.target.value) || 0)}
-            min="0"
-            step="0.01"
-          />
-        </div>
-      </div>
-      
-      {clientType !== 'destino' && clientType !== 'hy' && (
-        <div className="mb-6">
-          <div className="flex items-center mb-2">
-            <input 
-              type="checkbox" 
-              className="mr-2"
-              checked={hasTip}
-              onChange={(e) => setHasTip(e.target.checked)}
-            />
-            <span className="text-gray-700">Has Tip</span>
-          </div>
-          
-          {hasTip && (
-            <div className="ml-6 mt-2">
-              <label className="block text-gray-700 mb-2">Tip Amount ($)</label>
-              <input 
-                type="number" 
-                className="w-full p-2 border rounded-md"
-                value={tipAmount}
-                onChange={(e) => setTipAmount(parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.01"
-              />
+        {/* Group locations by region */}
+        {Object.entries(locationsByRegion).map(([regionName, locations]) => (
+          <div key={regionName} className="mb-4">
+            <h3 className="text-md font-medium text-gray-600 mb-2">{regionName}</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {locations.map(loc => {
+                const location = loc as Region;
+                return (
+                <div key={location} className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-gray-700 font-medium">{location}</label>
+                    <div className="text-xs text-gray-500">
+                      <span className="text-green-600">${LOCATION_PRICING[location].clientRate.toFixed(2)}</span> / 
+                      <span className="text-blue-600">${LOCATION_PRICING[location].driverRate.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <button 
+                      className="bg-red-100 text-red-800 font-bold rounded-md w-8 h-8"
+                      onClick={() => updateLocationCount(location, locationCounts[location] - 1)}
+                      aria-label={`Decrease ${location} count`}
+                    >
+                      -
+                    </button>
+                    <input 
+                      type="number" 
+                      className="mx-1 w-12 p-1 text-center border rounded-md"
+                      value={locationCounts[location]}
+                      onChange={(e) => updateLocationCount(location, parseInt(e.target.value) || 0)}
+                      min="0"
+                      aria-label={`${location} count`}
+                    />
+                    <button 
+                      className="bg-green-100 text-green-800 font-bold rounded-md w-8 h-8"
+                      onClick={() => updateLocationCount(location, locationCounts[location] + 1)}
+                      aria-label={`Increase ${location} count`}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {LOCATION_PRICING[location].tollFee > 0 && (
+                    <div className="text-xs text-blue-600 mt-1">
+                      Toll fee: ${LOCATION_PRICING[location].tollFee.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+              )})}
             </div>
-          )}
-        </div>
-      )}
-      
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <label className="block text-gray-700 mb-2">Mileage</label>
-          <input 
-            type="number" 
-            className="w-full p-2 border rounded-md"
-            value={mileage}
-            onChange={(e) => setMileage(parseFloat(e.target.value) || 0)}
-            min="0"
-            step="0.1"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-gray-700 mb-2">Toll Fee ($)</label>
-          <input 
-            type="number" 
-            className="w-full p-2 border rounded-md"
-            value={tollFee}
-            onChange={(e) => setTollFee(parseFloat(e.target.value) || 0)}
-            min="0"
-            step="0.01"
-          />
-        </div>
+          </div>
+        ))}
       </div>
       
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2">Number of Orders</label>
+        <label className="block text-gray-700 mb-2">Total Route Mileage</label>
         <input 
           type="number" 
           className="w-full p-2 border rounded-md"
-          value={multipleOrders}
-          onChange={(e) => setMultipleOrders(parseInt(e.target.value) || 1)}
-          min="1"
+          value={totalMileage}
+          onChange={(e) => setTotalMileage(parseFloat(e.target.value) || 0)}
+          min="0"
+          step="0.1"
         />
         <p className="text-sm text-gray-500 mt-1">
-          {clientType === 'destino' 
-            ? 'Used for discount calculation: 2 orders = $5 off, 3 orders = $10 off, 4+ orders = $15 off' 
-            : clientType === 'foodee'
-              ? 'Used for discount calculation: $2 discount per order'
-              : 'Number of orders being delivered'}
+          Enter the total distance for the entire delivery route
         </p>
       </div>
       
-      <button 
-        className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
-        onClick={handleCalculate}
-      >
-        Calculate
-      </button>
+      <div className="flex space-x-3 mb-6">
+        <button 
+          className="flex-1 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+          onClick={calculateResults}
+        >
+          Calculate
+        </button>
+      </div>
       
       {calculatedResults && (
         <div className="mt-8 p-4 bg-gray-100 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Results</h2>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-3 rounded shadow">
-              <h3 className="font-medium text-gray-700">Client Fee</h3>
+              <h3 className="font-medium text-gray-700">Client Pay</h3>
               <p className="text-xl font-bold text-green-600">
-                ${typeof calculatedResults.clientPrice === 'number' 
-                  ? calculatedResults.clientPrice.toFixed(2) 
-                  : calculatedResults.clientPrice}
+                ${calculatedResults.clientPay.toFixed(2)}
               </p>
               
-              <div className="mt-3 text-sm text-gray-600">
-                <div>Base Fee: ${typeof calculatedResults.baseDeliveryFee === 'string' 
-                  ? `${calculatedResults.baseDeliveryFee} of order value` 
-                  : calculatedResults.baseDeliveryFee.toFixed(2)}
-                </div>
-                <div>Mileage Fee: ${calculatedResults.mileageFee.toFixed(2)}</div>
-                <div>Toll Fee: ${tollFee.toFixed(2)}</div>
-                {calculatedResults.tipAmount > 0 && (
-                  <div>Tip Amount: ${calculatedResults.tipAmount.toFixed(2)}</div>
+              {/* Added client payment breakdown */}
+              <div className="mt-2 text-sm text-gray-600">
+                <div>Base charges: ${(calculatedResults.clientPay - calculatedResults.extraMileageChargeClient - calculatedResults.tollFees).toFixed(2)}</div>
+                {calculatedResults.extraMileageChargeClient > 0 && (
+                  <div>Extra mileage: ${calculatedResults.extraMileageChargeClient.toFixed(2)}</div>
                 )}
-                {calculatedResults.discount > 0 && (
-                  <div>Discount: -${calculatedResults.discount.toFixed(2)}</div>
+                {calculatedResults.tollFees > 0 && (
+                  <div>Toll fees: ${calculatedResults.tollFees.toFixed(2)}</div>
                 )}
               </div>
             </div>
@@ -438,22 +330,99 @@ const FoodDeliveryCalculator = () => {
                 ${calculatedResults.driverPay.toFixed(2)}
               </p>
               
-              {/* Added driver pay breakdown for clarity */}
-              <div className="mt-3 text-sm text-gray-600">
-                <div>Base Pay: ${(calculatedResults.driverPay - (mileage > 10 ? (mileage - 10) * 0.7 : 0) - tollFee).toFixed(2)}</div>
-                {mileage > 10 && (
-                  <div>Mileage Pay: ${((mileage - 10) * 0.7).toFixed(2)}</div>
+              {/* Added driver payment breakdown */}
+              <div className="mt-2 text-sm text-gray-600">
+                <div>Base pay: ${(calculatedResults.driverPay - calculatedResults.extraMileageChargeDriver - calculatedResults.tollFees).toFixed(2)}</div>
+                {calculatedResults.extraMileageChargeDriver > 0 && (
+                  <div>Extra mileage: ${calculatedResults.extraMileageChargeDriver.toFixed(2)}</div>
                 )}
-                {tollFee > 0 && (
-                  <div>Toll Reimbursement: ${tollFee.toFixed(2)}</div>
+                {calculatedResults.tollFees > 0 && (
+                  <div>Toll fees: ${calculatedResults.tollFees.toFixed(2)}</div>
                 )}
               </div>
             </div>
           </div>
+          
+          <div className="bg-white p-4 rounded shadow mb-4">
+            <h3 className="font-medium text-gray-700 mb-3">Calculation Breakdown</h3>
+            
+            <div className="grid grid-cols-3 gap-1 text-sm">
+              <div className="font-medium">Category</div>
+              <div className="font-medium text-center">Client</div>
+              <div className="font-medium text-center">Driver</div>
+              
+              <div>Total Stops</div>
+              <div className="text-center">{calculatedResults.totalStops}</div>
+              <div className="text-center">{calculatedResults.totalStops}</div>
+              
+              <div>Mileage Allowance</div>
+              <div className="text-center">{calculatedResults.mileageAllowanceClient} miles</div>
+              <div className="text-center">{calculatedResults.mileageAllowanceDriver} miles</div>
+              
+              <div>Total Mileage</div>
+              <div className="text-center">{totalMileage} miles</div>
+              <div className="text-center">{totalMileage} miles</div>
+              
+              <div>Extra Mileage</div>
+              <div className="text-center">{calculatedResults.extraMileageClient} miles</div>
+              <div className="text-center">{calculatedResults.extraMileageDriver} miles</div>
+              
+              <div>Extra Mileage Rate</div>
+              <div className="text-center">${CLIENT_MILEAGE_RATE.toFixed(2)}/mile</div>
+              <div className="text-center">${DRIVER_MILEAGE_RATE.toFixed(2)}/mile</div>
+              
+              <div>Extra Mileage Charge</div>
+              <div className="text-center">${calculatedResults.extraMileageChargeClient.toFixed(2)}</div>
+              <div className="text-center">${calculatedResults.extraMileageChargeDriver.toFixed(2)}</div>
+              
+              <div>Toll Fees</div>
+              <div className="text-center">${calculatedResults.tollFees.toFixed(2)}</div>
+              <div className="text-center">${calculatedResults.tollFees.toFixed(2)}</div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded shadow">
+            <h3 className="font-medium text-gray-700 mb-3">Location Breakdown</h3>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2">Location</th>
+                    <th className="text-center py-2">Count</th>
+                    <th className="text-right py-2">Client Charge</th>
+                    <th className="text-right py-2">Driver Pay</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calculatedResults.locationBreakdown.map((item, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-2">{item.location}</td>
+                      <td className="text-center py-2">{item.count}</td>
+                      <td className="text-right py-2">${item.clientCharge.toFixed(2)}</td>
+                      <td className="text-right py-2">${item.driverPay.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
+      
+      {/* Help text and explanation */}
+      <div className="mt-6 text-sm text-gray-500">
+        <h3 className="font-medium text-gray-700 mb-2">How calculations work:</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Each stop has a base rate that varies by location</li>
+          <li>Client mileage allowance: {MILES_PER_STOP} miles per stop + {BASE_MILES_ALLOWANCE} base miles</li>
+          <li>Driver mileage allowance: {MILES_PER_STOP} miles per stop</li>
+          <li>Extra mileage charges: ${CLIENT_MILEAGE_RATE.toFixed(2)}/mile for client, ${DRIVER_MILEAGE_RATE.toFixed(2)}/mile for driver</li>
+          <li>Toll fees are only counted once per location, regardless of the number of stops</li>
+        </ul>
+      </div>
     </div>
   );
 };
 
-export default FoodDeliveryCalculator;
+export default FlowerDeliveryCalculator;

@@ -450,6 +450,55 @@ const FoodDeliveryCalculator = () => {
           </div>
         </div>
       )}
+      
+      {/* Added explanatory notes section */}
+      <div className="mt-8 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg">
+        <h3 className="font-medium text-gray-700 mb-2">How calculations work:</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          <li><strong>Pricing Tiers:</strong> Based on both headcount and order value ranges</li>
+          <li><strong>Tier Selection Strategy:</strong> When headcount and order value fall into different tiers, the selected strategy determines which tier to use</li>
+          <li><strong>Base Delivery Fee:</strong> Fixed amount or percentage based on the pricing tier</li>
+          <li><strong>Mileage:</strong> First 10 miles included, then charged at ${clientType === 'foodee' ? '0.70' : '3.00'}/mile for client, always $0.70/mile for driver</li>
+          <li><strong>Discounts:</strong> 
+            {clientType === 'destino' ? 'Destino: $5 off for 2 orders, $10 off for 3 orders, $15 off for 4+ orders' : 
+             clientType === 'foodee' ? 'Foodee: $2 discount per additional order' : 
+             'Varies by client type'}
+          </li>
+          <li><strong>Driver Compensation:</strong> Based on tiers determined by headcount and order value</li>
+          {clientType !== 'destino' && clientType !== 'hy' && (
+            <li><strong>Tip Handling:</strong> Different base fees apply depending on whether the order includes a tip</li>
+          )}
+        </ul>
+        
+        <h3 className="font-medium text-gray-700 mt-4 mb-2">Client-Specific Information:</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          {clientType === 'foodee' && (
+            <>
+              <li>Pricing shifts to percentage-based model (9%) for orders with 125+ headcount or $1,200+ value</li>
+              <li>Lower mileage rate ($0.70/mile) compared to other clients</li>
+            </>
+          )}
+          {(clientType === 'catervalley' || clientType === 'graceBillion') && (
+            <>
+              <li>Pricing shifts to percentage-based model (9% with tip, 10% without) for orders with 100+ headcount or $1,200+ value</li>
+              <li>Higher mileage rate ($3.00/mile)</li>
+            </>
+          )}
+          {clientType === 'destino' && (
+            <>
+              <li>No tip option available for this client</li>
+              <li>Pricing shifts to percentage-based model (10%) for orders with 125+ headcount or $1,500+ value</li>
+              <li>Multi-order discounts: $5 off for 2 orders, $10 off for 3 orders, $15 off for 4+ orders</li>
+            </>
+          )}
+          {clientType === 'hy' && (
+            <>
+              <li>Fixed flat rate of $50.00 regardless of order size</li>
+              <li>No tip option available for this client</li>
+            </>
+          )}
+        </ul>
+      </div>
     </div>
   );
 };
