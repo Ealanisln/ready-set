@@ -37,8 +37,8 @@ const ROLE_MENU_ITEMS: Record<UserType, MenuItem> = {
   },
   [UserType.HELPDESK]: {
     id: 4,
-    title: "Helpdesk",
-    path: "/helpdesk",
+    title: "Helpdesk Portal",
+    path: "/admin",
   },
   [UserType.SUPER_ADMIN]: {
     id: 2,

@@ -47,10 +47,10 @@ async function checkAuthorization(requestedUserId: string) {
       select: { type: true }
     });
     
-    // Allow access if the user is an admin or super_admin in database profile
-    if (userData?.type === UserType.ADMIN || userData?.type === UserType.SUPER_ADMIN) {
-      console.log("Auth check - User has admin type in profile");
-      return null; // Authorized for admins by profile
+    // Allow access if the user is an admin, super_admin, or helpdesk user in database profile
+    if (userData?.type === UserType.ADMIN || userData?.type === UserType.SUPER_ADMIN || userData?.type === UserType.HELPDESK) {
+      console.log("Auth check - User has admin or helpdesk type in profile");
+      return null; // Authorized for admins and helpdesk by profile
     }
     
     // Deny access for all other cases

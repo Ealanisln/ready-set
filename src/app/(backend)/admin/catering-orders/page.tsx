@@ -31,8 +31,8 @@ const Orders = async () => {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "super_admin"].includes(profile.type.toLowerCase())) {
-    // Redirect to appropriate page if not an admin
+  if (!profile || !["admin", "super_admin", "helpdesk"].includes(profile.type.toLowerCase())) {
+    // Redirect to appropriate page if not an admin or helpdesk
     redirect("/");
   }
 

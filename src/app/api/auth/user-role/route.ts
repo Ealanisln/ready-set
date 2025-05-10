@@ -59,11 +59,13 @@ export async function GET(req: NextRequest) {
     // Determine user roles
     const isAdmin = profile.type === UserType.ADMIN;
     const isSuperAdmin = profile.type === UserType.SUPER_ADMIN;
+    const isHelpdesk = profile.type === UserType.HELPDESK;
 
     // Return role information
     return NextResponse.json({
       isAdmin,
       isSuperAdmin,
+      isHelpdesk,
       userType: profile.type
     }, { status: 200 });
 

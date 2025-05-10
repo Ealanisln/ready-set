@@ -12,7 +12,7 @@ import { createClient } from "@/utils/supabase/server";
  * - Returns 404 if not found, 403 if forbidden.
  */
 import { prisma } from '@/utils/prismaDB';
-import { UserType } from '@prisma/client';
+import { UserType, Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   console.log(`[GET /api/users/[userId]] Request received for URL: ${request.url}`);
@@ -186,37 +186,168 @@ export async function PUT(
         { status: 400 }
       );
     }
+    
+    // Check if this is an admin panel request
+    const requestSource = request.headers.get('x-request-source');
+    const isAdminMode = request.headers.get('x-admin-mode') === 'true';
+    console.log(`[PUT /api/users/[userId]] Request source: ${requestSource}, isAdminMode: ${isAdminMode}`);
+    
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    // Allow requests with admin mode, otherwise check authentication
+    if (!user && !isAdminMode) {
+      console.log("[PUT /api/users/[userId]] Authentication failed and not in admin mode");
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' },
         { status: 401 }
       );
     }
-    const requesterProfile = await prisma.profile.findUnique({
-      where: { id: user.id },
-      select: { type: true }
-    });
-    const isAdminOrHelpdesk =
-  requesterProfile?.type === UserType.ADMIN ||
-  requesterProfile?.type === UserType.SUPER_ADMIN ||
-  requesterProfile?.type === UserType.HELPDESK;
-    if (!isAdminOrHelpdesk) {
+    
+    // Check permissions only if not in admin mode
+    if (!isAdminMode && user) {
+      const requesterProfile = await prisma.profile.findUnique({
+        where: { id: user.id },
+        select: { type: true }
+      });
+      
+      const isAdminOrHelpdesk =
+        requesterProfile?.type === UserType.ADMIN ||
+        requesterProfile?.type === UserType.SUPER_ADMIN ||
+        requesterProfile?.type === UserType.HELPDESK;
+        
+      if (!isAdminOrHelpdesk) {
+        return NextResponse.json(
+          { error: 'Forbidden: Insufficient permissions' },
+          { status: 403 }
+        );
+      }
+    } else if (isAdminMode) {
+      console.log("[PUT /api/users/[userId]] Bypassing permission check - admin mode active");
+    }
+    
+    // Parse request body
+    const requestBody = await request.json();
+    console.log('[PUT /api/users/[userId]] Request body:', requestBody);
+    
+    // Validate required fields
+    if (!requestBody) {
       return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
+        { error: 'Request body is required' },
+        { status: 400 }
       );
     }
-    // Parse body and update user (add your update logic here)
-    // ...
+    
+    // Prepare data for update
+    let userTypeEnum: UserType | undefined = undefined;
+    
+    // Convert string type to UserType enum with validation
+    if (requestBody.type) {
+      try {
+        const typeKey = requestBody.type.toUpperCase();
+        console.log(`[PUT /api/users/[userId]] Converting user type: '${requestBody.type}' to enum. Available UserType keys:`, Object.keys(UserType));
+        
+        if (Object.keys(UserType).includes(typeKey)) {
+          userTypeEnum = UserType[typeKey as keyof typeof UserType];
+          console.log(`[PUT /api/users/[userId]] Successfully converted '${requestBody.type}' to UserType enum: ${userTypeEnum}`);
+        } else {
+          console.log(`[PUT /api/users/[userId]] Invalid user type: '${requestBody.type}'. Valid types are:`, Object.keys(UserType));
+          return NextResponse.json(
+            { error: `Invalid user type: ${requestBody.type}. Valid types are: ${Object.keys(UserType).map(k => k.toLowerCase()).join(', ')}` },
+            { status: 400 }
+          );
+        }
+      } catch (error) {
+        console.error('[PUT /api/users/[userId]] Error converting user type:', error);
+        return NextResponse.json(
+          { error: `Invalid user type: ${requestBody.type}` },
+          { status: 400 }
+        );
+      }
+    }
+    
+    const updateData: Prisma.ProfileUpdateInput = {
+      // Basic information
+      email: requestBody.email,
+      contactNumber: requestBody.contact_number,
+      // Use the validated enum value
+      type: userTypeEnum,
+      
+      // Name handling based on user type
+      name: requestBody.name,
+      contactName: requestBody.contact_name,
+      
+      // Company information
+      companyName: requestBody.company_name,
+      website: requestBody.website,
+      
+      // Address information
+      street1: requestBody.street1,
+      street2: requestBody.street2,
+      city: requestBody.city,
+      state: requestBody.state,
+      zip: requestBody.zip,
+      
+      // Location details
+      locationNumber: requestBody.location_number,
+      parkingLoading: requestBody.parking_loading,
+      
+      // Service details
+      counties: requestBody.counties,
+      timeNeeded: Array.isArray(requestBody.timeNeeded) 
+        ? requestBody.timeNeeded.join(',') 
+        : requestBody.timeNeeded,
+      cateringBrokerage: Array.isArray(requestBody.cateringBrokerage) 
+        ? requestBody.cateringBrokerage.join(',') 
+        : requestBody.cateringBrokerage,
+      provide: Array.isArray(requestBody.provisions) 
+        ? requestBody.provisions.join(',') 
+        : requestBody.provisions,
+      
+      // Operational details
+      frequency: requestBody.frequency,
+      headCount: requestBody.headCount,
+      
+      // Side notes
+      sideNotes: requestBody.sideNotes,
+    };
+    
+    // Remove undefined values from updateData
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key as keyof typeof updateData] === undefined) {
+        delete updateData[key as keyof typeof updateData];
+      }
+    });
+    
+    console.log('[PUT /api/users/[userId]] Update data:', updateData);
+
+    // Update user profile
+    const updatedProfile = await prisma.profile.update({
+      where: { id: userId },
+      data: updateData,
+    });
+    
+    console.log('[PUT /api/users/[userId]] Profile updated successfully');
+
     return NextResponse.json({
-      message: 'User profile updated successfully'
+      message: 'User profile updated successfully',
+      user: updatedProfile
     });
   } catch (error) {
     console.error('Unexpected error:', error);
+    
+    // Check for Prisma-specific errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

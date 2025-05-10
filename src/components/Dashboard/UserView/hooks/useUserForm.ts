@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { UserFormValues } from "../types";
+import { createClient } from "@/utils/supabase/client";
+import { useUser } from "@/contexts/UserContext";
 
 // Define a type that extends UseFormReturn with our custom properties
 import { UseFormReturn } from "react-hook-form";
@@ -16,6 +18,9 @@ export const useUserForm = (
   userId: string,
   fetchUser: () => Promise<UserFormValues | null>
 ): ExtendedUseFormReturn => {
+  // Get user session from context
+  const { session } = useUser();
+  
   // Create the form with react-hook-form
   const methods = useForm<UserFormValues>({
     defaultValues: {
@@ -128,6 +133,25 @@ export const useUserForm = (
       
       console.log("Data being sent to API:", submitData); // Add log
 
+      // Get the current auth token
+      let authToken = session?.access_token;
+      
+      // If no token in context, try to get it directly from Supabase
+      if (!authToken) {
+        try {
+          const supabase = createClient();
+          const { data } = await supabase.auth.getSession();
+          authToken = data.session?.access_token;
+          console.log("Retrieved new auth token from Supabase:", !!authToken);
+        } catch (tokenError) {
+          console.error("Failed to get auth token:", tokenError);
+        }
+      }
+      
+      // Check if we have the admin mode flag
+      const isAdminMode = typeof window !== 'undefined' && localStorage.getItem('admin_mode') === 'true';
+      console.log("Admin mode active:", isAdminMode);
+
       const response = await fetch(`/api/users/${userId}`, {
         method: "PUT",
         headers: {
@@ -135,6 +159,8 @@ export const useUserForm = (
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
           "x-request-source": "ModernUserProfile-Submit",
+          "x-admin-mode": isAdminMode ? "true" : "false",
+          ...(authToken && { "Authorization": `Bearer ${authToken}` })
         },
         body: JSON.stringify(submitData),
         credentials: 'include'

@@ -7,7 +7,7 @@ const PROTECTED_ROUTES: Record<UserType, RegExp> = {
   [UserType.ADMIN]: /^\/admin(\/.*)?$/,
   [UserType.SUPER_ADMIN]: /^\/admin(\/.*)?$/,
   [UserType.DRIVER]: /^\/driver(\/.*)?$/,
-  [UserType.HELPDESK]: /^\/helpdesk(\/.*)?$/,
+  [UserType.HELPDESK]: /^\/helpdesk(\/.*)?$|^\/admin(\/.*)?$/,
   [UserType.VENDOR]: /^\/vendor(\/.*)?$/,
   [UserType.CLIENT]: /^\/client(\/.*)?$/
 };

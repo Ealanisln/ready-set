@@ -25,7 +25,7 @@ export const driverMenuItem: MenuItem = {
 export const helpdeskMenuItem: MenuItem = {
   id: 33,
   title: "Helpdesk Portal",
-  path: "/app/(site)/(users)/helpdesk",
+  path: "/admin",
   newTab: false,
 };
 

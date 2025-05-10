@@ -34,13 +34,13 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        if (!profile || (profile.type !== 'SUPER_ADMIN' && profile.type !== 'ADMIN')) {
-          console.log('User is not an admin, redirecting to home');
+        if (!profile || (profile.type !== 'SUPER_ADMIN' && profile.type !== 'ADMIN' && profile.type !== 'HELPDESK')) {
+          console.log('User is not an admin or helpdesk, redirecting to home');
           router.push('/');
           return;
         }
 
-        console.log('User is authorized as admin');
+        console.log('User is authorized as admin or helpdesk');
         setIsLoading(false);
       } catch (error) {
         console.error('Auth check failed:', error);
