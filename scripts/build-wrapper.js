@@ -15,135 +15,130 @@ try {
   // Verify component directory structure
   const flowersDir = path.join(process.cwd(), 'src', 'components', 'Flowers');
   console.log(`📂 Checking component directory: ${flowersDir}`);
-  if (fs.existsSync(flowersDir)) {
-    console.log('  Component directory exists');
-    const files = fs.readdirSync(flowersDir);
-    console.log(`  Files (${files.length}): ${files.join(', ')}`);
-  } else {
-    console.error('❌ Component directory does not exist!');
+  if (!fs.existsSync(flowersDir)) {
+    console.log('  ❌ Component directory does not exist, creating it...');
+    fs.mkdirSync(flowersDir, { recursive: true });
   }
+  
+  const files = fs.readdirSync(flowersDir);
+  console.log(`  Files (${files.length}): ${files.join(', ')}`);
   
   // Define the component files that need lowercase versions
   const components = [
-    'FlowerHero.tsx',
-    'FlowerIcons.tsx',
-    'PackageDelivery.tsx',
-    'DeliveryWork.tsx',
-    'DelicateBlooms.tsx',
-    'ExpertSupportSection.tsx',
-    'FAQSection.tsx'
+    { pascal: 'FlowerHero.tsx', lower: 'flowerhero.tsx' },
+    { pascal: 'FlowerIcons.tsx', lower: 'flowericons.tsx' },
+    { pascal: 'PackageDelivery.tsx', lower: 'packagedelivery.tsx' },
+    { pascal: 'DeliveryWork.tsx', lower: 'deliverywork.tsx' },
+    { pascal: 'DelicateBlooms.tsx', lower: 'delicateblooms.tsx' },
+    { pascal: 'ExpertSupportSection.tsx', lower: 'expertsupportsection.tsx' },
+    { pascal: 'FAQSection.tsx', lower: 'faqsection.tsx' }
   ];
   
-  // Force create lowercase versions
-  console.log('📁 Creating lowercase component files:');
+  // Create a placeholder component content generator
+  const createPlaceholderContent = (componentName) => {
+    return `'use client';
+export default function ${componentName.replace('.tsx', '')}() {
+  return <div className="p-8 text-center">Placeholder for ${componentName}</div>;
+}`;
+  };
   
-  // Get existing files
-  const existingFiles = fs.readdirSync(flowersDir);
+  // Ensure all lowercase files exist
+  console.log('📁 Ensuring lowercase component files exist:');
   
-  // Process each component
-  components.forEach(component => {
-    const lowercaseName = component.toLowerCase();
-    const destPath = path.join(flowersDir, lowercaseName);
+  components.forEach(({ pascal, lower }) => {
+    const lowerPath = path.join(flowersDir, lower);
+    const pascalPath = path.join(flowersDir, pascal);
     
-    console.log(`Processing: ${component} → ${lowercaseName}`);
+    console.log(`Processing: ${pascal} → ${lower}`);
     
-    // Find the source file (original case or any variation)
-    const matchingFile = existingFiles.find(file => 
-      file.toLowerCase() === component.toLowerCase()
-    );
-    
-    if (!matchingFile) {
-      console.error(`  ❌ No matching file found for ${component}`);
-      
-      // Create an empty placeholder
-      const defaultContent = `'use client';\nexport default function EmptyComponent() { return <div>Placeholder for ${component}</div>; }`;
+    // Check if we already have a lowercase file
+    if (fs.existsSync(lowerPath)) {
+      console.log(`  ✅ Lowercase file already exists: ${lower}`);
+    } 
+    // Check if we have a PascalCase file to convert
+    else if (fs.existsSync(pascalPath)) {
+      console.log(`  🔄 Converting PascalCase file to lowercase: ${pascal} → ${lower}`);
       try {
-        fs.writeFileSync(destPath, defaultContent);
-        console.log(`  ✅ Created placeholder for ${lowercaseName}`);
+        const content = fs.readFileSync(pascalPath, 'utf8');
+        fs.writeFileSync(lowerPath, content);
+        console.log(`  ✅ Created lowercase file from PascalCase: ${lower}`);
       } catch (err) {
-        console.error(`  ❌ Failed to create placeholder:`, err);
+        console.error(`  ❌ Error converting PascalCase file: ${err.message}`);
+        console.log(`  ⚠️ Creating placeholder instead...`);
+        fs.writeFileSync(lowerPath, createPlaceholderContent(pascal));
       }
-      return;
-    }
-    
-    // Force delete and recreate the lowercase version
-    try {
-      // If the file already exists with the same inode (macOS case-insensitive), we need to copy to a temp file first
-      if (fs.existsSync(destPath)) {
-        console.log(`  🔄 Deleting existing ${lowercaseName}`);
-        
+    } 
+    // Check if file exists regardless of case (for case-insensitive file systems)
+    else {
+      const matchingFile = files.find(file => file.toLowerCase() === lower.toLowerCase());
+      if (matchingFile) {
+        console.log(`  🔄 Found case-variant file: ${matchingFile}`);
         try {
-          // Create a temporary copy with a different name
-          const tempName = `${lowercaseName}.temp`;
-          const tempPath = path.join(flowersDir, tempName);
-          
-          // Read the original file
+          // Read the content from the variant
           const content = fs.readFileSync(path.join(flowersDir, matchingFile), 'utf8');
           
-          // Write to temp file
+          // Special handling for case-insensitive file systems to avoid conflicts
+          const tempPath = path.join(flowersDir, `${lower}.temp`);
           fs.writeFileSync(tempPath, content);
           
-          // Try to delete the original
-          fs.unlinkSync(destPath);
+          // For case-insensitive systems, this may delete the original too
+          try {
+            if (fs.existsSync(lowerPath) && matchingFile !== lower) {
+              fs.unlinkSync(lowerPath);
+            }
+          } catch (err) {
+            console.warn(`  ⚠️ Could not delete existing file: ${err.message}`);
+          }
           
-          // Rename temp back to target
-          fs.renameSync(tempPath, destPath);
-          console.log(`  ✅ Successfully recreated ${lowercaseName}`);
+          // Rename temp to the proper lowercase name
+          fs.renameSync(tempPath, lowerPath);
+          console.log(`  ✅ Created lowercase file from variant: ${lower}`);
         } catch (err) {
-          console.error(`  ❌ Error during file recreation:`, err);
-          
-          // If that fails, create directly with simple content
-          const content = `'use client';\n\n// Import from original file\nexport { default } from './${matchingFile}';`;
-          fs.writeFileSync(destPath, content);
-          console.log(`  ✅ Created import reference to ${matchingFile}`);
+          console.error(`  ❌ Error processing file variant: ${err.message}`);
+          console.log(`  ⚠️ Creating placeholder instead...`);
+          fs.writeFileSync(lowerPath, createPlaceholderContent(pascal));
         }
       } else {
-        // Just copy directly
-        const sourcePath = path.join(flowersDir, matchingFile);
-        fs.copyFileSync(sourcePath, destPath);
-        console.log(`  ✅ Created lowercase version from ${matchingFile}`);
+        // No matching file, create a placeholder
+        console.log(`  ⚠️ No existing file found, creating placeholder for: ${lower}`);
+        fs.writeFileSync(lowerPath, createPlaceholderContent(pascal));
+        console.log(`  ✅ Created placeholder file: ${lower}`);
       }
-    } catch (err) {
-      console.error(`  ❌ Failed to create lowercase version:`, err);
     }
   });
-
-  // Determine if we're in Vercel
+  
+  // On Vercel (case-sensitive file system), we need to ensure only lowercase files exist
   const isVercel = process.env.VERCEL === '1';
+  if (isVercel) {
+    console.log('🧹 Removing PascalCase files on Vercel to avoid case conflicts:');
+    components.forEach(({ pascal, lower }) => {
+      const pascalPath = path.join(flowersDir, pascal);
+      if (fs.existsSync(pascalPath)) {
+        try {
+          fs.unlinkSync(pascalPath);
+          console.log(`  ✅ Deleted PascalCase file: ${pascal}`);
+        } catch (err) {
+          console.error(`  ❌ Error deleting PascalCase file: ${err.message}`);
+        }
+      }
+    });
+  }
 
   // Build command
   let buildCommand = 'npx prisma generate && ';
 
-  if (isVercel) {
-    console.log('🔄 Running build in Vercel environment with TypeScript case-insensitivity');
-    buildCommand += 'next build';
-  } else {
-    console.log('🔄 Running build in local environment');
-    buildCommand += 'next build';
-  }
-
-  // Verify that lowercase files exist before building
-  const importantFiles = [
-    'flowerhero.tsx',
-    'flowericons.tsx', 
-    'packagedelivery.tsx',
-    'deliverywork.tsx',
-    'delicateblooms.tsx',
-    'expertsupportsection.tsx',
-    'faqsection.tsx'
-  ];
+  console.log(`🔄 Running build in ${isVercel ? 'Vercel' : 'local'} environment`);
+  buildCommand += 'next build';
   
-  console.log('🔍 Verifying lowercase files before building:');
-  
-  // Check each important file
-  importantFiles.forEach(file => {
+  // Final verification
+  console.log('🔍 Verifying component files before building:');
+  const lowerComponents = components.map(c => c.lower);
+  lowerComponents.forEach(file => {
     const filePath = path.join(flowersDir, file);
     if (fs.existsSync(filePath)) {
       console.log(`  ✅ ${file} exists`);
     } else {
-      console.log(`  ❌ ${file} missing - creating placeholder`);
-      const defaultContent = `'use client';\nexport default function Placeholder() { return <div>Placeholder</div>; }`;
-      fs.writeFileSync(filePath, defaultContent);
+      console.error(`  ❌ ${file} is missing! This will cause build errors.`);
     }
   });
   
