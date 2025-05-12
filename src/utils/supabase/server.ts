@@ -7,13 +7,21 @@ import { CookieOptions } from '@supabase/ssr'
 // For App Router usage - this uses next/headers which only works in the App Router
 export async function createClient() {
   // Dynamically import cookies from next/headers only when this function is called
-  // This prevents the import from being evaluated during build time for Pages Router
   const { cookies } = await import('next/headers')
   
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+      global: {
+        headers: {
+          'x-redirect-to': '/sign-in',
+        },
+      },
       cookies: {
         async getAll() {
           const cookieStore = await cookies()
@@ -39,6 +47,15 @@ export async function createAdminClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+      global: {
+        headers: {
+          'x-redirect-to': '/sign-in',
+        },
+      },
       cookies: {
         async getAll() {
           const cookieStore = await cookies()
@@ -64,6 +81,15 @@ export function createServerSupabaseClient(context: { req: NextApiRequest; res: 
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+      global: {
+        headers: {
+          'x-redirect-to': '/sign-in',
+        },
+      },
       cookies: {
         getAll() {
           return Object.entries(cookiesObj).map(([name, value]) => ({

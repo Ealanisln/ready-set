@@ -19,6 +19,13 @@ export const createClient = (): SupabaseClient => {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+      global: {
+        headers: {
+          'x-redirect-to': '/sign-in',
+        },
       },
     });
   }

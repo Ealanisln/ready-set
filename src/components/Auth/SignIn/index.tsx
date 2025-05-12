@@ -11,11 +11,13 @@ import { login, FormState } from "@/app/actions/login";
 import GoogleAuthButton from "@/components/Auth/GoogleAuthButton";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
+import { H } from 'highlight.run';
+import { logAuthError, trackAuthSuccess } from '@/utils/highlight-auth-logger';
 
 const Signin = ({
   searchParams,
 }: {
-  searchParams?: { error?: string; message?: string };
+  searchParams?: { error?: string; message?: string; returnTo?: string };
 }) => {
   const { isLoading: isUserLoading, session } = useUser();
   const router = useRouter();
@@ -42,25 +44,60 @@ const Signin = ({
     general: "",
   });
 
+  // Get returnTo from URL parameters
+  const [returnTo, setReturnTo] = useState<string>("/");
+
+  useEffect(() => {
+    // Get returnTo from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const returnPath = params.get("returnTo");
+    if (returnPath) {
+      setReturnTo(returnPath);
+    }
+  }, []);
+
   useEffect(() => {
     if (state?.error) {
       setErrors((prev) => ({ ...prev, general: state.error || "" }));
       setLoading(false);
+      
+      // Track login error with Highlight
+      try {
+        logAuthError(state.error, {
+          action: 'login',
+          email: loginData.email,
+          returnTo: returnTo
+        });
+      } catch (err) {
+        console.error('Failed to log auth error:', err);
+      }
     }
-  }, [state]);
+    
+    // If redirectTo is set in the state, we're being redirected by the server
+    if (state?.redirectTo) {
+      console.log("Login action is handling redirect to:", state.redirectTo);
+      
+      // Track successful login
+      try {
+        trackAuthSuccess({
+          action: 'login',
+          email: loginData.email,
+          returnTo: returnTo,
+          redirectTo: state.redirectTo
+        });
+      } catch (err) {
+        console.error('Failed to track auth success:', err);
+      }
+      
+      // Let the server handle the redirect
+    }
+  }, [state, loginData.email, returnTo]);
 
   useEffect(() => {
     if (searchParams?.error) {
       setErrors((prev) => ({ ...prev, general: searchParams.error || "" }));
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (session && !isUserLoading) {
-       console.log("SignIn: Session detected, redirecting to /");
-       router.push("/");
-    }
-  }, [session, isUserLoading, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -123,6 +160,31 @@ const Signin = ({
       setMagicLinkLoading(false);
     }
   };
+
+  // Add new useEffect to track errors and auth redirects
+  useEffect(() => {
+    try {
+      // Track page view with context
+      if (typeof window !== 'undefined' && window.H) {
+        H.track('auth_signin_page_view', {
+          hasError: !!errors.general || !!searchParams?.error,
+          hasReturnTo: !!returnTo,
+          returnTo: returnTo,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      // Track auth errors from URL parameters
+      if (searchParams?.error) {
+        logAuthError(searchParams.error, {
+          action: 'login',
+          returnTo: returnTo
+        });
+      }
+    } catch (err) {
+      console.error('Failed to track auth page view:', err);
+    }
+  }, [searchParams, returnTo, errors.general]);
 
   if (isUserLoading) {
     return (
@@ -239,66 +301,70 @@ const Signin = ({
                 </button>
               </div>
 
-              {loginMethod === "password" ? (
-                <form
-                  action={formAction}
-                  noValidate
-                  onSubmit={() => setLoading(true)}
-                >
-                  <div className="mb-[22px]">
+              {/* Password login form */}
+              {loginMethod === "password" && (
+                <form action={formAction} className="mb-5">
+                  <div className="mb-4">
                     <input
                       type="email"
                       name="email"
                       placeholder="Email"
-                      value={loginData.email}
-                      onChange={handleInputChange}
                       className={`w-full rounded-md border ${
                         errors.email ? "border-red-500" : "border-stroke"
-                      } bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary`}
+                      } bg-transparent px-5 py-3 text-base text-body-color outline-none transition focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white`}
+                      value={loginData.email}
+                      onChange={handleInputChange}
+                      required
                     />
                     {errors.email && (
-                      <p className="mt-1 text-left text-sm text-red-500">
-                        {errors.email}
-                      </p>
+                      <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                     )}
                   </div>
-
-                  <div className="mb-[22px]">
+                  <div className="mb-4">
                     <input
                       type="password"
                       name="password"
                       placeholder="Password"
-                      value={loginData.password}
-                      onChange={handleInputChange}
                       className={`w-full rounded-md border ${
                         errors.password ? "border-red-500" : "border-stroke"
-                      } bg-transparent px-5 py-3 text-base text-dark outline-none transition placeholder:text-dark-6 focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white dark:focus:border-primary`}
+                      } bg-transparent px-5 py-3 text-base text-body-color outline-none transition focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:text-white`}
+                      value={loginData.password}
+                      onChange={handleInputChange}
+                      required
                     />
                     {errors.password && (
-                      <p className="mt-1 text-left text-sm text-red-500">
+                      <p className="mt-1 text-sm text-red-500">
                         {errors.password}
                       </p>
                     )}
                   </div>
-
-                  <div className="mb-5">
+                  {/* Hidden input for returnTo */}
+                  <input
+                    type="hidden"
+                    name="returnTo"
+                    value={returnTo}
+                  />
+                  <div className="mb-6">
                     <button
                       type="submit"
+                      className="flex w-full items-center justify-center rounded-md bg-primary px-5 py-3 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-blue-dark"
                       disabled={loading}
-                      className="w-full cursor-pointer rounded-md border border-primary bg-primary px-5 py-3 text-base text-white transition duration-300 ease-in-out hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {loading ? (
                         <>
-                          <span>Signing in</span>
                           <Loader />
+                          <span className="ml-2">Signing in...</span>
                         </>
                       ) : (
-                        "Sign In"
+                        "Sign in"
                       )}
                     </button>
                   </div>
                 </form>
-              ) : (
+              )}
+
+              {/* Magic Link login form */}
+              {loginMethod === "magic" && (
                 <form onSubmit={handleSendMagicLink} noValidate>
                   {magicLinkSent ? (
                     <div className="mb-4 rounded border border-green-200 bg-green-50 p-4 text-left">

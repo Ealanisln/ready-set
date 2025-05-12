@@ -191,7 +191,8 @@ const CateringOrdersPage: React.FC = () => {
   const [limit] = useState(10); // Default limit for pagination
   const [userRoles, setUserRoles] = useState<UserRole>({
     isAdmin: false,
-    isSuperAdmin: false
+    isSuperAdmin: false,
+    helpdesk: false
   });
 
   // Add status tabs
@@ -256,28 +257,29 @@ const CateringOrdersPage: React.FC = () => {
   useEffect(() => {
     const fetchUserRoles = async () => {
       try {
-        // Get current user for auth token
         const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user } } = await supabase.auth.getUser();
         
-        // Make API call with authentication
-        const response = await fetch('/api/auth/user-role', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': session ? `Bearer ${session.access_token}` : '',
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch user role');
+        if (!user) {
+          console.error("No authenticated user found");
+          return;
         }
-        const data = await response.json();
-        setUserRoles({
-          isAdmin: data.isAdmin || data.isSuperAdmin,
-          isSuperAdmin: data.isSuperAdmin
-        });
-      } catch (err) {
-        console.error('Error fetching user role:', err);
+        
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('type')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserRoles({
+            isAdmin: profile.type.toLowerCase() === 'admin',
+            isSuperAdmin: profile.type.toLowerCase() === 'super_admin',
+            helpdesk: profile.type.toLowerCase() === 'helpdesk'
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user roles:", error);
       }
     };
 

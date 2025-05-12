@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { UserType } from '@/types/user';  // Changed import to use local types
 
 // Define protected role-specific routes
-const PROTECTED_ROUTES: Record<UserType, RegExp> = {
-  [UserType.ADMIN]: /^\/admin(\/.*)?$/,
-  [UserType.SUPER_ADMIN]: /^\/admin(\/.*)?$/,
-  [UserType.DRIVER]: /^\/driver(\/.*)?$/,
-  [UserType.HELPDESK]: /^\/helpdesk(\/.*)?$|^\/admin(\/.*)?$/,
-  [UserType.VENDOR]: /^\/vendor(\/.*)?$/,
-  [UserType.CLIENT]: /^\/client(\/.*)?$/
+const PROTECTED_ROUTES: Record<string, RegExp> = {
+  admin: /^\/admin(\/.*)?$/,
+  super_admin: /^\/admin(\/.*)?$/,
+  driver: /^\/driver(\/.*)?$/,
+  helpdesk: /^\/admin(\/.*)?$/,
+  vendor: /^\/vendor(\/.*)?$/,
+  client: /^\/client(\/.*)?$/
 };
 
 // Public routes that don't require authentication
@@ -28,6 +27,9 @@ const PUBLIC_ROUTES = [
 
 export async function protectRoutes(request: Request) {
   const { pathname } = new URL(request.url);
+  
+  // Add debug logging
+  console.log('Current pathname:', pathname);
   
   // Allow access to public routes
   if (PUBLIC_ROUTES.includes(pathname)) {
@@ -66,22 +68,32 @@ export async function protectRoutes(request: Request) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Ensure the fetched type matches the enum value casing (lowercase)
-  const userType = profile.type.toLowerCase() as UserType;
+  // Add debug logging
+  console.log('User profile type from DB:', profile.type);
+  
+  // Convert the user type to lowercase to match our route keys
+  const userTypeKey = profile.type.toLowerCase();
+  
+  // Add debug logging
+  console.log('Normalized user type key for routing:', userTypeKey);
+  console.log('Available route keys:', Object.keys(PROTECTED_ROUTES));
 
   // Check if the userType exists as a key in PROTECTED_ROUTES
-  if (!PROTECTED_ROUTES[userType]) {
-    console.error(`Invalid or unexpected user type '${userType}' found for user ${user.id}. Redirecting to home.`);
-    // Redirect to a generic home page or an error page might be better
+  if (!PROTECTED_ROUTES[userTypeKey]) {
+    console.error(`Invalid or unexpected user type '${profile.type}' found for user ${user.id}. Redirecting to home.`);
     return NextResponse.redirect(new URL('/', request.url)); 
   }
 
   // Check if the current path matches the user's allowed routes
-  const isAllowedRoute = PROTECTED_ROUTES[userType].test(pathname);
+  const isAllowedRoute = PROTECTED_ROUTES[userTypeKey].test(pathname);
+  
+  // Add debug logging
+  console.log('Is allowed route:', isAllowedRoute);
 
   // If the route is not allowed for the user's type, redirect to their home page
   if (!isAllowedRoute) {
-    const homeRoute = `/${userType.toLowerCase()}`;
+    // For helpdesk users, redirect to admin instead of /helpdesk
+    const homeRoute = userTypeKey === 'helpdesk' ? '/admin' : `/${userTypeKey}`;
     return NextResponse.redirect(new URL(homeRoute, request.url));
   }
 

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { createClient } from "@/utils/supabase/client";
 import { Session, User } from '@supabase/supabase-js';
 import { UserType } from "@/types/user";
+import { H } from 'highlight.run';
 
 // Define user context types
 type UserContextType = {
@@ -42,6 +43,15 @@ let userRoleCache: {
 
 // Cache expiry time (5 minutes)
 const CACHE_EXPIRY = 5 * 60 * 1000;
+
+// Export a wrapper component that ensures client-side only rendering
+export function UserProvider({ children }: { children: ReactNode }) {
+  return (
+    <UserProviderClient>
+      {children}
+    </UserProviderClient>
+  );
+}
 
 // Create a client component wrapper
 function UserProviderClient({ children }: { children: ReactNode }) {
@@ -97,6 +107,8 @@ function UserProviderClient({ children }: { children: ReactNode }) {
         if (currentSession?.user) {
           console.log("UserContext: Session found. Fetching user role...");
           await fetchUserRole(currentSession.user);
+          // Identify user to Highlight
+          identifyUserToHighlight(currentSession.user);
         } else {
           console.log("UserContext: No initial session found. Setting loading to false.");
           setIsLoading(false);
@@ -118,6 +130,8 @@ function UserProviderClient({ children }: { children: ReactNode }) {
             
             if (newSession?.user?.id !== currentSession?.user?.id) {
               await fetchUserRole(newSession.user);
+              // Identify user to Highlight on auth state change
+              identifyUserToHighlight(newSession.user);
             }
           }
         );
@@ -128,6 +142,22 @@ function UserProviderClient({ children }: { children: ReactNode }) {
         if (mounted) {
           setError("Authentication failed");
           setIsLoading(false);
+        }
+      }
+    };
+
+    // Identify user to Highlight
+    const identifyUserToHighlight = (user: User) => {
+      if (typeof window !== 'undefined' && user) {
+        try {
+          H.identify(user.email || user.id, {
+            id: user.id,
+            email: user.email || 'no-email',
+            role: userRole || 'unknown'
+          });
+          console.log("User identified to Highlight:", user.id);
+        } catch (err) {
+          console.error("Failed to identify user to Highlight:", err);
         }
       }
     };
@@ -189,7 +219,7 @@ function UserProviderClient({ children }: { children: ReactNode }) {
         authListener.subscription.unsubscribe();
       }
     };
-  }, [supabase]);
+  }, [supabase, userRole]);
   
   // Function to manually refresh user data
   const refreshUserData = async () => {
@@ -208,6 +238,7 @@ function UserProviderClient({ children }: { children: ReactNode }) {
           .eq('id', data.session.user.id)
           .single();
         
+        let role = UserType.CLIENT;
         if (profile?.type) {
           const typeUpper = profile.type.toUpperCase();
           const enumValues = Object.values(UserType).map(val => val.toUpperCase());
@@ -216,12 +247,19 @@ function UserProviderClient({ children }: { children: ReactNode }) {
             const originalEnumValue = Object.values(UserType).find(
               val => val.toUpperCase() === typeUpper
             );
-            setUserRole(originalEnumValue as UserType);
-          } else {
-            setUserRole(UserType.CLIENT);
+            role = originalEnumValue as UserType;
           }
-        } else {
-          setUserRole(UserType.CLIENT);
+        }
+        
+        setUserRole(role);
+        
+        // Update Highlight with the latest user info after refresh
+        if (typeof window !== 'undefined') {
+          H.identify(data.session.user.email || data.session.user.id, {
+            id: data.session.user.id,
+            email: data.session.user.email || 'no-email',
+            role: role || 'unknown'
+          });
         }
       }
     } catch (err) {
@@ -244,9 +282,4 @@ function UserProviderClient({ children }: { children: ReactNode }) {
       {children}
     </UserContext.Provider>
   );
-}
-
-// Export a wrapper component that ensures client-side only rendering
-export function UserProvider({ children }: { children: ReactNode }) {
-  return <UserProviderClient>{children}</UserProviderClient>;
 }

@@ -1,40 +1,33 @@
 // src/middleware.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { updateSession } from "@/utils/supabase/middleware";
 import { protectRoutes } from './middleware/routeProtection';
-
-// Constants and Types (Consider moving these to a shared types file if used elsewhere)
-const USER_TYPES = {
-  ADMIN: "admin",
-  SUPER_ADMIN: "super_admin",
-  DRIVER: "driver",
-  HELPDESK: "helpdesk",
-  VENDOR: "vendor",
-  CLIENT: "client",
-} as const;
-
-type UserType = (typeof USER_TYPES)[keyof typeof USER_TYPES];
+import { highlightMiddleware } from '@highlight-run/next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { Database } from '@/types/supabase';
 
 interface TypeRoutes {
   [key: string]: string;
 }
 
-// Constants
-const TYPE_ROUTES: TypeRoutes = {
-  admin: "/admin",
-  super_admin: "/admin",
-  driver: "/driver",
-  helpdesk: "/helpdesk",
-  vendor: "/vendor",
-  client: "/client",
-} as const;
-
-const PROTECTED_PATHS: ReadonlySet<string> = new Set(["/admin", "/addresses"]);
-const ADMIN_PATHS: ReadonlySet<string> = new Set(["/admin"]); // User-facing admin path
+// Protected admin routes that require authentication
+const PROTECTED_ROUTES = [
+  '/admin',
+  '/admin/catering-orders',
+  '/admin/users',
+  '/admin/settings',
+  '/admin/job-applications',
+  '/dashboard'
+];
 
 export async function middleware(request: NextRequest) {
-  // console.log("Middleware V2 called for:", request.nextUrl.pathname); // Keep this? Optional
+  // Apply Highlight.run middleware for cookie-based session tracking
+  try {
+    await highlightMiddleware(request);
+  } catch (error) {
+    console.error('Highlight middleware error:', error);
+    // Continue processing the request even if highlight has an error
+  }
 
   // Skip middleware for auth callback routes
   if (request.nextUrl.pathname.startsWith('/auth/callback')) {
@@ -76,23 +69,75 @@ export async function middleware(request: NextRequest) {
   // within protectRoutes or updateSession.
 
   // console.log(`Middleware V2: Allowing request for ${request.nextUrl.pathname} to proceed.`); // Removed
-  return response; // Return the response potentially modified by updateSession cookies
+
+  try {
+    const supabase = createMiddlewareClient<Database>({ req: request, res: response });
+    
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    
+    // Check if the route requires authentication
+    const requiresAuth = PROTECTED_ROUTES.some(route => 
+      pathname === route || pathname.startsWith(`${route}/`)
+    );
+    
+    if (requiresAuth) {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Log auth redirect by adding a custom header that will be read by the client
+        const response = NextResponse.redirect(new URL(`/sign-in?returnTo=${pathname}`, request.url));
+        
+        // Add a header to track the redirect (will be used by the client to report to Highlight)
+        response.headers.set('x-auth-redirect', 'true');
+        response.headers.set('x-redirect-from', pathname);
+        response.headers.set('x-redirect-reason', 'unauthenticated');
+        
+        return response;
+      }
+      
+      // Check for specific admin-only routes
+      if (pathname.startsWith('/admin')) {
+        // Fetch user profile to check role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('type')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!profile || !['admin', 'super_admin', 'helpdesk'].includes((profile.type ?? '').toLowerCase())) {
+          // User is authenticated but not authorized
+          const response = NextResponse.redirect(new URL('/', request.url));
+          
+          // Add headers for tracking
+          response.headers.set('x-auth-redirect', 'true');
+          response.headers.set('x-redirect-from', pathname);
+          response.headers.set('x-redirect-reason', 'unauthorized');
+          
+          return response;
+        }
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Middleware error:', error);
+    
+    // In case of error, still allow the request through
+    return NextResponse.next();
+  }
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - public folder
+     * - api routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    // Include specific paths if needed, but the above negative lookahead is often sufficient
-    // '/admin/:path*',
-    // '/client/:path*',
-    // '/driver/:path*',
-    // etc.
+    '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
   ],
 };

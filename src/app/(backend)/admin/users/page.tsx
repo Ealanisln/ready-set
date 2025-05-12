@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { validateAdminRole } from "@/middleware/authMiddleware";
 import UsersClient from "./UsersClient";
 import { createClient } from "@/utils/supabase/server";
+import AdminHighlightInit from "@/app/admin-highlight-init";
+import { HighlightErrorBoundary } from '@/components/ErrorBoundary/HighlightErrorBoundary';
+import Link from "next/link";
 
 // Server component for authentication and protection
 export default async function UsersPage() {
@@ -27,5 +30,20 @@ export default async function UsersPage() {
     redirect("/");
   }
 
-  return <UsersClient />;
+  return (
+    <>
+      <AdminHighlightInit />
+      <div className="p-2 bg-amber-50 border-b border-amber-200 text-sm">
+        <p className="text-amber-800">
+          Having issues with error tracking? Try our{" "}
+          <Link href="/highlight-test" className="underline font-medium">
+            Highlight Test Page
+          </Link>
+        </p>
+      </div>
+      <HighlightErrorBoundary>
+        <UsersClient />
+      </HighlightErrorBoundary>
+    </>
+  );
 }

@@ -7,13 +7,22 @@ import "../styles/index.css";
 import "../styles/prism-vsc-dark-plus.css";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import CookieConsentBanner from "../components/Cookies/Banner";
-import { UserProvider } from "@/contexts/UserContext"; // Add this import
+import { UserProvider } from "@/contexts/UserContext";
 import { Toaster } from "@/components/ui/toaster";
+import { HighlightInit } from '@highlight-run/next/client';
+import { H } from 'highlight.run';
+import { CONSTANTS } from '@/constants';
+import { HighlightErrorBoundary } from '@/components/ErrorBoundary/HighlightErrorBoundary';
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
 });
+
+// Expose Highlight globally for easier debugging
+if (typeof window !== 'undefined') {
+  window.H = H;
+}
 
 export default function RootLayout({
   children,
@@ -40,11 +49,40 @@ export default function RootLayout({
             alt="analytics-pixel"
           />
         </noscript>
+        
+        {/* Directly include Highlight.js script for more reliable loading */}
+        <Script id="highlight-init" strategy="beforeInteractive">
+          {`
+            window.HIGHLIGHT_DEBUG = true;
+            window.HIGHLIGHT_PROJECT_ID = "${CONSTANTS.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID}";
+          `}
+        </Script>
       </head>
       <body className="overflow-x-hidden">
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          <UserProvider> {/* Wrap everything in UserProvider */}
-            <ClientLayout>{children}</ClientLayout>
+          <UserProvider>
+            <HighlightInit
+              projectId={CONSTANTS.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID}
+              serviceName="ready-set-frontend"
+              debug={true}
+              networkRecording={{
+                enabled: true,
+                recordHeadersAndBody: true,
+                urlBlocklist: [
+                  // Add sensitive URLs here that shouldn't be recorded
+                  "/api/auth",
+                  "/api/login",
+                ],
+              }}
+              tracingOrigins={[
+                "localhost", 
+                "readysetllc.com",
+                "ready-set.vercel.app"
+              ]}
+            />
+            <HighlightErrorBoundary>
+              <ClientLayout>{children}</ClientLayout>
+            </HighlightErrorBoundary>
           </UserProvider>
         </ErrorBoundary>
         <Toaster />

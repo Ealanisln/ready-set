@@ -4,7 +4,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import FlowerImage from './FlowerImage';
 import { useState } from 'react';
 import DialogFormContainer from '@/components/Logistics/DialogFormContainer';
 import ScheduleDialog from '../Logistics/Schedule';
@@ -34,7 +33,7 @@ const FlowerHero = () => {
         <p className="cursor-pointer font-[Montserrat] text-sm text-gray-900 transition-all duration-300 ease-in-out hover:scale-105 hover:text-yellow-500 md:text-base lg:text-lg">
           From San Francisco to Atlanta and Austin, our dedicated drivers ensure your blooms arrive
           on time, every time. Each route is monitored in real-time and handled with care—because we
-          know it’s more than just flowers. It’s your shop’s reputation in every bouquet.
+          know it's more than just flowers. It's your shop's reputation in every bouquet.
         </p>
 
         <div className="flex flex-row flex-nowrap items-center gap-4 pt-4">
@@ -61,7 +60,15 @@ const FlowerHero = () => {
       {/* Right content - Image */}
 
       <div className="flex w-full items-center justify-end overflow-visible">
-        <FlowerImage />
+        <div className="relative h-80 w-80 md:h-96 md:w-96">
+          <Image 
+            src="/images/flowers/bouquet.jpg"
+            alt="Flower bouquet" 
+            className="rounded-lg object-cover"
+            fill
+            priority
+          />
+        </div>
       </div>
     </section>
   );

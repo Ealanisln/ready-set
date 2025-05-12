@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FileUpload } from '@/types/file';
 import { createClient } from "@/utils/supabase/client";
 import { syncOrderStatusWithBroker } from "@/lib/services/brokerSyncService";
+import { UserType } from "@/types/user";
 
 // Make sure the bucket name is user-assets 
 const STORAGE_BUCKET = "user-assets";
@@ -106,6 +107,15 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
   const pathname = usePathname();
   const orderNumber = (pathname ?? '').split("/").pop() || "";
   const supabase = createClient();
+  const [userRoles, setUserRoles] = useState<{
+    isAdmin: boolean;
+    isSuperAdmin: boolean;
+    isHelpdesk: boolean;
+  }>({
+    isAdmin: false,
+    isSuperAdmin: false,
+    isHelpdesk: false
+  });
 
   // Check for bucket existence but don't try to create it (requires admin privileges)
   const ensureStorageBucketExists = useCallback(async () => {
@@ -534,6 +544,41 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
       console.error("Error updating internal order status:", error);
       toast.error(error instanceof Error ? error.message : "Failed to update order status. Please try again.");
     }
+  };
+
+  const fetchUserRoles = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error("No authenticated user found");
+        return;
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('type')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile) {
+        setUserRoles({
+          isAdmin: profile.type === UserType.ADMIN,
+          isSuperAdmin: profile.type === UserType.SUPER_ADMIN,
+          isHelpdesk: profile.type === UserType.HELPDESK
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user roles:", error);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchUserRoles();
+  }, [fetchUserRoles]);
+
+  const userCanEditOrder = () => {
+    return userRoles.isAdmin || userRoles.isSuperAdmin || userRoles.isHelpdesk;
   };
 
   if (isLoading) {

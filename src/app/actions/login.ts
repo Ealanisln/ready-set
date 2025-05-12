@@ -6,8 +6,29 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { UserType } from "@prisma/client";
 
+// Define protected role-specific routes (copied from routeProtection.ts to avoid circular dependency)
+const PROTECTED_ROUTES: Record<string, RegExp> = {
+  admin: /^\/admin(\/.*)?$/,
+  super_admin: /^\/admin(\/.*)?$/,
+  driver: /^\/driver(\/.*)?$/,
+  helpdesk: /^\/helpdesk(\/.*)?$|^\/admin(\/.*)?$/,
+  vendor: /^\/vendor(\/.*)?$/,
+  client: /^\/client(\/.*)?$/
+};
+
+// Define default home routes for each user type
+const USER_HOME_ROUTES: Record<string, string> = {
+  admin: "/admin",
+  super_admin: "/admin",
+  driver: "/driver",
+  helpdesk: "/helpdesk",
+  vendor: "/vendor",
+  client: "/client"
+};
+
 export interface FormState {
   error?: string;
+  redirectTo?: string;
 }
 
 export async function login(
@@ -19,6 +40,7 @@ export async function login(
 
   const email = formData.get("email")?.toString().toLowerCase() || "";
   const password = formData.get("password")?.toString() || "";
+  const returnTo = formData.get("returnTo")?.toString();
 
   if (!email || !password) {
     return { error: "Email and password are required" };
@@ -64,37 +86,40 @@ export async function login(
     return { error: "User profile type not found" };
   }
 
-  // Redirect based on user type
-  const userType = profile.type.toLowerCase();
-  let redirectPath = "/";
+  console.log("User profile type from DB:", profile.type);
+  
+  // Normalize the user type to lowercase for consistent handling
+  const userTypeKey = profile.type.toLowerCase();
+  console.log("Normalized user type for redirection:", userTypeKey);
 
-  console.log("User type for redirection:", userType);
+  // Determine where to redirect the user
+  let redirectPath: string;
 
-  switch (userType) {
-    case UserType.VENDOR.toLowerCase():
-      redirectPath = "/vendor";
-      break;
-    case UserType.CLIENT.toLowerCase():
-      redirectPath = "/client";
-      break;
-    case UserType.DRIVER.toLowerCase():
-      redirectPath = "/driver";
-      break;
-    case UserType.HELPDESK.toLowerCase():
-      redirectPath = "/helpdesk";
-      break;
-    case UserType.ADMIN.toLowerCase():
-    case UserType.SUPER_ADMIN.toLowerCase():
-      redirectPath = "/admin";
-      break;
-    default:
-      console.warn("Unknown user type:", userType);
-      redirectPath = "/client"; // Default to client dashboard
+  // If returnTo is provided and the user has access to that path, use it
+  if (returnTo && returnTo !== '/') {
+    // Check if the user has access to the returnTo path
+    const hasAccess = PROTECTED_ROUTES[userTypeKey]?.test(returnTo);
+    
+    if (hasAccess) {
+      console.log("Redirecting user to returnTo path:", returnTo);
+      redirectPath = returnTo;
+    } else {
+      // If user doesn't have access to returnTo path, use their default home route
+      redirectPath = USER_HOME_ROUTES[userTypeKey] || "/";
+      console.log("User doesn't have access to returnTo path, redirecting to default home:", redirectPath);
+    }
+  } else {
+    // Use the default home route for this user type
+    redirectPath = USER_HOME_ROUTES[userTypeKey] || "/";
+    console.log("No valid returnTo path provided, redirecting to default home:", redirectPath);
   }
 
-  console.log("Redirecting user to:", redirectPath);
+  // Always redirect to the determined path
+  console.log("Final redirect destination:", redirectPath);
   redirect(redirectPath);
-  return { error: "" }; // Unreachable but satisfies TypeScript
+
+  // This is unreachable but satisfies TypeScript
+  return { redirectTo: redirectPath };
 }
 
 export async function signup(formData: FormData) {

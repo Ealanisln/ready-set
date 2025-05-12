@@ -1,7 +1,7 @@
 // src/app/(site)/flowers/page.tsx
 'use client';
 
-// Import components with lowercase filenames for compatibility
+// Import components with correct casing for compatibility
 import FlowerHero from '@/components/Flowers/flowerhero';
 import FlowerIcons from '@/components/Flowers/flowericons';
 import PackageDelivery from '@/components/Flowers/packagedelivery';

@@ -28,62 +28,46 @@ if (!fs.existsSync(flowersDir)) {
   process.exit(1);
 }
 
+// Get the actual files in the directory
+const actualFiles = fs.readdirSync(flowersDir);
+console.log(`Found ${actualFiles.length} files in Flowers directory: ${actualFiles.join(', ')}`);
+
 // Create lowercase versions
 console.log('📄 Creating lowercase component files:');
 
 let success = true;
 components.forEach(component => {
-  const sourcePath = path.join(flowersDir, component);
   const lowercaseName = component.toLowerCase();
   const destPath = path.join(flowersDir, lowercaseName);
   
   console.log(`Processing: ${component} → ${lowercaseName}`);
   
-  // Check if source exists
-  if (!fs.existsSync(sourcePath)) {
-    console.error(`  ❌ Source file ${component} doesn't exist!`);
-    console.log(`  Checking for mixed-case variations...`);
+  // First check if the lowercase version already exists
+  if (fs.existsSync(destPath)) {
+    console.log(`  ✓ Lowercase version already exists at ${lowercaseName}`);
+    return;
+  }
+  
+  // Look for any case variation that might exist
+  const matchingFile = actualFiles.find(file => file.toLowerCase() === lowercaseName || file === component);
+  
+  if (matchingFile) {
+    console.log(`  ✅ Found variation: ${matchingFile}`);
     
-    // Try to find a variation of the filename with a different case
-    const files = fs.readdirSync(flowersDir);
-    const matchingFile = files.find(file => file.toLowerCase() === lowercaseName);
-    
-    if (matchingFile) {
-      console.log(`  ✅ Found variation: ${matchingFile}`);
-      // If the matched file isn't the lowercase version, copy it
-      if (matchingFile !== lowercaseName) {
-        try {
-          const altSourcePath = path.join(flowersDir, matchingFile);
-          fs.copyFileSync(altSourcePath, destPath);
-          console.log(`  ✓ Copied ${matchingFile} → ${lowercaseName}`);
-        } catch (err) {
-          console.error(`  ❌ Failed to copy ${matchingFile}:`, err);
-          success = false;
-        }
-      } else {
-        console.log(`  ✓ Lowercase version already exists`);
-      }
-    } else {
-      console.error(`  ❌ No matching file found for ${component}`);
+    // If the matched file isn't the lowercase version, copy it
+    try {
+      const sourcePath = path.join(flowersDir, matchingFile);
+      fs.copyFileSync(sourcePath, destPath);
+      console.log(`  ✓ Copied ${matchingFile} → ${lowercaseName}`);
+    } catch (err) {
+      console.error(`  ❌ Failed to copy ${matchingFile}:`, err);
       success = false;
     }
     return;
   }
   
-  // Check if destination already exists
-  if (fs.existsSync(destPath)) {
-    console.log(`  ✓ Lowercase version already exists`);
-    return;
-  }
-  
-  // Create the lowercase version
-  try {
-    fs.copyFileSync(sourcePath, destPath);
-    console.log(`  ✓ Created lowercase version`);
-  } catch (err) {
-    console.error(`  ❌ Failed to create lowercase version:`, err);
-    success = false;
-  }
+  console.error(`  ❌ No matching file found for ${component} or ${lowercaseName}`);
+  success = false;
 });
 
 if (success) {

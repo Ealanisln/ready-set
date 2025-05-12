@@ -43,7 +43,7 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
               <TableHead className="hidden sm:table-cell">Status</TableHead>
               <TableHead className="hidden md:table-cell">Date</TableHead>
               <TableHead className="text-right">Total</TableHead>
-              {(userRoles.isAdmin || userRoles.isSuperAdmin) && (
+              {(userRoles.isAdmin || userRoles.isSuperAdmin || userRoles.helpdesk) && (
                 <TableHead className="w-10"></TableHead>
               )}
             </TableRow>
@@ -80,7 +80,7 @@ export const CateringOrdersTable: React.FC<CateringOrdersTableProps> = ({
                     ? parseFloat(order.order_total).toFixed(2)
                     : order.order_total.toFixed(2)}
                 </TableCell>
-                {(userRoles.isAdmin || userRoles.isSuperAdmin) && (
+                {(userRoles.isAdmin || userRoles.isSuperAdmin || userRoles.helpdesk) && (
                   <TableCell className="text-right p-0 pr-2">
                     <DeleteCateringOrder
                       orderId={order.id}

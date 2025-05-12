@@ -68,3 +68,39 @@ Stay updated with our latest news and valuable information about our services th
 ## Contact
 
 [Provide contact information or links for support and inquiries]
+
+## Highlight.run Integration
+
+This project is configured with [Highlight.run](https://www.highlight.io) for session replay, error monitoring, and fullstack debugging. It uses the official `@highlight-run/next` package for Next.js integration.
+
+### Environment Variables
+
+Add the following environment variable to your `.env.local` file:
+
+```bash
+# Highlight.run API Key for sourcemap uploads
+HIGHLIGHT_PROJECT_API_KEY=your_api_key_here
+```
+
+### Features Enabled
+
+- Session replay to view user interactions
+- Frontend error monitoring with automatic sourcemap uploads
+- Server-side error tracking and logging
+- User identification integrated with authentication system
+- React error boundary integration
+- Network request tracing
+- Full-stack distributed tracing across frontend and backend
+
+### How It Works
+
+- Frontend initialization via `HighlightInit` in `src/app/layout.tsx`
+- Server-side tracing through `instrumentation.ts`
+- Error boundaries from `@highlight-run/next/client`
+- SSR error handling in `src/app/error.tsx`
+- Middleware integration for cookie-based session tracking
+- API route wrapping with `withAppRouterHighlight`
+- User identification in `src/contexts/UserContext.tsx`
+- Sourcemaps are uploaded during the build process
+
+To view your application sessions and errors, visit [app.highlight.io](https://app.highlight.io).

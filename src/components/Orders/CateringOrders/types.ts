@@ -36,4 +36,5 @@ export interface Order {
 export interface UserRole {
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  helpdesk: boolean;
 }

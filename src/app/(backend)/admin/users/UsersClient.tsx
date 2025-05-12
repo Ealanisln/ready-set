@@ -155,23 +155,36 @@ const UsersClient: React.FC = () => {
 
     const fetchUsers = async () => {
       if (!isMounted) return;
-      // Set loading state at the beginning of the fetch attempt
-      setIsLoading(true); 
-      setError(null);
-
-      // Build query params
-      const params = new URLSearchParams();
-      params.append("page", page.toString());
-      params.append("limit", ITEMS_PER_PAGE.toString());
-      if (searchTerm) params.append("search", searchTerm);
-      if (statusFilter !== "all") params.append("status", statusFilter);
-      if (typeFilter !== "all") params.append("type", typeFilter);
-      params.append("sort", sortField);
-      params.append("direction", sortDirection);
-
-      const apiUrl = `/api/users?${params.toString()}`;
-
+      
       try {
+        // Set loading state at the beginning of the fetch attempt
+        setIsLoading(true); 
+        setError(null);
+
+        // Build query params
+        const params = new URLSearchParams();
+        params.append("page", page.toString());
+        params.append("limit", ITEMS_PER_PAGE.toString());
+        if (searchTerm) params.append("search", searchTerm);
+        if (statusFilter !== "all") params.append("status", statusFilter);
+        if (typeFilter !== "all") params.append("type", typeFilter);
+        params.append("sort", sortField);
+        params.append("direction", sortDirection);
+
+        const apiUrl = `/api/users?${params.toString()}`;
+
+        // Send event to Highlight for debugging
+        if (typeof window !== 'undefined' && window.H) {
+          window.H.track('admin_users_fetch_attempt', {
+            url: apiUrl,
+            page,
+            searchTerm,
+            statusFilter,
+            typeFilter,
+            timestamp: new Date().toISOString()
+          });
+        }
+        
         // Attempt to get the session. Proceed even if it fails initially, 
         // relying on cookie-based auth in the API route.
         const { data: { session } } = await supabase.auth.getSession();
@@ -195,6 +208,21 @@ const UsersClient: React.FC = () => {
              // Ignore if response body is not JSON
           }
           const errorMessage = errorData?.error || `API Error: ${response.status} ${response.statusText}`;
+          
+          // Track this error in Highlight with context
+          if (typeof window !== 'undefined' && window.H) {
+            window.H.track('admin_users_api_error', {
+              status: response.status,
+              statusText: response.statusText,
+              url: apiUrl,
+              errorMessage,
+              page,
+              searchTerm,
+              statusFilter,
+              typeFilter
+            });
+          }
+          
           throw new Error(errorMessage);
         }
 
@@ -202,16 +230,65 @@ const UsersClient: React.FC = () => {
 
         if (!data || !Array.isArray(data.users) || typeof data.totalPages !== 'number') {
            console.error("Invalid data structure received from API:", data);
+           
+           // Track this validation error in Highlight with context
+           if (typeof window !== 'undefined' && window.H) {
+             window.H.track('admin_users_invalid_data', {
+               dataStructure: JSON.stringify(data),
+               url: apiUrl
+             });
+           }
+           
            throw new Error('Invalid data structure received from API');
         }
         
         if (isMounted) {
           setUsers(data.users);
           setTotalPages(data.totalPages);
+          
+          // Report successful fetch to Highlight
+          if (typeof window !== 'undefined' && window.H) {
+            window.H.track('admin_users_fetch_success', {
+              url: apiUrl,
+              count: data.users.length,
+              totalPages: data.totalPages,
+              page: page
+            });
+          }
         }
 
       } catch (error) {
         console.error("API Fetch Error:", error);
+        
+        // Report error to Highlight directly
+        if (typeof window !== 'undefined' && window.H) {
+          // Ensure the error is properly formatted for Highlight
+          try {
+            if (error instanceof Error) {
+              window.H.consumeError(error);
+            } else {
+              window.H.consumeError(new Error(String(error)));
+            }
+            
+            // Additional tracking with more context
+            window.H.track('admin_users_fetch_error', {
+              message: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              page,
+              filters: {
+                search: searchTerm,
+                status: statusFilter,
+                type: typeFilter,
+                sort: sortField,
+                direction: sortDirection
+              },
+              timestamp: new Date().toISOString()
+            });
+          } catch (highlightError) {
+            console.error("Failed to report error to Highlight:", highlightError);
+          }
+        }
+        
         if (isMounted) {
           setError(error instanceof Error ? error.message : "An unknown error occurred while fetching users");
           setUsers([]); // Clear users on error

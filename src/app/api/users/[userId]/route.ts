@@ -190,40 +190,71 @@ export async function PUT(
     // Check if this is an admin panel request
     const requestSource = request.headers.get('x-request-source');
     const isAdminMode = request.headers.get('x-admin-mode') === 'true';
-    console.log(`[PUT /api/users/[userId]] Request source: ${requestSource}, isAdminMode: ${isAdminMode}`);
+    const isAdminPanelRequest = requestSource === 'ModernUserProfile' || 
+                               requestSource === 'AdminPanel' || 
+                               requestSource === 'ModernUserProfile-Submit' ||
+                               isAdminMode;
+    console.log(`[PUT /api/users/[userId]] Request source: ${requestSource}, isAdminMode: ${isAdminMode}, isAdminPanelRequest: ${isAdminPanelRequest}`);
     
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Allow requests with admin mode, otherwise check authentication
-    if (!user && !isAdminMode) {
-      console.log("[PUT /api/users/[userId]] Authentication failed and not in admin mode");
+    if (authError) {
+      console.error("[PUT /api/users/[userId]] Supabase auth error:", authError);
+      
+      // For admin panel requests, bypass authentication
+      if (isAdminPanelRequest) {
+        console.log("[PUT /api/users/[userId]] Authentication bypassed for admin panel request");
+      } else {
+        return NextResponse.json({ error: 'Authentication error' }, { status: 500 });
+      }
+    }
+
+    // Skip authentication check for admin panel requests
+    if (!user && !isAdminPanelRequest) {
+      console.log("[PUT /api/users/[userId]] No authenticated user found and not an admin panel request.");
       return NextResponse.json(
         { error: 'Unauthorized: Authentication required' },
         { status: 401 }
       );
     }
     
-    // Check permissions only if not in admin mode
-    if (!isAdminMode && user) {
-      const requesterProfile = await prisma.profile.findUnique({
-        where: { id: user.id },
-        select: { type: true }
-      });
-      
-      const isAdminOrHelpdesk =
-        requesterProfile?.type === UserType.ADMIN ||
-        requesterProfile?.type === UserType.SUPER_ADMIN ||
-        requesterProfile?.type === UserType.HELPDESK;
+    if (user) {
+      console.log(`[PUT /api/users/[userId]] Authenticated user ID: ${user.id}`);
+    }
+
+    // For admin panel requests, skip permission check
+    let requesterProfile;
+    let isAdminOrHelpdesk = false;
+    
+    if (user && !isAdminPanelRequest) {
+      // Only check permissions if not an admin panel request and user is authenticated
+      try {
+        requesterProfile = await prisma.profile.findUnique({
+          where: { id: user.id },
+          select: { type: true }
+        });
+        console.log(`[PUT /api/users/[userId]] Requester profile fetched:`, requesterProfile);
         
-      if (!isAdminOrHelpdesk) {
-        return NextResponse.json(
-          { error: 'Forbidden: Insufficient permissions' },
-          { status: 403 }
-        );
+        isAdminOrHelpdesk =
+          requesterProfile?.type === UserType.ADMIN ||
+          requesterProfile?.type === UserType.SUPER_ADMIN ||
+          requesterProfile?.type === UserType.HELPDESK;
+          
+        // Only allow if admin/super_admin/helpdesk
+        if (!isAdminOrHelpdesk) {
+          console.log(`[PUT /api/users/[userId]] Forbidden: User ${user.id} (type: ${requesterProfile?.type}) attempted to update profile ${userId}.`);
+          return NextResponse.json(
+            { error: 'Forbidden: Insufficient permissions' },
+            { status: 403 }
+          );
+        }
+      } catch (profileError) {
+        console.error(`[PUT /api/users/[userId]] Error fetching requester profile (ID: ${user.id}):`, profileError);
+        return NextResponse.json({ error: 'Failed to fetch requester profile' }, { status: 500 });
       }
-    } else if (isAdminMode) {
-      console.log("[PUT /api/users/[userId]] Bypassing permission check - admin mode active");
+    } else if (isAdminPanelRequest) {
+      console.log("[PUT /api/users/[userId]] Skipping permission check for admin panel request");
     }
     
     // Parse request body

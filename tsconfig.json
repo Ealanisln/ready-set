@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -13,23 +17,42 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [{"name": "next"}],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@styles/*": ["./src/styles/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ]
     },
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "baseUrl": ".",
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "src/scripts/sync-users.mts", "src/app/(backend)/admin/drives-calculator"  ],
-  "exclude": ["node_modules"]
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "src/app/(backend)/admin/drives-calculator",
+    "src/scripts/sync-users.mts",
+    "dist/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
