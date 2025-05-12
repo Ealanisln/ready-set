@@ -12,6 +12,7 @@ import ExpertSupportSection from '@/components/Flowers/ExpertSupportSection';
 import FAQSection from '@/components/Flowers/FAQSection';
 import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
 import { FormType } from '@/components/Logistics/QuoteRequest/types';
+import CateringDelivery from '@/components/Food/CateringDelivery';
 
 export default function LogisticsPage() {
   const { openForm, DialogForm } = FormManager();
