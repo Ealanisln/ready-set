@@ -7,6 +7,7 @@ import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormMana
 import CateringDelivery from '@/components/Food/CateringDelivery';
 import DeliveryPartners from '@/components/Food/DeliveryPartners';
 import FoodIcons from '@/components/Food/FoodIcons';
+import DeliveryTerms from '@/components/Food/DeliveryTerms';
 
 export default function FoodPage() {
   return (
@@ -14,6 +15,7 @@ export default function FoodPage() {
       <CateringDelivery />
       <DeliveryPartners />
       <FoodIcons />
+      <DeliveryTerms />
     </div>
   );
 }
