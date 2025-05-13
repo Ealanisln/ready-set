@@ -15,12 +15,14 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, subtitle, 
   return (
     <div className="flex flex-1 flex-col items-center">
       <motion.div
-        className="flex h-[320px] w-[320px] flex-col items-center justify-center rounded-[24px] bg-[#FFD84D] p-6"
+        className="flex h-[320px] w-[320px] flex-col items-center justify-start rounded-[24px] bg-[#FFD84D] p-6 pt-16"
         whileHover={{ scale: 1.03 }}
         transition={{ type: 'spring', stiffness: 300 }}
       >
-        <div className="flex h-full w-full flex-col items-center justify-center">
-          <Image src={icon} alt={title} width={100} height={100} className="mb-6" />
+        <div className="flex w-full flex-col items-center">
+          <div className="mb-6 flex h-[100px] items-center justify-center">
+            <Image src={icon} alt={title} width={100} height={100} />
+          </div>
           <div className="text-center">
             {subtitle ? (
               <>
@@ -33,7 +35,7 @@ const ServiceFeature: React.FC<ServiceFeatureProps> = ({ icon, title, subtitle, 
           </div>
         </div>
       </motion.div>
-      <p className="mt-6 max-w-[320px] text-center text-base leading-snug text-black">
+      <p className="mt-6 max-w-[320px] text-justify text-base leading-snug text-black">
         {description}
       </p>
     </div>
