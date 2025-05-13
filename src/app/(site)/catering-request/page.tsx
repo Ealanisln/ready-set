@@ -125,7 +125,7 @@ const CateringPage = () => {
   return (
     <section
       id="catering-request"
-      className="bg-gray-50 pb-16 pt-24 dark:bg-gray-900 lg:pb-24 pt-32"
+      className="bg-gray-50 pb-16 dark:bg-gray-900 lg:pb-24 pt-32"
     >
       <div className="container px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
