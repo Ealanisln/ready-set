@@ -252,7 +252,7 @@ const Signin = ({
                 <h3 className="mb-4 text-base font-medium text-dark dark:text-white">
                   Sign in with
                 </h3>
-                <GoogleAuthButton />
+                <GoogleAuthButton mode="signin" />
               </div>
 
               {/* Sign up link */}

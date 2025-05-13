@@ -97,16 +97,18 @@ export const clientSchema = z.object({
   head_count: z.string().min(1, "Please select a headcount"),
 });
 
-// Update the user types to only include vendor and client
-export const userTypes = ["vendor", "client"] as const;
+// Update user types to include driver and helpdesk
+export const userTypes = ["vendor", "client", "driver", "helpdesk"] as const;
 export type UserType = (typeof userTypes)[number];
 
 export const formSchema = z.discriminatedUnion("userType", [
   clientSchema,
   vendorSchema,
+  // We don't need schemas for driver/helpdesk as they redirect to application
 ]);
 
-// Update FormDataUnion to only include vendor and client
+// Keep FormDataUnion as just vendor and client since those are the only types
+// that use the existing form process
 export type FormDataUnion = VendorFormData | ClientFormData;
 
 export type VendorFormData = z.infer<typeof vendorSchema>;

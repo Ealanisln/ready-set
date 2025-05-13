@@ -9,21 +9,35 @@ import Loader from "@/components/Common/Loader";
 
 interface GoogleAuthButtonProps {
   className?: string;
+  userType?: 'vendor' | 'client';
+  mode?: 'signup' | 'signin';
 }
 
-const GoogleAuthButton = ({ className = '' }: GoogleAuthButtonProps) => {
+const GoogleAuthButton = ({ 
+  className = '', 
+  userType, 
+  mode = 'signup' 
+}: GoogleAuthButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGoogleSignIn = async () => {
     const supabase = await createClient()
     try {
       setIsLoading(true)
-      console.log("Redirecting to:", getRedirectUrl()); // Debug log
+      
+      // Prepare redirect URL with userType parameter if provided
+      let redirectUrl = getRedirectUrl();
+      if (userType) {
+        // Append userType as a query parameter to the redirect URL
+        redirectUrl = `${redirectUrl}${redirectUrl.includes('?') ? '&' : '?'}userType=${userType}`;
+      }
+      
+      console.log("Redirecting to:", redirectUrl); // Debug log
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getRedirectUrl(), // This now guarantees /auth/callback is included
+          redirectTo: redirectUrl,
         }
       })
       
@@ -87,7 +101,7 @@ const GoogleAuthButton = ({ className = '' }: GoogleAuthButtonProps) => {
           <Loader />
         </>
       ) : (
-        <span>Sign in with Google</span>
+        <span>Sign {mode === 'signup' ? 'up' : 'in'} with Google</span>
       )}
     </button>
   )
