@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single();
       
-    if (!userProfile || !["ADMIN", "HELPDESK", "SUPER_ADMIN"].includes(userProfile.type)) {
+    if (!userProfile || !userProfile.type || !["ADMIN", "HELPDESK", "SUPER_ADMIN"].includes(userProfile.type)) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }

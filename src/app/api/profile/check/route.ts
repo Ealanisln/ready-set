@@ -45,36 +45,18 @@ export async function GET(request: Request) {
     const isOAuth = user.app_metadata?.provider && 
                    user.app_metadata.provider !== 'email';
     
-    // 1. First check if user exists in public.user table
-    const { data: publicUserData, error: publicUserError } = await supabase
-      .from("user")
-      .select("id, type, status")
-      .eq("id", userId)
-      .limit(1)
-      .single();
-      
-    if (!publicUserError && publicUserData) {
-      console.log(`API: User found in public.user table: ${publicUserData.id}`);
-      return NextResponse.json({
-        needsProfileCompletion: false,
-        userType: publicUserData.type,
-        userData: user
-      });
-    }
-    
-    // 2. Check if user has a profile in the 'profiles' table
-    const { data: profilesData, error: profilesError } = await supabase
+    // Check if user has a profile in the 'profiles' table
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("auth_user_id, type, status")
-      .eq("auth_user_id", userId)
-      .limit(1)
+      .select("id, type")
+      .eq("id", userId)
       .single();
       
-    if (!profilesError && profilesData) {
-      console.log(`API: User found in profiles table: ${profilesData.auth_user_id}`);
+    if (!profileError && profileData && profileData.type) {
+      console.log(`API: User found in profiles table: ${profileData.id}`);
       return NextResponse.json({
         needsProfileCompletion: false,
-        userType: profilesData.type,
+        userType: profileData.type,
         userData: user
       });
     }
@@ -95,7 +77,7 @@ export async function GET(request: Request) {
       if (shouldBypass) {
         console.log(`API: Manual user with bypass criteria, auto-creating profile`);
         
-        // Create basic profiles for the user (both in user and profiles tables)
+        // Create basic profile for the user
         await createUserProfile(supabase, userId, user);
         
         return NextResponse.json({
@@ -129,34 +111,14 @@ async function createUserProfile(
   user: any
 ): Promise<boolean> {
   try {
-    // Create entry in public.user table
-    const userProfile: UserProfile = {
+    // Create entry in profiles table
+    const profileData = {
       id: userId,
       name: user.user_metadata?.full_name || user.user_metadata?.name || (user.email?.split('@')[0] || 'user'),
       email: user.email || '',
       type: 'client', // Default type for manual users
-      status: 'active', // Activate immediately
       created_at: new Date(),
       updated_at: new Date()
-    };
-    
-    const { error: userError } = await supabase
-      .from('user')
-      .insert(userProfile);
-      
-    if (userError) {
-      console.error("Error creating user profile:", userError);
-      throw userError;
-    }
-    
-    // Create entry in profiles table
-    const profileData: ProfilesEntry = {
-      auth_user_id: userId,
-      name: userProfile.name,
-      type: userProfile.type,
-      status: userProfile.status,
-      created_at: userProfile.created_at,
-      updated_at: userProfile.updated_at
     };
     
     const { error: profileError } = await supabase
@@ -165,7 +127,7 @@ async function createUserProfile(
       
     if (profileError) {
       console.error("Error creating profile:", profileError);
-      // Continue anyway since we created the user entry
+      return false;
     }
     
     return true;

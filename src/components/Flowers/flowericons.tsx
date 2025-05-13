@@ -2,21 +2,21 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 interface ServiceFeatureProps {
   icon: string;
   title: string;
   description: React.ReactNode;
-  delay?: number;
 }
 
-const FeatureBox: React.FC<ServiceFeatureProps> = ({
+const ServiceFeature: React.FC<ServiceFeatureProps> = ({
   icon,
   title,
   description,
-  delay = 0,
 }) => {
+  // For "Bulk Orders? No Problem!" force line breaks for 2 lines
   const adjustedTitle =
     title === "Bulk Orders? No Problem!" ? (
       <>
@@ -29,35 +29,29 @@ const FeatureBox: React.FC<ServiceFeatureProps> = ({
     );
 
   return (
-    <motion.div 
-      className="flex flex-col items-center"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: delay / 1000 }}
-    >
+    <div className="flex flex-1 flex-col items-center">
       <motion.div
-        className="bg-[#FFD015] rounded-[50px] shadow-md p-8 h-[320px] w-full flex flex-col items-center justify-center"
-        whileHover={{ scale: 1.03, y: -5 }}
+        className={`font-your-custom-font flex h-[300px] w-[300px] flex-col items-center justify-center rounded-[60px] bg-[#FFD015] p-8 shadow-lg outline-none`}
+        whileHover={{ scale: 1.05 }}
         transition={{ type: "spring", stiffness: 300 }}
       >
-        <Image
-          src={icon}
-          alt={typeof title === "string" ? title : ""}
-          width={220}
-          height={220}
-          className="mb-6"
-          priority
-        />
-        <h3 className="text-3xl font-black text-center leading-tight text-black">
-          {adjustedTitle}
-        </h3>
+        <div className="flex h-full w-full flex-col items-center justify-start">
+          <Image
+            src={icon}
+            alt={typeof title === "string" ? title : ""}
+            width={140}
+            height={140}
+            className="mb-8"
+          />
+          <h3 className="mt-4 flex h-auto flex-grow items-start justify-center px-2 text-center text-2xl font-black leading-tight tracking-tight">
+            {adjustedTitle}
+          </h3>
+        </div>
       </motion.div>
-      <div className="mt-6 px-4 max-w-[340px]">
-        <p className="text-center text-black leading-relaxed text-base">
-          {description}
-        </p>
-      </div>
-    </motion.div>
+      <p className="font-your-custom-font mt-6 max-w-[320px] text-center text-base leading-snug text-black">
+        {description}
+      </p>
+    </div>
   );
 };
 
@@ -73,50 +67,44 @@ const FlowerIcons: React.FC = () => {
           route, making your logistics smoother and more efficient.
         </span>
       ),
-      delay: 0
     },
     {
       icon: "/images/flowers/truck.svg",
       title: "Personalized Delivery Service",
       description:
         "You'll get a dedicated driver assigned to your shop. No more guessing who's coming—just familiar, reliable service every time.",
-      delay: 200
     },
     {
       icon: "/images/flowers/agent.svg",
       title: "Hands-On Support",
       description:
         "Our helpdesk monitors every delivery from dispatch to doorstep, keeping you updated in real-time so you're never in the dark — so you can focus more on operations while we handle the admin work.",
-      delay: 400
     },
   ];
 
   return (
-    <div className="py-16">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="text-center mb-14">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-            It's Not Just What We Do
-          </h2>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800">
-            It's How We Do It
-          </h2>
-        </div>
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mb-6 px-4 text-center">
+        <h2 className="mb-2 text-[clamp(1.5rem,5vw,2.25rem)] font-bold leading-tight">
+          It's Not Just What We Do
+        </h2>
+        <h2 className="mb-0 text-[clamp(1.5rem,5vw,2.25rem)] font-bold leading-tight">
+          It's How We Do It
+        </h2>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-          {serviceFeatures.map((feature, index) => (
-            <FeatureBox
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              delay={feature.delay}
-            />
-          ))}
-        </div>
+      <div className="flex flex-col items-stretch justify-between gap-8 md:flex-row">
+        {serviceFeatures.map((feature, index) => (
+          <ServiceFeature
+            key={index}
+            icon={feature.icon}
+            title={feature.title}
+            description={feature.description}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-export default FlowerIcons;
+export default FlowerIcons; 

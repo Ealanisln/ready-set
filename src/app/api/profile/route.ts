@@ -80,9 +80,9 @@ export async function POST(request: Request) {
         
         console.log("Profile created successfully in Supabase");
         
-        // 2. Insert user data into user table
+        // 2. Insert user data into profiles table
         const { data: userTableResult, error: userTableError } = await supabase
-          .from('user')
+          .from('profiles')
           .insert(userTableData)
           .select();
           

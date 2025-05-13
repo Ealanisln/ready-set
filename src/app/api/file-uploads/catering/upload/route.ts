@@ -34,11 +34,11 @@ export async function POST(request: NextRequest) {
       try {
         const { data: userProfile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('type')
           .eq('id', userId)
           .single();
         
-        userType = userProfile?.role || 'client'; // Default to 'client' if no role found
+        userType = userProfile?.type || 'client'; // Default to 'client' if no type found
       } catch (err) {
         console.log("Error fetching user role, defaulting to 'client':", err);
         userType = 'client';
