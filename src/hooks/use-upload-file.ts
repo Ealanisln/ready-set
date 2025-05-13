@@ -396,6 +396,7 @@ export function useUploadFile({
       category,            // Add dependency
       userId,              // Add dependency
       bucketName,          // Add dependency
+      actualBucketName,    // Add the missing dependency
       // initSupabase,     // Remove if not directly used inside onUpload
     ]
   );
