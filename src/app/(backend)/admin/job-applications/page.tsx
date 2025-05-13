@@ -27,5 +27,5 @@ export default async function JobApplicationsPage() {
     redirect("/");
   }
 
-  return <JobApplicationsClient />;
+  return <JobApplicationsClient userType={userType} />;
 }

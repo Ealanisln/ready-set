@@ -6,6 +6,13 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { FileWithPath } from "react-dropzone";
 import toast from "react-hot-toast";
 
+// Helper to extract message from different error types
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'An unknown error occurred';
+};
+
 export type UploadedFile = {
   key: string;
   name: string;
@@ -130,6 +137,57 @@ export function useUploadFile({
     init();
   }, [initSupabase, fetchExistingFiles]);
 
+  // Default bucket to file uploader if not specified
+  const actualBucketName = bucketName || "fileUploader"; 
+  
+  const uploadFile = useCallback(
+    async (file: File) => {
+      // Use entityId if it exists, otherwise use tempEntityId
+      const currentId = entityId || tempEntityId;
+      
+      try {
+        setIsUploading(true);
+        
+        // Create FormData for the file upload
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        // Add additional metadata to the form
+        formData.append("entityType", entityType || "");
+        formData.append("entityId", currentId);
+        formData.append("category", category || "");
+        formData.append("bucketName", actualBucketName);
+        
+        // Upload the file using the API route
+        const response = await fetch("/api/file-uploads", {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to upload file");
+        }
+        
+        const data = await response.json();
+        
+        if (data.file) {
+          setUploadedFiles((prev) => [...prev, data.file]);
+          return data.file;
+        }
+        
+        return null;
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast.error(`Error uploading file: ${getErrorMessage(error)}`);
+        return null;
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [entityId, tempEntityId, entityType, category, actualBucketName]
+  );
+
   // Handle file uploads to Supabase Storage and register in database via API
   const onUpload = useCallback(
     async (files: FileWithPath[]): Promise<UploadedFile[]> => {
@@ -206,8 +264,8 @@ export function useUploadFile({
             if (userId) {
               formData.append('userId', userId);
             }
-             if (bucketName) {
-              formData.append('bucketName', bucketName);
+             if (actualBucketName) {
+              formData.append('bucketName', actualBucketName);
             }
 
             // Log form data entries
@@ -472,7 +530,7 @@ export function useUploadFile({
 
         // Delete file from Supabase Storage
         const { data, error } = await client.storage
-          .from(bucketName)
+          .from(actualBucketName)
           .remove([filePath]);
 
         if (error) {
@@ -505,7 +563,7 @@ export function useUploadFile({
         throw error;
       }
     },
-    [initSupabase, bucketName],
+    [initSupabase, actualBucketName],
   );
 
   return {

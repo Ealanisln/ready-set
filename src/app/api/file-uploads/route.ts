@@ -3,13 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { PrismaClient } from "@prisma/client";
-
-// Define storage buckets in one place for easy updating
-const STORAGE_BUCKETS = {
-  DEFAULT: "user-assets",
-  FILE_UPLOADER: "fileUploader",
-  CATERING: "catering-files"
-};
+import { STORAGE_BUCKETS } from "@/utils/file-service";
 
 // Add a new route to get a signed URL for a file
 export async function GET(request: NextRequest) {
@@ -146,27 +140,24 @@ export async function POST(request: NextRequest) {
     // Get the Supabase client for storage
     const supabase = await createClient();
 
-    // Handle temporary entity IDs for job applications
+    // Handle entity IDs in a consistent way
     // Don't add temp- prefix to IDs that already have temp_ prefix (job applications)
-    let tempId = '';
+    let finalEntityId = '';
     if (entityId) {
-      if (entityId.startsWith('temp_')) {
-        // For job applications, use the ID as-is
-        tempId = entityId;
-        console.log(`Using job application temporary ID as-is: ${tempId}`);
-      } else if (entityId.startsWith('temp-')) {
-        // For existing temp IDs, use as-is
-        tempId = entityId;
+      if (entityId.startsWith('temp_') || entityId.startsWith('temp-')) {
+        // For temporary IDs, use as-is
+        finalEntityId = entityId;
+        console.log(`Using temporary ID as-is: ${finalEntityId}`);
       } else {
-        // For normal IDs, prefix with temp- (legacy behavior)
-        tempId = `temp-${entityId}`;
+        // For normal IDs, use directly without temp prefix
+        finalEntityId = entityId;
       }
     } else {
       // Generate a new temporary ID if none provided
-      tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+      finalEntityId = `temp-${Date.now()}-${Math.random().toString(36).substring(2)}`;
     }
     
-    console.log(`Using entity ID for file upload: ${tempId}`);
+    console.log(`Using entity ID for file upload: ${finalEntityId}`);
     
     // Upload file to Supabase Storage
     const fileExt = file.name.split(".").pop();
@@ -176,74 +167,71 @@ export async function POST(request: NextRequest) {
 
     // Create a structured path based on entityType
     let filePath;
-    let storageBucket;
+    let storageBucket = (bucketName || STORAGE_BUCKETS.DEFAULT) as string;
     
     // Convert entityType to a consistent format
     const normalizedEntityType = entityType.toLowerCase();
     console.log(`Normalized entityType: ${normalizedEntityType}`);
     
-    // Determine which bucket to use based on entity type
+    // Determine which bucket and path to use based on entity type
     if (normalizedEntityType === "catering") {
-      storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
-      filePath = `orders/catering/${tempId}/${fileName}`;
+      // Consistent path for catering orders
+      filePath = `orders/catering/${finalEntityId}/${fileName}`;
       console.log("Using orders/catering path for catering order");
     } 
     else if (normalizedEntityType === "on_demand") {
-      storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
-      filePath = `orders/on-demand/${tempId}/${fileName}`;
+      // Consistent path for on-demand orders  
+      filePath = `orders/on-demand/${finalEntityId}/${fileName}`;
       console.log("Using orders/on-demand path for on-demand order");
     }
     else if (normalizedEntityType === "job_application") {
       // For job application type, check if ID is a temp ID or real UUID
-      if (entityId && entityId.startsWith('temp_')) {
-        // Skip UUID validation for temp_ job application IDs
+      if (finalEntityId.startsWith('temp_') || finalEntityId.startsWith('temp-')) {
+        // Skip UUID validation for temp job application IDs
         console.log("Using job-applications/temp path for temp job application uploads");
-        filePath = `job-applications/temp/${tempId}/${fileName}`;
-        storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+        filePath = `job-applications/temp/${finalEntityId}/${fileName}`;
       } else {
         // Only try to validate as UUID for non-temp IDs
         try {
           const jobApp = await prisma.jobApplication.findUnique({
-            where: { id: entityId }
+            where: { id: finalEntityId }
           });
           
           if (jobApp) {
             console.log("Valid job application ID, using job-applications path");
             filePath = `job-applications/${jobApp.id}/${fileName}`;
-            storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
           } else {
             // Check if we have a specific upload path from the category
             if (uploadPath && uploadPath.startsWith("job-applications/temp/")) {
               console.log(`Using specified upload path: ${uploadPath}`);
-              filePath = `${uploadPath}/${tempId}/${fileName}`;
-              storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+              filePath = `${uploadPath}/${finalEntityId}/${fileName}`;
             }
             // If category suggests this is a catering order but tagged as job application
             else if (normalizedCategory === "catering-order") {
               console.log("Catering order detected by category, using orders/catering path");
-              filePath = `orders/catering/${tempId}/${fileName}`;
-              storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+              filePath = `orders/catering/${finalEntityId}/${fileName}`;
             } else if (normalizedCategory === "on-demand") {
               console.log("On-demand order detected by category, using orders/on-demand path");
-              filePath = `orders/on-demand/${tempId}/${fileName}`;
-              storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+              filePath = `orders/on-demand/${finalEntityId}/${fileName}`;
             } else {
               console.log("Using job-applications/temp path for temp job application uploads");
-              filePath = `job-applications/temp/${tempId}/${fileName}`;
-              storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+              filePath = `job-applications/temp/${finalEntityId}/${fileName}`;
             }
           }
         } catch (error) {
           console.error("Error checking job application:", error);
-          filePath = `job-applications/temp/${tempId}/${fileName}`;
-          storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+          filePath = `job-applications/temp/${finalEntityId}/${fileName}`;
         }
       }
     }
+    else if (normalizedEntityType === "user") {
+      // Consistent path for user files
+      filePath = `users/${finalEntityId}/${fileName}`;
+      console.log("Using users path for user files");
+    }
     // Default handling for other types
     else {
-      filePath = `${normalizedEntityType || 'general'}/${tempId}/${fileName}`;
-      storageBucket = bucketName || STORAGE_BUCKETS.DEFAULT;
+      filePath = `${normalizedEntityType || 'general'}/${finalEntityId}/${fileName}`;
     }
 
     // If bucketName was explicitly provided in the request, use that
@@ -311,15 +299,6 @@ export async function POST(request: NextRequest) {
       data: { publicUrl },
     } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
 
-    // Alternative URL construction in case the standard method doesn't work
-    const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const alternativeUrl = `${projectUrl}/storage/v1/object/public/${storageBucket}/${filePath}`;
-    
-    // For debugging - log the URLs
-    console.log("Standard publicUrl:", publicUrl);
-    console.log("Alternative URL:", alternativeUrl);
-    
-    // Use the standard URL for now, but keep the alternative as a backup
     const finalUrl = publicUrl;
 
     // Prepare database record data based on entityType
@@ -332,7 +311,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
       category: normalizedCategory,
       // Set isTemporary flag based on entityId format
-      isTemporary: entityId ? (entityId.startsWith('temp_') || entityId.startsWith('temp-')) : true,
+      isTemporary: finalEntityId ? (finalEntityId.startsWith('temp_') || finalEntityId.startsWith('temp-')) : true,
       // Set all IDs to null by default
       cateringRequestId: null,
       onDemandId: null,
@@ -347,26 +326,26 @@ export async function POST(request: NextRequest) {
     try {
       // First, prioritize category for determining the correct foreign key
       if (normalizedCategory === "catering-order" || normalizedCategory === "catering" || entityType === "catering") {
-        console.log(`Evaluating cateringRequestId for: ${entityId}`);
+        console.log(`Evaluating cateringRequestId for: ${finalEntityId}`);
         
         // Only set cateringRequestId if it's NOT a temporary ID
-        if (entityId && !entityId.startsWith('temp-')) {
-          console.log(`Setting cateringRequestId to: ${entityId}`);
-          dbData.cateringRequestId = entityId;
+        if (finalEntityId && !finalEntityId.startsWith('temp-') && !finalEntityId.startsWith('temp_')) {
+          console.log(`Setting cateringRequestId to: ${finalEntityId}`);
+          dbData.cateringRequestId = finalEntityId;
           
           // Double-check the catering request exists
           try {
             const cateringRequest = await prisma.cateringRequest.findUnique({
-              where: { id: entityId }
+              where: { id: finalEntityId }
             });
             
             if (cateringRequest) {
-              console.log(`Verified catering request exists: ID=${entityId}`);
+              console.log(`Verified catering request exists: ID=${finalEntityId}`);
               // Make sure category is set consistently to improve retrieval
               dbData.category = "catering-order";
               dbData.isTemporary = false;
             } else {
-              console.warn(`Catering request with ID ${entityId} not found in database`);
+              console.warn(`Catering request with ID ${finalEntityId} not found in database`);
               dbData.isTemporary = true;
               // Clear the ID to avoid database errors
               dbData.cateringRequestId = null;
@@ -377,77 +356,74 @@ export async function POST(request: NextRequest) {
             // Clear the ID to avoid database errors
             dbData.cateringRequestId = null;
           }
-        } else if (entityId) {
-          console.log(`Skipping cateringRequestId for temporary ID: ${entityId}`);
+        } else if (finalEntityId) {
+          console.log(`Skipping cateringRequestId for temporary ID: ${finalEntityId}`);
           // For temporary IDs, mark the file as temporary and do NOT set the cateringRequestId
           dbData.isTemporary = true;
           dbData.cateringRequestId = null;
           dbData.category = "catering-order";
-          
-          // Store 'temp-entityId' in category instead to help with retrieval
-          dbData.category = `catering-order::${entityId}`;
         }
       } else if (normalizedCategory === "on-demand" || entityType === "on_demand") {
         // Similar logic for on-demand requests
-        if (entityId && !entityId.startsWith('temp-')) {
-          console.log(`Setting onDemandId to: ${entityId}`);
-          dbData.onDemandId = entityId;
+        if (finalEntityId && !finalEntityId.startsWith('temp-') && !finalEntityId.startsWith('temp_')) {
+          console.log(`Setting onDemandId to: ${finalEntityId}`);
+          dbData.onDemandId = finalEntityId;
           dbData.isTemporary = false;
-        } else if (entityId) {
-          console.log(`Skipping onDemandId for temporary ID: ${entityId}`);
+        } else if (finalEntityId) {
+          console.log(`Skipping onDemandId for temporary ID: ${finalEntityId}`);
           dbData.isTemporary = true;
           dbData.onDemandId = null;
           // Store in category for retrieval
-          dbData.category = `on-demand::${entityId}`;
+          dbData.category = `on-demand`;
         }
       } else if (entityType === "job_application") {
         // Only set jobApplicationId if it's really a job application (verified earlier)
         // Skip UUID validation completely for temp_ format IDs
-        if (entityId && !entityId.startsWith('temp-') && !entityId.startsWith('temp_')) {
+        if (finalEntityId && !finalEntityId.startsWith('temp-') && !finalEntityId.startsWith('temp_')) {
           try {
             const jobApp = await prisma.jobApplication.findUnique({
-              where: { id: entityId }
+              where: { id: finalEntityId }
             });
             
             if (jobApp) {
-              console.log(`Setting jobApplicationId to: ${entityId} (verified)`);
-              dbData.jobApplicationId = entityId;
+              console.log(`Setting jobApplicationId to: ${finalEntityId} (verified)`);
+              dbData.jobApplicationId = finalEntityId;
               dbData.isTemporary = false;
             } else {
-              console.log(`JobApplication ${entityId} not found, not setting foreign key`);
+              console.log(`JobApplication ${finalEntityId} not found, not setting foreign key`);
               dbData.jobApplicationId = null;
               dbData.isTemporary = true;
               // Keep the original category rather than modifying it
             }
           } catch (error) {
-            console.log(`Error finding job application with ID ${entityId}, treating as temporary`, error);
+            console.log(`Error finding job application with ID ${finalEntityId}, treating as temporary`, error);
             dbData.jobApplicationId = null;
             dbData.isTemporary = true;
           }
-        } else if (entityId) {
+        } else if (finalEntityId) {
           // For temp IDs, don't try to look up in database at all
-          console.log(`Using temporary ID for job application: ${entityId}`);
+          console.log(`Using temporary ID for job application: ${finalEntityId}`);
           dbData.jobApplicationId = null;
           dbData.isTemporary = true;
           // Keep the original category rather than modifying it
         }
       } else if (entityType === "user") {
         // For user files, we need to set the userId field
-        if (entityId && !entityId.startsWith('temp-') && !entityId.startsWith('temp_')) {
-          console.log(`Setting userId to: ${entityId} for user file`);
-          dbData.userId = entityId;
+        if (finalEntityId && !finalEntityId.startsWith('temp-') && !finalEntityId.startsWith('temp_')) {
+          console.log(`Setting userId to: ${finalEntityId} for user file`);
+          dbData.userId = finalEntityId;
           
           // Check if user exists
           try {
             const userProfile = await prisma.profile.findUnique({
-              where: { id: entityId }
+              where: { id: finalEntityId }
             });
             
             if (userProfile) {
-              console.log(`Verified user exists: ID=${entityId}`);
+              console.log(`Verified user exists: ID=${finalEntityId}`);
               dbData.isTemporary = false;
             } else {
-              console.warn(`User with ID ${entityId} not found in database`);
+              console.warn(`User with ID ${finalEntityId} not found in database`);
               dbData.isTemporary = true;
               // Clear the ID to avoid database errors
               dbData.userId = null;
@@ -457,23 +433,21 @@ export async function POST(request: NextRequest) {
             dbData.isTemporary = true;
             dbData.userId = null;
           }
-        } else if (entityId) {
+        } else if (finalEntityId) {
           dbData.userId = null;
           dbData.isTemporary = true;
           // Store in category for retrieval
-          dbData.category = `user::${entityId}`;
+          dbData.category = `user`;
         }
       } else {
         console.log(`No specific entity ID field set for type: ${entityType} and category: ${normalizedCategory}`);
         // For safety, ensure all fields are null if undefined or temp
-        if (entityId && (entityId.startsWith('temp-') || entityId.startsWith('temp_'))) {
+        if (finalEntityId && (finalEntityId.startsWith('temp-') || finalEntityId.startsWith('temp_'))) {
           dbData.isTemporary = true;
           dbData.cateringRequestId = null;
           dbData.onDemandId = null;
           dbData.jobApplicationId = null;
           dbData.userId = null;
-          // Store temp ID in category
-          dbData.category = `${normalizedCategory || entityType}::${entityId}`;
         }
       }
     } catch (error) {
@@ -501,12 +475,12 @@ export async function POST(request: NextRequest) {
         url: finalUrl,
         type: file.type,
         size: file.size,
-        entityId: tempId,
+        entityId: finalEntityId,
         entityType: entityType,
         category: normalizedCategory,
         path: filePath,
-        isTemporary: !entityId,
-        bucketName,
+        isTemporary: dbData.isTemporary,
+        bucketName: storageBucket,
       },
     });
   } catch (error: any) {
@@ -593,7 +567,7 @@ export async function DELETE(request: NextRequest) {
       const publicIndex = pathParts.findIndex(part => part === 'public');
       
       if (publicIndex !== -1 && publicIndex + 1 < pathParts.length) {
-        bucketName = pathParts[publicIndex + 1];
+        bucketName = pathParts[publicIndex + 1] as typeof STORAGE_BUCKETS.DEFAULT;
         // The path is everything after the bucket name
         filePath = pathParts.slice(publicIndex + 2).join('/');
         

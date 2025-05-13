@@ -30,6 +30,7 @@ type ApplicationDetailDialogProps = {
   onDeleteClick: (application: JobApplication) => void;
   isSubmitting: boolean;
   error: string | null;
+  canDeleteApplications: boolean;
 };
 
 export const ApplicationDetailDialog: React.FC<ApplicationDetailDialogProps> = ({
@@ -40,6 +41,7 @@ export const ApplicationDetailDialog: React.FC<ApplicationDetailDialogProps> = (
   onDeleteClick,
   isSubmitting,
   error,
+  canDeleteApplications,
 }) => {
   if (!application) return null;
 
@@ -242,15 +244,17 @@ export const ApplicationDetailDialog: React.FC<ApplicationDetailDialogProps> = (
         )}
         
         <DialogFooter className="mt-6 flex-col sm:flex-row gap-2 sm:justify-between sm:gap-0">
-          <Button
-            variant="destructive"
-            onClick={() => onDeleteClick(application)}
-            disabled={isSubmitting}
-            className="sm:order-1"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Application
-          </Button>
+          {canDeleteApplications && (
+            <Button
+              variant="destructive"
+              onClick={() => onDeleteClick(application)}
+              disabled={isSubmitting}
+              className="sm:order-1"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Application
+            </Button>
+          )}
           
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button

@@ -410,12 +410,28 @@ export async function DELETE(
       where: { id: user.id },
       select: { type: true }
     });
-    if (requesterProfile?.type !== UserType.SUPER_ADMIN) {
+    
+    // Only allow ADMIN and SUPER_ADMIN to delete users (not HELPDESK)
+    if (requesterProfile?.type !== UserType.SUPER_ADMIN && requesterProfile?.type !== UserType.ADMIN) {
       return NextResponse.json(
-        { error: 'Forbidden: Only super_admin can delete users' },
+        { error: 'Forbidden: Only Admin or Super Admin can delete users' },
         { status: 403 }
       );
     }
+    
+    // Prevent deletion of SUPER_ADMIN users
+    const userToDelete = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { type: true }
+    });
+    
+    if (userToDelete?.type === UserType.SUPER_ADMIN) {
+      return NextResponse.json(
+        { error: 'Forbidden: Super Admin users cannot be deleted' },
+        { status: 403 }
+      );
+    }
+    
     // ...delete logic here
     return NextResponse.json({
       message: 'User and associated files deleted'

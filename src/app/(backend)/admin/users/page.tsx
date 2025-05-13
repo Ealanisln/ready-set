@@ -37,7 +37,7 @@ export default async function UsersPage() {
       <AdminHighlightInit />
      
       <HighlightErrorBoundary>
-        <UsersClient />
+        <UsersClient userType={userType} />
       </HighlightErrorBoundary>
     </>
   );

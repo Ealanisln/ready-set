@@ -129,7 +129,11 @@ const LoadingSkeleton = () => (
 const ITEMS_PER_PAGE = 10;
 
 // Export the client component directly
-const UsersClient: React.FC = () => {
+interface UsersClientProps {
+  userType: string;
+}
+
+const UsersClient: React.FC<UsersClientProps> = ({ userType }) => {
   // --- State ---
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +151,9 @@ const UsersClient: React.FC = () => {
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
+  
+  // Check if current user can delete users (only admin and super_admin)
+  const canDeleteUsers = ["admin", "super_admin"].includes(userType);
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -618,19 +625,21 @@ const UsersClient: React.FC = () => {
                                       })
                                     : 'Invalid Date'}
                                 </span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:bg-red-50 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => {
-                                    setUserToDelete(user);
-                                    setShowDeleteDialog(true);
-                                  }}
-                                  disabled={user.type === 'super_admin'}
-                                >
-                                  <AlertCircle className="h-4 w-4" />
-                                  <span className="sr-only">Delete</span>
-                                </Button>
+                                {canDeleteUsers && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => {
+                                      setUserToDelete(user);
+                                      setShowDeleteDialog(true);
+                                    }}
+                                    disabled={user.type === 'super_admin'}
+                                  >
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span className="sr-only">Delete</span>
+                                  </Button>
+                                )}
                               </div>
                             </TableCell>
                           </motion.tr>
@@ -713,13 +722,15 @@ const UsersClient: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => userToDelete && handleDelete(userToDelete.id)}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
+            {canDeleteUsers && (
+              <AlertDialogAction
+                onClick={() => userToDelete && handleDelete(userToDelete.id)}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

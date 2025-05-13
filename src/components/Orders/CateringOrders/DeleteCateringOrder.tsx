@@ -35,8 +35,8 @@ export const DeleteCateringOrder: React.FC<DeleteCateringOrderProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Only render the delete button if the user is an admin, super admin, or helpdesk
-  if (!userRoles.isAdmin && !userRoles.isSuperAdmin && !userRoles.helpdesk) {
+  // Only render the delete button if the user is an admin or super admin (not helpdesk)
+  if (!userRoles.isAdmin && !userRoles.isSuperAdmin) {
     return null;
   }
 

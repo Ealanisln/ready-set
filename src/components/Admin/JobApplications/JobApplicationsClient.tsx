@@ -359,7 +359,11 @@ const DeleteConfirmationDialog: React.FC<{
 };
 
 // Main client component
-const JobApplicationsClient = () => {
+interface JobApplicationsClientProps {
+  userType: string;
+}
+
+const JobApplicationsClient = ({ userType }: JobApplicationsClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -378,6 +382,9 @@ const JobApplicationsClient = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState<JobApplication | null>(null);
   const [isDeletingApplication, setIsDeletingApplication] = useState(false);
+
+  // Check if user can delete applications (only admin and super_admin)
+  const canDeleteApplications = ["admin", "super_admin"].includes(userType);
 
   // Format date helper
   const formatDate = (dateString: string | Date) => {
@@ -906,14 +913,16 @@ const JobApplicationsClient = () => {
                                     <Calendar className="mr-2 h-4 w-4 text-blue-500" />
                                     Schedule Interview
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => openDeleteConfirmation(application)}
-                                    disabled={isDeletingApplication}
-                                    className="text-red-600 focus:bg-red-50"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
-                                    Delete
-                                  </DropdownMenuItem>
+                                  {canDeleteApplications && (
+                                    <DropdownMenuItem
+                                      onClick={() => openDeleteConfirmation(application)}
+                                      disabled={isDeletingApplication}
+                                      className="text-red-600 focus:bg-red-50"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -994,6 +1003,7 @@ const JobApplicationsClient = () => {
         onDeleteClick={(application) => openDeleteConfirmation(application)}
         isSubmitting={isSubmitting}
         error={error}
+        canDeleteApplications={canDeleteApplications}
       />
 
       {/* Delete Confirmation Dialog */}

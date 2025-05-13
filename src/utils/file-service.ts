@@ -21,6 +21,8 @@ export interface FileMetadata {
 
 // Define the buckets we'll use in the application
 export const STORAGE_BUCKETS = {
+  DEFAULT: 'user-assets',
+  FILE_UPLOADER: 'fileUploader',
   CATERING_FILES: 'catering-files',
   USER_FILES: 'user-files',
   PROFILE_IMAGES: 'profile-images',
@@ -182,45 +184,124 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
   const supabase = await createClient();
   
   try {
-    // Find temporary files older than threshold using type assertion
-    const { data: orphanedFiles, error: findError } = await (supabase as any)
-      .from('file_metadata')
-      .select('*')
-      .like('entity_id', 'temp-%')
-      .lt('created_at', new Date(Date.now() - timeThreshold * 60 * 60 * 1000).toISOString());
+    // Find all temporary files older than threshold
+    const getTempFilesWithPrefix = async (prefix: string) => {
+      const { data, error } = await (supabase as any)
+        .from('file_metadata')
+        .select('*')
+        .like('entity_id', `${prefix}%`)
+        .lt('created_at', new Date(Date.now() - timeThreshold * 60 * 60 * 1000).toISOString());
+      
+      if (error) throw error;
+      return data || [];
+    };
     
-    if (findError) throw findError;
+    // Get files with both temp- and temp_ prefixes
+    const tempDashFiles = await getTempFilesWithPrefix('temp-');
+    const tempUnderscoreFiles = await getTempFilesWithPrefix('temp_');
+    
+    // Combine the results
+    const orphanedFiles = [...tempDashFiles, ...tempUnderscoreFiles];
     
     if (!orphanedFiles || orphanedFiles.length === 0) {
       return { success: true, deleted: 0 };
     }
     
+    console.log(`Found ${orphanedFiles.length} orphaned files to clean up`);
+    
     // Define a type for the orphaned file records
     interface OrphanedFile {
       id: string;
       file_key: string;
+      file_url: string;
     }
     
     // Group files by bucket for efficient deletion
     const filesByBucket: Record<string, string[]> = {};
+    
+    // Process each orphaned file
     for (const file of orphanedFiles as OrphanedFile[]) {
-      const bucketName = file.file_key.split('/')[0]; // Assuming the bucket name is part of the key
-      if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
-      filesByBucket[bucketName].push(file.file_key);
+      try {
+        let bucketName: string;
+        let filePath: string;
+        
+        // Try to extract bucket and path from file_url first (more reliable)
+        if (file.file_url) {
+          try {
+            const url = new URL(file.file_url);
+            const pathParts = url.pathname.split('/');
+            
+            // Find the index of "public" which comes before the bucket name
+            const publicIndex = pathParts.findIndex(part => part === 'public');
+            
+            if (publicIndex !== -1 && publicIndex + 1 < pathParts.length) {
+              bucketName = pathParts[publicIndex + 1];
+              // The path is everything after the bucket name
+              filePath = pathParts.slice(publicIndex + 2).join('/');
+              
+              // Add the file to the appropriate bucket group
+              if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
+              filesByBucket[bucketName].push(filePath);
+              
+              continue;
+            }
+          } catch (urlError) {
+            console.error('Error parsing file URL:', urlError);
+            // Fall through to the file_key method below
+          }
+        }
+        
+        // Fallback to file_key parsing if URL parsing failed
+        if (file.file_key) {
+          // Try to determine if the key includes the bucket name
+          // Format could be either "bucket/path" or just "path"
+          const knownBuckets = Object.values(STORAGE_BUCKETS);
+          const keyParts = file.file_key.split('/');
+          
+          if (knownBuckets.includes(keyParts[0] as any)) {
+            // If first part is a known bucket, use it
+            bucketName = keyParts[0];
+            filePath = keyParts.slice(1).join('/');
+          } else {
+            // Otherwise, assume it's a path in the default bucket
+            bucketName = STORAGE_BUCKETS.DEFAULT;
+            filePath = file.file_key;
+          }
+          
+          // Add the file to the appropriate bucket group
+          if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
+          filesByBucket[bucketName].push(filePath);
+        }
+      } catch (parseError) {
+        console.error('Error processing orphaned file:', parseError);
+      }
     }
+    
+    console.log('Files to delete by bucket:', Object.entries(filesByBucket).map(
+      ([bucket, paths]) => `${bucket}: ${paths.length} files`
+    ));
     
     // Delete files from storage
-    for (const [bucket, keys] of Object.entries(filesByBucket)) {
-      await supabase.storage.from(bucket).remove(keys);
+    for (const [bucket, paths] of Object.entries(filesByBucket)) {
+      if (paths.length > 0) {
+        const { error } = await supabase.storage.from(bucket).remove(paths);
+        if (error) {
+          console.error(`Error deleting files from bucket ${bucket}:`, error);
+        } else {
+          console.log(`Successfully deleted ${paths.length} files from bucket ${bucket}`);
+        }
+      }
     }
     
-    // Delete metadata records using type assertion
+    // Delete metadata records
     const { error: deleteError } = await (supabase as any)
       .from('file_metadata')
       .delete()
-      .in('id', (orphanedFiles as OrphanedFile[]).map(f => f.id));
+      .in('id', orphanedFiles.map(f => f.id));
     
     if (deleteError) throw deleteError;
+    
+    console.log(`Successfully deleted ${orphanedFiles.length} file metadata records`);
     
     return { success: true, deleted: orphanedFiles.length };
   } catch (error) {

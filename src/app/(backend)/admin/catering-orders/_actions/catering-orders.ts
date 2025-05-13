@@ -450,7 +450,7 @@ export async function deleteCateringOrder(orderId: string): Promise<DeleteOrderR
       console.error(`Unauthorized: User ${user.id} with type ${userProfile?.type} attempted to delete order`);
       return { 
         success: false, 
-        error: "Unauthorized: Only administrators can delete catering orders." 
+        error: "Unauthorized: Only Admin or Super Admin can delete catering orders." 
       };
     }
 
