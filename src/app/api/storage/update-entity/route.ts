@@ -26,16 +26,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Update file entity IDs
+    // Explicitly type the result to handle the type issue
     const updatedFiles = await updateFileEntityId(
       oldEntityId,
       newEntityId,
       session.user.id
-    );
+    ) as unknown as Array<any> | null;
 
     return NextResponse.json({
       message: 'File associations updated successfully',
-      updatedCount: updatedFiles?.length || 0,
-      files: updatedFiles
+      updatedCount: Array.isArray(updatedFiles) ? updatedFiles.length : 0,
+      files: updatedFiles || []
     });
   } catch (error: any) {
     console.error('Error updating file entity IDs:', error);

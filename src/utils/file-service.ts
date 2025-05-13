@@ -92,7 +92,9 @@ export async function saveFileMetadata(metadata: Omit<FileMetadata, 'id' | 'crea
   const supabase = await createClient();
   
   try {
-    const { data, error } = await supabase
+    // Use raw query to avoid type issues with the file_metadata table
+    // that's not properly typed in the Supabase client
+    const { data, error } = await (supabase as any)
       .from('file_metadata')
       .insert([metadata])
       .select()
@@ -111,7 +113,8 @@ export async function updateFileEntityId(oldEntityId: string, newEntityId: strin
   const supabase = await createClient();
   
   try {
-    const { data, error } = await supabase
+    // Use a direct RPC call that's defined in the database
+    const { data, error } = await (supabase as any)
       .rpc('update_file_entity_id', {
         p_old_entity_id: oldEntityId,
         p_new_entity_id: newEntityId,
@@ -119,7 +122,7 @@ export async function updateFileEntityId(oldEntityId: string, newEntityId: strin
       });
     
     if (error) throw error;
-    return data;
+    return data || [];
   } catch (error) {
     console.error('Error updating file entity ID:', error);
     throw error;
@@ -131,7 +134,8 @@ export async function getFilesForEntity(entityType: string, entityId: string) {
   const supabase = await createClient();
   
   try {
-    const { data, error } = await supabase
+    // Use type assertion to bypass type checking for the file_metadata table
+    const { data, error } = await (supabase as any)
       .from('file_metadata')
       .select('*')
       .eq('entity_type', entityType)
@@ -139,7 +143,7 @@ export async function getFilesForEntity(entityType: string, entityId: string) {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data;
+    return data || [];
   } catch (error) {
     console.error('Error getting files for entity:', error);
     throw error;
@@ -158,8 +162,8 @@ export async function deleteFile(fileKey: string, bucketName: string) {
     
     if (storageError) throw storageError;
     
-    // Delete metadata
-    const { error: dbError } = await supabase
+    // Delete metadata using type assertion
+    const { error: dbError } = await (supabase as any)
       .from('file_metadata')
       .delete()
       .eq('file_key', fileKey);
@@ -178,8 +182,8 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
   const supabase = await createClient();
   
   try {
-    // Find temporary files older than threshold
-    const { data: orphanedFiles, error: findError } = await supabase
+    // Find temporary files older than threshold using type assertion
+    const { data: orphanedFiles, error: findError } = await (supabase as any)
       .from('file_metadata')
       .select('*')
       .like('entity_id', 'temp-%')
@@ -191,9 +195,15 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
       return { success: true, deleted: 0 };
     }
     
+    // Define a type for the orphaned file records
+    interface OrphanedFile {
+      id: string;
+      file_key: string;
+    }
+    
     // Group files by bucket for efficient deletion
     const filesByBucket: Record<string, string[]> = {};
-    for (const file of orphanedFiles) {
+    for (const file of orphanedFiles as OrphanedFile[]) {
       const bucketName = file.file_key.split('/')[0]; // Assuming the bucket name is part of the key
       if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
       filesByBucket[bucketName].push(file.file_key);
@@ -204,11 +214,11 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
       await supabase.storage.from(bucket).remove(keys);
     }
     
-    // Delete metadata records
-    const { error: deleteError } = await supabase
+    // Delete metadata records using type assertion
+    const { error: deleteError } = await (supabase as any)
       .from('file_metadata')
       .delete()
-      .in('id', orphanedFiles.map(f => f.id));
+      .in('id', (orphanedFiles as OrphanedFile[]).map(f => f.id));
     
     if (deleteError) throw deleteError;
     

@@ -35,18 +35,11 @@ export async function GET(
       );
     }
     
-    // Try to get the user from both tables
+    // Try to get the user from the profiles table
     
-    // 1. First, try to get from profiles (seems to be your main table based on logs)
+    // 1. First, try to get by auth_user_id if it exists in the schema, or use id as fallback
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('auth_user_id', userId)
-      .single();
-      
-    // 2. Try to get from the user table
-    const { data: userData, error: userError } = await supabase
-      .from('user')
       .select('*')
       .eq('id', userId)
       .single();
@@ -64,22 +57,14 @@ export async function GET(
       // Add profile data if available
       ...(profileData || {}),
       
-      // Add user data if available (will override profile data if both exist)
-      ...(userData || {}),
-      
       // Ensure id is correct (added last to override any id from the spread objects)
       id: userId
     };
     
     // Map profile fields to expected format if needed
-    if (profileData && !userData) {
-      // If we only have profile data, ensure field mappings are correct
+    if (profileData) {
+      // If we have profile data, ensure field mappings are correct
       combinedUserData.type = profileData.type || 'client';
-      
-      // Map auth_user_id to id if that's the field used in profiles
-      if (profileData.auth_user_id) {
-        combinedUserData.id = profileData.auth_user_id;
-      }
     }
     
     return NextResponse.json(combinedUserData);
@@ -142,11 +127,11 @@ export async function PUT(
     let updatedUser;
     let updateError;
     
-    // Check if user exists in profiles table
+    // Check if user exists in profiles table by id
     const { data: profileExists } = await supabase
       .from('profiles')
-      .select('auth_user_id')
-      .eq('auth_user_id', userId)
+      .select('id')
+      .eq('id', userId)
       .single();
       
     if (profileExists) {
@@ -154,45 +139,25 @@ export async function PUT(
       const result = await supabase
         .from('profiles')
         .update(updateData)
-        .eq('auth_user_id', userId)
+        .eq('id', userId)
         .select('*')
         .single();
         
       updatedUser = result.data;
       updateError = result.error;
     } else {
-      // Check if exists in user table
-      const { data: userExists } = await supabase
-        .from('user')
-        .select('id')
-        .eq('id', userId)
+      // Create a new entry in profiles table
+      const result = await supabase
+        .from('profiles')
+        .insert({
+          id: userId, // Use id directly
+          ...updateData
+        })
+        .select('*')
         .single();
         
-      if (userExists) {
-        // Update user table
-        const result = await supabase
-          .from('user')
-          .update(updateData)
-          .eq('id', userId)
-          .select('*')
-          .single();
-          
-        updatedUser = result.data;
-        updateError = result.error;
-      } else {
-        // Create a new entry in profiles table
-        const result = await supabase
-          .from('profiles')
-          .insert({
-            auth_user_id: userId,
-            ...updateData
-          })
-          .select('*')
-          .single();
-          
-        updatedUser = result.data;
-        updateError = result.error;
-      }
+      updatedUser = result.data;
+      updateError = result.error;
     }
     
     if (updateError) {

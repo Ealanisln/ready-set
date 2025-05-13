@@ -59,12 +59,12 @@ const AddressManager: React.FC<AddressManagerProps> = ({
   useEffect(() => {
     let isMounted = true;
     
-    const fetchSession = async () => {
+    const fetchUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user }, error: getUserError } = await supabase.auth.getUser();
         if (isMounted) {
-          setUser(session?.user ?? null);
-          if (!session) {
+          setUser(user);
+          if (!user) {
             setError("Authentication required to load addresses.");
             if (onError) {
               onError("Authentication required to load addresses.");
@@ -73,18 +73,18 @@ const AddressManager: React.FC<AddressManagerProps> = ({
           }
         }
       } catch (err) {
-        console.error("Error fetching session:", err);
+        console.error("Error fetching user:", err);
         if (isMounted) {
-          setError("Error fetching session.");
+          setError("Error fetching user data.");
           if (onError) {
-            onError("Error fetching session.");
+            onError("Error fetching user data.");
           }
           setIsLoading(false);
         }
       }
     };
     
-    fetchSession();
+    fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;

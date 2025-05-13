@@ -20,7 +20,9 @@ export default async function JobApplicationsPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "super_admin", "helpdesk"].includes(profile.type.toLowerCase())) {
+  const userType = profile?.type?.toLowerCase() || '';
+  
+  if (!profile || !["admin", "super_admin", "helpdesk"].includes(userType)) {
     // Redirect to appropriate page if not an admin
     redirect("/");
   }

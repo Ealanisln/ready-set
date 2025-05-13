@@ -15,7 +15,7 @@ export async function DELETE(
     
     const { data: { user } } = await supabase.auth.getUser();
     
-    if (!user) {
+    if (!user || !user.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -28,8 +28,10 @@ export async function DELETE(
       .select('type')
       .eq('email', user.email)
       .single();
+    
+    const userType = userProfile?.type?.toUpperCase() || '';
       
-    if (!userProfile || !["ADMIN", "SUPER_ADMIN"].includes(userProfile.type)) {
+    if (!userProfile || !["ADMIN", "SUPER_ADMIN"].includes(userType)) {
       return NextResponse.json(
         { error: "Forbidden - Only admins can delete job applications" },
         { status: 403 }

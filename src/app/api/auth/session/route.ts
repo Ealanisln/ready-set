@@ -6,25 +6,22 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     
-    // Get the full session, not just the user
-    const { data, error } = await supabase.auth.getSession();
+    // Get the authenticated user
+    const { data: { user }, error } = await supabase.auth.getUser();
     
-    if (error || !data.session) {
+    if (error || !user) {
       return NextResponse.json(
-        { user: null, session: null },
-        { status: 200 } // Return 200 even for no session
+        { user: null },
+        { status: 200 } // Return 200 even for no user
       );
     }
     
-    // Return the complete session data structure
-    return NextResponse.json({
-      user: data.session.user,
-      session: data.session
-    });
+    // Return the user data
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('Error checking authentication:', error);
     return NextResponse.json(
-      { user: null, session: null, error: 'Authentication error' },
+      { user: null, error: 'Authentication error' },
       { status: 200 } // Still return 200 for client-side handling
     );
   }

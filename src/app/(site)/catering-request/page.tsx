@@ -27,7 +27,7 @@ const DeliveryChecklist = () => {
   ];
 
   return (
-    <div className="mx-auto mb-8 max-w-3xl">
+    <div className="mx-auto mb-8 max-w-3xl py-4">
       <div 
         className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:bg-gray-50"
         onClick={() => setIsOpen(!isOpen)}
@@ -125,7 +125,7 @@ const CateringPage = () => {
   return (
     <section
       id="catering-request"
-      className="bg-gray-50 pb-16 pt-24 dark:bg-gray-900 lg:pb-24 lg:pt-28"
+      className="bg-gray-50 pb-16 pt-24 dark:bg-gray-900 lg:pb-24 pt-32"
     >
       <div className="container px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
@@ -143,12 +143,12 @@ const CateringPage = () => {
           <CateringRequestForm />
         </div>
         
-        <div className="mt-16">
+        {/* <div className="mt-16">
           <h2 className="mb-8 text-center text-2xl font-bold text-gray-800 dark:text-white">
             Frequently Asked Questions
           </h2>
           <Faq />
-        </div>
+        </div> */}
       </div>
     </section>
   );

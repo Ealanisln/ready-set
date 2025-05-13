@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import CateringOrdersPage from "@/components/Orders/CateringOrders/CateringOrdersPage";
@@ -14,7 +13,17 @@ export const metadata: Metadata = {
   description: "Manage and track all catering orders across the platform",
 };
 
-const Orders = async () => {
+interface SearchParams {
+  page?: string;
+  status?: string;
+}
+
+const Orders = async ({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) => {
+  const params = await searchParams;
   const currentPath = '/admin/catering-orders';
 
   // Server-side authentication check to prevent unauthorized access
@@ -44,7 +53,9 @@ const Orders = async () => {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "super_admin", "helpdesk"].includes(profile.type.toLowerCase())) {
+  const userType = profile?.type?.toLowerCase() || '';
+  
+  if (!profile || !["admin", "super_admin", "helpdesk"].includes(userType)) {
     // Log the authorization failure
     serverLogger.warn(
       'Auth redirect: User not authorized', 
@@ -53,7 +64,7 @@ const Orders = async () => {
         path: currentPath,
         redirectTo: '/',
         userId: user.id,
-        userRole: profile?.type || 'unknown'
+        userRole: userType || 'unknown'
       }
     );
     
@@ -67,7 +78,7 @@ const Orders = async () => {
     'auth',
     {
       userId: user.id,
-      userRole: profile.type,
+      userRole: userType,
       path: currentPath
     }
   );

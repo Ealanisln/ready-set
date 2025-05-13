@@ -386,7 +386,7 @@ const ClientPage = async () => {
   const user = await getCurrentUser();
   
   if (!user?.id) {
-    redirect('/signin');
+    redirect('/sign-in');
   }
 
   // Fetch dashboard data

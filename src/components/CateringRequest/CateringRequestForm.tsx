@@ -604,6 +604,9 @@ const CateringRequestForm: React.FC<CateringRequestFormProps> = ({ client, isAdm
       if (userRole === 'client') {
         console.log("Redirecting client user to /client");
         router.push("/client");
+      } else if (userRole === 'vendor') {
+        console.log("Redirecting vendor user to /vendor");
+        router.push("/vendor");
       } else {
         console.log("Redirecting user to /dashboard");
         router.push("/dashboard");
