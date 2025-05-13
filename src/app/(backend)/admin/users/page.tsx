@@ -35,14 +35,7 @@ export default async function UsersPage() {
   return (
     <>
       <AdminHighlightInit />
-      <div className="p-2 bg-amber-50 border-b border-amber-200 text-sm">
-        <p className="text-amber-800">
-          Having issues with error tracking? Try our{" "}
-          <Link href="/highlight-test" className="underline font-medium">
-            Highlight Test Page
-          </Link>
-        </p>
-      </div>
+     
       <HighlightErrorBoundary>
         <UsersClient />
       </HighlightErrorBoundary>

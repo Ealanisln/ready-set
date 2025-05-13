@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AppRouterHighlight } from '@highlight-run/next/server';
 import { CONSTANTS } from '@/constants';
 import { serverLogger } from '@/utils/server-logger';
 import { handleApiError } from '@/utils/error-logging';
-
-// Configure Highlight wrapper
-const withHighlight = AppRouterHighlight({
-  projectID: CONSTANTS.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
-});
 
 // API route to test Highlight error tracking
 async function handler(
@@ -62,5 +56,6 @@ async function handler(
   }
 }
 
-// Export with Highlight wrapper
-export const GET = withHighlight(handler); 
+// Direct export of the handler without Highlight wrapper
+// This eliminates the dependency on @highlight-run/node in this route
+export const GET = handler; 

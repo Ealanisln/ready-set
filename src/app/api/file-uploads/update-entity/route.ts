@@ -38,8 +38,21 @@ export async function PUT(request: NextRequest) {
           { 
             isTemporary: true,
             cateringRequestId: oldEntityId.startsWith('temp-') ? null : oldEntityId 
+          },
+          // Look for files with category containing the old entity ID
+          {
+            isTemporary: true,
+            category: {
+              contains: oldEntityId
+            }
+          },
+          // Look for files with URLs containing the old entity ID
+          {
+            isTemporary: true,
+            fileUrl: {
+              contains: oldEntityId
+            }
           }
-          // Note: Removed metadata check since it's not in the schema
         ]
       },
       select: {

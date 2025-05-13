@@ -135,28 +135,58 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
         
         // Call the API to update file associations
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ready-set.vercel.app';
-        const response = await fetch(`${baseUrl}/api/file-uploads/update-entity`, {
+        const updateUrl = `${baseUrl}/api/file-uploads/update-entity`;
+        console.log(`Calling update-entity API at: ${updateUrl}`);
+        
+        const updateData = {
+          oldEntityId: tempEntityId,
+          newEntityId: newOrder.id,
+          entityType: 'catering_request',
+        };
+        console.log('Update file entity request data:', JSON.stringify(updateData));
+        
+        const response = await fetch(updateUrl, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            // We can't pass cookies directly in server actions, so we rely on the session
           },
-          body: JSON.stringify({
-            oldEntityId: tempEntityId,
-            newEntityId: newOrder.id,
-            entityType: 'catering_request',
-          }),
+          body: JSON.stringify(updateData),
         });
         
         if (response.ok) {
           const result = await response.json();
-          console.log('File associations update result:', result);
+          console.log('File associations update successful:', result);
         } else {
-          console.error('Failed to update file associations:', await response.text());
+          const errorText = await response.text();
+          console.error(`Failed to update file associations: ${response.status} - ${errorText}`);
+          
+          // Add retry logic in case of failure
+          console.log('Retrying file association update with a slight delay...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const retryResponse = await fetch(updateUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+          });
+          
+          if (retryResponse.ok) {
+            const retryResult = await retryResponse.json();
+            console.log('File associations update retry successful:', retryResult);
+          } else {
+            console.error('Retry failed to update file associations:', await retryResponse.text());
+          }
         }
       } catch (error) {
         // Log but don't fail the order creation if file update fails
         console.error('Error updating file associations:', error);
+        
+        // Make sure we have enough details for debugging
+        if (error instanceof Error) {
+          console.error(`Error stack: ${error.stack}`);
+        }
       }
 
       // Also try to update storage paths for any temporary files

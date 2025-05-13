@@ -85,6 +85,32 @@ const nextConfig = {
       }
     };
 
+    // Add exclusions for problematic modules
+    if (!isServer) {
+      // Exclude problematic highlight modules from client bundle
+      config.module = config.module || { rules: [] };
+      config.module.rules = config.module.rules || [];
+      
+      // Add a rule to handle problematic Node.js modules in client-side builds
+      config.module.rules.push({
+        test: [
+          /node_modules[\\|/]require-in-the-middle/,
+          /node_modules[\\|/]@highlight-run[\\|/]node/,
+          /node_modules[\\|/]@opentelemetry[\\|/]sdk-metrics/,
+          /ConsoleMetricExporter\.js$/,
+        ],
+        use: 'null-loader',
+      });
+
+      // Add the highlight-related modules to the externals
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : []),
+        'require-in-the-middle',
+        '@highlight-run/node',
+        '@opentelemetry/sdk-metrics',
+      ];
+    }
+
     // Enable more detailed error messages in webpack
     config.stats = {
       errorDetails: true
@@ -149,8 +175,14 @@ const nextConfig = {
     },
     serverMinification: true,
   },
-  // This property is compatible with Next.js 15
-  serverExternalPackages: ['esbuild', '@highlight-run/node', 'require-in-the-middle'],
+  // Use serverComponentsExternalPackages for Next.js 15 (this is the newer approach)
+  serverComponentsExternalPackages: [
+    'esbuild', 
+    '@highlight-run/node', 
+    'require-in-the-middle',
+    '@opentelemetry/sdk-metrics',
+    '@highlight-run/cloudflare'
+  ],
 } as NextConfig;
 
 // Need to handle async config properly

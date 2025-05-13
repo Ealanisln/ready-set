@@ -24,7 +24,8 @@ export async function GET() {
         email: true,
         name: true,
         contactName: true,
-        image: true
+        image: true,
+        status: true
       }
     });
     

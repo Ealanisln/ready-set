@@ -57,8 +57,20 @@ export default function ModernUserProfile({ userId, isUserProfile = false }: Mod
   
   // Wrapped handleStatusChange
   const handleStatusChange = async (newStatus: NonNullable<UserFormValues["status"]>) => {
-    // baseHandleStatusChange triggers setRefreshTrigger -> fetchUser -> updates userData -> useEffect in useUserForm resets form
-    await baseHandleStatusChange(newStatus);
+    try {
+      // First, update the form field directly for immediate UI feedback
+      setValue('status', newStatus, { shouldDirty: false });
+
+      // Then call the API and refresh data
+      await baseHandleStatusChange(newStatus);
+    } catch (error) {
+      console.error("Status change failed:", error);
+      // If the API call fails, we need to reset the form to its previous state
+      const fetchedData = await fetchUser();
+      if (fetchedData) {
+        reset(fetchedData, { keepDirty: false });
+      }
+    }
   };
 
   // Effect to fetch initial data only

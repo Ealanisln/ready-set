@@ -45,6 +45,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { UserStatus } from "@/types/user";
+
+// Log UserStatus values for debugging
+console.log("UserStatus enum values:", {
+  ACTIVE: UserStatus.ACTIVE,
+  PENDING: UserStatus.PENDING,
+  DELETED: UserStatus.DELETED
+});
 
 interface Delivery {
   id: string;
@@ -98,6 +107,7 @@ interface Delivery {
 
 interface UserProfile extends ProfileResponse {
   // Additional fields can be added here if needed
+  status?: UserStatus;
 }
 
 type DeliveryStatus = 'all' | 'active' | 'completed' | 'assigned';
@@ -123,6 +133,11 @@ const DriverDeliveries: React.FC = () => {
           throw new Error("Failed to fetch user profile");
         }
         const profileData: UserProfile = await response.json();
+        console.log("User profile data:", profileData);
+        console.log("User status:", profileData.status);
+        console.log("Status type:", typeof profileData.status);
+        console.log("Is status pending:", profileData.status === UserStatus.PENDING);
+        console.log("Is status active:", profileData.status === UserStatus.ACTIVE);
         setUserProfile(profileData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -393,284 +408,340 @@ const DriverDeliveries: React.FC = () => {
         </Card>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-6 mb-6">
-        <Card className="shadow-sm">
-          <CardHeader className="py-4 px-6">
-            <CardTitle className="text-lg font-medium">Today's Deliveries</CardTitle>
-          </CardHeader>
-          <CardContent className="pb-5 pt-0 px-6">
-            <div className="flex items-center">
-              <Calendar className="h-7 w-7 text-blue-500 mr-3" />
-              <div className="text-3xl font-bold">{todayCount}</div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm">
-          <CardHeader className="py-4 px-6">
-            <CardTitle className="text-lg font-medium">Upcoming</CardTitle>
-          </CardHeader>
-          <CardContent className="pb-5 pt-0 px-6">
-            <div className="flex items-center">
-              <Clock className="h-7 w-7 text-purple-500 mr-3" />
-              <div className="text-3xl font-bold">{upcomingCount}</div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm">
-          <CardHeader className="py-4 px-6">
-            <CardTitle className="text-lg font-medium">Completed</CardTitle>
-          </CardHeader>
-          <CardContent className="pb-5 pt-0 px-6">
-            <div className="flex items-center">
-              <CheckCircle2 className="h-7 w-7 text-green-500 mr-3" />
-              <div className="text-3xl font-bold">{completedCount}</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Dashboard Card */}
-      <Card className="shadow-sm">
-        <CardHeader className="py-5 px-6 border-b">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle className="text-xl font-medium">Delivery Dashboard</CardTitle>
-              <CardDescription className="text-balance leading-relaxed mt-1">
-                Manage your assigned deliveries and track your schedule
-              </CardDescription>
-            </div>
-            <div className="mt-4 md:mt-0 md:ml-auto">
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => setStatusFilter(value as DeliveryStatus)}
+      {/* Account Status Alert */}
+      {!isProfileLoading && userProfile?.status && userProfile.status.toString().toLowerCase() !== UserStatus.ACTIVE && (
+        <div className="mb-6">
+          <Alert 
+            variant={userProfile.status.toString().toLowerCase() === UserStatus.PENDING ? "default" : "destructive"}
+            className={userProfile.status.toString().toLowerCase() === UserStatus.PENDING 
+              ? "border-amber-500/50 bg-amber-50 text-amber-800 dark:border-amber-500 dark:bg-amber-950 dark:text-amber-300 [&>svg]:text-amber-800 dark:[&>svg]:text-amber-300" 
+              : undefined}
+          >
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>
+              {userProfile.status.toString().toLowerCase() === UserStatus.PENDING 
+                ? "Account Pending Approval" 
+                : userProfile.status.toString().toLowerCase() === UserStatus.DELETED 
+                  ? "Account Deactivated" 
+                  : "Account Status Issue"}
+            </AlertTitle>
+            <AlertDescription>
+              {userProfile.status.toString().toLowerCase() === UserStatus.PENDING 
+                ? "Our team is currently reviewing your submitted documents and information. During this verification process, you may have limited access to certain features. You'll be notified once your account is approved." 
+                : userProfile.status.toString().toLowerCase() === UserStatus.DELETED 
+                  ? "Your account has been deactivated by the administrator. All functionality has been disabled. Please contact support for assistance if you believe this is an error." 
+                  : "There's an issue with your account status. Please contact support for assistance."}
+            </AlertDescription>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => window.location.href = "mailto:apply@readysetllc.com"}
               >
-                <SelectTrigger className="w-[150px] h-9">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="assigned">Assigned</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
+                Contact Support
+              </Button>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Tabs defaultValue="today" value={activeTab} onValueChange={(value) => setActiveTab(value as "upcoming" | "today" | "completed")}>
-            <TabsList className="w-full md:w-auto mb-5 grid grid-cols-3">
-              <TabsTrigger value="today" className="flex-1 md:flex-none py-2">
-                <Calendar className="mr-2 h-4 w-4" />
-                Today
-              </TabsTrigger>
-              <TabsTrigger value="upcoming" className="flex-1 md:flex-none py-2">
-                <Clock className="mr-2 h-4 w-4" />
-                Upcoming
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="flex-1 md:flex-none py-2">
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Completed
-              </TabsTrigger>
-            </TabsList>
+          </Alert>
+        </div>
+      )}
 
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-10 w-10 animate-spin text-gray-500" />
+      {/* If account is deleted, show a disabled message and no other content */}
+      {userProfile?.status && userProfile.status.toString().toLowerCase() === UserStatus.DELETED ? (
+        <Card className="shadow-sm border-red-200">
+          <CardContent className="p-12 text-center">
+            <AlertTriangle className="h-16 w-16 mx-auto text-red-500 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Account Access Disabled</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+              Your account has been deactivated. You cannot access the driver dashboard or delivery features at this time.
+            </p>
+            <Button variant="outline" className="mt-2" disabled>
+              Dashboard Unavailable
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            <Card className="shadow-sm">
+              <CardHeader className="py-4 px-6">
+                <CardTitle className="text-lg font-medium">Today's Deliveries</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-5 pt-0 px-6">
+                <div className="flex items-center">
+                  <Calendar className="h-7 w-7 text-blue-500 mr-3" />
+                  <div className="text-3xl font-bold">{todayCount}</div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-sm">
+              <CardHeader className="py-4 px-6">
+                <CardTitle className="text-lg font-medium">Upcoming</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-5 pt-0 px-6">
+                <div className="flex items-center">
+                  <Clock className="h-7 w-7 text-purple-500 mr-3" />
+                  <div className="text-3xl font-bold">{upcomingCount}</div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-sm">
+              <CardHeader className="py-4 px-6">
+                <CardTitle className="text-lg font-medium">Completed</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-5 pt-0 px-6">
+                <div className="flex items-center">
+                  <CheckCircle2 className="h-7 w-7 text-green-500 mr-3" />
+                  <div className="text-3xl font-bold">{completedCount}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Dashboard Card */}
+          <Card className="shadow-sm">
+            <CardHeader className="py-5 px-6 border-b">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <CardTitle className="text-xl font-medium">Delivery Dashboard</CardTitle>
+                  <CardDescription className="text-balance leading-relaxed mt-1">
+                    Manage your assigned deliveries and track your schedule
+                  </CardDescription>
+                </div>
+                <div className="mt-4 md:mt-0 md:ml-auto">
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value as DeliveryStatus)}
+                  >
+                    <SelectTrigger className="w-[150px] h-9">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="assigned">Assigned</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            ) : filteredDeliveries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Truck className="mb-4 h-16 w-16 text-gray-400" />
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  No Deliveries Found
-                </h3>
-                <p className="max-w-md text-gray-500 dark:text-gray-400">
-                  {activeTab === "today" 
-                    ? "You don't have any deliveries scheduled for today." 
-                    : activeTab === "upcoming" 
-                      ? "You don't have any upcoming deliveries scheduled."
-                      : "You don't have any completed deliveries yet."}
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Order Details</TableHead>
-                        <TableHead className="hidden sm:table-cell">Pickup</TableHead>
-                        <TableHead className="hidden sm:table-cell">Delivery</TableHead>
-                        <TableHead className="hidden lg:table-cell">Status</TableHead>
-                        <TableHead className="text-right">Time</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredDeliveries.map((delivery, index) => {
-                        const pickupTime = formatDateTime(delivery.pickupDateTime);
-                        const arrivalTime = formatDateTime(delivery.arrivalDateTime);
-                        const completeTime = delivery.completeDateTime ? 
-                          formatDateTime(delivery.completeDateTime) : null;
-                        
-                        return (
-                          <TableRow key={`${delivery.id}-${index}`} className="group">
-                            <TableCell>
-                              <div className="flex flex-col space-y-1">
-                                <Link
-                                  href={`/driver/deliveries/${delivery.order_number}`}
-                                  className="font-medium hover:underline text-primary"
-                                >
-                                  #{delivery.order_number}
-                                </Link>
-                                <div className="flex items-center text-xs text-muted-foreground">
-                                  {getDeliveryTypeBadge(delivery.delivery_type)}
-                                </div>
-                                <HoverCard>
-                                  <HoverCardTrigger asChild>
-                                    <div className="text-sm text-muted-foreground cursor-help mt-1">
-                                      {delivery.client_attention.length > 30 
-                                        ? delivery.client_attention.substring(0, 30) + '...' 
-                                        : delivery.client_attention}
-                                    </div>
-                                  </HoverCardTrigger>
-                                  <HoverCardContent className="w-80">
-                                    <div className="space-y-2">
-                                      <h4 className="text-sm font-semibold">Client Instructions</h4>
-                                      <p className="text-sm">{delivery.client_attention}</p>
-                                      {delivery.specialNotes && (
-                                        <>
-                                          <h4 className="text-sm font-semibold">Special Notes</h4>
-                                          <p className="text-sm">{delivery.specialNotes}</p>
-                                        </>
-                                      )}
-                                      {delivery.pickupNotes && (
-                                        <>
-                                          <h4 className="text-sm font-semibold">Pickup Notes</h4>
-                                          <p className="text-sm">{delivery.pickupNotes}</p>
-                                        </>
-                                      )}
-                                      {getAdditionalDeliveryInfo(delivery).length > 0 && (
-                                        <>
-                                          <h4 className="text-sm font-semibold">Additional Details</h4>
-                                          <ul className="text-sm list-disc pl-4">
-                                            {getAdditionalDeliveryInfo(delivery).map((info, i) => (
-                                              <li key={i}>{info}</li>
-                                            ))}
-                                          </ul>
-                                        </>
-                                      )}
-                                    </div>
-                                  </HoverCardContent>
-                                </HoverCard>
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell">
-                              <div className="flex items-start space-x-2">
-                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                <div className="text-sm">
-                                  <div className="font-medium">{delivery.address.street1}</div>
-                                  <div className="text-muted-foreground">
-                                    {delivery.address.city}, {delivery.address.state}
-                                  </div>
-                                  {delivery.address.latitude && delivery.address.longitude && (
-                                    <a
-                                      href={`https://maps.google.com/?q=${delivery.address.latitude},${delivery.address.longitude}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+            </CardHeader>
+            <CardContent className="p-6">
+              <Tabs defaultValue="today" value={activeTab} onValueChange={(value) => setActiveTab(value as "upcoming" | "today" | "completed")}>
+                <TabsList className="w-full md:w-auto mb-5 grid grid-cols-3">
+                  <TabsTrigger value="today" className="flex-1 md:flex-none py-2">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Today
+                  </TabsTrigger>
+                  <TabsTrigger value="upcoming" className="flex-1 md:flex-none py-2">
+                    <Clock className="mr-2 h-4 w-4" />
+                    Upcoming
+                  </TabsTrigger>
+                  <TabsTrigger value="completed" className="flex-1 md:flex-none py-2">
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Completed
+                  </TabsTrigger>
+                </TabsList>
+
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-10 w-10 animate-spin text-gray-500" />
+                  </div>
+                ) : filteredDeliveries.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <Truck className="mb-4 h-16 w-16 text-gray-400" />
+                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      No Deliveries Found
+                    </h3>
+                    <p className="max-w-md text-gray-500 dark:text-gray-400">
+                      {activeTab === "today" 
+                        ? "You don't have any deliveries scheduled for today." 
+                        : activeTab === "upcoming" 
+                          ? "You don't have any upcoming deliveries scheduled."
+                          : "You don't have any completed deliveries yet."}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Order Details</TableHead>
+                            <TableHead className="hidden sm:table-cell">Pickup</TableHead>
+                            <TableHead className="hidden sm:table-cell">Delivery</TableHead>
+                            <TableHead className="hidden lg:table-cell">Status</TableHead>
+                            <TableHead className="text-right">Time</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredDeliveries.map((delivery, index) => {
+                            const pickupTime = formatDateTime(delivery.pickupDateTime);
+                            const arrivalTime = formatDateTime(delivery.arrivalDateTime);
+                            const completeTime = delivery.completeDateTime ? 
+                              formatDateTime(delivery.completeDateTime) : null;
+                            
+                            return (
+                              <TableRow key={`${delivery.id}-${index}`} className="group">
+                                <TableCell>
+                                  <div className="flex flex-col space-y-1">
+                                    <Link
+                                      href={`/driver/deliveries/${delivery.order_number}`}
+                                      className="font-medium hover:underline text-primary"
                                     >
-                                      Open in Maps
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell">
-                              {delivery.delivery_address ? (
-                                <div className="flex items-start space-x-2">
-                                  <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                  <div className="text-sm">
-                                    <div className="font-medium">{delivery.delivery_address.street1}</div>
-                                    <div className="text-muted-foreground">
-                                      {delivery.delivery_address.city}, {delivery.delivery_address.state}
+                                      #{delivery.order_number}
+                                    </Link>
+                                    <div className="flex items-center text-xs text-muted-foreground">
+                                      {getDeliveryTypeBadge(delivery.delivery_type)}
                                     </div>
-                                    {delivery.delivery_address.latitude && delivery.delivery_address.longitude && (
-                                      <a
-                                        href={`https://maps.google.com/?q=${delivery.delivery_address.latitude},${delivery.delivery_address.longitude}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                    <HoverCard>
+                                      <HoverCardTrigger asChild>
+                                        <div className="text-sm text-muted-foreground cursor-help mt-1">
+                                          {delivery.client_attention.length > 30 
+                                            ? delivery.client_attention.substring(0, 30) + '...' 
+                                            : delivery.client_attention}
+                                        </div>
+                                      </HoverCardTrigger>
+                                      <HoverCardContent className="w-80">
+                                        <div className="space-y-2">
+                                          <h4 className="text-sm font-semibold">Client Instructions</h4>
+                                          <p className="text-sm">{delivery.client_attention}</p>
+                                          {delivery.specialNotes && (
+                                            <>
+                                              <h4 className="text-sm font-semibold">Special Notes</h4>
+                                              <p className="text-sm">{delivery.specialNotes}</p>
+                                            </>
+                                          )}
+                                          {delivery.pickupNotes && (
+                                            <>
+                                              <h4 className="text-sm font-semibold">Pickup Notes</h4>
+                                              <p className="text-sm">{delivery.pickupNotes}</p>
+                                            </>
+                                          )}
+                                          {getAdditionalDeliveryInfo(delivery).length > 0 && (
+                                            <>
+                                              <h4 className="text-sm font-semibold">Additional Details</h4>
+                                              <ul className="text-sm list-disc pl-4">
+                                                {getAdditionalDeliveryInfo(delivery).map((info, i) => (
+                                                  <li key={i}>{info}</li>
+                                                ))}
+                                              </ul>
+                                            </>
+                                          )}
+                                        </div>
+                                      </HoverCardContent>
+                                    </HoverCard>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                  <div className="flex items-start space-x-2">
+                                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                    <div className="text-sm">
+                                      <div className="font-medium">{delivery.address.street1}</div>
+                                      <div className="text-muted-foreground">
+                                        {delivery.address.city}, {delivery.address.state}
+                                      </div>
+                                      {delivery.address.latitude && delivery.address.longitude && (
+                                        <a
+                                          href={`https://maps.google.com/?q=${delivery.address.latitude},${delivery.address.longitude}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                        >
+                                          Open in Maps
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                  {delivery.delivery_address ? (
+                                    <div className="flex items-start space-x-2">
+                                      <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                      <div className="text-sm">
+                                        <div className="font-medium">{delivery.delivery_address.street1}</div>
+                                        <div className="text-muted-foreground">
+                                          {delivery.delivery_address.city}, {delivery.delivery_address.state}
+                                        </div>
+                                        {delivery.delivery_address.latitude && delivery.delivery_address.longitude && (
+                                          <a
+                                            href={`https://maps.google.com/?q=${delivery.delivery_address.latitude},${delivery.delivery_address.longitude}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                          >
+                                            Open in Maps
+                                          </a>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground">N/A</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">
+                                  <div className="flex flex-col space-y-1">
+                                    {getStatusBadge(delivery.status, delivery.driverStatus)}
+                                    <div className="text-sm text-muted-foreground">
+                                      {delivery.user?.name || delivery.user?.email || 'Unknown Client'}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex flex-col items-end space-y-1">
+                                    <div className="whitespace-nowrap font-medium">
+                                      {pickupTime.time}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {pickupTime.date}
+                                    </div>
+                                    {activeTab !== "completed" && (
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`whitespace-nowrap text-xs ${
+                                          new Date(delivery.pickupDateTime) < new Date() 
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
+                                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                        }`}
                                       >
-                                        Open in Maps
-                                      </a>
+                                        {getTimeUntil(delivery.pickupDateTime)}
+                                      </Badge>
                                     )}
                                   </div>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">N/A</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <div className="flex flex-col space-y-1">
-                                {getStatusBadge(delivery.status, delivery.driverStatus)}
-                                <div className="text-sm text-muted-foreground">
-                                  {delivery.user?.name || delivery.user?.email || 'Unknown Client'}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex flex-col items-end space-y-1">
-                                <div className="whitespace-nowrap font-medium">
-                                  {pickupTime.time}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {pickupTime.date}
-                                </div>
-                                {activeTab !== "completed" && (
-                                  <Badge 
-                                    variant="outline" 
-                                    className={`whitespace-nowrap text-xs ${
-                                      new Date(delivery.pickupDateTime) < new Date() 
-                                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
-                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                                    }`}
-                                  >
-                                    {getTimeUntil(delivery.pickupDateTime)}
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-                {deliveries.length > limit && (
-                  <div className="mt-6 flex justify-between">
-                    <Button 
-                      variant="outline"
-                      onClick={handlePrevPage} 
-                      disabled={page === 1}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      onClick={handleNextPage}
-                      disabled={filteredDeliveries.length < limit}
-                    >
-                      Next
-                    </Button>
-                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {deliveries.length > limit && (
+                      <div className="mt-6 flex justify-between">
+                        <Button 
+                          variant="outline"
+                          onClick={handlePrevPage} 
+                          disabled={page === 1}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          onClick={handleNextPage}
+                          disabled={filteredDeliveries.length < limit}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </Tabs>
-        </CardContent>
-      </Card>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

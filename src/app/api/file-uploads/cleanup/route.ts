@@ -36,49 +36,59 @@ export async function POST(request: NextRequest) {
     if (entityId) {
       // Check if this is a catering request
       if (entityType === "catering_request" || entityType === "catering_order" || entityType === "catering-order") {
-        // Check if a catering request with this ID exists
-        const existingOrder = await prisma.cateringRequest.findUnique({
-          where: {
-            id: entityId
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        if (existingOrder) {
-          console.log(
-            `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
-          );
-          return NextResponse.json({
-            success: false,
-            message: "Cleanup canceled: Files belong to an existing order",
-            deletedCount: 0,
+        // Only check for an existing order if the ID isn't a temporary ID
+        if (!entityId.startsWith('temp-')) {
+          // Check if a catering request with this ID exists
+          const existingOrder = await prisma.cateringRequest.findUnique({
+            where: {
+              id: entityId
+            },
+            select: {
+              id: true,
+            },
           });
+
+          if (existingOrder) {
+            console.log(
+              `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
+            );
+            return NextResponse.json({
+              success: false,
+              message: "Cleanup canceled: Files belong to an existing order",
+              deletedCount: 0,
+            });
+          }
+        } else {
+          console.log(`Skipping existing order check for temporary ID: ${entityId}`);
         }
       }
 
       // Check if this is an on-demand request
       if (entityType === "on_demand") {
-        // Check if an on_demand order with this ID exists
-        const existingOrder = await prisma.onDemand.findUnique({
-          where: {
-            id: entityId
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        if (existingOrder) {
-          console.log(
-            `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
-          );
-          return NextResponse.json({
-            success: false,
-            message: "Cleanup canceled: Files belong to an existing order",
-            deletedCount: 0,
+        // Only check for an existing order if the ID isn't a temporary ID
+        if (!entityId.startsWith('temp-')) {
+          // Check if an on_demand order with this ID exists
+          const existingOrder = await prisma.onDemand.findUnique({
+            where: {
+              id: entityId
+            },
+            select: {
+              id: true,
+            },
           });
+
+          if (existingOrder) {
+            console.log(
+              `Cleanup canceled: entityId ${entityId} belongs to an existing order`,
+            );
+            return NextResponse.json({
+              success: false,
+              message: "Cleanup canceled: Files belong to an existing order",
+              deletedCount: 0,
+            });
+          }
+        } else {
+          console.log(`Skipping existing order check for temporary ID: ${entityId}`);
         }
       }
     }

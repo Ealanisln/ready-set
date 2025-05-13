@@ -41,10 +41,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 
-    // Check if user is super_admin using the imported enum
-    if (userData?.type !== UserType.SUPER_ADMIN) {
+    // Check if user has appropriate permissions (super_admin, helpdesk, or admin)
+    if (
+      userData?.type !== UserType.SUPER_ADMIN && 
+      userData?.type !== UserType.HELPDESK && 
+      userData?.type !== UserType.ADMIN
+    ) {
       return NextResponse.json({ 
-        error: "Forbidden. Only super admins can update user status."
+        error: "Forbidden. Only admins, helpdesk, and super admin users can update user status."
       }, { status: 403 });
     }
 

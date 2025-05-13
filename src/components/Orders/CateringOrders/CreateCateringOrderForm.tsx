@@ -353,6 +353,14 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
         const cleanup = async () => {
           try {
             console.log("Cleaning up uploaded files on unmount:", uploadedFileKeys);
+            console.log("Using tempEntityId for cleanup:", tempEntityId);
+            
+            // Don't attempt cleanup if we don't have the IDs we need
+            if (!uploadedFileKeys.length || !tempEntityId) {
+              console.log("Skipping cleanup - missing keys or tempEntityId");
+              return;
+            }
+            
             const response = await fetch("/api/file-uploads/cleanup", {
               method: "POST",
               headers: {
@@ -364,12 +372,24 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                 entityType: "catering_order",
               }),
             });
-            if (!response.ok) throw new Error("Failed to clean up files");
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error(`Failed to clean up files: ${response.status} - ${errorText}`);
+              // Don't throw - just log the error
+            } else {
+              console.log("File cleanup completed successfully");
+            }
           } catch (error) {
             console.error("Error cleaning up files:", error);
+            // Error already logged, no need to re-throw
           }
         };
-        cleanup();
+        
+        // Execute but don't wait for it since this is in cleanup function
+        cleanup().catch(err => {
+          console.error("Unhandled promise rejection in cleanup:", err);
+        });
       }
     };
   }, [uploadedFileKeys, isSubmitting, tempEntityId]);

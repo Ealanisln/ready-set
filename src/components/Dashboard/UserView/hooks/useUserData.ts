@@ -150,6 +150,9 @@ export const useUserData = (
 
       toast.success(data.message || "User status updated successfully");
       
+      // Update user data immediately
+      await fetchUser();
+      
       // Trigger full refetch via parent component (keeps data consistent)
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
