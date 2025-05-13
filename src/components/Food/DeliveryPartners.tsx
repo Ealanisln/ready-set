@@ -56,39 +56,29 @@ const DeliveryPartners: React.FC = () => {
     [],
   );
 
-  // State for tracking which partners to show
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [partnersPerView, setPartnersPerView] = useState<number>(4);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [selectedDot, setSelectedDot] = useState<number>(0);
 
-  // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
       const width = window.innerWidth;
       const mobileView = width < 768;
       setIsMobile(mobileView);
 
-      // On mobile, we'll show fewer cards
       if (mobileView) {
         setPartnersPerView(3);
       } else {
-        // On larger screens, show 4 cards
         setPartnersPerView(4);
       }
     };
 
-    // Initial check
     checkIfMobile();
-
-    // Add event listener for window resize
     window.addEventListener('resize', checkIfMobile);
-
-    // Clean up
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
-  // Handle navigation
   const handlePrevious = () => {
     setCurrentIndex((prev) => {
       const newIndex =
@@ -111,19 +101,15 @@ const DeliveryPartners: React.FC = () => {
     });
   };
 
-  // Update the selected dot based on current index
   const updateSelectedDot = (index: number) => {
-    // Calculate which dot should be active based on the current index
     const totalGroups = Math.ceil(partners.length / partnersPerView);
     const dotIndex = Math.floor(index / partnersPerView) % totalGroups;
     setSelectedDot(dotIndex);
   };
 
-  // Calculate which partners to display
   const visiblePartners = useMemo(() => {
     const result = [...partners];
 
-    // If we're approaching the end, add partners from the beginning to ensure smooth cycling
     if (currentIndex + partnersPerView > partners.length) {
       const neededFromStart = currentIndex + partnersPerView - partners.length;
       return [...result.slice(currentIndex), ...result.slice(0, neededFromStart)];
@@ -132,7 +118,6 @@ const DeliveryPartners: React.FC = () => {
     return result.slice(currentIndex, currentIndex + partnersPerView);
   }, [currentIndex, partners, partnersPerView]);
 
-  // Calculate total number of dots needed (one for each group of partners)
   const totalDots = Math.ceil(partners.length / partnersPerView);
 
   return (
@@ -148,41 +133,28 @@ const DeliveryPartners: React.FC = () => {
         />
       </div>
 
-      <div className="relative z-10 mt-0 flex w-full flex-col items-center justify-center">
-        <div className="flex flex-col items-center">
-          {/* Centered logo */}
-          <div className="relative flex w-full justify-center">
-            <div className="absolute left-1/2 top-0 z-30 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[16px] border-black bg-yellow-400 shadow-lg">
-              <Image
-                src="/images/logo/new-logo-ready-set copy.png"
-                alt="Ready Set Logo"
-                width={100}
-                height={100}
-                className="rounded-full object-contain"
-                priority
-              />
-            </div>
-          </div>
-
-          <div className="relative z-20 mb-24 mt-14 flex w-full max-w-4xl flex-col items-center rounded-[2rem] bg-white px-12 py-6 shadow-lg">
-            <h2 className="mb-2 text-center text-4xl font-extrabold tracking-wide text-gray-900">
-              OUR FOOD DELIVERY PARTNERS
-            </h2>
-            <p className="text-center text-lg font-medium text-gray-700">
-              WE'RE PROUD TO COLLABORATE WITH SOME OF THE TOP NAMES IN THE INDUSTRY:
-            </p>
-          </div>
-        </div>
+      {/* Image moved higher with negative margin-top */}
+      <div
+        className="absolute left-0 right-0 top-0 z-30 mx-auto w-full max-w-3xl px-4 md:px-0"
+        style={{ marginTop: '-40px' }} // Added negative margin to move it up
+      >
+        <Image
+          src="/images/food/partners/deliverysupport.png"
+          alt="Delivery Support"
+          width={800}
+          height={400}
+          className="w-full rounded-xl shadow-xl"
+          priority
+        />
       </div>
 
       {/* Partners slider at bottom */}
-      <div className="absolute bottom-0 left-0 z-20 w-full pb-2">
+      <div className="absolute bottom-0 left-0 z-10 w-full pb-2">
         <div className="relative w-full">
           <div className="w-full px-4 md:px-10">
             {/* Partners display */}
             <div className="flex justify-center gap-2 md:gap-3">
               {isMobile ? (
-                // Mobile: Show fewer cards
                 <div className="flex w-full justify-center">
                   {visiblePartners.map((partner, idx) => (
                     <div key={`${partner.name}-${idx}`} className="w-1/3 px-1">
@@ -200,7 +172,6 @@ const DeliveryPartners: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                // Desktop: Standard layout
                 visiblePartners.map((partner, idx) => (
                   <div
                     key={`${partner.name}-${idx}`}
@@ -221,9 +192,8 @@ const DeliveryPartners: React.FC = () => {
               )}
             </div>
 
-            {/* New navigation layout with centered controls */}
+            {/* Navigation controls */}
             <div className="mt-8 flex items-center justify-center">
-              {/* Left arrow button */}
               <button
                 onClick={handlePrevious}
                 className="flex h-20 w-20 items-center justify-center"
@@ -232,7 +202,6 @@ const DeliveryPartners: React.FC = () => {
                 <ArrowLeftIcon />
               </button>
 
-              {/* Pagination dots */}
               <div className="mx-10 flex items-center space-x-6">
                 {Array.from({ length: totalDots }).map((_, index) => (
                   <div
@@ -244,7 +213,6 @@ const DeliveryPartners: React.FC = () => {
                 ))}
               </div>
 
-              {/* Right arrow button */}
               <button
                 onClick={handleNext}
                 className="flex h-20 w-20 items-center justify-center"
