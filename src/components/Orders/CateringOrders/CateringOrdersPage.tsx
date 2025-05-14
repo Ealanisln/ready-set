@@ -58,6 +58,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Order, StatusFilter, UserRole } from "./types";
 import { CateringOrdersTable } from "./CateringOrdersTable";
 import { createClient } from "@/utils/supabase/client";
+import { Prisma, CateringRequest, Profile, Address } from "@prisma/client";
+import { Order as OrderType } from "@/types/order";
+import { CateringStatus } from "@/types/order-status";
 
 // --- Interface, Type, Configs, Skeleton ---
 enum CateringNeedHost {
@@ -76,7 +79,10 @@ enum DriverStatus {
 
 interface CateringOrder {
   id: string;
+  guid: string | null;
   userId: string;
+  pickupAddressId: string;
+  deliveryAddressId: string;
   orderNumber: string;
   brokerage?: string | null;
   status: OrderStatus;
@@ -397,12 +403,12 @@ const CateringOrdersPage: React.FC = () => {
 
   // Add a function to map CateringOrder to Order
   const mapToOrderType = (orders: CateringOrder[]): Order[] => {
-    return orders.map(order => ({
+    return orders.map((order) => ({
       id: order.id,
       order_number: order.orderNumber,
       status: order.status.toLowerCase(),
       date: order.pickupDateTime || order.createdAt,
-      order_total: order.orderTotal || 0,
+      order_total: order.orderTotal ? Number(order.orderTotal) : 0,
       client_attention: order.clientAttention || undefined,
       user: order.user ? {
         id: order.user.id,
@@ -410,8 +416,24 @@ const CateringOrdersPage: React.FC = () => {
         email: order.user.email,
         contactNumber: order.user.contactNumber
       } : undefined,
-      pickupAddress: order.pickupAddress,
-      deliveryAddress: order.deliveryAddress
+      pickupAddress: {
+        id: order.pickupAddress.id,
+        street1: order.pickupAddress.street1,
+        street2: order.pickupAddress.street2,
+        city: order.pickupAddress.city,
+        state: order.pickupAddress.state,
+        zip: order.pickupAddress.zip,
+        county: order.pickupAddress.county
+      },
+      deliveryAddress: {
+        id: order.deliveryAddress.id,
+        street1: order.deliveryAddress.street1,
+        street2: order.deliveryAddress.street2,
+        city: order.deliveryAddress.city,
+        state: order.deliveryAddress.state,
+        zip: order.deliveryAddress.zip,
+        county: order.deliveryAddress.county
+      }
     }));
   };
 

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
 import { CombinedOrder } from "@/types/models";
+import { CateringRequest, OnDemand, Prisma } from "@prisma/client";
 
 interface DashboardStats {
   activeOrders: number;
@@ -105,13 +106,27 @@ async function getClientDashboardData(userId: string): Promise<ClientDashboardDa
 
   // Combine and sort orders
   const combinedOrders: CombinedOrder[] = [
-    ...recentCateringOrders.map(order => ({
+    ...recentCateringOrders.map((order: {
+      id: string;
+      orderNumber: string;
+      status: CateringRequest['status'];
+      pickupDateTime: Date | null;
+      arrivalDateTime: Date | null;
+      orderTotal: Prisma.Decimal | null;
+    }) => ({
       ...order,
       orderType: 'catering' as const,
       orderTotal: order.orderTotal ? Number(order.orderTotal) : null,
       status: order.status.toString()
     })),
-    ...recentOnDemandOrders.map(order => ({
+    ...recentOnDemandOrders.map((order: {
+      id: string;
+      orderNumber: string;
+      status: OnDemand['status'];
+      pickupDateTime: Date;
+      arrivalDateTime: Date;
+      orderTotal: Prisma.Decimal | null;
+    }) => ({
       ...order,
       orderType: 'on_demand' as const,
       orderTotal: order.orderTotal ? Number(order.orderTotal) : null,

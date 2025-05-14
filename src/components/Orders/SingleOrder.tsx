@@ -277,13 +277,28 @@ const SingleOrder: React.FC<SingleOrderProps> = ({ onDeleteSuccess, showHeader =
         console.log("Files data received:", filesData);
 
         const filesArray = Array.isArray(filesData) ? filesData : Object.values(filesData);
-        const transformedFiles = filesArray.map((file: any) => ({
+        const transformedFiles = filesArray.map((file: {
+          id: string;
+          fileName: string;
+          fileType: string | null;
+          fileSize: number;
+          fileUrl: string;
+          entityType: string;
+          entityId: string;
+          category?: string;
+          uploadedAt: string | null;
+          updatedAt: string | null;
+          userId?: string;
+          cateringRequestId?: number;
+          onDemandId?: number;
+          isTemporary?: boolean;
+        }): FileUpload => ({
           ...file,
           uploadedAt: file.uploadedAt ? new Date(file.uploadedAt) : new Date(),
           updatedAt: file.updatedAt ? new Date(file.updatedAt) : new Date(),
-          cateringRequestId: file.cateringRequestId ? Number(file.cateringRequestId) : null,
-          fileSize: Number(file.fileSize),
-          onDemandId: file.onDemandId ? Number(file.onDemandId) : null,
+          cateringRequestId: file.cateringRequestId ? Number(file.cateringRequestId) : undefined,
+          onDemandId: file.onDemandId ? Number(file.onDemandId) : undefined,
+          isTemporary: file.isTemporary || false
         }));
 
         setFiles(transformedFiles);

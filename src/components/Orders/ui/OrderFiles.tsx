@@ -62,7 +62,22 @@ export function OrderFilesManager({
           throw new Error("Invalid response format");
         }
 
-        const processedFiles = filesArray.map((file: any): FileUpload => {
+        const processedFiles = filesArray.map((file: {
+          id: string;
+          fileName: string;
+          fileType: string | null;
+          fileSize: number;
+          fileUrl: string;
+          entityType?: string;
+          entityId?: string;
+          category?: string;
+          uploadedAt: string | null;
+          updatedAt: string | null;
+          userId?: string;
+          cateringRequestId?: number;
+          onDemandId?: number;
+          isTemporary?: boolean;
+        }): FileUpload => {
           // Ensure all required fields are present with proper types
           return {
             id: file.id || "",
@@ -75,7 +90,7 @@ export function OrderFilesManager({
             category: file.category || "catering-order", // Use "catering-order" as the default category
             uploadedAt: new Date(file.uploadedAt || Date.now()),
             updatedAt: new Date(file.updatedAt || file.uploadedAt || Date.now()),
-            userId: file.userId, // Optional field
+            userId: file.userId,
             cateringRequestId: typeof file.cateringRequestId === 'number' ? file.cateringRequestId : undefined,
             onDemandId: typeof file.onDemandId === 'number' ? file.onDemandId : undefined,
             isTemporary: file.isTemporary || false,

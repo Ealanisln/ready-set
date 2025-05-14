@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { CateringRequest, OnDemand } from "@prisma/client";
 import { notFound } from "next/navigation";
+import { Prisma } from "@prisma/client";
 
 // Custom types for cleaner data structure
 export interface OrderData {
@@ -112,12 +113,48 @@ export async function getVendorOrders(limit = 10) {
   });
 
   // Transform the data to a unified format
-  const cateringOrders: OrderData[] = cateringRequests.map((order: any) => ({
+  const cateringOrders: OrderData[] = cateringRequests.map((order: {
+    id: string;
+    orderNumber: string;
+    status: CateringRequest['status'];
+    pickupDateTime: Date | null;
+    arrivalDateTime: Date | null;
+    completeDateTime: Date | null;
+    orderTotal: Prisma.Decimal | null;
+    tip: Prisma.Decimal | null;
+    clientAttention: string | null;
+    pickupAddress: {
+      id: string;
+      name: string | null;
+      street1: string;
+      street2: string | null;
+      city: string;
+      state: string;
+      zip: string;
+      locationNumber: string | null;
+      parkingLoading: string | null;
+      longitude: number | null;
+      latitude: number | null;
+    };
+    deliveryAddress: {
+      id: string;
+      name: string | null;
+      street1: string;
+      street2: string | null;
+      city: string;
+      state: string;
+      zip: string;
+      locationNumber: string | null;
+      parkingLoading: string | null;
+      longitude: number | null;
+      latitude: number | null;
+    };
+  }) => ({
     id: order.id,
     orderNumber: order.orderNumber,
     orderType: "catering",
     status: order.status,
-    pickupDateTime: order.pickupDateTime.toISOString(),
+    pickupDateTime: order.pickupDateTime?.toISOString() || new Date().toISOString(),
     arrivalDateTime: order.arrivalDateTime?.toISOString() || "",
     completeDateTime: order.completeDateTime?.toISOString() || null,
     orderTotal: Number(order.orderTotal) || 0,
@@ -141,13 +178,49 @@ export async function getVendorOrders(limit = 10) {
     }
   }));
 
-  const onDemandOrders: OrderData[] = onDemandRequests.map((order: any) => ({
+  const onDemandOrders: OrderData[] = onDemandRequests.map((order: {
+    id: string;
+    orderNumber: string;
+    status: OnDemand['status'];
+    pickupDateTime: Date | null;
+    arrivalDateTime: Date | null;
+    completeDateTime: Date | null;
+    orderTotal: Prisma.Decimal | null;
+    tip: Prisma.Decimal | null;
+    clientAttention: string | null;
+    pickupAddress: {
+      id: string;
+      name: string | null;
+      street1: string;
+      street2: string | null;
+      city: string;
+      state: string;
+      zip: string;
+      locationNumber: string | null;
+      parkingLoading: string | null;
+      longitude: number | null;
+      latitude: number | null;
+    };
+    deliveryAddress: {
+      id: string;
+      name: string | null;
+      street1: string;
+      street2: string | null;
+      city: string;
+      state: string;
+      zip: string;
+      locationNumber: string | null;
+      parkingLoading: string | null;
+      longitude: number | null;
+      latitude: number | null;
+    };
+  }) => ({
     id: order.id,
     orderNumber: order.orderNumber,
     orderType: "on_demand",
     status: order.status,
-    pickupDateTime: order.pickupDateTime.toISOString(),
-    arrivalDateTime: order.arrivalDateTime.toISOString(),
+    pickupDateTime: order.pickupDateTime?.toISOString() || new Date().toISOString(),
+    arrivalDateTime: order.arrivalDateTime?.toISOString() || "",
     completeDateTime: order.completeDateTime?.toISOString() || null,
     orderTotal: Number(order.orderTotal) || 0,
     tip: Number(order.tip) || 0,
@@ -399,8 +472,8 @@ export async function getOrderByNumber(orderNumber: string) {
       orderNumber: onDemandRequest.orderNumber,
       orderType: "on_demand",
       status: onDemandRequest.status,
-      pickupDateTime: onDemandRequest.pickupDateTime.toISOString(),
-      arrivalDateTime: onDemandRequest.arrivalDateTime.toISOString(),
+      pickupDateTime: onDemandRequest.pickupDateTime?.toISOString() || null,
+      arrivalDateTime: onDemandRequest.arrivalDateTime?.toISOString() || null,
       completeDateTime: onDemandRequest.completeDateTime?.toISOString() || null,
       orderTotal: Number(onDemandRequest.orderTotal) || 0,
       tip: Number(onDemandRequest.tip) || 0,
