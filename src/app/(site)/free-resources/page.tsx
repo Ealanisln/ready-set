@@ -3,11 +3,23 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import ResourcesGrid from "@/components/Resources/ResourcesGrid";
 import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
 import { Separator } from "@/components/ui/separator";
-import { getGuides } from "@/sanity/lib/queries"; // Import your data fetching function
 import Image from "next/image";
 
+// Export with dynamic data fetching to avoid static generation problems
+export const dynamic = 'force-dynamic';
+
 const FreeResourcesPage = async () => {
-  const guides = await getGuides(); // Fetch guides from Sanity or your data source
+  let guides = [];
+  
+  try {
+    // Import and use client only when the function is called
+    const { getGuides } = await import("@/sanity/lib/queries");
+    guides = await getGuides();
+  } catch (error) {
+    console.error("Error fetching guides:", error);
+    // Provide fallback empty array if fetching fails
+    guides = [];
+  }
 
   return (
     <div className="container mx-auto px-4 py-16 pt-36">

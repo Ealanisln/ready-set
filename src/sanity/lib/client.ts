@@ -8,6 +8,8 @@ export const client = createClient({
   dataset,
   projectId,
   useCdn,
+  // Disable stega encoding to avoid arrayBuffer issues during build
+  stega: false,
 })
 
 const builder = imageUrlBuilder(client)
