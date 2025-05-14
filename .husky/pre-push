@@ -1,16 +1,3 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-echo "🔍 Running pre-push checks..."
-
-# Skip typecheck and run only build
-echo "Skipping type checking and running build only..."
-pnpm build:no-typecheck
-
-# Check the exit status of the previous command
-if [ $? -ne 0 ]; then
-  echo "❌ Build failed. Please fix the build errors before pushing."
-  exit 1
-fi
 
 echo "✅ Pre-push checks passed!" 

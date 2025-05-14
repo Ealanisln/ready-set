@@ -382,6 +382,10 @@ enum CateringStatus {
   ASSIGNED
   CANCELLED
   COMPLETED
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  DELIVERED
 }
 
 enum OnDemandStatus {
@@ -389,6 +393,10 @@ enum OnDemandStatus {
   ASSIGNED
   CANCELLED
   COMPLETED
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  DELIVERED
 }
 
 enum VehicleType {
