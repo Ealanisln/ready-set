@@ -1,8 +1,9 @@
 // src/lib/auth.ts
 import { createClient } from "@/utils/supabase/server";
+import { UserType } from "@/types/user";
 // Note: If UserType enum from Prisma is available/generated for frontend/server code,
 // you could import and use it for stronger type safety, e.g.:
-// import { UserType } from '@prisma/client'; // Adjust import path as needed
+//  // Adjust import path as needed
 
 export async function syncOAuthProfile(userId: string, metadata: any) {
   // This function can be called after OAuth authentication to check if a profile needs to be created

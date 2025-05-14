@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Determine user roles
+    // Determine user roles using Prisma UserType enum
     const isAdmin = profile.type === UserType.ADMIN;
     const isSuperAdmin = profile.type === UserType.SUPER_ADMIN;
     const isHelpdesk = profile.type === UserType.HELPDESK;

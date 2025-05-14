@@ -1,6 +1,7 @@
-import { createClient } from '@/utils/supabase/server';
-import { UserStatus, UserType } from '@/types/user';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { UserStatus, UserType } from '@prisma/client';
+import { prisma } from "@/utils/prismaDB";
+import { createClient } from "@/utils/supabase/server";
 
 // Remove the separate RouteContext interface if it exists
 // interface RouteContext { ... }

@@ -2,7 +2,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { prisma } from '../../../lib/prisma'; // Adjust path if your prisma client is elsewhere
 import { approveJobApplication } from './job-applications';
-import { UserType, ApplicationStatus } from '@prisma/client';
+
+import { UserType } from "@/types/user";
 
 // --- Mock next/cache --- 
 vi.mock('next/cache', () => ({

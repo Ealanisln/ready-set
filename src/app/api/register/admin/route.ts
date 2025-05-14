@@ -5,7 +5,7 @@ import { validateAdminRole } from "@/middleware/authMiddleware";
 import { Resend } from "resend";
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
-import { Prisma, UserType, UserStatus } from "@prisma/client";
+import { Prisma, UserStatus, UserType } from '@prisma/client';
 
 interface AdminRegistrationRequest {
   name: string;

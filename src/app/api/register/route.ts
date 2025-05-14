@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
-import { Prisma, UserType as PrismaUserType } from "@prisma/client";
-import { UserType, UserStatus } from "@/types/user";
+import { Prisma, UserStatus, UserType } from '@prisma/client';
 
+// Map between our form input types and the Prisma enum values
+const userTypeMap: Record<string, string> = {
+  'vendor': 'VENDOR',
+  'client': 'CLIENT',
+  'driver': 'DRIVER',
+  'admin': 'ADMIN',
+  'helpdesk': 'HELPDESK',
+  'super_admin': 'SUPER_ADMIN'
+};
 
 interface BaseFormData {
   email: string;
   password: string;  // Required for registration
   phoneNumber: string;
-  userType: UserType;
+  userType: string;  // We'll map this to the enum ourselves
   street1: string;
   street2?: string;
   city: string;
@@ -157,7 +165,7 @@ export async function POST(request: Request) {
         options: {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
           data: {
-            userType,
+            userType: userTypeMap[userType] || 'VENDOR',
             name: userType === "driver" || userType === "helpdesk"
               ? (body as DriverFormData | HelpDeskFormData).name
               : (body as VendorFormData | ClientFormData).contact_name,
@@ -227,15 +235,21 @@ export async function POST(request: Request) {
       id: supabaseUserId,
       email: email.toLowerCase(),
       contactNumber: phoneNumber,
-      type: userType.toUpperCase() as PrismaUserType,
-      name: userType === UserType.DRIVER || userType === UserType.HELPDESK
+      type: userType === 'vendor' ? UserType.VENDOR : 
+            userType === 'client' ? UserType.CLIENT :
+            userType === 'driver' ? UserType.DRIVER :
+            userType === 'admin' ? UserType.ADMIN :
+            userType === 'helpdesk' ? UserType.HELPDESK :
+            userType === 'super_admin' ? UserType.SUPER_ADMIN : 
+            UserType.VENDOR,
+      name: userType === "driver" || userType === "helpdesk"
           ? (body as DriverFormData | HelpDeskFormData).name
           : (body as VendorFormData | ClientFormData).contact_name,
-      companyName: userType !== UserType.DRIVER && userType !== UserType.HELPDESK
+      companyName: userType !== "driver" && userType !== "helpdesk"
           ? (body as VendorFormData | ClientFormData).company
           : undefined,
-      status: 'PENDING',
-      headCount: userType === UserType.CLIENT 
+      status: UserStatus.PENDING,
+      headCount: userType === "client" 
         ? parseInt((body as ClientFormData).head_count) || null
         : undefined,
       street1: body.street1,

@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
-import { Prisma, UserType, UserStatus } from "@prisma/client";
+import { UserStatus, UserType } from '@prisma/client';
 
 export async function PUT(request: Request) {
   try {

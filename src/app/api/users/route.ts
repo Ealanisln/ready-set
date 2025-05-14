@@ -3,7 +3,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
-import { Prisma, UserStatus, UserType } from "@prisma/client"; // Import Prisma types and enums
+import { Prisma, UserStatus, UserType } from '@prisma/client';
 
 // GET: Fetch users with pagination, search, sort, filter
 export async function GET(request: NextRequest) {

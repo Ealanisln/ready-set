@@ -1,10 +1,12 @@
 // src/app/actions/register.ts
 
+"use server";
+
+import { revalidatePath } from 'next/cache';
 import { createClient } from "@/utils/supabase/server";
+import { Prisma, UserStatus, UserType } from '@prisma/client';
 import { prisma } from "@/utils/prismaDB";
 import { headers } from "next/headers";
-// Import UserType and UserStatus directly from Prisma
-import { UserType, UserStatus } from "@prisma/client"; // Import Prisma's enums
 
 // Helper function for redirects (keep as is)
 const encodedRedirect = (
@@ -36,14 +38,33 @@ export async function registerUser(formData: FormData) {
         );
     }
 
-    // Validate userType against the enum values
-    const isValidUserType = Object.values(UserType).includes(userType as UserType);
-    if (!isValidUserType) {
-        return encodedRedirect(
-            "error",
-            "/auth/signup",
-            `Invalid user type provided: ${userType}`,
-        );
+    // Map userType string to UserType enum
+    let userTypeEnum: UserType;
+    switch(userType.toUpperCase()) {
+        case 'VENDOR':
+            userTypeEnum = UserType.VENDOR;
+            break;
+        case 'CLIENT':
+            userTypeEnum = UserType.CLIENT;
+            break;
+        case 'DRIVER':
+            userTypeEnum = UserType.DRIVER;
+            break;
+        case 'ADMIN':
+            userTypeEnum = UserType.ADMIN;
+            break;
+        case 'HELPDESK':
+            userTypeEnum = UserType.HELPDESK;
+            break;
+        case 'SUPER_ADMIN':
+            userTypeEnum = UserType.SUPER_ADMIN;
+            break;
+        default:
+            return encodedRedirect(
+                "error",
+                "/auth/signup",
+                `Invalid user type provided: ${userType}`,
+            );
     }
 
     // Extract *other* user data
@@ -121,9 +142,7 @@ export async function registerUser(formData: FormData) {
                 id: userId, // Link to auth.users table
                 email,
                 name,
-                // FIX for Error 2: Use the validated string, casting to Prisma's UserType.
-                type: userType as UserType,
-                // Use the Prisma enum member directly
+                type: userTypeEnum, // Use the actual Prisma enum value
                 status: UserStatus.PENDING, // Use Prisma enum member
                 isTemporaryPassword: false,
                 // Spread other filtered data
@@ -177,6 +196,31 @@ export async function adminCreateUser(userData: {
         }
 
         const adminUserType = userData.userType;
+        
+        // Map userType string to UserType enum
+        let userTypeEnum: UserType;
+        switch(adminUserType.toUpperCase()) {
+            case 'VENDOR':
+                userTypeEnum = UserType.VENDOR;
+                break;
+            case 'CLIENT':
+                userTypeEnum = UserType.CLIENT;
+                break;
+            case 'DRIVER':
+                userTypeEnum = UserType.DRIVER;
+                break;
+            case 'ADMIN':
+                userTypeEnum = UserType.ADMIN;
+                break;
+            case 'HELPDESK':
+                userTypeEnum = UserType.HELPDESK;
+                break;
+            case 'SUPER_ADMIN':
+                userTypeEnum = UserType.SUPER_ADMIN;
+                break;
+            default:
+                throw new Error(`Invalid user type provided: ${adminUserType}`);
+        }
 
         // --- Validation & Resolution for Status ---
         let resolvedStatus: UserStatus;
@@ -201,7 +245,7 @@ export async function adminCreateUser(userData: {
                 email: userData.email,
                 password: userData.password,
                 email_confirm: true,
-                user_metadata: { name: userData.name, user_type: adminUserType },
+                user_metadata: { name: userData.name, user_type: userTypeEnum },
             });
 
         if (authError) throw authError; // Let the catch block handle
@@ -233,15 +277,13 @@ export async function adminCreateUser(userData: {
                 id: userId, // Link to auth user
                 email: userData.email,
                 name: userData.name,
-                // FIX for Error 2/6: Assign validated type string, cast to Prisma's UserType
-                type: adminUserType as UserType,
-                // Assign the resolved Prisma enum member
+                type: userTypeEnum, // Use the actual Prisma enum value
                 status: resolvedStatus,
                 isTemporaryPassword: userData.isTemporaryPassword ?? false,
                 // Spread the *filtered* other data
                 ...otherProfileData,
-                 // Explicitly set parsed head_count - FIX for Error 1
-                 ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
+                // Explicitly set parsed head_count - FIX for Error 1
+                ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
                 // Let Prisma handle timestamps if configured
                 // created_at: new Date(),
                 // updated_at: new Date(),

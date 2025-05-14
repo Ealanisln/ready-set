@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { UserType } from "@prisma/client";
+
 import { prisma } from "@/utils/prismaDB";
+import { UserType } from "@prisma/client";
+
 
 /**
  * Gets the authenticated user from an API request using the Authorization header

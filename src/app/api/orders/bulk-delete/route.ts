@@ -5,25 +5,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server"; // Assumes this is your server client helper
 import { prisma } from "@/utils/prismaDB";
 import { storage } from "@/utils/supabase/storage"; // Import the new storage utility
-import { UserType } from "@prisma/client"; // Import the UserType enum
+import { UserType } from "@prisma/client";
+
+// Constants
+const BUCKET_NAME = "fileUploader"; // Replace with your actual bucket name
+
+// Helper to create a Supabase client
+async function getSupabaseClient() {
+  return await createClient();
+}
 
 export async function POST(req: NextRequest) {
   try {
     // Initialize Supabase client (for auth check primarily)
     // Note: The storage utility will create its own client instance internally
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
 
     // Get user session from Supabase
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user || !user.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized - Must be signed in" },
+        { status: 401 },
+      );
     }
 
-    // Check if user has admin privileges in your application's profile table
+    // Get user profile from Prisma
     const userData = await prisma.profile.findUnique({
       where: { id: user.id },
       select: { type: true },
@@ -169,7 +177,7 @@ export async function POST(req: NextRequest) {
                 );
                 // *** Use the imported storage utility ***
                 // Note: This uses the request's user context. Storage Policies MUST allow deletion.
-                const bucket = await storage.from(BUCKET_NAME); // Await the async 'from'
+                const bucket = await storage.from(BUCKET_NAME);
                 const { error: storageError } = await bucket.remove([filePath]); // Call remove
 
                 if (storageError) {

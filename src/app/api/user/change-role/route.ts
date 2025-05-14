@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
-import { UserType } from "@/types/user";
+import { UserType } from "@prisma/client";
+
 
 
 export async function POST(request: NextRequest) {

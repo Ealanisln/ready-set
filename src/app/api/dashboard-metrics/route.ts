@@ -1,12 +1,12 @@
 // app/api/dashboard-metrics/route.ts
 import { NextResponse } from "next/server";
 // Import Prisma client, Decimal type, and the necessary Enums
-import { PrismaClient, Prisma, CateringStatus, UserType } from "@prisma/client"; 
+import { PrismaClient, Prisma, CateringStatus, UserType } from '@prisma/client'; 
 
 const prisma = new PrismaClient();
 
 // Define potential Enums if they exist in your schema - These are now imported above
-// import { OrderStatus, UserType } from '@prisma/client'; // Example if defined
+// import { OrderStatus } from '@prisma/client'; // Example if defined
 
 export async function GET() {
   console.log("API Route /api/dashboard-metrics called."); // Log route entry

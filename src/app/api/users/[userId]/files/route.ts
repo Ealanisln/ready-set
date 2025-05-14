@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { storage } from '@/utils/supabase/storage';
 import { UserType } from "@prisma/client";
+
 
 // Updated helper function to fix authorization issues
 async function checkAuthorization(requestedUserId: string) {

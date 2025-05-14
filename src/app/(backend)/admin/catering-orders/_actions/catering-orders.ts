@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { Prisma, UserType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ClientListItem,
@@ -12,6 +12,16 @@ import {
   CreateOrderResult
 } from './schemas';
 import { createClient } from '@/utils/supabase/server';
+
+// Define UserType enum locally to match schema
+enum UserType {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  CLIENT = 'CLIENT',
+  VENDOR = 'VENDOR',
+  DRIVER = 'DRIVER'
+}
 
 // Define the delete operation result interface
 export interface DeleteOrderResult {

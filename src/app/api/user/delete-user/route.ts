@@ -1,10 +1,9 @@
 // src/app/api/user/delete-user/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
-import { UserType } from "@/types/user";
+import { prisma } from "@/utils/prismaDB";
+import { UserType } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export async function DELETE(request: NextRequest) {
   try {

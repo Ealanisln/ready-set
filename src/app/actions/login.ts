@@ -4,7 +4,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { UserType } from "@prisma/client";
+
+import { UserType } from "@/types/user";
 
 // Define protected role-specific routes (copied from routeProtection.ts to avoid circular dependency)
 const PROTECTED_ROUTES: Record<string, RegExp> = {

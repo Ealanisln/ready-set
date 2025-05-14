@@ -1,9 +1,13 @@
-import { defineConfig } from 'vitest/config';
+/// <reference types="vitest" />
+/// <reference types="vite/client" />
+
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path'; // Import path for resolving aliases
+import type { UserConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react()], // Add react plugin if you test React components
+  plugins: [react()],
   test: {
     globals: true, // Enable Vitest globals (describe, it, expect, etc.)
     environment: 'jsdom', // Set environment for browser-like testing
@@ -23,4 +27,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'), 
     },
   },
-}); 
+} as UserConfig); 

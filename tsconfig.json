@@ -37,7 +37,8 @@
       ]
     },
     "types": [
-      "node"
+      "node",
+      "vitest"
     ],
     "baseUrl": ".",
     "strictNullChecks": true,

@@ -85,12 +85,16 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
   let newProfile: Awaited<ReturnType<typeof prisma.profile.create>> | null = null;
   try {
     // Determine profile type based on job position
-    let profileType: UserType = UserType.DRIVER; // Default to DRIVER
+    let profileType: UserType;
+    
     // Add specific checks based on the position strings you expect
     if (jobApplication.position?.toLowerCase().includes('virtual assistant') || 
         jobApplication.position?.toLowerCase().includes('helpdesk')) {
       profileType = UserType.HELPDESK;
     } else if (jobApplication.position?.toLowerCase().includes('driver')) {
+      profileType = UserType.DRIVER;
+    } else {
+      // Default case
       profileType = UserType.DRIVER;
     }
     // Add more else-if conditions for other positions/types if needed
@@ -103,7 +107,7 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
           name: `${jobApplication.firstName} ${jobApplication.lastName}`,
           contactName: `${jobApplication.firstName} ${jobApplication.lastName}`,
           contactNumber: jobApplication.phone,
-          type: profileType, // Use the determined profile type
+          type: profileType,
           status: 'ACTIVE',
           isTemporaryPassword: true,
         },
