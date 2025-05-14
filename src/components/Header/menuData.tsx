@@ -89,7 +89,7 @@ export const rsSubsidiariesMenuItem: MenuItem = {
     {
       id: 17,
       title: "Join Us",
-      path: "/join-the-team",
+      path: "/apply",
       newTab: false,
     },
   ],

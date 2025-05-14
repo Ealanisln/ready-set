@@ -8,7 +8,7 @@ import { createClient } from '@/utils/supabase/server';
 /**
  * Server action to approve a job application and create a corresponding user profile.
  */
-export const approveJobApplication = async (jobApplicationId: string): Promise<{ message: string; profileId: string }> => {
+export const approveJobApplication = async (jobApplicationId: string): Promise<{ message: string; profileId?: string }> => {
   // --- IMPORTANT: Manual Authorization Check using Supabase --- 
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -57,14 +57,17 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
     throw new Error('Job application not found.');
   }
 
-  // Optional: Check if the application is already approved/rejected
-  if (
-    jobApplication.status === 'APPROVED' ||
-    jobApplication.status === 'REJECTED'
-  ) {
-    throw new Error(
-      `Job application status is already ${jobApplication.status}.`,
-    );
+  // Check if the application is already approved/rejected
+  if (jobApplication.status === 'APPROVED') {
+    return {
+      message: `This job application has already been approved. No further action needed.`,
+    };
+  }
+  
+  if (jobApplication.status === 'REJECTED') {
+    return {
+      message: `This job application has already been rejected. Please change the status first if you wish to approve it.`,
+    };
   }
 
   // 2. Check if a profile with this email already exists using prisma

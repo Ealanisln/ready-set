@@ -7,6 +7,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { motion, AnimatePresence } from "framer-motion";
 import AppointmentDialog from "../VirtualAssistant/Appointment";
 import dynamic from "next/dynamic";
+import { getPromotionDates } from "@/utils/dates";
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -60,6 +61,7 @@ const ClientSidePromoPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const calendarUrl =
     "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true";
+  const { formattedDisplay } = getPromotionDates();
 
   useEffect(() => {
     setIsOpen(true);
@@ -184,7 +186,7 @@ const ClientSidePromoPopup = () => {
                       variants={textVariants}
                       custom={3}
                     >
-                      Limited-time offer from March 1 to 15, 2025.{" "}
+                      Limited-time offer from {formattedDisplay}.{" "}
                     </motion.p>
                   </CardContent>
                 </Card>

@@ -27,6 +27,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle redirects for renamed or moved pages
+  if (request.nextUrl.pathname === "/resources") {
+    return NextResponse.redirect(new URL('/free-resources', request.url));
+  }
+
   try {
     // Update the user's session using Supabase middleware helper
     const response = await updateSession(request);
