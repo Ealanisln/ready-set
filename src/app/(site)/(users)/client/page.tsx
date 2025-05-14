@@ -5,7 +5,8 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { CateringStatus, OnDemandStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
 
 // Define types for our orders
 type CombinedOrder = (
@@ -163,12 +164,8 @@ async function getClientDashboardData(userId: string): Promise<ClientDashboardDa
 }
 
 const UpcomingOrderCard = ({ order }: { order: CombinedOrder }) => {
-  const statusColors: Record<CateringStatus | OnDemandStatus, string> = {
-    ACTIVE: "bg-blue-100 text-blue-800",
-    ASSIGNED: "bg-indigo-100 text-indigo-800",
-    COMPLETED: "bg-green-100 text-green-800",
-    CANCELLED: "bg-red-100 text-red-800",
-  };
+  // Use the shared helper function for status colors
+  const statusColor = getStatusColorClasses(order.status as OrderStatus);
 
   const formatDate = (date: Date | null) => {
     if (!date) return "N/A";
@@ -210,7 +207,7 @@ const UpcomingOrderCard = ({ order }: { order: CombinedOrder }) => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-semibold text-gray-900">{order.orderNumber}</h4>
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
           {order.status.toLowerCase().replace('_', ' ')}
         </span>
       </div>

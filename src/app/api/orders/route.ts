@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma, PrismaClient, CateringStatus, OnDemandStatus } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { sendOrderEmail, CateringOrder as EmailSenderCateringOrder, OnDemandOrder as EmailSenderOnDemandOrder } from "@/utils/emailSender";
 import { createClient } from "@/utils/supabase/server";
 import { CateringNeedHost } from "@/types/order";
 import { updateCaterValleyOrderStatus } from '@/services/caterValleyService';
+import { CateringStatus, OnDemandStatus } from '@/types/order-status';
 
 const prisma = new PrismaClient();
 

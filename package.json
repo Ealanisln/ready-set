@@ -175,6 +175,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^25.0.1",
     "node-fetch": "2",
+    "node-mocks-http": "^1.17.2",
     "null-loader": "^4.0.1",
     "postcss": "^8.4.49",
     "prisma": "5.22.0",
