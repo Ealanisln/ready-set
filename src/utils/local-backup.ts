@@ -61,7 +61,7 @@ async function createBackup(): Promise<void> {
       .filter(file => file.endsWith('.sql'))
       .sort();
       
-    if (backupFiles.length > 7) {
+    if (backupFiles.length > 7 && backupFiles[0]) {
       const oldestFile = backupFiles[0];
       fs.unlinkSync(path.join(backupDir, oldestFile));
       console.log(`🗑️  Removed old backup: ${oldestFile}`);

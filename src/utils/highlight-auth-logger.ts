@@ -100,11 +100,13 @@ export function trackAuthSuccess(context: {
 function maskEmail(email: string): string {
   if (!email || email.length < 5 || !email.includes('@')) return 'invalid-email';
   
-  const [username, domain] = email.split('@');
+  const [localPart, domain] = email.split('@');
+  
+  if (!localPart || !domain) return 'invalid-email';
   
   // Keep first 2 characters and last character of username
-  const maskedUsername = username.charAt(0) + 
-    (username.length > 2 ? '*'.repeat(username.length - 2) + username.charAt(username.length - 1) : '*');
+  const maskedUsername = localPart.charAt(0) + 
+    (localPart.length > 2 ? '*'.repeat(localPart.length - 2) + localPart.charAt(localPart.length - 1) : '*');
   
   // Keep domain for analytics
   return `${maskedUsername}@${domain}`;
