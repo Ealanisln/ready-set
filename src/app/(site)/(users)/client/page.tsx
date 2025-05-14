@@ -8,11 +8,16 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
 
-// Define types for our orders
-type CombinedOrder = (
-  | (Pick<Prisma.CateringRequestGetPayload<{}>, 'id' | 'orderNumber' | 'status' | 'pickupDateTime' | 'arrivalDateTime' | 'orderTotal'> & { orderType: 'catering' })
-  | (Pick<Prisma.OnDemandGetPayload<{}>, 'id' | 'orderNumber' | 'status' | 'pickupDateTime' | 'arrivalDateTime' | 'orderTotal'> & { orderType: 'on_demand' })
-);
+// Define simplified types for our orders
+type CombinedOrder = {
+  id: string;
+  orderNumber: string;
+  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'DELIVERED' | 'CANCELLED' | 'ACTIVE' | 'ASSIGNED' | 'COMPLETED';
+  pickupDateTime: Date | null;
+  arrivalDateTime: Date | null;
+  orderTotal: Prisma.Decimal | null;
+  orderType: 'catering' | 'on_demand';
+};
 
 interface DashboardStats {
   activeOrders: number;
