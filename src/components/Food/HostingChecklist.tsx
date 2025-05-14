@@ -1,21 +1,24 @@
 import React from 'react';
 
-const HostingChecklist = () => {
+interface HostingChecklistProps {
+  // You can add any props here if needed in the future
+}
+
+const HostingChecklist: React.FC<HostingChecklistProps> = () => {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* 7 Point Checklist */}
-        <div className="flex flex-col">
-          <div className="bg-yellow-300 p-6 text-center">
+        <div className="mx-auto flex w-full max-w-sm flex-col">
+          <div className="bg-yellow-400 p-6 text-center">
             <h2 className="text-2xl font-bold">
               7 POINT
               <br />
               CHECKLIST
             </h2>
           </div>
-          {/* Added space here */}
           <div className="h-6"></div>
-          <div className="flex-1 bg-gray-500 p-6 text-white">
+          <div className="min-h-[460px] flex-grow bg-stone-600 p-6 text-white">
             <ul className="list-inside space-y-4">
               <li className="flex items-start">
                 <span className="mr-2">•</span>
@@ -54,19 +57,17 @@ const HostingChecklist = () => {
             </ul>
           </div>
         </div>
-
         {/* Checklist for Hosting Job */}
-        <div className="flex flex-col">
-          <div className="bg-yellow-300 p-6 text-center">
+        <div className="mx-auto flex w-full max-w-sm flex-col">
+          <div className="bg-yellow-400 p-6 text-center">
             <h2 className="text-2xl font-bold">
               CHECKLIST FOR
               <br />
               HOSTING JOB
             </h2>
           </div>
-          {/* Added space here */}
           <div className="h-6"></div>
-          <div className="flex-1 bg-gray-500 p-6 text-white">
+          <div className="min-h-[460px] flex-grow bg-stone-600 p-6 text-white">
             <ul className="list-inside space-y-4">
               <li className="flex items-start">
                 <span className="mr-2">•</span>
@@ -116,7 +117,7 @@ const HostingChecklist = () => {
       </div>
 
       {/* Bottom text */}
-      <div className="mt-6 px-8 text-center text-gray-700">
+      <div className="mt-8 px-8 text-center text-gray-700">
         <p className="italic">
           Here at Ready Set, we treat your business like an extension of our own. Our drivers
           undergo a training program to maximize food safety and client experience. All drivers have
