@@ -104,3 +104,56 @@ HIGHLIGHT_PROJECT_API_KEY=your_api_key_here
 - Sourcemaps are uploaded during the build process
 
 To view your application sessions and errors, visit [app.highlight.io](https://app.highlight.io).
+
+## Build and Deployment Process
+
+This project includes several safeguards to prevent build errors during deployment:
+
+### Local Development Checks
+
+Before pushing your changes to GitHub, you can run these commands to catch potential issues early:
+
+```bash
+# Run a full build check - simulates Vercel environment
+pnpm check-build
+
+# Run just the type checker
+pnpm typecheck
+
+# Run linting
+pnpm lint
+```
+
+### Git Hooks
+
+The project uses Husky to enforce pre-push checks:
+
+- **Pre-push hook**: Automatically runs type checking, Prisma generation, and linting before allowing you to push to GitHub
+
+### GitHub Actions
+
+A GitHub Actions workflow runs on every push and pull request to ensure the build will succeed:
+
+- Runs on Ubuntu with Node.js 20
+- Uses PNPM with caching for faster builds
+- Performs TypeScript type checking
+- Runs a full build with the same environment variables as Vercel
+
+### Best Practices to Avoid Build Errors
+
+1. **Strict TypeScript checking**: The project is configured with strict TypeScript settings to catch type errors early
+
+2. **Version pinning**: All dependencies, especially Prisma, have their versions pinned to avoid inconsistencies
+
+3. **Import statements**: Always use explicit imports for types rather than namespace access:
+
+   ```typescript
+   // ❌ Avoid this:
+   if (error instanceof Prisma.PrismaClientKnownRequestError) { ... }
+   
+   // ✅ Use this instead:
+   import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+   if (error instanceof PrismaClientKnownRequestError) { ... }
+   ```
+
+4. **Run checks locally**: Always run `pnpm check-build` before pushing to GitHub to verify your changes will build successfully on Vercel

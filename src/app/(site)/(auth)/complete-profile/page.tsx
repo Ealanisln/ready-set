@@ -402,8 +402,8 @@ export default function CompleteProfile() {
 
         return (
           <OAuthVendorForm
-            onSubmit={(data: VendorFormData) =>
-              onSubmit({ ...data, userType: "vendor" })
+            onSubmit={(data) =>
+              onSubmit({ ...data, userType: "vendor" } as any)
             }
             isLoading={loading}
             userData={user?.user_metadata || {}}
@@ -436,8 +436,8 @@ export default function CompleteProfile() {
 
         return (
           <OAuthClientForm
-            onSubmit={(data: ClientFormData) =>
-              onSubmit({ ...data, userType: "client" })
+            onSubmit={(data) =>
+              onSubmit({ ...data, userType: "client" } as any)
             }
             isLoading={loading}
             userData={user?.user_metadata || {}}

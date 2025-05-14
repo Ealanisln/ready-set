@@ -322,7 +322,7 @@ export default async function GuidePage({
                 {/* Download Button - Using client component wrapper */}
                 {hasDownloadableFiles && (
                   <DownloadButtonWrapper
-                    files={guide.downloadableFiles}
+                    files={guide.downloadableFiles || []}
                     guideTitle={guide.title}
                   />
                 )}

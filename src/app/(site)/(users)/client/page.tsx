@@ -27,8 +27,15 @@ interface ClientDashboardData {
 // Add this utility function at the top level
 function convertToUTC(date: string, time: string): string {
   // Parse the local date and time
-  const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
-  const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+  const [yearStr, monthStr, dayStr] = date.split('-');
+  const [hoursStr, minutesStr] = time.split(':');
+  
+  // Convert to numbers with defaults if parsing fails
+  const year = yearStr ? parseInt(yearStr, 10) : 0;
+  const month = monthStr ? parseInt(monthStr, 10) : 1;
+  const day = dayStr ? parseInt(dayStr, 10) : 1;
+  const hours = hoursStr ? parseInt(hoursStr, 10) : 0;
+  const minutes = minutesStr ? parseInt(minutesStr, 10) : 0;
   
   // Create a date object in the local timezone
   const localDate = new Date(year, month - 1, day, hours, minutes);

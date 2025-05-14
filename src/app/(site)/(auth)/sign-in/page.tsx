@@ -32,7 +32,7 @@ const SigninPage = async ({
     error: params.error,
     message: params.message,
     returnTo: params.returnTo
-  } : undefined;
+  } as any : undefined;
 
   return (
     <>

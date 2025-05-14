@@ -86,8 +86,10 @@ async function getDatabaseStats() {
         .split("\n")
         .filter((line) => line.trim())
         .map((line) => {
-          const [name, size] = line.trim().split("|");
-          return { name: name.trim(), size: size.trim() };
+          const parts = line.trim().split("|");
+          const name = parts[0]?.trim() || '';
+          const size = parts[1]?.trim() || '';
+          return { name, size };
         }),
     };
   } finally {

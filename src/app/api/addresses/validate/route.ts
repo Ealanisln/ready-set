@@ -91,7 +91,7 @@ async function validateWithExternalApi(address: AddressRequest): Promise<Externa
         state: address.state,
         postalCode: address.postalCode,
         country: address.country,
-        unitNumber: address.unitNumber,
+        ...(address.unitNumber ? { unitNumber: address.unitNumber } : {})
       } : null,
       issues: isValid ? [] : ['Address not found in database']
     };
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
         'Address validation failed',
         'ADDRESS_VALIDATION_FAILED',
         {
-          userId: body.userId,
+          userId: body.userId || undefined,
           addressData: {
             street: body.street,
             city: body.city,
@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
           'External address validation service error',
           'ADDRESS_VALIDATION_FAILED',
           {
-            userId: addressData.userId,
+            userId: addressData.userId || undefined,
             addressData: {
               street: addressData.street,
               city: addressData.city,
@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
           'Address not valid according to external validation',
           'ADDRESS_VALIDATION_FAILED',
           {
-            userId: addressData.userId,
+            userId: addressData.userId || undefined,
             addressData: {
               street: addressData.street,
               city: addressData.city,
@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
         error instanceof Error ? error.message : 'External validation API error',
         'ADDRESS_VALIDATION_FAILED',
         {
-          userId: addressData.userId,
+          userId: addressData.userId || undefined,
           addressData: {
             street: addressData.street,
             city: addressData.city,
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
         error instanceof Error ? error.message : 'Geocoding failed',
         'GEOCODING_FAILED',
         {
-          userId: addressData.userId,
+          userId: addressData.userId || undefined,
           addressData: {
             street: addressData.street,
             city: addressData.city,

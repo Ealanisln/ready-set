@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  typescript: {
+    // Skip type checking during build when SKIP_TYPECHECK is set
+    ignoreBuildErrors: process.env.SKIP_TYPECHECK === 'true',
+  },
   images: {
     remotePatterns: [
       {

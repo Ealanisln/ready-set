@@ -39,7 +39,7 @@ interface FormData {
   state: string;
   zip: string;
   notes?: string;
-  password?: string;
+  password: string;
   generateTemporaryPassword: boolean;
 }
 
@@ -77,7 +77,7 @@ const DriverHelpdeskRegistrationForm: React.FC = () => {
     setFormData((prev) => ({ 
       ...prev, 
       generateTemporaryPassword: checked,
-      // Clear password field if using generated password
+      // Empty string is a valid string value, not undefined
       password: checked ? "" : prev.password 
     }));
   };

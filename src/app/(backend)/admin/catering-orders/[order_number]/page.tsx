@@ -28,7 +28,9 @@ const OrderPage = () => {
     if (pathname) {
       const pathSegments = pathname.split("/");
       const lastSegment = pathSegments[pathSegments.length - 1];
-      setOrderNumber(lastSegment);
+      if (lastSegment) {
+        setOrderNumber(lastSegment);
+      }
     }
   }, [pathname]);
 

@@ -11,10 +11,10 @@ global.Response = Response as any;
 // PointerEvent polyfill for JSDOM (needed for Radix UI components tested with user-event)
 if (typeof window !== 'undefined' && !window.PointerEvent) {
   class PointerEvent extends MouseEvent {
-    pointerId?: number;
+    pointerId: number;
     constructor(type: string, params: PointerEventInit = {}) {
       super(type, params);
-      this.pointerId = params.pointerId;
+      this.pointerId = params.pointerId ?? 0; // Provide a default value when pointerId is undefined
     }
   }
   window.PointerEvent = PointerEvent as any;

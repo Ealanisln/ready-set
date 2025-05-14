@@ -98,14 +98,28 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
       // Create pickup address
       console.log("Creating pickup address");
       const pickupAddress = await tx.address.create({
-        data: data.pickupAddress,
+        data: {
+          street1: data.pickupAddress.street1,
+          street2: data.pickupAddress.street2 ?? null,
+          city: data.pickupAddress.city,
+          state: data.pickupAddress.state,
+          zip: data.pickupAddress.zip,
+          county: data.pickupAddress.county ?? null,
+        },
       });
       console.log("Pickup address created:", pickupAddress.id);
       
       // Create delivery address
       console.log("Creating delivery address");
       const deliveryAddress = await tx.address.create({
-        data: data.deliveryAddress,
+        data: {
+          street1: data.deliveryAddress.street1,
+          street2: data.deliveryAddress.street2 ?? null,
+          city: data.deliveryAddress.city,
+          state: data.deliveryAddress.state,
+          zip: data.deliveryAddress.zip,
+          county: data.deliveryAddress.county ?? null,
+        },
       });
       console.log("Delivery address created:", deliveryAddress.id);
 
@@ -115,20 +129,20 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
         data: {
           userId: data.userId,
           orderNumber: orderNumber,
-          brokerage: data.brokerage,
+          brokerage: data.brokerage ?? null,
           status: 'ACTIVE',
           pickupDateTime: data.pickupDateTime,
           arrivalDateTime: data.arrivalDateTime,
-          completeDateTime: data.completeDateTime,
-          headcount: data.headcount,
+          completeDateTime: data.completeDateTime ?? null,
+          headcount: data.headcount ?? null,
           needHost: data.needHost,
-          hoursNeeded: data.hoursNeeded,
-          numberOfHosts: data.numberOfHosts,
-          clientAttention: data.clientAttention,
-          pickupNotes: data.pickupNotes,
-          specialNotes: data.specialNotes,
+          hoursNeeded: data.hoursNeeded ?? null,
+          numberOfHosts: data.numberOfHosts ?? null,
+          clientAttention: data.clientAttention ?? null,
+          pickupNotes: data.pickupNotes ?? null,
+          specialNotes: data.specialNotes ?? null,
           orderTotal: data.orderTotal,
-          tip: data.tip,
+          tip: data.tip ?? null,
           pickupAddressId: pickupAddress.id,
           deliveryAddressId: deliveryAddress.id,
         },
@@ -334,9 +348,9 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
                   // Try to extract the path and filename
                   const publicIndex = parts.findIndex(part => part === 'public');
                   if (publicIndex >= 0 && publicIndex + 2 < parts.length) {
-                    const bucketName = parts[publicIndex + 1];
+                    const bucketName = parts[publicIndex + 1] || 'fileUploader';
                     const pathParts = parts.slice(publicIndex + 2);
-                    fileName = pathParts[pathParts.length - 1];
+                    fileName = pathParts[pathParts.length - 1] || '';
                     tempPath = pathParts.slice(0, -1).join('/');
                     
                     if (tempPath && fileName) {
@@ -481,7 +495,7 @@ export async function deleteCateringOrder(orderId: string): Promise<DeleteOrderR
     const fileUploads = [...order.fileUploads];
 
     // Perform the deletion in a transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Delete associated dispatches
       await tx.dispatch.deleteMany({
         where: { cateringRequestId: orderId }
@@ -521,21 +535,23 @@ export async function deleteCateringOrder(orderId: string): Promise<DeleteOrderR
             
             if (standardMatch) {
               // Standard URL format
-              bucketName = standardMatch[1];
-              filePath = standardMatch[2];
+              bucketName = standardMatch?.[1] || "fileUploader";
+              filePath = standardMatch?.[2] || "";
               console.log(`Standard URL pattern detected: bucket=${bucketName}, path=${filePath}`);
 
               // Attempt to delete from standard path
-              const { error } = await supabase.storage.from(bucketName).remove([filePath]);
-              if (error) {
-                console.error(`Error deleting file from standard path:`, error);
-              } else {
-                console.log(`Successfully deleted file from standard path`);
+              if (filePath) {
+                const { error } = await supabase.storage.from(bucketName).remove([filePath]);
+                if (error) {
+                  console.error(`Error deleting file from standard path:`, error);
+                } else {
+                  console.log(`Successfully deleted file from standard path`);
+                }
               }
             } 
             else if (tempFolderMatch) {
               // This is a temp folder structure
-              tempFolderPath = tempFolderMatch[1];
+              tempFolderPath = tempFolderMatch?.[1] || "";
               bucketName = "fileUploader"; // Most likely bucket for temp uploads
               
               console.log(`Temp folder detected: ${tempFolderPath}`);

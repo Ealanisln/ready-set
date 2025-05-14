@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+
+# Run typecheck and lint
+pnpm pre-push-check
+
+# Check the exit status of the previous command
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-push checks failed. Please fix the errors before pushing."
+  exit 1
+fi
+
+echo "✅ Pre-push checks passed!" 

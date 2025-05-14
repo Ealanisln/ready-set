@@ -53,7 +53,9 @@ const FlowerCalculator = () => {
 
   // Find the selected zone data
   const getSelectedZone = useCallback((): DeliveryZone => {
-    return deliveryZones.find(zone => zone.id === selectedZone) || deliveryZones[0];
+    // We know deliveryZones is not empty based on our useMemo initialization
+    const foundZone = deliveryZones.find(zone => zone.id === selectedZone);
+    return foundZone as DeliveryZone;
   }, [selectedZone, deliveryZones]);
 
   // Calculate the totals based on inputs

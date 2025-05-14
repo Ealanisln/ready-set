@@ -42,7 +42,11 @@
     ],
     "baseUrl": ".",
     "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "**/*.ts",
