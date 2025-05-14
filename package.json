@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "dotenv -e .env.local -- next dev",
-    "build": "prisma generate && next build",
+    "dev": "next dev",
+    "build": "prisma generate && tsc --noEmit && next build",
     "build:no-typecheck": "prisma generate && SKIP_TYPECHECK=true next build",
     "build:sourcemaps": "npm run build && npm run sourcemaps",
     "sourcemaps": "npx @highlight-run/sourcemap-uploader upload --apiKey ${HIGHLIGHT_PROJECT_API_KEY:-\"\"} --path ./.next",
@@ -20,7 +20,10 @@
     "test:watch": "dotenv -e .env.test -- vitest",
     "studio": "dotenv -e .env.local -- npx prisma studio",
     "db:generate": "dotenv -e .env.local -- npx prisma generate",
-    "prisma": "prisma generate"
+    "prisma": "prisma generate",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push && next build",
+    "type-check": "tsc --noEmit"
   },
   "jest": {
     "setupFilesAfterEnv": [

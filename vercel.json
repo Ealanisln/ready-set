@@ -1,12 +1,25 @@
 {
-  "version": 2,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
-  ],
+  "buildCommand": "pnpm run vercel-build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
   "build": {
     "env": {
-      "NODE_OPTIONS": "--experimental-json-modules",
-      "NEXT_TYPECHECK_CONFIG": "tsconfig.vercel.json"
+      "PRISMA_GENERATE_DATAPROXY": "true"
+    }
+  },
+  "functions": {
+    "src/app/api/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "crons": [],
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "development": true,
+      "production": true
     }
   }
 } 

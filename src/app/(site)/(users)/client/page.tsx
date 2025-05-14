@@ -5,19 +5,8 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
 import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
-
-// Define simplified types for our orders
-type CombinedOrder = {
-  id: string;
-  orderNumber: string;
-  status: string; // Using string instead of enum
-  pickupDateTime: Date | null;
-  arrivalDateTime: Date | null;
-  orderTotal: number | null; // Using number instead of Prisma.Decimal
-  orderType: 'catering' | 'on_demand';
-};
+import { CombinedOrder } from "@/types/models";
 
 interface DashboardStats {
   activeOrders: number;
