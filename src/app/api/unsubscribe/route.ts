@@ -29,7 +29,7 @@ export async function DELETE(request: Request) {
     const emailValidation = EmailSchema.safeParse(email);
     if (!emailValidation.success) {
       return NextResponse.json({ 
-        error: emailValidation.error.errors[0].message 
+        error: emailValidation.error.errors[0]?.message || "Invalid email address"
       }, { 
         status: 400 
       });
@@ -76,8 +76,18 @@ export async function DELETE(request: Request) {
       });
     }
 
+    // Ensure we have a valid contact with an ID
+    const contactId = contacts[0]?.id;
+    if (!contactId) {
+      return NextResponse.json({
+        error: "Invalid contact information."
+      }, { 
+        status: 400 
+      });
+    }
+
     // Step 2: Delete contact
-    const deleteUrl = `https://api.sendgrid.com/v3/marketing/contacts?ids=${contacts[0].id}`;
+    const deleteUrl = `https://api.sendgrid.com/v3/marketing/contacts?ids=${contactId}`;
     const deleteResponse = await axios.delete(deleteUrl, sendGridConfig);
 
     // Return 202 to match SendGrid's status code

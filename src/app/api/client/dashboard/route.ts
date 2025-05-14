@@ -61,7 +61,7 @@ async function fetchDashboardData(
 ): Promise<{ 
   success: boolean; 
   data?: any; 
-  error?: string;
+  error?: string | undefined;
   responseTimeMs?: number;
 }> {
   const startTime = Date.now();

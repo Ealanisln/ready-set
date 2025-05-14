@@ -375,8 +375,10 @@ function ClientDetails({ control, isUserProfile }: ClientDetailsProps) {
                 if (range.startsWith('+')) {
                   return numValue >= 300;
                 }
-                const [min, max] = range.split('-').map(Number);
-                return numValue >= min && numValue <= (max || min); // If no max, use min as max
+                const parts = range.split('-').map(Number);
+                const min = parts[0] || 0;
+                const max = parts[1] || min;
+                return numValue >= min && numValue <= max;
               });
               console.log('[ClientDetails Headcount Render] field.value:', field.value, ' | Calculated displayValue:', displayValue);
             }

@@ -11,7 +11,10 @@ export default function HighlightTest() {
   const [logs, setLogs] = useState<string[]>([]);
   
   const addLog = (message: string) => {
-    setLogs(prev => [...prev, `${new Date().toISOString().split('T')[1].split('.')[0]} - ${message}`]);
+    const timestamp = new Date().toISOString();
+    const timePart = timestamp.split('T')[1] || '';
+    const formattedTime = timePart.split('.')[0] || '';
+    setLogs(prev => [...prev, `${formattedTime} - ${message}`]);
   };
   
   useEffect(() => {

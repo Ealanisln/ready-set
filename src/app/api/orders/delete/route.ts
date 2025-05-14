@@ -277,20 +277,25 @@ export async function DELETE(req: NextRequest) {
                     const pathParts = file.fileUrl.split('/storage/v1/object/public/')[1];
                     if (pathParts) {
                       // Split by bucket name and the rest of the path
-                      const [bucket, ...rest] = pathParts.split('/');
-                      filePath = rest.join('/').split('?')[0]; // Remove query params
-                      
-                      console.log(`Extracted path from URL: bucket=${bucket}, path=${filePath}`);
-                      
-                      if (filePath) {
-                        const { error: fileDeleteError } = await supabase.storage
-                          .from('fileUploader')
-                          .remove([filePath]);
-                          
-                        if (fileDeleteError) {
-                          console.error(`Error deleting individual file ${filePath}:`, fileDeleteError);
-                        } else {
-                          console.log(`Successfully deleted individual file: ${filePath}`);
+                      const pathSegments = pathParts.split('/');
+                      if (pathSegments.length > 1) {
+                        const bucket = pathSegments[0];
+                        const rest = pathSegments.slice(1);
+                        const filePathWithQuery = rest.join('/');
+                        filePath = filePathWithQuery.split('?')[0] || ""; // Remove query params
+                        
+                        console.log(`Extracted path from URL: bucket=${bucket}, path=${filePath}`);
+                        
+                        if (filePath) {
+                          const { error: fileDeleteError } = await supabase.storage
+                            .from('fileUploader')
+                            .remove([filePath]);
+                            
+                          if (fileDeleteError) {
+                            console.error(`Error deleting individual file ${filePath}:`, fileDeleteError);
+                          } else {
+                            console.log(`Successfully deleted individual file: ${filePath}`);
+                          }
                         }
                       }
                     }

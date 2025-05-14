@@ -24,7 +24,11 @@ export function TeamSwitcher({
   }[];
 }) {
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const [activeTeam, setActiveTeam] = React.useState(teams.length > 0 ? teams[0] : null);
+
+  if (!activeTeam) {
+    return null; // Return nothing if no team is available
+  }
 
   return (
     <Link href="/admin" className="block">

@@ -50,8 +50,18 @@ export async function POST(request: NextRequest) {
     requiredFields.forEach((field) => {
       // Handle nested fields like pickupAddress.id
       if (field.includes('.')) {
-        const [parent, child] = field.split('.');
-        if (!data[parent] || !data[parent][child]) {
+        const parts = field.split('.');
+        const parent = parts[0];
+        const child = parts[1];
+        
+        if (
+          parent === undefined || 
+          child === undefined || 
+          !data[parent] || 
+          typeof data[parent] !== 'object' || 
+          data[parent] === null || 
+          !(child in data[parent])
+        ) {
           missingFields.push(field);
         }
       } else if (data[field] === undefined || data[field] === null || data[field] === '') {

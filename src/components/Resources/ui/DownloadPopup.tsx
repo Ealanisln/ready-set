@@ -33,7 +33,7 @@ export const DownloadPopup: React.FC<DownloadPopupProps> = ({
 
   // Determine the primary download URL (prefer Sanity files if available)
   const primaryDownloadUrl =
-    downloadFiles && downloadFiles.length > 0
+    downloadFiles && downloadFiles.length > 0 && downloadFiles[0]?.asset?.url
       ? downloadFiles[0].asset.url
       : downloadUrl;
 

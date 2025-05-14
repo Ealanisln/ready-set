@@ -240,16 +240,25 @@ const OnDemandOrdersPage: React.FC = () => {
   // Helper to format time string (HH:MM:SS) into AM/PM
   const formatTime = (timeString: string | null | undefined): string => {
      if (!timeString) return '-';
+     
      // Basic check for valid time format before splitting
      if (!/^\d{1,2}:\d{2}(:\d{2})?/.test(timeString)) return timeString;
-     const parts = timeString.split(':');
-     let hours = parseInt(parts[0], 10);
-     const minutes = parseInt(parts[1], 10);
-     const ampm = hours >= 12 ? 'PM' : 'AM';
-     hours = hours % 12;
-     hours = hours ? hours : 12; // the hour '0' should be '12'
-     const minutesStr = minutes < 10 ? '0' + minutes : String(minutes); // Ensure two digits
-     return `${hours}:${minutesStr} ${ampm}`;
+     
+     try {
+       const timeParts = timeString.split(':');
+       const hours = parseInt(timeParts[0] || '0', 10);
+       const minutes = parseInt(timeParts[1] || '0', 10);
+       
+       if (isNaN(hours) || isNaN(minutes)) return timeString;
+       
+       const ampm = hours >= 12 ? 'PM' : 'AM';
+       const displayHours = hours % 12 || 12; // Convert 0 to 12
+       const displayMinutes = minutes < 10 ? `0${minutes}` : String(minutes);
+       
+       return `${displayHours}:${displayMinutes} ${ampm}`;
+     } catch (error) {
+       return timeString;
+     }
   };
   // --- End of handlers/helpers ---
 

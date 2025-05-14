@@ -88,10 +88,10 @@ export interface DispatchErrorContext {
   driverId?: string;
   orderId?: string;
   location?: {
-    lat?: number;
-    lng?: number;
+    lat?: number | undefined;
+    lng?: number | undefined;
   };
-  deliveryStatus?: string;
+  deliveryStatus?: string | undefined;
   notificationDetails?: {
     type: string;
     recipient: string;

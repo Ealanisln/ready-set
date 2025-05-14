@@ -114,6 +114,12 @@ const openDocumentWithFallback = async (url: string) => {
           const path = matches[2];
           console.log("Trying to get signed URL for path:", path);
           
+          if (!path) {
+            console.error("Failed to extract path from URL.");
+            toast({ title: "Error", description: "Could not parse document path.", variant: "destructive" });
+            return;
+          }
+          
           try {
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();

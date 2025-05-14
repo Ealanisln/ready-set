@@ -68,7 +68,7 @@ async function getApplicationData(
   // Mock data
   return {
     userId: `user_${Math.floor(Math.random() * 1000)}`,
-    status: ['SUBMITTED', 'UNDER_REVIEW', 'INTERVIEW_SCHEDULED'][Math.floor(Math.random() * 3)],
+    status: ['SUBMITTED', 'UNDER_REVIEW', 'INTERVIEW_SCHEDULED'][Math.floor(Math.random() * 3)] || 'SUBMITTED',
     position: 'Delivery Driver',
     location: 'San Francisco, CA',
     documents: [`doc_${Math.floor(Math.random() * 100)}`, `doc_${Math.floor(Math.random() * 100)}`]

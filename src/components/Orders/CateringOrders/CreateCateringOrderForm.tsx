@@ -978,7 +978,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         const timeValue = e.target.value;
                         if (!timeValue) return;
                         
-                        const [hours, minutes] = timeValue.split(':').map(Number);
+                        const [hoursStr = '0', minutesStr = '0'] = timeValue.split(':');
+                        const hours = parseInt(hoursStr, 10);
+                        const minutes = parseInt(minutesStr, 10);
+                        
+                        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return;
+                        
                         const currentDate = watch('pickupDateTime');
                         
                         // If we have a date, update it with the new time
@@ -1069,7 +1074,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         const timeValue = e.target.value;
                         if (!timeValue) return;
                         
-                        const [hours, minutes] = timeValue.split(':').map(Number);
+                        const [hoursStr = '0', minutesStr = '0'] = timeValue.split(':');
+                        const hours = parseInt(hoursStr, 10);
+                        const minutes = parseInt(minutesStr, 10);
+                        
+                        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return;
+                        
                         const currentDate = watch('arrivalDateTime');
                         
                         // If we have a date, update it with the new time
@@ -1162,7 +1172,12 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
                         const timeValue = e.target.value;
                         if (!timeValue) return;
                         
-                        const [hours, minutes] = timeValue.split(':').map(Number);
+                        const [hoursStr = '0', minutesStr = '0'] = timeValue.split(':');
+                        const hours = parseInt(hoursStr, 10);
+                        const minutes = parseInt(minutesStr, 10);
+                        
+                        if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return;
+                        
                         const currentDate = watch('completeDateTime') as Date | undefined;
                         
                         // If we have a date, update it with the new time
@@ -1468,9 +1483,9 @@ export const CreateCateringOrderForm: React.FC<CreateCateringOrderFormProps> = (
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-700">{file.name}</span>
-                  {progresses && progresses[file.name] !== undefined && progresses[file.name] < 100 && (
+                  {progresses && typeof file.name === 'string' && typeof progresses === 'object' && progresses !== null && file.name in progresses && (
                     <span className="text-xs text-gray-500">
-                      {Math.round(progresses[file.name])}%
+                      {Math.round(progresses[file.name as keyof typeof progresses] || 0)}%
                     </span>
                   )}
                 </div>

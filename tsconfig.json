@@ -45,7 +45,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noFallthroughCasesInSwitch": true
   },
   "include": [

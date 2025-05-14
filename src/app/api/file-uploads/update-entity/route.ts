@@ -171,77 +171,82 @@ export async function PUT(request: NextRequest) {
           const publicIndex = pathParts.findIndex(part => part === 'public');
           
           if (publicIndex >= 0 && publicIndex + 1 < pathParts.length) {
-            const bucketName = pathParts[publicIndex + 1];
+            const bucketName = pathParts[publicIndex + 1] || '';
             
-            // Look for the old entity ID in the path
-            const pathAfterBucket = pathParts.slice(publicIndex + 2).join('/');
-            
-            // Attempt to identify the folder structure
-            let oldPath = '';
-            let newPath = '';
-            
-            if (pathAfterBucket.includes('catering_order')) {
-              // Handle catering_order path format
-              const parts = pathAfterBucket.split('/');
-              for (let i = 0; i < parts.length - 1; i++) {
-                if (parts[i] === 'catering_order' && i + 1 < parts.length) {
-                  const folderName = parts[i + 1];
-                  if (folderName.includes(oldEntityId) || folderName === oldEntityId) {
-                    // Found the folder with old ID
-                    const fileName = parts[parts.length - 1];
-                    oldPath = `catering_order/${folderName}/${fileName}`;
-                    newPath = `catering_order/${newEntityId}/${fileName}`;
-                    break;
-                  }
-                }
-              }
-            } else if (pathAfterBucket.includes('orders/catering')) {
-              // Handle orders/catering path format
-              const parts = pathAfterBucket.split('/');
-              for (let i = 0; i < parts.length - 1; i++) {
-                if ((parts[i] === 'orders' && parts[i+1] === 'catering') && i + 2 < parts.length) {
-                  const folderName = parts[i + 2];
-                  if (folderName.includes(oldEntityId) || folderName === oldEntityId) {
-                    // Found the folder with old ID
-                    const fileName = parts[parts.length - 1];
-                    oldPath = `orders/catering/${folderName}/${fileName}`;
-                    newPath = `orders/catering/${newEntityId}/${fileName}`;
-                    break;
-                  }
-                }
-              }
-            }
-            
-            if (oldPath && newPath) {
-              console.log(`Attempting to move file from ${oldPath} to ${newPath} in bucket ${bucketName}`);
+            // Only proceed if we have a valid bucket name
+            if (bucketName) {
+              // Look for the old entity ID in the path
+              const pathAfterBucket = pathParts.slice(publicIndex + 2).join('/');
               
-              try {
-                const { error: moveError } = await supabase.storage
-                  .from(bucketName)
-                  .move(oldPath, newPath);
-                  
-                if (moveError) {
-                  console.error(`Error moving file: ${moveError.message}`);
-                } else {
-                  console.log(`Successfully moved file to ${newPath}`);
-                  
-                  // Update file URL in database
-                  const { data: { publicUrl } } = supabase.storage
-                    .from(bucketName)
-                    .getPublicUrl(newPath);
-                  
-                  await prisma.fileUpload.update({
-                    where: { id: file.id },
-                    data: { fileUrl: publicUrl }
-                  });
-                  
-                  console.log(`Updated file URL to ${publicUrl}`);
+              // Attempt to identify the folder structure
+              let oldPath = '';
+              let newPath = '';
+              
+              if (pathAfterBucket.includes('catering_order')) {
+                // Handle catering_order path format
+                const parts = pathAfterBucket.split('/');
+                for (let i = 0; i < parts.length - 1; i++) {
+                  if (parts[i] === 'catering_order' && i + 1 < parts.length) {
+                    // Type assertion to handle possibly undefined values
+                    const folderName = parts[i + 1] as string;
+                    if (folderName && (folderName.includes(oldEntityId) || folderName === oldEntityId)) {
+                      // Found the folder with old ID
+                      const fileName = parts[parts.length - 1] as string;
+                      oldPath = `catering_order/${folderName}/${fileName}`;
+                      newPath = `catering_order/${newEntityId}/${fileName}`;
+                      break;
+                    }
+                  }
                 }
-              } catch (moveError) {
-                console.error(`Exception moving file: ${moveError}`);
+              } else if (pathAfterBucket.includes('orders/catering')) {
+                // Handle orders/catering path format
+                const parts = pathAfterBucket.split('/');
+                for (let i = 0; i < parts.length - 1; i++) {
+                  if ((parts[i] === 'orders' && parts[i+1] === 'catering') && i + 2 < parts.length) {
+                    // Type assertion to handle possibly undefined values
+                    const folderName = parts[i + 2] as string;
+                    if (folderName && (folderName.includes(oldEntityId) || folderName === oldEntityId)) {
+                      // Found the folder with old ID
+                      const fileName = parts[parts.length - 1] as string;
+                      oldPath = `orders/catering/${folderName}/${fileName}`;
+                      newPath = `orders/catering/${newEntityId}/${fileName}`;
+                      break;
+                    }
+                  }
+                }
               }
-            } else {
-              console.log(`Could not determine proper path mapping for ${file.fileUrl}`);
+              
+              if (oldPath && newPath) {
+                console.log(`Attempting to move file from ${oldPath} to ${newPath} in bucket ${bucketName}`);
+                
+                try {
+                  const { error: moveError } = await supabase.storage
+                    .from(bucketName)
+                    .move(oldPath, newPath);
+                    
+                  if (moveError) {
+                    console.error(`Error moving file: ${moveError.message}`);
+                  } else {
+                    console.log(`Successfully moved file to ${newPath}`);
+                    
+                    // Update file URL in database
+                    const { data: { publicUrl } } = supabase.storage
+                      .from(bucketName)
+                      .getPublicUrl(newPath);
+                    
+                    await prisma.fileUpload.update({
+                      where: { id: file.id },
+                      data: { fileUrl: publicUrl }
+                    });
+                    
+                    console.log(`Updated file URL to ${publicUrl}`);
+                  }
+                } catch (moveError) {
+                  console.error(`Exception moving file: ${moveError}`);
+                }
+              } else {
+                console.log(`Could not determine proper path mapping for ${file.fileUrl}`);
+              }
             }
           }
         }

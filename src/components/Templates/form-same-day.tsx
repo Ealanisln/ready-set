@@ -49,10 +49,27 @@ const FormSameDay = () => {
   });
 
   const onSubmit = (data: Inputs) => {
+    if (!data.date) {
+      console.error('Date is required');
+      return;
+    }
 
-    const [year, month, day] = data.date.split("-").map(Number);
+    const dateParts = data.date.split("-").map(part => parseInt(part, 10));
+    if (dateParts.length !== 3 || dateParts.some(isNaN)) {
+      console.error('Invalid date format');
+      return;
+    }
+
+    const year = dateParts[0] || 0;
+    const month = dateParts[1] || 1;
+    const day = dateParts[2] || 1;
+    
     const dateObj = new Date(year, month - 1, day);
-
+    if (isNaN(dateObj.getTime())) {
+      console.error('Invalid date');
+      return;
+    }
+    
     const formattedDate = dateObj.toLocaleDateString("en-US", {
       weekday: "long",
       month: "numeric",
@@ -60,7 +77,7 @@ const FormSameDay = () => {
       year: "numeric",
     });
 
-    let message = `Hello ${data.driverName}, this is ${data.helpdeskAgent}. You're scheduled for a food drive today, ${formattedDate}.\n\n`;
+    let message = `Hi ${data.driverName}! This is ${data.helpdeskAgent}. Here are your food drive for today, ${formattedDate}. Please check the details and confirm. Thank you!\n`;
 
     message += `Route/Order  Pick Up\n`;
 

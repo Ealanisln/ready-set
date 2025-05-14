@@ -49,8 +49,26 @@ const FormNextDay = () => {
   });
 
   const onSubmit = (data: Inputs) => {
-    const [year, month, day] = data.date.split("-").map(Number);
+    if (!data.date) {
+      console.error('Date is required');
+      return;
+    }
+
+    const dateParts = data.date.split("-").map(part => parseInt(part, 10));
+    if (dateParts.length !== 3 || dateParts.some(isNaN)) {
+      console.error('Invalid date format');
+      return;
+    }
+
+    const year = dateParts[0] || 0;
+    const month = dateParts[1] || 1;
+    const day = dateParts[2] || 1;
+    
     const dateObj = new Date(year, month - 1, day);
+    if (isNaN(dateObj.getTime())) {
+      console.error('Invalid date');
+      return;
+    }
     
     const formattedDate = dateObj.toLocaleDateString("en-US", {
       weekday: "long",
@@ -88,23 +106,33 @@ const FormNextDay = () => {
       .then(() => console.log("Message copied to clipboard"))
       .catch((err) => console.error("Failed to copy message: ", err));
 
-      setPersistentDate(data.date);
-      setPersistentHelpdeskAgent(data.helpdeskAgent);
+    setPersistentDate(data.date);
+    setPersistentHelpdeskAgent(data.helpdeskAgent);
 
-      setPersistentDate(data.date);
-      setPersistentHelpdeskAgent(data.helpdeskAgent);
+    // Reset form with empty order
+    reset({
+      date: data.date,
+      helpdeskAgent: data.helpdeskAgent,
+      driverName: '',
+      orders: [{
+        orderNumber: '',
+        pickupTime: '',
+        restaurant: '',
+        restaurantAddress: '',
+        company: '',
+        companyAddress: '',
+        headcounts: '',
+        totalPay: '',
+        dropOffTimeStart: '',
+        dropOffTimeEnd: ''
+      }]
+    });
+  };
 
-      reset({
-        date: data.date,
-        helpdeskAgent: data.helpdeskAgent,
-        driverName: '', // Reset driver name
-        orders: [{}] as Order[], // Reset orders
-      });  };
-
-      useEffect(() => {
-        setValue('date', persistentDate);
-        setValue('helpdeskAgent', persistentHelpdeskAgent);
-      }, [persistentDate, persistentHelpdeskAgent, setValue]);
+  useEffect(() => {
+    setValue('date', persistentDate);
+    setValue('helpdeskAgent', persistentHelpdeskAgent);
+  }, [persistentDate, persistentHelpdeskAgent, setValue]);
 
   return (
     <div className="overflow-hidden py-8">
@@ -310,7 +338,7 @@ const FormNextDay = () => {
                           <div className="w-full px-4 md:w-1/2">
                             <div className="mb-8">
                               <label htmlFor={`orders.${index}.companyAddress`}>
-                                Company Address
+                                Client Address
                               </label>
                               <input
                                 {...register(
@@ -331,138 +359,13 @@ const FormNextDay = () => {
                               )}
                             </div>
                           </div>
-
-                          <div className="w-full px-4 md:w-1/2">
-                            <div className="mb-8">
-                              <label htmlFor={`orders.${index}.headcounts`}>
-                                Headcount
-                              </label>
-                              <input
-                                type="number"
-                                {...register(
-                                  `orders.${index}.headcounts` as const,
-                                  {
-                                    required: "Headcounts is required",
-                                  },
-                                )}
-                                className="dark:text-body-color-dark w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                              />
-                              {errors.orders?.[index]?.headcounts && (
-                                <span>
-                                  {errors.orders?.[index]?.headcounts?.message}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="w-full px-4 md:w-1/2">
-                            <div className="mb-8">
-                              <label htmlFor={`orders.${index}.totalPay`}>
-                                Total Pay
-                              </label>
-                              <input
-                                type="number"
-                                step="0.01"
-                                {...register(
-                                  `orders.${index}.totalPay` as const,
-                                  {
-                                    required: "Total pay is required",
-                                  },
-                                )}
-                                className="dark:text-body-color-dark w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                              />
-                              {errors.orders?.[index]?.totalPay && (
-                                <span>
-                                  {errors.orders?.[index]?.totalPay?.message}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="w-full px-4 md:w-1/2">
-                            <div className="mb-8">
-                              <label
-                                htmlFor={`orders.${index}.dropOffTimeStart`}
-                              >
-                                Drop-off Time Start
-                              </label>
-                              <input
-                                type="text"
-                                {...register(
-                                  `orders.${index}.dropOffTimeStart` as const,
-                                  {
-                                    required: "Drop-off start time is required",
-                                  },
-                                )}
-                                className="dark:text-body-color-dark w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                              />
-                              {errors.orders?.[index]?.dropOffTimeStart && (
-                                <span>
-                                  {
-                                    errors.orders?.[index]?.dropOffTimeStart
-                                      ?.message
-                                  }
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="w-full px-4 md:w-1/2">
-                            <div className="mb-8">
-                              <label htmlFor={`orders.${index}.dropOffTimeEnd`}>
-                                Drop-off Time End
-                              </label>
-                              <input
-                                type="text"
-                                {...register(
-                                  `orders.${index}.dropOffTimeEnd` as const,
-                                  {
-                                    required: "Drop-off end time is required",
-                                  },
-                                )}
-                                className="dark:text-body-color-dark w-full rounded-sm border border-stroke bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                              />
-                              {errors.orders?.[index]?.dropOffTimeEnd && (
-                                <span>
-                                  {
-                                    errors.orders?.[index]?.dropOffTimeEnd
-                                      ?.message
-                                  }
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {index > 0 && (
-                            <div className="py-4">
-                              <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={() => remove(index)}
-                              >
-                                Remove Order
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  <div className="flex space-x-4">
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={() => append({} as Order)}
-                      className="px-4 py-2"
-                    >
-                      Add Another Order
-                    </Button>
-
-                    <Button type="submit" className="px-4 py-2">
-                      Submit
-                    </Button>
-                  </div>
+                </div>
+                <div className="mt-8">
+                  <Button type="submit">Generate SMS Template</Button>
                 </div>
               </form>
             </div>

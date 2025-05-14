@@ -217,13 +217,20 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
     }
     
     // Group files by bucket for efficient deletion
-    const filesByBucket: Record<string, string[]> = {};
+    const filesByBucket: Record<keyof typeof STORAGE_BUCKETS, string[]> = {
+      DEFAULT: [],
+      FILE_UPLOADER: [],
+      CATERING_FILES: [],
+      USER_FILES: [],
+      PROFILE_IMAGES: [],
+      ORDER_FILES: []
+    };
     
     // Process each orphaned file
     for (const file of orphanedFiles as OrphanedFile[]) {
       try {
-        let bucketName: string;
-        let filePath: string;
+        let bucketName: keyof typeof STORAGE_BUCKETS = 'DEFAULT';
+        let filePath = '';
         
         // Try to extract bucket and path from file_url first (more reliable)
         if (file.file_url) {
@@ -235,15 +242,24 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
             const publicIndex = pathParts.findIndex(part => part === 'public');
             
             if (publicIndex !== -1 && publicIndex + 1 < pathParts.length) {
-              bucketName = pathParts[publicIndex + 1];
-              // The path is everything after the bucket name
-              filePath = pathParts.slice(publicIndex + 2).join('/');
+              const potentialBucketName = pathParts[publicIndex + 1];
+              // Check if the bucket name is valid
+              const isValidBucket = (name: string): name is keyof typeof STORAGE_BUCKETS => {
+                return Object.keys(STORAGE_BUCKETS).includes(name);
+              };
               
-              // Add the file to the appropriate bucket group
-              if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
-              filesByBucket[bucketName].push(filePath);
-              
-              continue;
+              if (potentialBucketName && isValidBucket(potentialBucketName)) {
+                bucketName = potentialBucketName;
+                // The path is everything after the bucket name
+                const remainingParts = pathParts.slice(publicIndex + 2);
+                filePath = remainingParts.length > 0 ? remainingParts.join('/') : '';
+                
+                if (filePath) {
+                  filesByBucket[bucketName].push(filePath);
+                }
+                
+                continue;
+              }
             }
           } catch (urlError) {
             console.error('Error parsing file URL:', urlError);
@@ -255,22 +271,26 @@ export async function cleanupOrphanedFiles(timeThreshold = 24) {
         if (file.file_key) {
           // Try to determine if the key includes the bucket name
           // Format could be either "bucket/path" or just "path"
-          const knownBuckets = Object.values(STORAGE_BUCKETS);
           const keyParts = file.file_key.split('/');
+          const firstPart = keyParts[0];
           
-          if (knownBuckets.includes(keyParts[0] as any)) {
+          const isValidBucket = (name: string): name is keyof typeof STORAGE_BUCKETS => {
+            return Object.keys(STORAGE_BUCKETS).includes(name);
+          };
+          
+          if (firstPart && isValidBucket(firstPart)) {
             // If first part is a known bucket, use it
-            bucketName = keyParts[0];
-            filePath = keyParts.slice(1).join('/');
+            bucketName = firstPart;
+            const remainingParts = keyParts.slice(1);
+            filePath = remainingParts.length > 0 ? remainingParts.join('/') : '';
           } else {
             // Otherwise, assume it's a path in the default bucket
-            bucketName = STORAGE_BUCKETS.DEFAULT;
             filePath = file.file_key;
           }
           
-          // Add the file to the appropriate bucket group
-          if (!filesByBucket[bucketName]) filesByBucket[bucketName] = [];
-          filesByBucket[bucketName].push(filePath);
+          if (filePath) {
+            filesByBucket[bucketName].push(filePath);
+          }
         }
       } catch (parseError) {
         console.error('Error processing orphaned file:', parseError);

@@ -114,13 +114,17 @@ const ExpertSupportSection: React.FC = () => {
       // For names with slashes, split at the slash
       if (name.includes('/')) {
         const parts = name.split('/');
-        return (
-          <>
-            {parts[0].trim()}
-            <br />
-            {parts[1].trim()}
-          </>
-        );
+        const firstPart = parts[0]?.trim() || '';
+        const secondPart = parts[1]?.trim() || '';
+        if (firstPart && secondPart) {
+          return (
+            <>
+              {firstPart}
+              <br />
+              {secondPart}
+            </>
+          );
+        }
       }
 
       // For long names without slashes, find a good split point

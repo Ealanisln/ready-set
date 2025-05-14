@@ -211,8 +211,10 @@ const DriverDeliveries: React.FC = () => {
 
   // Format the user's first name
   const getFirstName = (): string => {
-    if (!userProfile?.name) return "";
-    return userProfile.name.split(" ")[0];
+    const fullName = userProfile?.name;
+    if (!fullName) return "";
+    const nameParts = fullName.split(" ");
+    return nameParts[0] || "";
   };
 
   const handleNextPage = () => setPage((prev) => prev + 1);

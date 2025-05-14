@@ -102,24 +102,22 @@ const Testimonials = () => {
         const categoryKey = category as 'CLIENTS' | 'VENDORS' | 'DRIVERS';
         const items = groupedTestimonials[categoryKey] || [];
 
+        // Initialize the category array if it doesn't exist
         if (!cardRefs.current[categoryKey]) {
           cardRefs.current[categoryKey] = [];
         }
 
+        // Initialize the overflow array if it doesn't exist
+        if (!newHasOverflow[categoryKey]) {
+          newHasOverflow[categoryKey] = [];
+        }
+
         items.forEach((_, index) => {
-          const element = cardRefs.current[categoryKey][index];
-          if (element) {
+          // Ensure the ref array exists and has the element
+          if (cardRefs.current[categoryKey] && cardRefs.current[categoryKey][index]) {
+            const element = cardRefs.current[categoryKey][index];
             const hasContentOverflow = element.scrollHeight > element.clientHeight;
-
-            // Inicializar el array si no existe
-            if (!newHasOverflow[categoryKey]) {
-              newHasOverflow[categoryKey] = [];
-            }
-
-            // Asignar el valor de overflow sólo si cambia
-            if (newHasOverflow[categoryKey][index] !== hasContentOverflow) {
-              newHasOverflow[categoryKey][index] = hasContentOverflow;
-            }
+            newHasOverflow[categoryKey][index] = hasContentOverflow;
           }
         });
       });

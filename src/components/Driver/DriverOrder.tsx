@@ -262,8 +262,9 @@ const OrderPage: React.FC = () => {
 
         if (
           data.dispatch &&
+          Array.isArray(data.dispatch) &&
           data.dispatch.length > 0 &&
-          data.dispatch[0].driver
+          data.dispatch[0]?.driver
         ) {
           setDriverInfo(data.dispatch[0].driver);
         } else {
@@ -306,8 +307,9 @@ const OrderPage: React.FC = () => {
       setOrder(updatedOrder);
       if (
         updatedOrder.dispatch &&
+        Array.isArray(updatedOrder.dispatch) &&
         updatedOrder.dispatch.length > 0 &&
-        updatedOrder.dispatch[0].driver
+        updatedOrder.dispatch[0]?.driver
       ) {
         setDriverInfo(updatedOrder.dispatch[0].driver);
       }
