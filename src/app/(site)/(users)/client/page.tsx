@@ -12,10 +12,10 @@ import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } fr
 type CombinedOrder = {
   id: string;
   orderNumber: string;
-  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'DELIVERED' | 'CANCELLED' | 'ACTIVE' | 'ASSIGNED' | 'COMPLETED';
+  status: string; // Using string instead of enum
   pickupDateTime: Date | null;
   arrivalDateTime: Date | null;
-  orderTotal: Prisma.Decimal | null;
+  orderTotal: number | null; // Using number instead of Prisma.Decimal
   orderType: 'catering' | 'on_demand';
 };
 
@@ -116,8 +116,18 @@ async function getClientDashboardData(userId: string): Promise<ClientDashboardDa
 
   // Combine and sort orders
   const combinedOrders: CombinedOrder[] = [
-    ...recentCateringOrders.map(order => ({ ...order, orderType: 'catering' as const })),
-    ...recentOnDemandOrders.map(order => ({ ...order, orderType: 'on_demand' as const })),
+    ...recentCateringOrders.map(order => ({
+      ...order,
+      orderType: 'catering' as const,
+      orderTotal: order.orderTotal ? Number(order.orderTotal) : null,
+      status: order.status.toString()
+    })),
+    ...recentOnDemandOrders.map(order => ({
+      ...order,
+      orderType: 'on_demand' as const,
+      orderTotal: order.orderTotal ? Number(order.orderTotal) : null,
+      status: order.status.toString()
+    })),
   ]
     .sort((a, b) => (b.pickupDateTime?.getTime() ?? 0) - (a.pickupDateTime?.getTime() ?? 0))
     .slice(0, 3);
@@ -198,7 +208,7 @@ const UpcomingOrderCard = ({ order }: { order: CombinedOrder }) => {
     });
   };
 
-  const formatCurrency = (amount: Prisma.Decimal | null) => {
+  const formatCurrency = (amount: number | null) => {
     if (!amount) return "$0.00";
     return `$${Number(amount).toFixed(2)}`;
   };
