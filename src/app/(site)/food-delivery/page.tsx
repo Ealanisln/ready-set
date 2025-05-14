@@ -9,6 +9,7 @@ import DeliveryPartners from '@/components/Food/DeliveryPartners';
 import FoodIcons from '@/components/Food/FoodIcons';
 import DeliveryTerms from '@/components/Food/DeliveryTerms';
 import HostingChecklist from '@/components/Food/HostingChecklist';
+import MainMeal from '@/components/Food/MainMeal';
 
 export default function FoodPage() {
   return (
@@ -18,6 +19,7 @@ export default function FoodPage() {
       <FoodIcons />
       <DeliveryTerms />
       <HostingChecklist />
+      <MainMeal />
     </div>
   );
 }
