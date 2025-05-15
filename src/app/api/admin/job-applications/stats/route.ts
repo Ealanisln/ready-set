@@ -2,81 +2,83 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { JobApplication } from '@prisma/client';
 
-type ApplicationCount = {
-  _count: number;
-  position: string;
-};
-
 export async function GET(request: NextRequest) {
   try {
-    // Get applications count by status
-    const statusCounts = await prisma.jobApplication.groupBy({
-      by: ['status'],
-      _count: true,
-      orderBy: {
-        _count: {
-          id: 'desc',
-        },
-      },
+    // Count total job applications (not deleted)
+    const total = await prisma.jobApplication.count({
+      where: { deletedAt: null },
     });
 
-    // Get applications count by position
-    const positionCounts = await prisma.jobApplication.groupBy({
+    // Count by status
+    const [pending, approved, rejected, interviewing] = await Promise.all([
+      prisma.jobApplication.count({
+        where: { deletedAt: null, status: 'PENDING' },
+      }),
+      prisma.jobApplication.count({
+        where: { deletedAt: null, status: 'APPROVED' },
+      }),
+      prisma.jobApplication.count({
+        where: { deletedAt: null, status: 'REJECTED' },
+      }),
+      prisma.jobApplication.count({
+        where: { deletedAt: null, status: 'INTERVIEWING' },
+      }),
+    ]);
+
+    // Group by position
+    const byPosition = await prisma.jobApplication.groupBy({
       by: ['position'],
-      _count: true,
-      orderBy: {
-        _count: {
-          id: 'desc',
-        },
-      },
+      where: { deletedAt: null },
+      _count: { position: true },
     });
 
-    // Format data for frontend visualization
-    const byStatus = statusCounts.map(item => ({
-      status: item.status,
-      count: item._count.id,
-    }));
-
-    const byPosition: { position: string; count: number }[] = [];
-    positionCounts.forEach((item: ApplicationCount) => {
-      byPosition.push({
-        position: item.position,
-        count: item._count,
-      });
+    // Convert to { [position]: count }
+    const applicationsByPosition: Record<string, number> = {};
+    byPosition.forEach((item) => {
+      applicationsByPosition[item.position] = item._count.position;
     });
 
-    // Get recent applications (last 10)
+    // Get recent applications
     const recentApplicationsData = await prisma.jobApplication.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
       include: {
-        files: true,
+        fileUploads: true,
       },
     });
 
-    const recentApplications = recentApplicationsData.map((app: JobApplication & { files: any[] }) => {
+    // Convert to application objects
+    const recentApplications = recentApplicationsData.map(app => {
       return {
         id: app.id,
         name: `${app.firstName} ${app.lastName}`,
         position: app.position,
         status: app.status,
         createdAt: app.createdAt,
-        hasResume: app.files.some(file => file.category === 'RESUME'),
+        hasResume: app.fileUploads?.some(file => file.category === 'resume') || false,
       };
     });
 
-    return NextResponse.json({
-      byStatus,
-      byPosition,
+    // Create response with correct property names
+    const stats = {
+      totalApplications: total,
+      pendingApplications: pending,
+      approvedApplications: approved,
+      rejectedApplications: rejected,
+      interviewingApplications: interviewing,
+      applicationsByPosition,
       recentApplications,
-      totalApplications: await prisma.jobApplication.count(),
-    });
+    };
+
+    return NextResponse.json(stats, { status: 200 });
   } catch (error) {
-    console.error('Error fetching application stats:', error);
+    // Log error for debugging
+    console.error('Failed to fetch job application stats:', error);
+
+    // Return a typed error response
     return NextResponse.json(
-      { error: 'Failed to fetch application statistics' },
+      { error: 'Failed to fetch job application stats' },
       { status: 500 }
     );
   }
