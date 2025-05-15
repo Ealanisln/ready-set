@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import ScheduleDialog from '../Logistics/Schedule';
+import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
 
 interface CateringDeliveryProps {
   onRequestQuote?: () => void;
@@ -10,6 +11,7 @@ interface CateringDeliveryProps {
 
 const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const { openForm, DialogForm } = FormManager();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -26,15 +28,23 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
 
   const handleQuoteClick = () => {
     console.log('CateringHero - Get a quote clicked');
-    if (onRequestQuote) {
-      onRequestQuote();
-    } else {
-      console.log('Quote functionality not yet implemented');
-    }
+    openForm('food');
   };
 
   return (
-    <section className="w-full bg-white">
+    <section className="relative w-full bg-white">
+      {/* Background image - positioned absolutely to cover the section */}
+      <div className="absolute inset-0 z-0 opacity-15">
+        <Image
+          src="/images/food/truckbg.png"
+          alt="Delivery truck background"
+          fill
+          sizes="100vw"
+          priority
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
+
       <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-12 md:flex-row md:items-center md:py-16 lg:py-20">
         {/* Left content - Text */}
         <div className="relative z-10 w-full max-w-xl space-y-6 px-4 md:w-1/2 md:px-6 lg:px-8">
@@ -73,19 +83,23 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
           <div className="relative">
             {/* Yellow circular background with food bowl image */}
             <div className="relative h-[450px] w-[450px] overflow-hidden rounded-full border-8 border-yellow-300 bg-yellow-300 md:h-[550px] md:w-[550px] lg:h-[600px] lg:w-[600px]">
-              <Image
-                src="/images/food/salad-bowl.png"
-                alt="Catering food bowl with fresh ingredients"
-                fill
-                sizes="(max-width: 768px) 100vw, 600px"
-                priority
-                className="rounded-full object-cover"
-                style={{ objectPosition: 'center center' }}
-              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Image
+                  src="/images/food/salad-bowl.png"
+                  alt="Catering food bowl with fresh ingredients"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  priority
+                  className="translate-x-5 scale-110"
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Render the dialog form */}
+      {DialogForm}
     </section>
   );
 };

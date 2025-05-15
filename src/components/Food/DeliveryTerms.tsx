@@ -6,16 +6,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ScheduleDialog from '../Logistics/Schedule';
 import { FormType } from '../Logistics/QuoteRequest/types';
+import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager'; // Import FormManager
 
 interface PackageDeliveryProps {
   onRequestQuote?: (formType: FormType) => void;
 }
 
 const DeliveryTerms = ({ onRequestQuote }: PackageDeliveryProps) => {
+  // Initialize the FormManager to get openForm and DialogForm
+  const { openForm, DialogForm } = FormManager();
+
   const handleQuoteClick = () => {
-    if (onRequestQuote) {
-      onRequestQuote('flower');
-    }
+    openForm('food');
   };
 
   return (
@@ -108,6 +110,8 @@ const DeliveryTerms = ({ onRequestQuote }: PackageDeliveryProps) => {
           </div>
         </div>
       </div>
+      {/* Render the dialog form */}
+      {DialogForm}
     </div>
   );
 };
