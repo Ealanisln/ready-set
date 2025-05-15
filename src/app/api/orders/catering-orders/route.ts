@@ -15,7 +15,7 @@ import {
 // Import error type from runtime library
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"; 
 
-import { prisma } from "@/lib/prisma"; 
+import { prisma } from "@/lib/db/prisma"; 
 
 const ITEMS_PER_PAGE = 10;
 

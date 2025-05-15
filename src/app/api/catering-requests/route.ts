@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { Decimal } from "@/types/prisma";
 import { createClient } from "@/utils/supabase/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { CateringNeedHost } from "@/types/order";
 
 // Validates and processes a catering request submission
