@@ -1,6 +1,7 @@
 // src/utils/order-mappers.ts
 
 import { Prisma } from "@prisma/client";
+import { Decimal } from "@/types/prisma";
 import {
   CateringRequest,
   OnDemand,
@@ -46,7 +47,7 @@ type PrismaOnDemand = Prisma.OnDemandGetPayload<{
 }>;
 
 // Helper function to convert Prisma Decimal to number
-function convertDecimalToNumber(decimal: Prisma.Decimal | null): number | null {
+function convertDecimalToNumber(decimal: Decimal | null): number | null {
   return decimal ? Number(decimal) : null;
 }
 

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { PrismaClient, Prisma, UserType } from '@prisma/client'
+import { Decimal } from '@/types/prisma'
 import { CateringStatus } from '@/types/order-status'
 
 const prisma = new PrismaClient();
@@ -60,7 +61,7 @@ export async function GET() {
 
     // Handle potential Decimal type from Prisma before converting
     let finalRevenue = 0;
-    if (revenueValue instanceof Prisma.Decimal) {
+    if (revenueValue instanceof Decimal) {
       finalRevenue = revenueValue.toNumber();
     } else if (typeof revenueValue === 'number') {
       // Although orderTotal is Decimal?, sum might return null if no records exist or all are null.

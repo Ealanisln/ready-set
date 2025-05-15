@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
-import { CateringRequest, OnDemand } from "@/types/prisma";
+import { CateringRequest, OnDemand, Decimal } from "@/types/prisma";
 import { notFound } from "next/navigation";
 
 // Custom types for cleaner data structure
@@ -120,8 +120,8 @@ export async function getVendorOrders(limit = 10) {
     pickupDateTime: Date | null;
     arrivalDateTime: Date | null;
     completeDateTime: Date | null;
-    orderTotal: Prisma.Decimal | null;
-    tip: Prisma.Decimal | null;
+    orderTotal: Decimal | null;
+    tip: Decimal | null;
     clientAttention: string | null;
     pickupAddress: {
       id: string;
@@ -185,8 +185,8 @@ export async function getVendorOrders(limit = 10) {
     pickupDateTime: Date | null;
     arrivalDateTime: Date | null;
     completeDateTime: Date | null;
-    orderTotal: Prisma.Decimal | null;
-    tip: Prisma.Decimal | null;
+    orderTotal: Decimal | null;
+    tip: Decimal | null;
     clientAttention: string | null;
     pickupAddress: {
       id: string;

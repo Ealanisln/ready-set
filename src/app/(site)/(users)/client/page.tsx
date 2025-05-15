@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
 import { CombinedOrder } from "@/types/models";
 import { Prisma } from "@prisma/client";
-import { CateringRequest, OnDemand } from "@/types/prisma";
+import { CateringRequest, OnDemand, Decimal } from "@/types/prisma";
 
 interface DashboardStats {
   activeOrders: number;
@@ -113,7 +113,7 @@ async function getClientDashboardData(userId: string): Promise<ClientDashboardDa
       status: CateringRequest['status'];
       pickupDateTime: Date | null;
       arrivalDateTime: Date | null;
-      orderTotal: Prisma.Decimal | null;
+      orderTotal: Decimal | null;
     }) => ({
       ...order,
       orderType: 'catering' as const,
@@ -126,7 +126,7 @@ async function getClientDashboardData(userId: string): Promise<ClientDashboardDa
       status: OnDemand['status'];
       pickupDateTime: Date;
       arrivalDateTime: Date;
-      orderTotal: Prisma.Decimal | null;
+      orderTotal: Decimal | null;
     }) => ({
       ...order,
       orderType: 'on_demand' as const,

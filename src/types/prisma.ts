@@ -1,4 +1,8 @@
 import { Prisma } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
+
+// Export Decimal type for use in other files
+export { Decimal };
 
 // Export type definitions for Prisma models
 export type CateringRequest = Prisma.CateringRequestGetPayload<{}>;

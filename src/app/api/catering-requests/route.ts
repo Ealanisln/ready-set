@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { Decimal } from "@/types/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { CateringNeedHost } from "@/types/order";
@@ -120,8 +121,8 @@ export async function POST(request: NextRequest) {
 
     // Convert numeric values
     const headcount = parseInt(data.headcount, 10);
-    const orderTotal = new Prisma.Decimal(data.orderTotal);
-    const tip = data.tip ? new Prisma.Decimal(data.tip) : new Prisma.Decimal(0);
+    const orderTotal = new Decimal(data.orderTotal);
+    const tip = data.tip ? new Decimal(data.tip) : new Decimal(0);
     
     let hoursNeeded = null;
     let numberOfHosts = null;

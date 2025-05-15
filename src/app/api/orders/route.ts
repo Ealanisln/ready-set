@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { Decimal } from "@/types/prisma";
 import { sendOrderEmail, CateringOrder as EmailSenderCateringOrder, OnDemandOrder as EmailSenderOnDemandOrder } from "@/utils/emailSender";
 import { createClient } from "@/utils/supabase/server";
 import { CateringNeedHost } from "@/types/order";
@@ -120,7 +121,7 @@ export async function GET(req: NextRequest) {
     const serializedOrders = allOrders.map((order) => ({
       ...JSON.parse(
         JSON.stringify(order, (key, value) => {
-          if ((key === 'order_total' || key === 'tip') && value instanceof Prisma.Decimal) {
+          if ((key === 'order_total' || key === 'tip') && value instanceof Decimal) {
             return value.toString();
           }
           if (typeof value === 'bigint') {
@@ -226,9 +227,9 @@ export async function POST(request: NextRequest) {
       const parsedPickupDateTime = new Date(pickupDateTime);
       const parsedArrivalDateTime = new Date(arrivalDateTime);
       const parsedCompleteDateTime = completeDateTime ? new Date(completeDateTime) : null;
-      // Use Prisma.Decimal for currency fields
-      const parsedOrderTotal = new Prisma.Decimal(orderTotal);
-      let parsedTip: Prisma.Decimal | undefined = tip ? new Prisma.Decimal(tip) : undefined;
+      // Use Decimal for currency fields
+      const parsedOrderTotal = new Decimal(orderTotal);
+      let parsedTip: Decimal | undefined = tip ? new Decimal(tip) : undefined;
 
       if (isNaN(parsedPickupDateTime.getTime())) throw new Error("Invalid pickupDateTime format");
       if (isNaN(parsedArrivalDateTime.getTime())) throw new Error("Invalid arrivalDateTime format");
@@ -308,7 +309,7 @@ export async function POST(request: NextRequest) {
         // Serialize BigInts and Decimals before returning JSON
         const serializedOrder = JSON.parse(
            JSON.stringify(newCateringOrder, (key, value) => {
-             if ((key === 'order_total' || key === 'tip') && value instanceof Prisma.Decimal) {
+             if ((key === 'order_total' || key === 'tip') && value instanceof Decimal) {
                return value.toString();
              }
              if (typeof value === 'bigint') {
