@@ -5,8 +5,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev",
-    "build": "prisma generate && node scripts/type-check.js && next build",
-    "build:no-typecheck": "prisma generate && SKIP_TYPECHECK=true next build",
+    "build": "node scripts/prisma-setup.js && node scripts/type-check.js && next build",
+    "build:no-typecheck": "node scripts/prisma-setup.js && SKIP_TYPECHECK=true next build",
     "build:sourcemaps": "npm run build && npm run sourcemaps",
     "sourcemaps": "npx @highlight-run/sourcemap-uploader upload --apiKey ${HIGHLIGHT_PROJECT_API_KEY:-\"\"} --path ./.next",
     "start": "next start",
@@ -21,8 +21,8 @@
     "studio": "dotenv -e .env.local -- npx prisma studio",
     "db:generate": "dotenv -e .env.local -- npx prisma generate",
     "prisma": "prisma generate",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma db push && NODE_ENV=production next build",
+    "postinstall": "node scripts/prisma-setup.js",
+    "vercel-build": "node scripts/prisma-setup.js && prisma db push && NODE_ENV=production next build",
     "vercel-sim": "node scripts/vercel-build-simulation.js",
     "type-check": "tsc --noEmit",
     "pre-push": "node scripts/type-check.js"
