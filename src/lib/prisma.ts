@@ -1,9 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/utils/prismaDB";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma; 
+// This file is used to ensure Prisma client is initialized
+// before it's used in the app
+export default prisma; 
