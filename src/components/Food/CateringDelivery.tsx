@@ -93,18 +93,18 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
 
         {/* Right content - Image */}
         <div className="mt-8 flex w-full items-center justify-center md:mt-0 md:w-1/2 md:justify-end">
-          <div className="relative">
+          <div className="relative w-full max-w-md md:max-w-lg lg:max-w-lg">
             {/* Yellow circular background with food bowl image */}
-            <div className="relative h-[450px] w-[450px] overflow-hidden rounded-full border-8 border-yellow-300 bg-yellow-300 md:h-[550px] md:w-[550px] lg:h-[600px] lg:w-[600px]">
+            <div className="relative mx-auto h-[300px] w-[300px] overflow-hidden rounded-full border-8 border-yellow-300 bg-yellow-300 md:h-[400px] md:w-[400px] lg:h-[450px] lg:w-[450px]">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Image
                   src="/images/food/salad-bowl.png"
                   alt="Catering food bowl with fresh ingredients"
                   fill
-                  sizes="(max-width: 768px) 100vw, 600px"
+                  sizes="(max-width: 768px) 80vw, (max-width: 1024px) 50vw, 450px"
                   priority
-                  className="translate-x-5 scale-110"
-                  style={{ objectFit: 'contain' }}
+                  className="scale-125" // Añadimos scale-125 para hacer la imagen un 25% más grande
+                  style={{ objectFit: 'cover' }} // Cambiamos de 'contain' a 'cover'
                 />
               </div>
             </div>
