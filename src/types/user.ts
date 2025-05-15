@@ -37,6 +37,34 @@ export enum CateringStatus { // Added from Prisma Schema
   ASSIGNED = 'ASSIGNED',
   CANCELLED = 'CANCELLED',
   COMPLETED = 'COMPLETED',
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DELIVERED = 'DELIVERED',
+}
+
+export enum OnDemandStatus { // Added from Prisma Schema
+  ACTIVE = 'ACTIVE',
+  ASSIGNED = 'ASSIGNED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DELIVERED = 'DELIVERED',
+}
+
+export enum VehicleType { // Added from Prisma Schema
+  CAR = 'CAR',
+  VAN = 'VAN',
+  TRUCK = 'TRUCK',
+}
+
+export enum ApplicationStatus { // Added from Prisma Schema
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  INTERVIEWING = 'INTERVIEWING',
 }
 
 // --- Interfaces ---
