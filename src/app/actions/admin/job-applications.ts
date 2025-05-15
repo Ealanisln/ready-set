@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { prisma } from '../../../lib/prisma'; 
 import { createClient } from '@/utils/supabase/server';
 
@@ -133,7 +134,7 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
     });
   } catch (error) {
     console.error('Failed to approve job application:', error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error instanceof PrismaClientKnownRequestError) {
       throw new Error(
         `Database error during approval: ${error.code}. Please try again or contact support.`
       );
@@ -241,7 +242,7 @@ export const deleteJobApplication = async (jobApplicationId: string): Promise<{ 
     };
   } catch (error) {
     console.error('Failed to delete job application:', error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error instanceof PrismaClientKnownRequestError) {
       throw new Error(
         `Database error during deletion: ${error.code}. Please try again or contact support.`
       );
