@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
+import { PrismaTransaction } from "@/types/prisma-types";
 
 export async function DELETE(
   request: NextRequest,
@@ -52,7 +53,7 @@ export async function DELETE(
     }
 
     // Begin a transaction to delete both the application and associated files
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: PrismaTransaction) => {
       // First delete all associated file uploads
       if (application.fileUploads && application.fileUploads.length > 0) {
         await tx.fileUpload.deleteMany({

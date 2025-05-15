@@ -49,4 +49,13 @@ export function convertToPrismaUserStatus(status: UserStatus): PrismaUserStatusV
 }
 
 // Other Prisma helper types
-export type PrismaError = Error | PrismaClientKnownRequestError; 
+export type PrismaError = Error | PrismaClientKnownRequestError;
+
+/**
+ * Type for Prisma transaction client
+ * This type can be used for the transaction callback parameter to avoid 'any' type errors
+ */
+export type PrismaTransaction = Omit<
+  Prisma.TransactionClient, 
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>; 

@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { createClient } from "@/utils/supabase/server";
+import { PrismaTransaction } from "@/types/prisma-types";
 
 export async function GET() {
   try {
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
     console.log("Creating profile using server-side operations");
     
     // Begin transaction for all database operations
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: PrismaTransaction) => {
       try {
         // 1. Insert profile into Supabase profiles table
         const { data: profileResult, error: profileError } = await supabase

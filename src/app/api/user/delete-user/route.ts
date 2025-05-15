@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { UserType } from "@prisma/client";
+import { PrismaTransaction } from '@/types/prisma-types';
 
 
 export async function DELETE(request: NextRequest) {
@@ -49,7 +50,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Using a transaction to ensure all operations succeed or fail together
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: PrismaTransaction) => {
       // 1. Handle dispatch records manually
       await tx.dispatch.deleteMany({
         where: {

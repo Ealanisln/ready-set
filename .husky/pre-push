@@ -1,3 +1,10 @@
 #!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run type checking to catch TypeScript errors
+pnpm run typecheck
+
+# Run Vercel build simulation (commented out for faster development - uncomment before deployment)
+# pnpm run vercel-sim
 
 echo "✅ Pre-push checks passed!" 

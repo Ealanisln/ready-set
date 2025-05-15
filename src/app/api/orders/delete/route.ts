@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, UserType } from '@prisma/client';
 import { createClient } from "@/utils/supabase/server";
+import { PrismaTransaction } from "@/types/prisma-types";
 
 const prisma = new PrismaClient();
 
@@ -71,7 +72,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Start a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: PrismaTransaction) => {
       // Delete associated dispatches
       const deletedDispatches = await tx.dispatch.deleteMany({
         where: {

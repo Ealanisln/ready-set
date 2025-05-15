@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/server"; // Assumes this is your 
 import { prisma } from "@/utils/prismaDB";
 import { storage } from "@/utils/supabase/storage"; // Import the new storage utility
 import { UserType } from "@prisma/client";
+import { PrismaTransaction } from "@/types/prisma-types";
 
 // Constants
 const BUCKET_NAME = "fileUploader"; // Replace with your actual bucket name
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Step 3: Start a transaction for atomic database operations
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: PrismaTransaction) => {
           // Step 4: Delete associated files from Supabase Storage
           console.log(
             `Processing files for order ${orderNumber}. Found ${fileUploads.length} files.`,
