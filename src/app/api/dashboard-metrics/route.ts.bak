@@ -1,7 +1,8 @@
 // app/api/dashboard-metrics/route.ts
 import { NextResponse } from "next/server";
 // Import Prisma client, Decimal type, and the necessary Enums
-import { PrismaClient, Prisma, CateringStatus, UserType } from '@prisma/client'; 
+import { PrismaClient, Prisma, CateringStatus } from '@prisma/client'; 
+import { UserType } from '@/types/user';
 
 const prisma = new PrismaClient();
 

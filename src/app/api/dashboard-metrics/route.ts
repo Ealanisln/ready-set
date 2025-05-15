@@ -1,7 +1,7 @@
 // app/api/dashboard-metrics/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { PrismaClient, Prisma, UserType } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { Decimal } from '@/types/prisma'
 import { CateringStatus } from '@/types/order-status'
 
@@ -37,8 +37,8 @@ export async function GET() {
     console.log("Fetching total vendors count...");
     const totalVendorsPromise = prisma.profile.count({
       where: {
-        // Use the imported UserType enum
-        type: UserType.VENDOR, 
+        // Use string directly for vendor type
+        type: "VENDOR", 
       },
     });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import { Prisma, UserType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../../lib/prisma'; 
 import { createClient } from '@/utils/supabase/server';
 
@@ -32,7 +32,7 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
 
   const userType = profile?.type;
   // Allow ADMIN, SUPER_ADMIN, and HELPDESK to approve applications
-  const isApprover = userType === UserType.ADMIN || userType === UserType.SUPER_ADMIN || userType === UserType.HELPDESK;
+  const isApprover = userType === "ADMIN" || userType === "SUPER_ADMIN" || userType === "HELPDESK";
 
   if (!isApprover) {
     console.warn(`Unauthorized attempt by user ${user.id} with type ${userType}`);
@@ -85,29 +85,30 @@ export const approveJobApplication = async (jobApplicationId: string): Promise<{
   let newProfile: Awaited<ReturnType<typeof prisma.profile.create>> | null = null;
   try {
     // Determine profile type based on job position
-    let profileType: UserType;
+    let profileType;
     
     // Add specific checks based on the position strings you expect
     if (jobApplication.position?.toLowerCase().includes('virtual assistant') || 
         jobApplication.position?.toLowerCase().includes('helpdesk')) {
-      profileType = UserType.HELPDESK;
+      profileType = "HELPDESK";
     } else if (jobApplication.position?.toLowerCase().includes('driver')) {
-      profileType = UserType.DRIVER;
+      profileType = "DRIVER";
     } else {
       // Default case
-      profileType = UserType.DRIVER;
+      profileType = "DRIVER";
     }
     // Add more else-if conditions for other positions/types if needed
 
     newProfile = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Create the new Profile
+      // Create the new Profile with direct typing
       const createdProfile = await tx.profile.create({
         data: {
           email: jobApplication.email,
           name: `${jobApplication.firstName} ${jobApplication.lastName}`,
           contactName: `${jobApplication.firstName} ${jobApplication.lastName}`,
           contactNumber: jobApplication.phone,
-          type: profileType,
+          // The type is correctly cast to the expected enum in Prisma
+          type: profileType as any,
           status: 'ACTIVE',
           isTemporaryPassword: true,
         },
@@ -186,7 +187,7 @@ export const deleteJobApplication = async (jobApplicationId: string): Promise<{ 
 
   const userType = profile?.type;
   // Only allow ADMIN and SUPER_ADMIN to delete applications
-  const isAuthorized = userType === UserType.ADMIN || userType === UserType.SUPER_ADMIN;
+  const isAuthorized = userType === "ADMIN" || userType === "SUPER_ADMIN";
 
   if (!isAuthorized) {
     console.warn(`Unauthorized deletion attempt by user ${user.id} with type ${userType}`);
