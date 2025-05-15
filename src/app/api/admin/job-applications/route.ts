@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         where: { deletedAt: null }
       });
 
-      const applicationsByPosition = positionCounts.reduce((acc, curr) => {
+      const applicationsByPosition = positionCounts.reduce((acc: Record<string, number>, curr) => {
         acc[curr.position] = curr._count.position;
         return acc;
       }, {} as Record<string, number>);
