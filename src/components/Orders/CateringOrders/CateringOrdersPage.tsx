@@ -58,7 +58,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Order, StatusFilter, UserRole } from "./types";
 import { CateringOrdersTable } from "./CateringOrdersTable";
 import { createClient } from "@/utils/supabase/client";
-import { Prisma, CateringRequest, Profile, Address } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { CateringRequest, Profile, Address } from "@/types/prisma";
 import { Order as OrderType } from "@/types/order";
 import { CateringStatus } from "@/types/order-status";
 

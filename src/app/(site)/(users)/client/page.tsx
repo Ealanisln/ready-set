@@ -7,7 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { CateringStatus, OnDemandStatus, OrderStatus, getStatusColorClasses } from "@/types/order-status";
 import { CombinedOrder } from "@/types/models";
-import { CateringRequest, OnDemand, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { CateringRequest, OnDemand } from "@/types/prisma";
 
 interface DashboardStats {
   activeOrders: number;
