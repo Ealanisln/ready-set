@@ -13,7 +13,7 @@ import MainMeal from '@/components/Food/MainMeal';
 
 export default function FoodPage() {
   return (
-    <div className="pt-16 md:pt-20">
+    <div className="pt-20 md:pt-24">
       <CateringDelivery />
       <DeliveryPartners />
       <FoodIcons />

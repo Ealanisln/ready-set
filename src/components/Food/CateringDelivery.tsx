@@ -11,11 +11,23 @@ interface CateringDeliveryProps {
 
 const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [marginTopClass, setMarginTopClass] = useState('mt-0'); // Valor inicial sin margen
   const { openForm, DialogForm } = FormManager();
 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
+      updateMarginTopClass(window.innerWidth);
+    };
+
+    const updateMarginTopClass = (width: number) => {
+      if (width < 768) {
+        setMarginTopClass('mt-16');
+      } else if (width < 1024) {
+        setMarginTopClass('mt-20');
+      } else {
+        setMarginTopClass('mt-24');
+      }
     };
 
     checkIfMobile();
@@ -32,9 +44,11 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
   };
 
   return (
-    <section className="relative w-full bg-white">
-      {/* Background image - positioned absolutely to cover the section */}
-      <div className="absolute inset-0 z-0 opacity-15">
+    <section className={`relative min-h-[600px] w-full ${marginTopClass}`}>
+      {' '}
+      {/* Usamos el estado para la clase de margen */}
+      {/* Background image - no opacity or bg-color to see if image loads */}
+      <div className="absolute inset-0 z-0">
         <Image
           src="/images/food/truckbg.png"
           alt="Delivery truck background"
@@ -44,7 +58,6 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
           style={{ objectFit: 'cover' }}
         />
       </div>
-
       <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-12 md:flex-row md:items-center md:py-16 lg:py-20">
         {/* Left content - Text */}
         <div className="relative z-10 w-full max-w-xl space-y-6 px-4 md:w-1/2 md:px-6 lg:px-8">
