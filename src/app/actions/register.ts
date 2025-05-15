@@ -4,7 +4,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from "@/utils/supabase/server";
-import { Prisma, UserStatus, UserType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { UserStatus, UserType } from '@/types/user';
+import { convertToPrismaUserStatus, convertToPrismaUserType, PrismaClientKnownRequestError } from '@/types/prisma-types';
 import { prisma } from "@/utils/prismaDB";
 import { headers } from "next/headers";
 
@@ -142,16 +144,13 @@ export async function registerUser(formData: FormData) {
                 id: userId, // Link to auth.users table
                 email,
                 name,
-                type: userTypeEnum, // Use the actual Prisma enum value
-                status: UserStatus.PENDING, // Use Prisma enum member
+                type: convertToPrismaUserType(userTypeEnum) as any, // Convert and cast
+                status: convertToPrismaUserStatus(UserStatus.PENDING) as any, // Convert and cast
                 isTemporaryPassword: false,
                 // Spread other filtered data
                 ...filteredOtherData,
                 // Explicitly set parsed head_count (will override if present in spread) - FIX for Error 1
                 ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
-                // Let Prisma handle timestamps if columns have @default(now()) / @updatedAt
-                // created_at: new Date(),
-                // updated_at: new Date(),
             },
         });
 
@@ -225,15 +224,19 @@ export async function adminCreateUser(userData: {
         // --- Validation & Resolution for Status ---
         let resolvedStatus: UserStatus;
         if (userData.status) {
-            // Convert potential input string ('active', 'pending', 'ACTIVE', 'PENDING') to uppercase enum key
-            const statusKey = String(userData.status).toUpperCase() as keyof typeof UserStatus;
-            // Check if the uppercase key exists in the Prisma UserStatus enum
-            if (!(statusKey in UserStatus)) {
-                 throw new Error(`Invalid status provided: ${userData.status}. Expected one of ${Object.keys(UserStatus).join(', ')}`);
+            // Convert potential input string to appropriate enum value
+            const statusUpperCase = String(userData.status).toUpperCase();
+            if (statusUpperCase === 'ACTIVE') {
+                resolvedStatus = UserStatus.ACTIVE;
+            } else if (statusUpperCase === 'PENDING') {
+                resolvedStatus = UserStatus.PENDING;
+            } else if (statusUpperCase === 'DELETED') {
+                resolvedStatus = UserStatus.DELETED;
+            } else {
+                throw new Error(`Invalid status provided: ${userData.status}. Expected one of ACTIVE, PENDING, DELETED`);
             }
-            resolvedStatus = UserStatus[statusKey]; // Get the corresponding enum member
         } else {
-            resolvedStatus = UserStatus.ACTIVE; // Default to ACTIVE using Prisma enum member
+            resolvedStatus = UserStatus.ACTIVE; // Default to ACTIVE
         }
         // --- End Validation ---
 
@@ -272,25 +275,22 @@ export async function adminCreateUser(userData: {
         }
 
         // 2. Create user record in Prisma Profile table
-        const user = await prisma.profile.create({
+        const createNewProfile = await prisma.profile.create({
             data: {
-                id: userId, // Link to auth user
+                id: userId, // Link to auth.users
                 email: userData.email,
                 name: userData.name,
-                type: userTypeEnum, // Use the actual Prisma enum value
-                status: resolvedStatus,
-                isTemporaryPassword: userData.isTemporaryPassword ?? false,
+                type: convertToPrismaUserType(userTypeEnum) as any, // Convert and cast
+                status: convertToPrismaUserStatus(resolvedStatus) as any, // Convert and cast
+                isTemporaryPassword: userData.isTemporaryPassword ?? true,
                 // Spread the *filtered* other data
                 ...otherProfileData,
                 // Explicitly set parsed head_count - FIX for Error 1
                 ...(headCountNum !== undefined && { head_count: String(headCountNum) }), // Convert to string
-                // Let Prisma handle timestamps if configured
-                // created_at: new Date(),
-                // updated_at: new Date(),
             },
         });
 
-        return { success: true, user };
+        return { success: true, user: createNewProfile };
     } catch (error) {
         console.error("Admin user creation error:", error);
         let errorMessage = "Failed to create user via admin panel.";
