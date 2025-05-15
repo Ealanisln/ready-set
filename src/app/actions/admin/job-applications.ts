@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { prisma } from '../../../lib/prisma'; 
+import { prisma } from '@/lib/db/prisma'; 
 import { createClient } from '@/utils/supabase/server';
 
 /**

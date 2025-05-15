@@ -1,78 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { JobApplicationStats, JobApplication } from '@/types/job-application';
+import { prisma } from '@/lib/db/prisma';
+import { JobApplication } from '@prisma/client';
 
-export async function GET(req: NextRequest) {
+type ApplicationCount = {
+  _count: number;
+  position: string;
+};
+
+export async function GET(request: NextRequest) {
   try {
-    // Count total job applications (not deleted)
-    const total = await prisma.jobApplication.count({
-      where: { deletedAt: null },
-    });
-
-    // Count by status
-    const [pending, approved, rejected, interviewing] = await Promise.all([
-      prisma.jobApplication.count({
-        where: { deletedAt: null, status: 'PENDING' },
-      }),
-      prisma.jobApplication.count({
-        where: { deletedAt: null, status: 'APPROVED' },
-      }),
-      prisma.jobApplication.count({
-        where: { deletedAt: null, status: 'REJECTED' },
-      }),
-      prisma.jobApplication.count({
-        where: { deletedAt: null, status: 'INTERVIEWING' },
-      }),
-    ]);
-
-    // Group by position
-    const byPosition = await prisma.jobApplication.groupBy({
-      by: ['position'],
-      where: { deletedAt: null },
-      _count: { position: true },
-    });
-
-    // Convert to { [position]: count }
-    const applicationsByPosition: Record<string, number> = {};
-    byPosition.forEach((item) => {
-      applicationsByPosition[item.position] = item._count.position;
-    });
-
-    // Get recent applications
-    const recentApplicationsData = await prisma.jobApplication.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      include: {
-        fileUploads: true,
+    // Get applications count by status
+    const statusCounts = await prisma.jobApplication.groupBy({
+      by: ['status'],
+      _count: true,
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
       },
     });
 
-    // Convert to JobApplication[] type
-    const recentApplications = recentApplicationsData.map(app => {
-      // Use as JobApplication to tell TypeScript we'll handle the conversion
-      return app as unknown as JobApplication;
+    // Get applications count by position
+    const positionCounts = await prisma.jobApplication.groupBy({
+      by: ['position'],
+      _count: true,
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
     });
 
-    // Create response with correct property names
-    const stats: JobApplicationStats = {
-      totalApplications: total,
-      pendingApplications: pending,
-      approvedApplications: approved,
-      rejectedApplications: rejected,
-      interviewingApplications: interviewing,
-      applicationsByPosition,
+    // Format data for frontend visualization
+    const byStatus = statusCounts.map(item => ({
+      status: item.status,
+      count: item._count.id,
+    }));
+
+    const byPosition: { position: string; count: number }[] = [];
+    positionCounts.forEach((item: ApplicationCount) => {
+      byPosition.push({
+        position: item.position,
+        count: item._count,
+      });
+    });
+
+    // Get recent applications (last 10)
+    const recentApplicationsData = await prisma.jobApplication.findMany({
+      take: 10,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        files: true,
+      },
+    });
+
+    const recentApplications = recentApplicationsData.map((app: JobApplication & { files: any[] }) => {
+      return {
+        id: app.id,
+        name: `${app.firstName} ${app.lastName}`,
+        position: app.position,
+        status: app.status,
+        createdAt: app.createdAt,
+        hasResume: app.files.some(file => file.category === 'RESUME'),
+      };
+    });
+
+    return NextResponse.json({
+      byStatus,
+      byPosition,
       recentApplications,
-    };
-
-    return NextResponse.json(stats, { status: 200 });
+      totalApplications: await prisma.jobApplication.count(),
+    });
   } catch (error) {
-    // Log error for debugging
-    console.error('Failed to fetch job application stats:', error);
-
-    // Return a typed error response
+    console.error('Error fetching application stats:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch job application stats' },
+      { error: 'Failed to fetch application statistics' },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { prisma } from '../../../lib/prisma'; // Adjust path if your prisma client is elsewhere
+import { prisma } from '@/lib/db/prisma'; // Adjust path if your prisma client is elsewhere
 import { approveJobApplication } from './job-applications';
 import { UserType } from "@/types/user";
 import { ApplicationStatus } from "@prisma/client";
