@@ -14,7 +14,7 @@
     "typecheck": "node scripts/type-check.js",
     "pre-push-check": "pnpm typecheck && pnpm prisma generate && pnpm lint",
     "check-build": "./scripts/check-build.sh",
-    "prepare": "husky install",
+    "prepare": "husky",
     "backup": "dotenv -e .env.production tsx scripts/backup-db.ts",
     "test": "dotenv -e .env.test -- vitest run",
     "test:watch": "dotenv -e .env.test -- vitest",
@@ -24,7 +24,8 @@
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma db push && node scripts/type-check.js && next build",
     "vercel-sim": "node scripts/vercel-build-simulation.js",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "pre-push": "node scripts/type-check.js"
   },
   "jest": {
     "setupFilesAfterEnv": [
