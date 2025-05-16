@@ -1,6 +1,4 @@
 // src/app/(site)/food/page.tsx
-'use client';
-
 import { Metadata } from 'next';
 import { FormType } from '@/components/Logistics/QuoteRequest/types';
 import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
