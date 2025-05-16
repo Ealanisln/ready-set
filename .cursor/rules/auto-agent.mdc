@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Instructs the AI to proactively check the codebase, iterate on solutions based on context, and manage files without asking for permission.
+alwaysApply: true
+---
+
+- Always check the existing codebase context before proposing solutions or making changes.
+- Iterate on your approach based on the provided context and files. Prioritize solutions that align with existing patterns and conventions in the codebase.
+- Proceed with adding, modifying, or removing files as necessary to fulfill the request without explicitly asking for confirmation for each file operation. Assume standard file operations are implicitly approved as part of the overall task.

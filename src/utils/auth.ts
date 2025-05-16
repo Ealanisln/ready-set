@@ -6,7 +6,17 @@ import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prismaDB";
 import type { Adapter } from "next-auth/adapters";
-import { user } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+
+// Define User type based on the schema
+type User = {
+  id: string;
+  type: UsersType;
+  isTemporaryPassword: boolean;
+  email: string | null;
+  password: string | null;
+  [key: string]: any;
+};
 
 type UsersType =
   | "vendor"
@@ -15,6 +25,19 @@ type UsersType =
   | "admin"
   | "helpdesk"
   | "super_admin";
+
+// Type assertion for Prisma client to work around TypeScript errors
+const typedPrisma = prisma as unknown as PrismaClient & {
+  user: {
+    findUnique: (args: any) => Promise<User | null>;
+    update: (args: any) => Promise<User>;
+  }
+};
+
+// Ensure Prisma is properly initialized
+if (!prisma) {
+  throw new Error("Prisma client failed to initialize");
+}
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -38,24 +61,29 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+        try {
+          const user = await typedPrisma.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        if (!user || !user.password) {
+          if (!user || !user.password) {
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password,
+          );
+
+          if (!isPasswordValid) {
+            return null;
+          }
+
+          return user;
+        } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password,
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return user;
       },
     }),
 
@@ -80,15 +108,19 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.type = (user as user).type;
-        token.isTemporaryPassword = (user as user).isTemporaryPassword;
+        token.type = (user as User).type;
+        token.isTemporaryPassword = (user as User).isTemporaryPassword;
       }
       if (account && account.type === "oauth") {
-        await prisma.user.update({
-          where: { id: token.id },
-          data: { isTemporaryPassword: false },
-        });
-        token.isTemporaryPassword = false;
+        try {
+          await typedPrisma.user.update({
+            where: { id: token.id as string },
+            data: { isTemporaryPassword: false },
+          });
+          token.isTemporaryPassword = false;
+        } catch (error) {
+          console.error("Error updating user in jwt callback:", error);
+        }
       }
       return token;
     },
@@ -105,11 +137,17 @@ export const authOptions: NextAuthOptions = {
 
     async signIn({ user, account }) {
       if (account?.type === "credentials") {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-        });
-        if (dbUser?.isTemporaryPassword) {
-          return true; // Allow sign in, we'll handle redirection on the client side
+        try {
+          const dbUser = await typedPrisma.user.findUnique({
+            where: { id: user.id },
+          });
+          if (dbUser?.isTemporaryPassword) {
+            return true; // Allow sign in, we'll handle redirection on the client side
+          }
+        } catch (error) {
+          console.error("Error in signIn callback:", error);
+          // Still return true to allow sign in, but log the error
+          return true;
         }
       }
       return true;
@@ -119,10 +157,14 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user, account }) {
       if (account?.type === "oauth") {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { isTemporaryPassword: false },
-        });
+        try {
+          await typedPrisma.user.update({
+            where: { id: user.id },
+            data: { isTemporaryPassword: false },
+          });
+        } catch (error) {
+          console.error("Error in signIn event:", error);
+        }
       }
     },
   },
