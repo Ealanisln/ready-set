@@ -92,26 +92,67 @@ const DeliveryWork: React.FC = () => {
         'Inbound and outbound voice call and text options available for status updates.',
       ],
     },
+    {
+      id: '08',
+      title: 'Marketing',
+      subtitle: 'Social Media, Flyers, and Lead Gen',
+      points: [
+        'Posting on Social Media like Facebook, Instagram and Tiktok.',
+        'Promotional Flyer Design',
+        'Gaining the interest of potential customers to increase future sales',
+        'Ensure all content is on-brand, consistent in style and quality, and optimized for search and user experience for all content channels.',
+      ],
+    },
+    {
+      id: '09',
+      title: 'Sales',
+      subtitle: 'Ensuring the Sales Process',
+      points: [
+        'Managing the administrative tasks associated with the sales process to increased sales efficiency.',
+        'Ensuring that customer inquiries and complaints are addressed promptly and professionally.',
+        'Analyzing sales data and identifying trends.',
+        'Serves as a liaison between the sales team and other departments within the organization.',
+        'Identifying new sales opportunities, optimizing sales processes, and improving the effectiveness of the sales team.',
+      ],
+    },
+    {
+      id: '10',
+      title: 'Recruiting / Onboarding',
+      subtitle: 'Maintain ATS, Obtain Required Documents and Signatures',
+      points: [
+        'Extraction of Applicants from Indeed and Facebook',
+        'Using Google Voice to get additional information and main source of communication.',
+        'Sending PDF file for applicants to fill out using apply@ready-set.co.',
+        'Adding applicants data on the Availability & Recruiting Spreadsheet',
+        "Sending of schedule for 'Daily and Weekly' basis.",
+      ],
+    },
+    {
+      id: '11',
+      title: 'Virtual Assistants',
+      subtitle: 'Various Tasks Upon Request',
+      points: [
+        'Available 24/7, making them the perfect solution for people who need help outside of regular business hours.',
+        'Save a lot of time.',
+        'Much more cost-effective, and you only pay for the time they spend working on your tasks.',
+        'Tailor services to fit specific needs and preferences.',
+        'Continuously handles multiple tasks at once.',
+      ],
+    },
   ];
 
   const [api, setApi] = useState<CarouselApi | undefined>();
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Add mobile detection
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    // Set initial state
     handleResize();
-
-    // Add event listener
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
     };
@@ -122,11 +163,9 @@ const DeliveryWork: React.FC = () => {
     setCurrentStep(api.selectedScrollSnap());
   }, [api]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) return;
     setCurrentStep(api.selectedScrollSnap());
-
-    // Set up event listener for carousel changes
     api.on('select', onSelect);
 
     return () => {
@@ -134,29 +173,9 @@ const DeliveryWork: React.FC = () => {
     };
   }, [api, onSelect]);
 
-  // Set number of dots based on screen size
-  const totalDots = isMobile ? 7 : 5;
-  const activeDotIndex = Math.min(currentStep, totalDots - 1);
-
-  // Updated helper function to handle different behavior for mobile
-  const getActiveDotForCurrentSlide = (
-    currentSlide: number,
-    totalSlides: number,
-    totalDots: number,
-  ): number => {
-    // On mobile, show all 7 dots with direct mapping
-    if (isMobile) {
-      return currentSlide;
-    }
-
-    // For desktop: slides 0-4, dot index is the same as slide index
-    if (currentSlide < totalDots - 1) {
-      return currentSlide;
-    }
-
-    // For desktop: slides 5 and 6, always highlight the last dot (index 4)
-    return totalDots - 1;
-  };
+  // Calculate total dots based on device type
+  // For desktop, show all dots except the last two
+  const visibleDots = isMobile ? deliverySteps.length : deliverySteps.length - 2;
 
   return (
     <section className="bg-[#fdfcf7] py-20">
@@ -192,7 +211,6 @@ const DeliveryWork: React.FC = () => {
             </CarouselContent>
           </Carousel>
           <div className="mt-8 flex items-center justify-center gap-4">
-            {/* Left Arrow Button */}
             <button
               className={`${isMobile ? 'px-2 text-5xl' : 'px-4 text-7xl'} font-extrabold text-[#222] transition-colors hover:text-[#e2b13c] disabled:opacity-40`}
               onClick={() => api?.scrollPrev()}
@@ -202,41 +220,25 @@ const DeliveryWork: React.FC = () => {
             >
               &#60;
             </button>
-            {/* Navigation dots - Shows different number based on screen size */}
             <div className={`flex ${isMobile ? 'gap-2' : 'gap-5'}`}>
-              {Array.from({ length: totalDots }, (_, idx) => (
+              {Array.from({ length: visibleDots }, (_, idx) => (
                 <button
                   key={idx}
                   className={`flex items-center justify-center rounded-full border-2 transition-colors duration-200 ${
-                    getActiveDotForCurrentSlide(currentStep, deliverySteps.length, totalDots) ===
-                    idx
-                      ? 'border-[#222] bg-[#222]'
-                      : 'border-[#222] bg-transparent'
+                    currentStep === idx ? 'border-[#222] bg-[#222]' : 'border-[#222] bg-transparent'
                   } ${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`}
-                  onClick={() => {
-                    // Map dot index to slides appropriately for mobile or desktop
-                    const targetSlide = isMobile
-                      ? idx
-                      : idx === totalDots - 1
-                        ? deliverySteps.length - 1
-                        : idx;
-                    api?.scrollTo(targetSlide);
-                  }}
+                  onClick={() => api?.scrollTo(idx)}
                   aria-label={`Go to slide ${idx + 1}`}
                   type="button"
                 >
                   <span
                     className={`block rounded-full ${
-                      getActiveDotForCurrentSlide(currentStep, deliverySteps.length, totalDots) ===
-                      idx
-                        ? 'bg-[#222]'
-                        : 'bg-transparent'
+                      currentStep === idx ? 'bg-[#222]' : 'bg-transparent'
                     } ${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`}
                   />
                 </button>
               ))}
             </div>
-            {/* Right Arrow Button */}
             <button
               className={`${isMobile ? 'px-2 text-5xl' : 'px-4 text-7xl'} font-extrabold text-[#222] transition-colors hover:text-[#e2b13c] disabled:opacity-40`}
               onClick={() => api?.scrollNext()}
