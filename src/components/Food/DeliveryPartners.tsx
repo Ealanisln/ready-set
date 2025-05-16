@@ -13,7 +13,7 @@ interface Partner {
 const DeliveryPartners: React.FC = () => {
   const partners: Partner[] = useMemo(
     () => [
-      { name: 'Deli', logo: '/images/food/partners/deli.jpg' },
+      { name: 'Deli', logo: '/images/food/partners/Deli.jpg' },
       { name: 'Bobcha', logo: '/images/food/partners/bobcha.jpg' },
       { name: 'Foodee', logo: '/images/food/partners/foodee.jpg' },
       { name: 'Destino', logo: '/images/food/partners/destino.png' },
