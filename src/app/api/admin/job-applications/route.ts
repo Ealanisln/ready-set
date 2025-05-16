@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/prismaDB";
 import { ApplicationStatus } from "@/types/job-application";
 import { createClient } from "@/utils/supabase/server";
+import { AuthError } from "@supabase/supabase-js";
 
 // GET handler for fetching job applications with filters and pagination
 export async function GET(request: NextRequest) {
@@ -21,13 +22,49 @@ export async function GET(request: NextRequest) {
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Verify the token by getting the user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    // Try to verify the token with improved error handling
+    let user;
+    let authError: AuthError | Error | unknown = null;
+    
+    try {
+      // Verify the token by getting the user with a retry mechanism
+      const response = await Promise.race([
+        supabase.auth.getUser(token),
+        new Promise<{data: {user: null}, error: Error}>((_, reject) => 
+          setTimeout(() => reject(new Error('Auth request timed out after 25s')), 25000)
+        )
+      ]);
+      
+      if ('data' in response && response.data && response.data.user) {
+        user = response.data.user;
+      } else if ('error' in response && response.error) {
+        authError = response.error;
+      }
+    } catch (error) {
+      console.error('Auth verification error:', error);
+      authError = error;
+      
+      // Try one more time with a backup approach if possible
+      try {
+        const retryResponse = await supabase.auth.getUser(token);
+        if (retryResponse.data && retryResponse.data.user) {
+          user = retryResponse.data.user;
+          authError = null;
+        }
+      } catch (retryError) {
+        console.error('Auth retry failed:', retryError);
+      }
+    }
 
     if (authError || !user) {
       console.error('Auth error:', authError);
+      const errorMessage = authError instanceof Error ? authError.message : 
+                         typeof authError === 'object' && authError && 'message' in authError ? 
+                         (authError as { message: string }).message : 
+                         'Authentication failed';
+      
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized", details: errorMessage },
         { status: 401 }
       );
     }

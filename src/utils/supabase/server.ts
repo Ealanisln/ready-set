@@ -41,6 +41,14 @@ export async function createClient() {
         detectSessionInUrl: true,
         persistSession: true,
         autoRefreshToken: true
+      },
+      global: {
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            signal: AbortSignal.timeout(30000), // Increase timeout to 30 seconds
+          });
+        }
       }
     }
   )
@@ -82,6 +90,14 @@ export async function createAdminClient() {
         detectSessionInUrl: true,
         persistSession: true,
         autoRefreshToken: true
+      },
+      global: {
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            signal: AbortSignal.timeout(30000), // Increase timeout to 30 seconds
+          });
+        }
       }
     }
   )
@@ -118,6 +134,14 @@ export function createServerSupabaseClient(context: { req: NextApiRequest; res: 
         detectSessionInUrl: true,
         persistSession: true,
         autoRefreshToken: true
+      },
+      global: {
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            signal: AbortSignal.timeout(30000), // Increase timeout to 30 seconds
+          });
+        }
       }
     }
   )
