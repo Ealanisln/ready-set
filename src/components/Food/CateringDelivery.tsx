@@ -89,21 +89,31 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
     tap: { scale: 0.95 }
   };
 
+  const pulseAnimation = {
+    scale: [1, 1.02, 1],
+    transition: {
+      duration: 3,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "reverse" as const
+    }
+  };
+
   return (
-    <section className={`relative min-h-[600px] w-full ${marginTopClass} bg-gray-50`}>
+    <section className={`relative min-h-[500px] w-full ${marginTopClass} bg-gray-50 mb-16 md:mb-24 lg:mb-32`}>
       <motion.div 
-        className="relative mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-12 md:flex-row md:items-center md:py-16 lg:py-20"
+        className="relative mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-8 md:flex-row md:items-center md:py-12 lg:py-16"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         {/* Left content - Text */}
         <motion.div 
-          className="relative z-10 w-full max-w-xl space-y-6 px-4 md:w-1/2 md:px-6 lg:px-8"
+          className="relative z-10 w-full max-w-xl space-y-8 px-4 md:w-1/2 md:px-6 lg:px-8"
           variants={containerVariants}
         >
           <motion.h1 
-            className="font-[Montserrat] text-3xl font-black leading-tight text-gray-800 md:text-4xl lg:text-5xl"
+            className="font-[Montserrat] text-2xl font-black leading-none tracking-tight text-gray-800 md:text-3xl lg:text-4xl"
             variants={itemVariants}
           >
             Your Go-To Catering
@@ -111,7 +121,7 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
             Delivery Partner Since
             <br />
             <motion.span 
-              className="text-3xl text-yellow-400 md:text-4xl lg:text-5xl"
+              className="relative inline-block text-2xl text-yellow-400 md:text-3xl lg:text-4xl"
               variants={itemVariants}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,7 +132,7 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
           </motion.h1>
 
           <motion.p 
-            className="font-[Montserrat] text-base leading-relaxed text-gray-900 md:text-lg"
+            className="font-[Montserrat] text-md font-medium leading-relaxed text-gray-900 md:text-lg lg:text-xl"
             variants={itemVariants}
           >
             Ready Set HQ, based in the San Francisco Bay Area, is expanding to Atlanta and Austin.
@@ -132,12 +142,12 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
           </motion.p>
 
           <motion.div 
-            className="flex flex-wrap items-center gap-4 pt-4"
+            className="flex flex-wrap items-center gap-6 pt-6"
             variants={itemVariants}
           >
             <motion.button
               onClick={handleQuoteClick}
-              className="rounded-full bg-yellow-300 px-8 py-3 font-[Montserrat] font-bold text-gray-800 transition-colors hover:bg-yellow-400"
+              className="rounded-full bg-yellow-300 px-10 py-4 font-[Montserrat] text-lg font-extrabold text-gray-800 shadow-md transition-all hover:bg-yellow-400 hover:shadow-lg hover:translate-y-[-2px]"
               variants={buttonVariants}
               whileHover="hover"
               whileTap="tap"
@@ -147,7 +157,7 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
             <ScheduleDialog
               buttonText="Book a Call"
               calendarUrl="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0J6woLwahSRd6c1KrJ_X1cOl99VPr6x-Rp240gi87kaD28RsU1rOuiLVyLQKleUqoVJQqDEPVu?gv=true"
-              className="rounded-full bg-yellow-300 px-8 py-3 font-[Montserrat] font-bold text-gray-800 transition-colors hover:bg-yellow-400"
+              className="rounded-full bg-yellow-300 px-10 py-4 font-[Montserrat] text-lg font-extrabold text-gray-800 shadow-md transition-all hover:bg-yellow-400 hover:shadow-lg hover:translate-y-[-2px]"
             />
           </motion.div>
         </motion.div>
@@ -163,6 +173,7 @@ const CateringDelivery: React.FC<CateringDeliveryProps> = ({ onRequestQuote }) =
               className="relative mx-auto h-[320px] w-[320px] overflow-hidden rounded-full border-8 border-yellow-300 bg-yellow-300 md:h-[400px] md:w-[400px] lg:h-[450px] lg:w-[450px]"
               variants={imageVariants}
               whileHover={{ rotate: 3, transition: { duration: 0.5 } }}
+              animate={pulseAnimation}
             >
               <motion.div 
                 className="absolute inset-0 flex items-center justify-center"
