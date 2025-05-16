@@ -7,7 +7,7 @@ const HostingChecklist: React.FC<HostingChecklistProps> = () => {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* 7 Point Checklist */}
-        <div className="mx-auto flex w-full max-w-sm flex-col">
+        <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-lg shadow-md">
           <div className="bg-yellow-400 p-6 text-center">
             <h2 className="text-2xl font-bold">
               7 POINT
@@ -56,7 +56,7 @@ const HostingChecklist: React.FC<HostingChecklistProps> = () => {
           </div>
         </div>
         {/* Checklist for Hosting Job */}
-        <div className="mx-auto flex w-full max-w-sm flex-col">
+        <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-lg shadow-md">
           <div className="bg-yellow-400 p-6 text-center">
             <h2 className="text-2xl font-bold">
               CHECKLIST FOR
