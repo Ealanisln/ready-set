@@ -11,11 +11,17 @@ interface ServiceFeatureProps {
 
 const ServiceFeature: React.FC<ServiceFeatureProps> = ({ imageUrl, altText, description }) => {
   return (
-    <div className="flex flex-1 flex-col items-center">
-      <div className="rounded-[24px relative h-[320px] w-[320px] overflow-hidden">
-        <Image src={imageUrl} alt={altText} layout="fill" objectFit="cover" />
+    <div className="flex flex-1 flex-col items-center px-4">
+      <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[24px]">
+        <Image
+          src={imageUrl}
+          alt={altText}
+          fill
+          sizes="(max-width: 768px) 100vw, 280px"
+          className="object-cover"
+        />
       </div>
-      <p className="mt-6 max-w-[320px] text-justify text-base leading-snug text-black">
+      <p className="mt-6 w-full max-w-[280px] text-center text-base leading-snug text-black sm:text-justify">
         {description}
       </p>
     </div>
@@ -46,11 +52,11 @@ const FoodIcons: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      className="w-full bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url('/images/food/bagbg.png')` }}
     >
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-12 px-4 text-center">
+        <div className="mb-12 text-center">
           <h2 className="mb-2 text-[clamp(1.5rem,5vw,2.25rem)] font-bold leading-tight text-black">
             It's Not Just What We Do
           </h2>
@@ -59,7 +65,7 @@ const FoodIcons: React.FC = () => {
           </h2>
         </div>
 
-        <div className="flex flex-col items-stretch justify-between gap-8 md:flex-row">
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row md:items-stretch md:gap-4 lg:gap-8">
           {serviceFeatures.map((feature, index) => (
             <ServiceFeature
               key={index}
