@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface HostingChecklistProps {
-  // You can add any props here if needed in the future
-}
+type HostingChecklistProps = Record<string, never>; // Type-safe empty object
 
 const HostingChecklist: React.FC<HostingChecklistProps> = () => {
   return (
