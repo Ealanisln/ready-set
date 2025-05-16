@@ -5,7 +5,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "dotenv -e .env.local -- next dev",
-    "build": "dotenv -e .env.local -- npx prisma generate && next build",
+    "build": "dotenv -e .env.local -- next build",
+    "vercel-build": "next build",
     "build:sourcemaps": "npm run build && npm run sourcemaps",
     "sourcemaps": "npx @highlight-run/sourcemap-uploader upload --apiKey ${HIGHLIGHT_PROJECT_API_KEY:-\"\"} --path ./.next",
     "start": "next start",

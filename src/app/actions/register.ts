@@ -3,8 +3,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/utils/prismaDB";
 import { headers } from "next/headers";
-// Import UserType and UserStatus directly from Prisma
-import { UserType, UserStatus } from "@prisma/client"; // Import Prisma's enums
+// Import UserType and UserStatus from our local types
+import { UserType, UserStatus } from "@/types/prisma-types";
 
 // Helper function for redirects (keep as is)
 const encodedRedirect = (

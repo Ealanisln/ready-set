@@ -44,6 +44,9 @@ next-env.d.ts
 backups/*
 !backups/.gitkeep
 
+# Explicitly include Prisma generated client
+!/prisma/generated/
+
 
 
 # Environment Variables
