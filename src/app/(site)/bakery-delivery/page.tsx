@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import FoodIcons from '@/components/Food/FoodIcons';
 import BakeryDelivery from '@/components/Bakery/BakeryDelivery';
 import BakeryPartners from '@/components/Bakery/BakeryPartners';
+import BakeryTerms from '@/components/Bakery/BakeryTerms';
+import DownloadableResources from '@/components/Bakery/DownloadableResources';
 
 // export const metadata: Metadata = {
 //   title: 'Food Delivery Services for Events | Ready Set', // Replace with your title
@@ -63,6 +65,8 @@ export default function BakeryPage() {
       <BakeryDelivery />
       <BakeryPartners />
       <FoodIcons />
+      <BakeryTerms />
+      <DownloadableResources />
     </div>
   );
 }
