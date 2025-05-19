@@ -1,6 +1,6 @@
 // src/app/(site)/free-resources/[slug]/page.tsx
 import { notFound } from "next/navigation";
-import { client, urlFor } from "@/sanity/lib/client";
+import { client, urlFor, customFetch } from "@/sanity/lib/client";
 import BackArrow from "@/components/Common/Back";
 import React from "react";
 import Logo from "@/components/ui/logo";
@@ -92,12 +92,33 @@ interface GuideDocument {
 
 async function getGuide(slug: string): Promise<GuideDocument | null> {
   if (!slug) return null;
-  try {
-    return await client.fetch(guideQuery, { slug });
-  } catch (error) {
-    console.error("Error fetching guide:", error);
-    return null;
+  
+  // Add retry logic for more resilience
+  let retries = 3;
+  let lastError = null;
+  
+  while (retries > 0) {
+    try {
+      // Use GROQ for direct query with custom fetch to avoid arrayBuffer issues
+      const groqQuery = `*[_type == "guide" && slug.current == "${slug}"][0]`;
+      
+      // Use the client.fetch without additional options
+      const result = await client.fetch(groqQuery);
+      
+      return result;
+    } catch (error) {
+      lastError = error;
+      console.error(`Error fetching guide (retries left: ${retries}):`, error);
+      retries--;
+      // Wait 500ms before retrying
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
   }
+  
+  console.error("All retries failed fetching guide:", lastError);
+  return null;
 }
 
 export async function generateMetadata({
