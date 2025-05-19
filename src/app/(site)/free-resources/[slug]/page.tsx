@@ -381,6 +381,12 @@ export async function generateStaticParams() {
       "slug": slug.current
     }`);
 
+    // Ensure guides is an array before mapping
+    if (!guides || !Array.isArray(guides)) {
+      console.error("Guides is not an array:", guides);
+      return [];
+    }
+
     return guides.map((guide: { slug: string }) => ({
       slug: guide.slug,
     }));
