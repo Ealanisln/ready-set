@@ -64,7 +64,8 @@ export default function RootLayout({
             <HighlightInit
               projectId={CONSTANTS.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID}
               serviceName="ready-set-frontend"
-              debug={true}
+              debug={process.env.NODE_ENV === 'development'}
+
               networkRecording={{
                 enabled: true,
                 recordHeadersAndBody: true,
@@ -72,13 +73,18 @@ export default function RootLayout({
                   // Add sensitive URLs here that shouldn't be recorded
                   "/api/auth",
                   "/api/login",
-                ],
+                  "/api/user",
+                  "/api/users",
+                  "sanity.io",  // Don't record Sanity API requests
+                ]
               }}
               tracingOrigins={[
                 "localhost", 
                 "readysetllc.com",
-                "ready-set.vercel.app"
+                "ready-set.vercel.app",
+                "vercel.app" // Match all Vercel preview deployments
               ]}
+
             />
             <HighlightErrorBoundary>
               <ClientLayout>{children}</ClientLayout>

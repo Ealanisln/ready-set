@@ -20,16 +20,16 @@ importers:
     dependencies:
       '@auth/prisma-adapter':
         specifier: ^2.7.4
-        version: 2.9.1(@prisma/client@5.22.0(prisma@5.22.0))(nodemailer@6.10.1)
+        version: 2.9.1(@prisma/client@6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3))(nodemailer@6.10.1)
       '@faker-js/faker':
         specifier: ^9.3.0
         version: 9.8.0
       '@highlight-run/next':
-        specifier: ^7.9.11
-        version: 7.9.16(@opentelemetry/api@1.9.0)(encoding@0.1.13)(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^7.9.20
+        version: 7.9.20(@opentelemetry/api@1.9.0)(encoding@0.1.13)(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@highlight-run/react':
-        specifier: ^19.0.0
-        version: 19.0.5(highlight.run@9.18.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^19.0.8
+        version: 19.0.8(highlight.run@9.18.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.56.3(react@18.3.1))
@@ -217,8 +217,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       highlight.run:
-        specifier: ^9.18.0
-        version: 9.18.5
+        specifier: ^9.18.8
+        version: 9.18.8
       json-edit-react:
         specifier: ^1.19.1
         version: 1.26.2(react@18.3.1)
@@ -344,8 +344,8 @@ importers:
         specifier: 8.4.1
         version: 8.4.1
       '@prisma/client':
-        specifier: 5.22.0
-        version: 5.22.0(prisma@5.22.0)
+        specifier: 6.8.2
+        version: 6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
       '@testing-library/dom':
         specifier: ^10.4.0
         version: 10.4.0
@@ -440,8 +440,8 @@ importers:
         specifier: ^8.4.49
         version: 8.5.3
       prisma:
-        specifier: 5.22.0
-        version: 5.22.0
+        specifier: 6.8.2
+        version: 6.8.2(typescript@5.8.3)
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@22.15.18)(typescript@5.8.3))
@@ -1645,19 +1645,19 @@ packages:
   '@highlight-run/cloudflare@3.1.0':
     resolution: {integrity: sha512-9/8y1XLGxqJEkeI8WBXlvsdyoEys7xduq1DeSopKZHuzXcEPzEhDLX9ftOiwbPC0qDKyixW8HojeW0sSkkjBNQ==}
 
-  '@highlight-run/next@7.9.16':
-    resolution: {integrity: sha512-tKdx8Wn8ZbKbImDPsGy8P/UCNnlHWucFF+tWCefZhQfWcgKAhy+HytQsTuVUtsXYtep0xVbYrXBCoCZLDBbOxw==}
+  '@highlight-run/next@7.9.20':
+    resolution: {integrity: sha512-iu5MmElEgjOYEgV78PDg2jtrP1O6wzeIfqcWDwAmnmfvBOrDPqN9cAz2LAcFoqlE6soV+YjXf/8MfcADIyFyeQ==}
     peerDependencies:
       next: '>=13'
       react: '>=17'
 
-  '@highlight-run/node@3.12.1':
-    resolution: {integrity: sha512-OM0U5MX9huQbStaliOrrPyIIHEgfAZjGuFAzrjHskyhqnayPrQP9tq0MPV31M+01DCKWw7VKdrJ2hWGUM14fVA==}
+  '@highlight-run/node@3.12.4':
+    resolution: {integrity: sha512-oOQuI2ZCrK3Gyji6xyIOpYkwGNjn8AzDbAwc81CeYfO2clCXL6yhY8ApiPM6HFecWJRw3UCWBt5kz2h9FXqB1A==}
 
-  '@highlight-run/react@19.0.5':
-    resolution: {integrity: sha512-V/DWHemCSOc3jraUv86wZZh7N6FYPYjWVri2rICW1+QJDqlIuxCdNYsDlcNRE+MSGuc/WYhA5fanpVsAubp62g==}
+  '@highlight-run/react@19.0.8':
+    resolution: {integrity: sha512-OtIsBxcmTBZE4XBl24/AWWbyXtLpTvRecekCVAkw0hX5KN+MakXqWZbKD2DIWTY8w1qFIyFVssTTFr1raGp+dw==}
     peerDependencies:
-      highlight.run: 9.18.5
+      highlight.run: 9.18.8
       react: '>=16'
       react-dom: '>=16'
 
@@ -2390,23 +2390,53 @@ packages:
       prisma:
         optional: true
 
+  '@prisma/client@6.8.2':
+    resolution: {integrity: sha512-5II+vbyzv4si6Yunwgkj0qT/iY0zyspttoDrL3R4BYgLdp42/d2C8xdi9vqkrYtKt9H32oFIukvyw3Koz5JoDg==}
+    engines: {node: '>=18.18'}
+    peerDependencies:
+      prisma: '*'
+      typescript: '>=5.1.0'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
+      typescript:
+        optional: true
+
+  '@prisma/config@6.8.2':
+    resolution: {integrity: sha512-ZJY1fF4qRBPdLQ/60wxNtX+eu89c3AkYEcP7L3jkp0IPXCNphCYxikTg55kPJLDOG6P0X+QG5tCv6CmsBRZWFQ==}
+
   '@prisma/debug@5.22.0':
     resolution: {integrity: sha512-AUt44v3YJeggO2ZU5BkXI7M4hu9BF2zzH2iF2V5pyXT/lRTyWiElZ7It+bRH1EshoMRxHgpYg4VB6rCM+mG5jQ==}
+
+  '@prisma/debug@6.8.2':
+    resolution: {integrity: sha512-4muBSSUwJJ9BYth5N8tqts8JtiLT8QI/RSAzEogwEfpbYGFo9mYsInsVo8dqXdPO2+Rm5OG5q0qWDDE3nyUbVg==}
 
   '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2':
     resolution: {integrity: sha512-2PTmxFR2yHW/eB3uqWtcgRcgAbG1rwG9ZriSvQw+nnb7c4uCr3RAcGMb6/zfE88SKlC1Nj2ziUvc96Z379mHgQ==}
 
+  '@prisma/engines-version@6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e':
+    resolution: {integrity: sha512-Rkik9lMyHpFNGaLpPF3H5q5TQTkm/aE7DsGM5m92FZTvWQsvmi6Va8On3pWvqLHOt5aPUvFb/FeZTmphI4CPiQ==}
+
   '@prisma/engines@5.22.0':
     resolution: {integrity: sha512-UNjfslWhAt06kVL3CjkuYpHAWSO6L4kDCVPegV6itt7nD1kSJavd3vhgAEhjglLJJKEdJ7oIqDJ+yHk6qO8gPA==}
+
+  '@prisma/engines@6.8.2':
+    resolution: {integrity: sha512-XqAJ//LXjqYRQ1RRabs79KOY4+v6gZOGzbcwDQl0D6n9WBKjV7qdrbd042CwSK0v0lM9MSHsbcFnU2Yn7z8Zlw==}
 
   '@prisma/fetch-engine@5.22.0':
     resolution: {integrity: sha512-bkrD/Mc2fSvkQBV5EpoFcZ87AvOgDxbG99488a5cexp5Ccny+UM6MAe/UFkUC0wLYD9+9befNOqGiIJhhq+HbA==}
 
+  '@prisma/fetch-engine@6.8.2':
+    resolution: {integrity: sha512-lCvikWOgaLOfqXGacEKSNeenvj0n3qR5QvZUOmPE2e1Eh8cMYSobxonCg9rqM6FSdTfbpqp9xwhSAOYfNqSW0g==}
+
   '@prisma/get-platform@5.22.0':
     resolution: {integrity: sha512-pHhpQdr1UPFpt+zFfnPazhulaZYCUqeIcPpJViYoq9R+D/yw4fjE+CtnsnKzPYm0ddUbeXUzjGVGIRVgPDCk4Q==}
 
-  '@prisma/instrumentation@6.7.0':
-    resolution: {integrity: sha512-3NuxWlbzYNevgPZbV0ktA2z6r0bfh0g22ONTxcK09a6+6MdIPjHsYx1Hnyu4yOq+j7LmupO5J69hhuOnuvj8oQ==}
+  '@prisma/get-platform@6.8.2':
+    resolution: {integrity: sha512-vXSxyUgX3vm1Q70QwzwkjeYfRryIvKno1SXbIqwSptKwqKzskINnDUcx85oX+ys6ooN2ATGSD0xN2UTfg6Zcow==}
+
+  '@prisma/instrumentation@6.8.2':
+    resolution: {integrity: sha512-5NCTbZjw7a+WIZ/ey6G8SY+YKcyM2zBF0hOT1muvqC9TbVtTCr5Qv3RL/2iNDOzLUHEvo4I1uEfioyfuNOGK8Q==}
     peerDependencies:
       '@opentelemetry/api': ^1.8
 
@@ -6335,8 +6365,8 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  highlight.run@9.18.5:
-    resolution: {integrity: sha512-hopLUCtrdAkKKouV/xtVgb7wxfXXINurk4UhrTbWcdQJG4v13nsRtgH5EDppAZLdvqnHEG4IHR2HC9QNdilC7A==}
+  highlight.run@9.18.8:
+    resolution: {integrity: sha512-lJm4b+IONuUU/REWrzRLMRaXMdp2ZajoiWjIMGEYnLJvy1Tulb5n2W1c1N8P5DxiTQdusWTwy+Xt0g6ExOA2Dw==}
 
   history@5.3.0:
     resolution: {integrity: sha512-ZqaKwjjrAYUYfLG+htGaIIZ4nioX2L70ZUMIFysS3xvBsSG4x/n1V6TXV3N8ZYNuFGlDirFg32T7B6WOUPDYcQ==}
@@ -8235,6 +8265,16 @@ packages:
     resolution: {integrity: sha512-vtpjW3XuYCSnMsNVBjLMNkTj6OZbudcPPTPYHqX0CJfpcdWciI1dM8uHETwmDxxiqEwCIE6WvXucWUetJgfu/A==}
     engines: {node: '>=16.13'}
     hasBin: true
+
+  prisma@6.8.2:
+    resolution: {integrity: sha512-JNricTXQxzDtRS7lCGGOB4g5DJ91eg3nozdubXze3LpcMl1oWwcFddrj++Up3jnRE6X/3gB/xz3V+ecBk/eEGA==}
+    engines: {node: '>=18.18'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.1.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   prismjs@1.27.0:
     resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
@@ -10195,10 +10235,10 @@ snapshots:
     optionalDependencies:
       nodemailer: 6.10.1
 
-  '@auth/prisma-adapter@2.9.1(@prisma/client@5.22.0(prisma@5.22.0))(nodemailer@6.10.1)':
+  '@auth/prisma-adapter@2.9.1(@prisma/client@6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3))(nodemailer@6.10.1)':
     dependencies:
       '@auth/core': 0.39.1(nodemailer@6.10.1)
-      '@prisma/client': 5.22.0(prisma@5.22.0)
+      '@prisma/client': 6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
       - '@simplewebauthn/server'
@@ -11451,13 +11491,13 @@ snapshots:
       '@opentelemetry/sdk-trace-web': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.33.0
 
-  '@highlight-run/next@7.9.16(@opentelemetry/api@1.9.0)(encoding@0.1.13)(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@highlight-run/next@7.9.20(@opentelemetry/api@1.9.0)(encoding@0.1.13)(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@highlight-run/cloudflare': 3.1.0
-      '@highlight-run/node': 3.12.1(@opentelemetry/api@1.9.0)
-      '@highlight-run/react': 19.0.5(highlight.run@9.18.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@highlight-run/node': 3.12.4(@opentelemetry/api@1.9.0)
+      '@highlight-run/react': 19.0.8(highlight.run@9.18.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@highlight-run/sourcemap-uploader': 0.6.3(encoding@0.1.13)
-      highlight.run: 9.18.5
+      highlight.run: 9.18.8
       js-cookie: 3.0.5
       next: 15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -11467,17 +11507,18 @@ snapshots:
       - react-dom
       - supports-color
 
-  '@highlight-run/node@3.12.1(@opentelemetry/api@1.9.0)':
+  '@highlight-run/node@3.12.4(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@prisma/instrumentation': 6.7.0(@opentelemetry/api@1.9.0)
+      '@prisma/instrumentation': 6.8.2(@opentelemetry/api@1.9.0)
+      highlight.run: 9.18.8
       require-in-the-middle: 7.5.2
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - supports-color
 
-  '@highlight-run/react@19.0.5(highlight.run@9.18.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@highlight-run/react@19.0.8(highlight.run@9.18.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      highlight.run: 9.18.5
+      highlight.run: 9.18.8
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -12334,9 +12375,22 @@ snapshots:
     optionalDependencies:
       prisma: 5.22.0
 
+  '@prisma/client@6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)':
+    optionalDependencies:
+      prisma: 6.8.2(typescript@5.8.3)
+      typescript: 5.8.3
+
+  '@prisma/config@6.8.2':
+    dependencies:
+      jiti: 2.4.2
+
   '@prisma/debug@5.22.0': {}
 
+  '@prisma/debug@6.8.2': {}
+
   '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2': {}
+
+  '@prisma/engines-version@6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e': {}
 
   '@prisma/engines@5.22.0':
     dependencies:
@@ -12345,17 +12399,34 @@ snapshots:
       '@prisma/fetch-engine': 5.22.0
       '@prisma/get-platform': 5.22.0
 
+  '@prisma/engines@6.8.2':
+    dependencies:
+      '@prisma/debug': 6.8.2
+      '@prisma/engines-version': 6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e
+      '@prisma/fetch-engine': 6.8.2
+      '@prisma/get-platform': 6.8.2
+
   '@prisma/fetch-engine@5.22.0':
     dependencies:
       '@prisma/debug': 5.22.0
       '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
       '@prisma/get-platform': 5.22.0
 
+  '@prisma/fetch-engine@6.8.2':
+    dependencies:
+      '@prisma/debug': 6.8.2
+      '@prisma/engines-version': 6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e
+      '@prisma/get-platform': 6.8.2
+
   '@prisma/get-platform@5.22.0':
     dependencies:
       '@prisma/debug': 5.22.0
 
-  '@prisma/instrumentation@6.7.0(@opentelemetry/api@1.9.0)':
+  '@prisma/get-platform@6.8.2':
+    dependencies:
+      '@prisma/debug': 6.8.2
+
+  '@prisma/instrumentation@6.8.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.57.2(@opentelemetry/api@1.9.0)
@@ -16973,7 +17044,7 @@ snapshots:
 
   he@1.2.0: {}
 
-  highlight.run@9.18.5:
+  highlight.run@9.18.8:
     dependencies:
       '@launchdarkly/js-client-sdk': 0.6.0
 
@@ -19140,6 +19211,13 @@ snapshots:
       '@prisma/engines': 5.22.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  prisma@6.8.2(typescript@5.8.3):
+    dependencies:
+      '@prisma/config': 6.8.2
+      '@prisma/engines': 6.8.2
+    optionalDependencies:
+      typescript: 5.8.3
 
   prismjs@1.27.0: {}
 

@@ -8,18 +8,34 @@ import Image from "next/image";
 // Export with dynamic data fetching to avoid static generation problems
 export const dynamic = 'force-dynamic';
 
-const FreeResourcesPage = async () => {
-  let guides = [];
+async function fetchGuidesWithRetry() {
+  // Import and use client only when the function is called
+  const { getGuides } = await import("@/sanity/lib/queries");
   
-  try {
-    // Import and use client only when the function is called
-    const { getGuides } = await import("@/sanity/lib/queries");
-    guides = await getGuides();
-  } catch (error) {
-    console.error("Error fetching guides:", error);
-    // Provide fallback empty array if fetching fails
-    guides = [];
+  let retries = 3;
+  let lastError = null;
+  
+  while (retries > 0) {
+    try {
+      const guides = await getGuides();
+      return guides;
+    } catch (error) {
+      lastError = error;
+      console.error(`Error fetching guides (retries left: ${retries}):`, error);
+      retries--;
+      // Wait 500ms before retrying
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
   }
+  
+  console.error("All retries failed when fetching guides:", lastError);
+  return [];
+}
+
+const FreeResourcesPage = async () => {
+  const guides = await fetchGuidesWithRetry();
 
   return (
     <div className="container mx-auto px-4 py-16 pt-36">
