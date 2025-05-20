@@ -11,7 +11,7 @@ interface FlowerHeroProps {
   imagePath?: string;
 }
 
-const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/flower1.png' }) => {
+const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/flower4.png' }) => {
   const [isTextAnimated, setIsTextAnimated] = useState(false);
   // Initialize the FormManager
   const { openForm, DialogForm } = FormManager();
@@ -34,12 +34,31 @@ const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/fl
   ];
 
   return (
-    <section className="mt-24 flex min-h-[100dvh] w-full items-start justify-center bg-gradient-to-br from-white via-white to-yellow-50 sm:mt-32 md:mt-16 md:min-h-screen md:items-center">
-      <div className="container mx-auto px-4 py-12 sm:px-6 sm:py-8 md:py-0 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:items-center md:gap-10 lg:gap-16">
+    <section
+      className="relative mt-24 flex min-h-[100dvh] w-full items-start justify-center overflow-hidden sm:mt-32 md:mt-16 md:min-h-screen md:items-center"
+      style={{
+        backgroundImage: `url(${imagePath})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right center',
+      }}
+    >
+      {/* CAMBIO CLAVE: Se eliminó 'mx-auto' de este div contenedor para que el contenido no esté centrado */}
+      <div className="container relative z-10 flex h-full items-center px-4 py-12 sm:px-6 sm:py-8 md:py-0 lg:px-8">
+        {/* Este div 'max-w-7xl' ya no es necesario si queremos que el contenido se pegue al borde izquierdo del container */}
+        {/* Lo vamos a dejar solo si quieres limitar el ancho máximo del contenido dentro del padding.
+            Si lo que quieres es que el texto use el padding del 'container' y luego vaya hacia la derecha hasta donde le dé el 'max-w-md',
+            entonces este div no ayuda, ya que es el que centraría su contenido si fuera necesario.
+            La clave es que el div que contiene el texto esté a la izquierda.
+         */}
+        <div className="w-full">
+          {' '}
+          {/* CAMBIO CLAVE: Aseguramos que ocupe todo el ancho disponible para su flexbox */}
+          {/* CAMBIO CLAVE: Aseguramos que los elementos flex se justifiquen al inicio (izquierda) */}
+          <div className="flex flex-col items-center gap-2 md:flex-row md:items-center md:justify-start md:gap-10 lg:gap-16">
             {/* Text Content */}
-            <div className="mb-2 w-full text-center md:mb-0 md:w-5/12 md:text-left">
+            {/* CAMBIO CLAVE: Añadimos 'md:mr-auto' para empujar el texto a la izquierda y dejar espacio a la derecha para la imagen */}
+            <div className="mb-2 w-full text-center md:mb-0 md:mr-auto md:w-full md:max-w-md md:text-left">
               <div
                 className={`transition-all duration-700 ease-in-out ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
               >
@@ -51,7 +70,6 @@ const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/fl
                   </span>
                 </h1>
               </div>
-
               <div className="space-y-2 md:space-y-5">
                 {paragraphs.map((paragraph, index) => (
                   <p
@@ -62,10 +80,9 @@ const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/fl
                   </p>
                 ))}
               </div>
-
               {/* CTA Buttons */}
               <div
-                className={`mt-4 flex flex-wrap gap-3 transition-all delay-700 duration-700 ease-in-out md:mt-10 md:gap-5 ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                className={`mt-4 flex flex-wrap justify-center gap-3 transition-all delay-700 duration-700 ease-in-out md:mt-10 md:justify-start md:gap-5 ${isTextAnimated ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
               >
                 <button
                   onClick={handleQuoteClick}
@@ -85,34 +102,13 @@ const FlowerHero: React.FC<FlowerHeroProps> = ({ imagePath = '/images/flowers/fl
               </div>
             </div>
 
-            {/* Flower Image - Modificado para hacer la imagen más grande y centrada */}
-            <div
-              className={`mb-4 mt-8 flex w-full items-center justify-center transition-all delay-300 duration-1000 ease-in-out sm:mb-8 sm:mt-12 md:mb-0 md:mt-0 md:w-7/12 ${isTextAnimated ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`}
-            >
-              <div
-                className="relative mx-auto w-full"
-                style={{
-                  height: 'min(60vh, 650px)', // Ajustado para mejor proporción
-                  maxHeight: '700px',
-                  minHeight: '350px',
-                  maxWidth: '100%',
-                }}
-              >
-                <Image
-                  src={imagePath}
-                  alt="Colorful flower bouquet"
-                  fill
-                  priority
-                  style={{ objectFit: 'contain', objectPosition: 'center center' }}
-                  sizes="(max-width: 768px) 90vw, 58vw"
-                  className="md:scale-130 scale-110 drop-shadow-2xl sm:scale-125" // Ajuste de escala para dispositivos móviles
-                />
-              </div>
+            <div className="hidden md:block md:flex-1">
+              {/* Este div sigue ocupando el espacio restante a la derecha del texto, 
+                  permitiendo que la imagen de fondo se vea. */}
             </div>
           </div>
         </div>
       </div>
-      {/* Render the dialog form */}
       {DialogForm}
     </section>
   );
