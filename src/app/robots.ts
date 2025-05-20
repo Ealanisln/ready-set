@@ -1,17 +1,19 @@
-import { MetadataRoute } from 'next';
+import { NextResponse } from 'next/server';
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: [
-        '/client/deliveries/',
-        '/driver/deliveries/',
-        '/reset-password/',
-        '/studio/',
-      ],
+export function GET() {
+  const robotsTxt = `User-agent: *
+Allow: /
+Disallow: /client/deliveries/
+Disallow: /driver/deliveries/
+Disallow: /reset-password/
+Disallow: /studio/
+
+Sitemap: https://readysetllc.com/sitemap.xml
+`;
+
+  return new NextResponse(robotsTxt, {
+    headers: {
+      'Content-Type': 'text/plain',
     },
-    sitemap: 'https://readysetllc.com/sitemap.xml',
-  };
-} 
+  });
+}

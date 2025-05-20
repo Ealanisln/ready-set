@@ -1,3 +1,8 @@
-User-Agent: *
-Disallow:
-Sitemap: https://ready-set.vercel.app/sitemap.xml
+User-agent: *
+Allow: /
+Disallow: /client/deliveries/
+Disallow: /driver/deliveries/
+Disallow: /reset-password/
+Disallow: /studio/
+
+Sitemap: https://readysetllc.com/sitemap.xml
