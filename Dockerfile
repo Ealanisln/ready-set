@@ -32,6 +32,8 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
+# Disable Husky during build to avoid git-related errors
+ENV HUSKY=0
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \

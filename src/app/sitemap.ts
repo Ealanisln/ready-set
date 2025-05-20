@@ -1,13 +1,18 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Simple fallback sitemap for testing
   return [
     {
-      url: 'https://example.com',
+      url: 'https://readysetllc.com',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1,
+    },
+    {
+      url: 'https://readysetllc.com/apply',
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 1,
+      priority: 0.8,
     },
   ]
 }
