@@ -1,6 +1,9 @@
 // TEMPORARY TEST FILE - MOCK SANITY CLIENT
 // Original file backed up in test-backup-1747680515
 
+import { createClient } from 'next-sanity'
+import ImageUrlBuilder from '@sanity/image-url'
+import { apiVersion, dataset, projectId, useCdn } from '../env'
 import type { PostDocument, SeoType } from "../schemaTypes/seo";
 import type { SimpleBlogCard, FullPost } from "@/types/simple-blog-card";
 
@@ -19,6 +22,18 @@ interface Guide {
   _updatedAt: string;
   seo?: SeoType;
 }
+
+// Create the Sanity client
+export const client = createClient({
+  projectId,
+  dataset,
+  apiVersion,
+  useCdn,
+  perspective: 'published',
+})
+
+// Valid Sanity image reference format for fallbacks
+const FALLBACK_IMAGE_REF = "image-Tb9Ew8CXIwaY6R1kjMvI0uRR-2000x3000-jpg";
 
 // Create mock response objects
 const createMockPostResponse = (slug?: string): ExtendedPostDocument => ({
@@ -128,155 +143,194 @@ const createFullPost = (post: ExtendedPostDocument): FullPost => ({
   }
 });
 
-// Create a mock guide
-const createMockGuideResponse = (slug?: string): Guide => ({
-  _id: "mock-guide-id",
-  title: "Mock Guide Title",
-  subtitle: "Mock Guide Subtitle",
-  slug: { current: slug || "mock-guide-slug" },
+// Helper function to get a post by slug
+export async function getPostBySlug(slug: string): Promise<PostDocument> {
+  try {
+    return await client.fetch(
+      `*[_type == "post" && slug.current == $slug][0]`,
+      { slug }
+    );
+  } catch (error) {
+    console.error(`Error fetching post with slug ${slug}:`, error);
+    // Return a minimal fallback post
+    return {
+      _type: "post",
+      _id: `fallback-${slug}`,
+      _updatedAt: new Date().toISOString(),
+      title: "Fallback Post",
+      slug: { current: slug },
+      mainImage: { 
+        _type: "image",
+        asset: {
+          _ref: FALLBACK_IMAGE_REF,
+          _type: "reference"
+        }
+      }
+    };
+  }
+}
+
+// Helper function to get a full post by slug
+export async function getFullPostBySlug(slug: string): Promise<FullPost> {
+  try {
+    const post = await client.fetch(
+      `*[_type == "post" && slug.current == $slug][0]{
+        title,
+        "currentSlug": slug.current,
+        "_updaAt": _updatedAt,
+        body,
+        mainImage,
+        seo
+      }`,
+      { slug }
+    );
+    return post;
+  } catch (error) {
+    console.error(`Error fetching full post with slug ${slug}:`, error);
+    // Return a minimal fallback post
+    return {
+      title: "Fallback Post",
+      currentSlug: slug,
+      _updaAt: new Date().toISOString(),
+      body: [],
+      mainImage: { 
+        _type: "image",
+        asset: {
+          _ref: FALLBACK_IMAGE_REF,
+          _type: "reference"
+        }
+      },
+      seo: null
+    };
+  }
+}
+
+// Create a fallback guide for error cases
+const createFallbackGuide = (slug: string): Guide => ({
+  _id: `fallback-${slug}`,
+  title: "Fallback Guide",
+  subtitle: "This is a fallback guide when Sanity data cannot be retrieved",
+  slug: { current: slug },
   _updatedAt: new Date().toISOString(),
   coverImage: {
     _type: "image",
     asset: {
-      _ref: "image-ref-789",
+      _ref: FALLBACK_IMAGE_REF,
       _type: "reference",
-    }
-  },
-  seo: {
-    _type: "seo",
-    metaTitle: "Mock Guide SEO Title",
-    metaDescription: "Mock Guide SEO Description",
-    seoKeywords: ["guide", "mock", "test"],
-    openGraph: {
-      _type: "openGraph",
-      title: "Mock Guide Open Graph Title",
-      description: "Mock Guide Open Graph Description",
-      image: {
-        _type: "customImage",
-        asset: {
-          _id: "image-id-101112",
-          metadata: {
-            _type: "sanityImageMetadata",
-            dimensions: {
-              _type: "sanityImageDimensions",
-              width: 1200,
-              height: 630
-            }
-          }
-        }
-      },
-      siteName: "Mock Site Name",
-      url: "https://example.com/mock-guide"
-    },
-    twitter: {
-      _type: "twitter",
-      handle: "@mockguidehandle",
-      site: "@mockguidesite",
-      cardType: "summary_large_image",
-      creator: "@mockguidecreator"
     }
   }
 });
 
-// Create specialized getter functions to help TypeScript with type narrowing
-export async function getPostBySlug(slug: string): Promise<PostDocument> {
-  console.log('Mock getPostBySlug called with slug:', slug);
-  return createMockPostResponse(slug);
-}
-
-export async function getFullPostBySlug(slug: string): Promise<FullPost> {
-  console.log('Mock getFullPostBySlug called with slug:', slug);
-  return createFullPost(createMockPostResponse(slug));
-}
-
+// Helper function to get a guide by slug
 export async function getGuideBySlug(slug: string): Promise<Guide> {
-  console.log('Mock getGuideBySlug called with slug:', slug);
-  return createMockGuideResponse(slug);
-}
-
-export async function getPosts(): Promise<SimpleBlogCard[]> {
-  console.log('Mock getPosts called');
-  const posts = [
-    createMockPostResponse("mock-post-1"),
-    createMockPostResponse("mock-post-2"),
-    createMockPostResponse("mock-post-3"),
-    createMockPostResponse("mock-post-4"),
-    createMockPostResponse("mock-post-5"),
-    createMockPostResponse("mock-post-6"),
-  ];
-  
-  return posts.map(createSimpleBlogCard);
-}
-
-export async function getGuides(): Promise<Guide[]> {
-  console.log('Mock getGuides called');
-  return [
-    createMockGuideResponse("mock-guide-1"),
-    createMockGuideResponse("mock-guide-2"),
-    createMockGuideResponse("mock-guide-3")
-  ];
-}
-
-// Main client with fetch method
-export const client = {
-  fetch: async (query: string, params?: any) => {
-    console.log('Mock Sanity client called with query:', query, 'params:', params);
+  try {
+    const guide = await client.fetch(
+      `*[_type == "guide" && slug.current == $slug][0]{
+        _id,
+        title,
+        subtitle,
+        slug,
+        coverImage,
+        _updatedAt,
+        seo
+      }`,
+      { slug }
+    );
     
-    // Use type casting to help TypeScript narrow the return type
-    
-    // Single post by slug for blog/[slug]
-    if (query.includes("post") && query.includes("slug.current") && params?.slug && query.includes("blog/[slug]")) {
-      return getPostBySlug(params.slug);
+    if (!guide) {
+      console.warn(`No guide found with slug ${slug}, using fallback`);
+      return createFallbackGuide(slug);
     }
     
-    // Single post by slug for promos/[slug]
-    if (query.includes("post") && query.includes("slug.current") && params?.slug && query.includes("promos")) {
-      return getFullPostBySlug(params.slug);
-    }
-    
-    // Single guide by slug
-    if (query.includes("guide") && query.includes("slug.current") && params?.slug) {
-      return getGuideBySlug(params.slug);
-    }
-    
-    // For lists of posts (blog page, homepage)
-    if (query.includes("post") && !params?.slug) {
-      return getPosts();
-    }
-    
-    // For lists of guides
-    if (query.includes("guide") && !params?.slug) {
-      return getGuides();
-    }
-    
-    // Default fallback - empty array for list queries
-    if (!params?.slug) {
-      return [] as any[];
-    }
-    
-    // Default fallback for single item queries
-    if (query.includes("post")) {
-      return getPostBySlug(params?.slug || "default");
-    }
-    
-    return getGuideBySlug(params?.slug || "default");
+    return guide;
+  } catch (error) {
+    console.error(`Error fetching guide with slug ${slug}:`, error);
+    return createFallbackGuide(slug);
   }
-};
-
-// Preserve any other exports from the original file
-export async function customFetch(url: string, options: RequestInit = {}) {
-  // Mock implementation
-  console.log('Mock customFetch called with URL:', url);
-  return new Response(JSON.stringify({ mock: true }));
 }
+
+// Helper function to get posts
+export async function getPosts(): Promise<SimpleBlogCard[]> {
+  try {
+    return await client.fetch(
+      `*[_type == "post" && defined(slug.current)]{
+        _id,
+        _updatedAt,
+        title,
+        slug,
+        mainImage,
+        categories[]->{
+          title,
+          _id
+        }
+      }`
+    );
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    // Return empty array as fallback
+    return [];
+  }
+}
+
+// Helper function to get guides
+export async function getGuides(): Promise<Guide[]> {
+  try {
+    const guides = await client.fetch(
+      `*[_type == "guide" && defined(slug.current)]{
+        _id,
+        title,
+        subtitle,
+        slug,
+        coverImage,
+        _updatedAt,
+        seo
+      }`
+    );
+    
+    if (!guides || !guides.length) {
+      console.warn("No guides found, using fallback guides");
+      return [
+        createFallbackGuide("what-is-email-marketing"),
+        createFallbackGuide("your-guide-to-delegation"),
+        createFallbackGuide("building-a-reliable-delivery-network")
+      ];
+    }
+    
+    return guides;
+  } catch (error) {
+    console.error("Error fetching guides:", error);
+    // Return fallback guides
+    return [
+      createFallbackGuide("what-is-email-marketing"),
+      createFallbackGuide("your-guide-to-delegation"),
+      createFallbackGuide("building-a-reliable-delivery-network")
+    ];
+  }
+}
+
+// Setup image URL builder
+const builder = ImageUrlBuilder(client);
 
 // Create a urlFor function that returns an object with a url method
 export function urlFor(source: any) {
-  // Mock implementation
-  console.log('Mock urlFor called with source:', source);
+  if (!source) {
+    console.warn("Invalid source passed to urlFor");
+    return {
+      url: () => "https://via.placeholder.com/600x400?text=Image+Not+Available"
+    };
+  }
   
-  // Return an object with a url() method that returns a string
-  return {
-    url: () => "https://mock-image-url.com/image.jpg"
-  };
+  try {
+    return builder.image(source);
+  } catch (error) {
+    console.error("Error in urlFor:", error);
+    return {
+      url: () => "https://via.placeholder.com/600x400?text=Image+Not+Available"
+    };
+  }
+}
+
+// Custom fetch helper
+export async function customFetch(url: string, options: RequestInit = {}) {
+  return fetch(url, options);
 }
