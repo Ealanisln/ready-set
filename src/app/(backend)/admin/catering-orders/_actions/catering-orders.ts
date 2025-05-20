@@ -159,7 +159,7 @@ export async function createCateringOrder(formData: CreateCateringOrderInput): P
         console.log(`Attempting to update file associations from temp ID ${tempEntityId} to order ID ${newOrder.id}`);
         
         // Call the API to update file associations
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ready-set.vercel.app';
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ready-set.vercel.app';
         const updateUrl = `${baseUrl}/api/file-uploads/update-entity`;
         console.log(`Calling update-entity API at: ${updateUrl}`);
         

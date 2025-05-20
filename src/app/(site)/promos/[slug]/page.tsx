@@ -1,4 +1,4 @@
-import { client, urlFor } from "@/sanity/lib/client";
+import { client, urlFor, getFullPostBySlug } from "@/sanity/lib/client";
 import { FullPost } from "@/types/simple-blog-card";
 import Image from "next/image";
 import { PortableText, PortableTextComponents } from "@portabletext/react";
@@ -6,19 +6,13 @@ import { notFound } from "next/navigation";
 
 export const revalidate = 30; // revalidate at most every hour
 
-async function getData(slug: string) {
-  const query = `
-    *[_type == "post" && slug.current == '${slug}'] {
-      "currentSlug": slug.current,
-      title,
-      body,
-      mainImage,
-      code   
-    }[0]`;
-
-  const data = await client.fetch(query);
-
-  return data;
+async function getData(slug: string): Promise<FullPost> {
+  try {
+    return await getFullPostBySlug(slug);
+  } catch (error) {
+    console.error("Error fetching promo post:", error);
+    throw error;
+  }
 }
 
 // Define custom components for Portable Text

@@ -1,7 +1,13 @@
 // src/sanity/lib/queries.ts
 
 import { groq } from "next-sanity";
-import { client } from "./client";
+import { 
+  client, 
+  getPostBySlug as fetchPostBySlug, 
+  getPosts as fetchPosts,
+  getGuideBySlug as fetchGuideBySlug,
+  getGuides as fetchGuides
+} from "./client";
 
 // SEO field fragments
 export const imageFields = groq`
@@ -123,11 +129,11 @@ export const postPathsQuery = groq`
 
 // Helper functions for fetching
 export async function getPostWithSEO(slug: string) {
-  return await client.fetch(postQuery, { slug });
+  return await fetchPostBySlug(slug);
 }
 
 export async function getAllPosts() {
-  return await client.fetch(postsQuery);
+  return await fetchPosts();
 }
 
 export const guideQuery = groq`
@@ -197,9 +203,9 @@ export const guidesQuery = groq`
 `;
 
 export async function getGuides() {
-  return await client.fetch(guidesQuery);
+  return await fetchGuides();
 }
 
 export async function getGuideBySlug(slug: string) {
-  return await client.fetch(guideQuery, { slug });
+  return await fetchGuideBySlug(slug);
 }

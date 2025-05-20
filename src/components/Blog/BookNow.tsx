@@ -42,7 +42,7 @@ const BookNow: React.FC<AdCardProps> = ({
   const [shareUrl, setShareUrl] = useState("");
   const [shareTitle, setShareTitle] = useState("");
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://readysetllc.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://readysetllc.com";
   const calendarUrl =
     "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ26Tewp9laqwen17F4qh13UwlakRL20eQ6LOJn7ANJ4swhUdFfc4inaFMixVsMghhFzE3nlpTSx?gv=true";
 

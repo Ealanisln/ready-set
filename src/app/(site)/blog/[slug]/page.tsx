@@ -1,6 +1,6 @@
 // src/app/(site)/blog/[slug]/page.tsx
 import { client, urlFor } from "@/sanity/lib/client";
-import { postQuery } from "@/sanity/lib/queries";
+import { postQuery, getPostWithSEO } from "@/sanity/lib/queries";
 import type {
   PortableTextMarkComponentProps,
   PortableTextComponents,
@@ -27,7 +27,7 @@ async function getPost(slug: string): Promise<PostDocument | null> {
   if (!slug) return null;
 
   try {
-    return await client.fetch(postQuery, { slug });
+    return await getPostWithSEO(slug);
   } catch (error) {
     console.error("Error fetching post:", error);
     return null;

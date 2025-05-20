@@ -11,7 +11,7 @@ interface CustomNextSeoProps {
 }
 
 const CustomNextSeo: React.FC<CustomNextSeoProps> = ({ seo, slug }) => {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
   const normalizedSlug = slug.startsWith("/") ? slug : `/${slug}`;
   const url = `${baseUrl}${normalizedSlug}`;
 

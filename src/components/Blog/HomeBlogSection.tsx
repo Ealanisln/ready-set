@@ -1,6 +1,6 @@
 import SectionTitle from "../Common/SectionTitle";
 import SingleBlog from "./SingleBlog";
-import { client } from "@/sanity/lib/client";
+import { client, getPosts } from "@/sanity/lib/client";
 import { postPathsQuery } from "@/sanity/lib/queries";
 import { SimpleBlogCard } from "@/types/simple-blog-card";
 
@@ -13,20 +13,14 @@ export async function generateStaticParams() {
   return posts;
 }
 
-async function getData() {
-  const query = `
-  *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] {
-    _id,
-    _updatedAt,
-    title,
-    slug,
-    mainImage,
-    smallDescription,
-    categories[]->{ title }
-  }  
-  `;
-  const data = await client.fetch(query);
-  return data;
+async function getData(): Promise<SimpleBlogCard[]> {
+  try {
+    // Use our typed function to get posts
+    return await getPosts();
+  } catch (error) {
+    console.error("Error fetching blog posts for home section:", error);
+    return []; // Return empty array on error
+  }
 }
 
 const HomeBlogSection = async () => {
@@ -54,7 +48,6 @@ const HomeBlogSection = async () => {
         </div>
       </div>
     </section>
-    
   );
 };
 

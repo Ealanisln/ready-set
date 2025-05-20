@@ -35,14 +35,14 @@ const sendRegistrationEmail = async (
       <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
       <p>For security reasons, you will be required to change your password upon your first login.</p>
       <p>Please click on the following link to log in:</p>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/login">Login</a>
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL}/login">Login</a>
       <p>If you did not request this account, please ignore this email.</p>
     `;
 
   try {
     await resend.emails.send({
       to: email,
-      from: process.env.FROM_EMAIL || "solutions@updates.readysetllc.com",
+      from: process.env.EMAIL_FROM || "solutions@updates.readysetllc.com",
       subject: "Welcome to Our Platform - Account Created",
       html: body,
     });

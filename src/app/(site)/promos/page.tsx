@@ -1,6 +1,8 @@
 import SingleBlog from "@/components/Blog/SingleBlog";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { Metadata } from "next";
+import { getPosts } from "@/sanity/lib/client";
+import { SimpleBlogCard } from "@/types/simple-blog-card";
 
 // Export with dynamic data fetching to avoid static generation problems
 export const dynamic = 'force-dynamic';
@@ -12,25 +14,10 @@ export const metadata: Metadata = {
   description: "Information about our promos",
 };
 
-async function getData() {
+async function getData(): Promise<SimpleBlogCard[]> {
   try {
-    // Import client only when needed
-    const { client } = await import("@/sanity/lib/client");
-    
-    const query = `
-    *[_type == 'post' && 'Promos' in categories[]->title] {
-      _id,
-      _updatedAt,
-      title,
-      slug,
-      mainImage,
-      smallDescription,
-      categories[]->{ title }
-    }  
-    `;
-    
-    const data = await client.fetch(query);
-    return data;
+    // Get posts from our mock client
+    return await getPosts();
   } catch (error) {
     console.error("Error fetching promos:", error);
     return []; // Return empty array as fallback

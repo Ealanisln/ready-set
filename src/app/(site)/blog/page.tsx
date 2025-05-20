@@ -3,6 +3,8 @@ import SingleBlog from "@/components/Blog/SingleBlog";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import NewsletterForm from "@/components/Resources/ui/NewsLetterForm";
 import { Metadata } from "next";
+import { client } from "@/sanity/lib/client";
+import { postsQuery, getAllPosts } from "@/sanity/lib/queries";
 
 // Export with dynamic data fetching to avoid static generation problems
 export const dynamic = 'force-dynamic';
@@ -10,9 +12,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 30;
 
 export const metadata: Metadata = {
-  title: "Ready Set Blog | Insights on Logistics & Virtual Assistant Services",
+  title: "Business Blog For Efficiency and Growth | Ready Set LLC",
   description:
-    "Expert insights on catering delivery logistics, virtual assistant services, and business solutions in the Bay Area. Stay updated with industry trends, tips, and best practices from Ready Set Group LLC.",
+    "Explore our blog for practical advice on business efficiency, operational excellence, and sustainable growth strategies for small to mid-sized companies.",
   keywords: [
     "logistics blog",
     "virtual assistant insights",
@@ -31,44 +33,35 @@ export const metadata: Metadata = {
     "industry best practices",
   ],
   openGraph: {
-    title: "Ready Set Blog | Business Insights & Industry Expertise",
+    title: "Business Blog For Efficiency and Growth | Ready Set LLC",
     description:
-      "Discover expert insights on logistics, virtual assistant services, and business solutions. Learn from Bay Area&apos;s leading business solutions provider.",
-    type: "website",
+      "Explore our blog for practical advice on business efficiency, operational excellence, and sustainable growth strategies for small to mid-sized companies.",
+    url: "https://readyset.consulting/blog",
+    siteName: "Ready Set",
+    images: [
+      {
+        url: "https://readyset.consulting/images/blog-og.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     locale: "en_US",
-    siteName: "Ready Set Group LLC",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ready Set Blog | Business Solutions Insights",
+    title: "Business Blog For Efficiency and Growth | Ready Set LLC",
     description:
-      "Expert articles on logistics, virtual assistant services, and business solutions from Ready Set Group LLC.",
+      "Explore our blog for practical advice on business efficiency, operational excellence, and sustainable growth strategies for small to mid-sized companies.",
+    images: ["https://readyset.consulting/images/blog-og.jpg"],
+  },
+  alternates: {
+    canonical: "https://readyset.consulting/blog",
   },
 };
 
 async function getData() {
-  try {
-    // Import client only when needed
-    const { client } = await import("@/sanity/lib/client");
-    
-    const query = `
-    *[_type == 'post' && (!defined(categories) || !('Promos' in categories[]->title))] | order(_updatedAt desc) {
-      _id,
-      _updatedAt,
-      title,
-      slug,
-      mainImage,
-      smallDescription,
-      categories[]->{ title, _id }
-    }  
-    `;
-    
-    const data = await client.fetch(query);
-    return data;
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return []; // Return empty array as fallback
-  }
+  return await getAllPosts();
 }
 
 export default async function Blog() {
@@ -139,23 +132,26 @@ export default async function Blog() {
       {/* Visual content */}
       <Breadcrumb pageName="Welcome to our blog" />
       
-      <section className="pb-16 pt-12 lg:pb-24 lg:pt-16">
-        <div className="container mx-auto">
-          <div className="mb-12 text-center">
-            <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl lg:text-5xl">
-              Ready Set Blog
-            </h1>
-            <p className="mx-auto max-w-3xl text-gray-600 dark:text-gray-300">
-              Expert insights on logistics, virtual assistant services, and business solutions 
-              in the Bay Area. Stay updated with industry trends and best practices.
-            </p>
+      <section className="pb-[120px] pt-[180px]">
+        <div className="container">
+          <div className="-mx-4 flex flex-wrap items-center justify-between">
+            <div className="mb-8 w-full px-4 md:mb-0 lg:mb-0">
+              <div className="mx-auto mb-[60px] max-w-[510px] text-center lg:mb-20">
+                <h1 className="mb-4 text-3xl font-bold text-black dark:text-white sm:text-4xl md:text-[40px]">
+                  Our Blog
+                </h1>
+                <p className="text-base text-body-color dark:text-dark-5">
+                  Insights, resources, and practical advice to optimize your
+                  business operations and drive sustainable growth in today's
+                  competitive market.
+                </p>
+              </div>
+            </div>
           </div>
-          
-          <div className="-mx-4 flex flex-wrap justify-center px-4">
-            <SingleBlog data={data} basePath="blog" />
-            
-            <div className="mt-20 w-full rounded-xl bg-gray-50 p-8 shadow-sm dark:bg-gray-800/30">
-              <NewsletterForm />
+
+          <div className="flex flex-wrap">
+            <div className="w-full">
+              <SingleBlog data={data} basePath="blog" />
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 // src/app/(site)/free-resources/[slug]/page.tsx
 import { notFound } from "next/navigation";
 import { client, urlFor, customFetch } from "@/sanity/lib/client";
+import { getGuideBySlug } from "@/sanity/lib/queries";
 import BackArrow from "@/components/Common/Back";
 import React from "react";
 import Logo from "@/components/ui/logo";
@@ -24,33 +25,12 @@ interface PortableTextBlock {
   markDefs?: any[];
 }
 
-// Updated query to match the new schema structure
-const guideQuery = `*[_type == "guide" && slug.current == $slug][0]{
-  title,
-  subtitle,
-  introduction,
-  coverImage,
-  mainContent,
-  listSections,
-  callToAction,
-  calendarUrl,
-  consultationCta,
-  _updatedAt,
-  seo,
-  "category": category->title,
-  downloadableFiles[] {
-    _key,
-    asset->{
-      _id,
-      url,
-      originalFilename
-    }
-  }
-}`;
-
-interface GuideDocument {
+// Define a Guide type to match what's returned from the client
+interface Guide {
+  _id: string;
   title: string;
   subtitle?: string;
+  slug: { current: string };
   introduction?: PortableTextBlock[];
   coverImage?: any;
   mainContent?: Array<{
@@ -87,38 +67,27 @@ interface GuideDocument {
       siteName?: string;
       url?: string;
     };
+    twitter?: {
+      _type: string;
+      handle?: string;
+      site?: string;
+      cardType?: string;
+      creator?: string;
+    };
   };
 }
 
-async function getGuide(slug: string): Promise<GuideDocument | null> {
+async function getGuide(slug: string): Promise<Guide | null> {
   if (!slug) return null;
   
-  // Add retry logic for more resilience
-  let retries = 3;
-  let lastError = null;
-  
-  while (retries > 0) {
-    try {
-      // Use GROQ for direct query with custom fetch to avoid arrayBuffer issues
-      const groqQuery = `*[_type == "guide" && slug.current == "${slug}"][0]`;
-      
-      // Use the client.fetch without additional options
-      const result = await client.fetch(groqQuery);
-      
-      return result;
-    } catch (error) {
-      lastError = error;
-      console.error(`Error fetching guide (retries left: ${retries}):`, error);
-      retries--;
-      // Wait 500ms before retrying
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
+  try {
+    // Use the typed helper function
+    const result = await getGuideBySlug(slug);
+    return result as unknown as Guide;
+  } catch (error) {
+    console.error(`Error fetching guide:`, error);
+    return null;
   }
-  
-  console.error("All retries failed fetching guide:", lastError);
-  return null;
 }
 
 export async function generateMetadata({
@@ -377,21 +346,15 @@ export default async function GuidePage({
 
 export async function generateStaticParams() {
   try {
-    const guides = await client.fetch(`*[_type == "guide"]{
-      "slug": slug.current
-    }`);
-
-    // Ensure guides is an array before mapping
-    if (!guides || !Array.isArray(guides)) {
-      console.error("Guides is not an array:", guides);
-      return [];
-    }
-
-    return guides.map((guide: { slug: string }) => ({
-      slug: guide.slug,
+    const { getGuides } = await import("@/sanity/lib/queries");
+    const guides = await getGuides();
+    
+    // Make sure we return objects with slug as string
+    return guides.map((guide) => ({
+      slug: guide.slug.current,
     }));
   } catch (error) {
-    console.error("Error in generateStaticParams:", error);
-    return []; // Return empty array to prevent build errors
+    console.error("Error generating static params:", error);
+    return [];
   }
 }
