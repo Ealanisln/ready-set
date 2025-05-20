@@ -6,6 +6,10 @@ const nextConfig = {
     // Always skip type checking during builds to prevent deployment failures
     ignoreBuildErrors: true,
   },
+  experimental: {
+    // Enable 'use cache' directive for static site generation
+    useCache: true,
+  },
   images: {
     remotePatterns: [
       {
