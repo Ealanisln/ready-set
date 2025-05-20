@@ -4,7 +4,7 @@ import { MetadataRoute } from 'next'
  * Generate robots.txt content
  * Using 'use cache' to ensure this can be statically generated
  */
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
   'use cache'
   
   // Use BASE_URL env var if defined, otherwise fallback to the Coolify deploy URL
