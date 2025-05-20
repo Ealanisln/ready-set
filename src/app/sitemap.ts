@@ -1,3 +1,4 @@
+// src/app/sitemap.ts (TEMPORARY MINIMAL DEBUGGING VERSION)
 import { MetadataRoute } from 'next'
 
 /**
@@ -15,44 +16,10 @@ interface SitemapEntry {
  * Using 'use cache' to ensure this can be statically generated
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  'use cache'
+  console.log('--- MINIMAL SITEMAP.TS CALLED (Coolify Build) ---');
+  // 'use cache'; // Temporarily commented out
   
-  try {
-    // Use BASE_URL env var if defined, otherwise fallback to the Coolify deploy URL
-    const baseUrl = process.env.BASE_URL || 
-      process.env.NEXT_PUBLIC_BASE_URL || 
-      'http://jsk8c8cwg4w84co88ckgkg48.91.99.110.92.sslip.io';
-    
-    // Define static sitemap entries
-    const staticEntries: SitemapEntry[] = [
-      {
-        url: `${baseUrl}`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'daily',
-        priority: 1,
-      },
-      {
-        url: `${baseUrl}/apply`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-      },
-    ];
-    
-    // You can add dynamic entries here if needed
-    // const dynamicEntries = await fetchDynamicEntries();
-    // return [...staticEntries, ...dynamicEntries];
-    
-    return staticEntries;
-  } catch (error) {
-    console.error('Error generating sitemap:', error);
-    
-    // Return a minimal valid sitemap if there's an error
-    return [
-      {
-        url: 'http://jsk8c8cwg4w84co88ckgkg48.91.99.110.92.sslip.io',
-        lastModified: new Date().toISOString(),
-      }
-    ];
-  }
+  return [
+    { url: 'https://example.com/', lastModified: new Date().toISOString() }
+  ];
 }
