@@ -13,9 +13,8 @@ interface SitemapEntry {
 
 /**
  * Generate a dynamic sitemap for the application
- * Using 'use cache' to ensure this can be statically generated
  */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   console.log('--- MINIMAL SITEMAP.TS CALLED (Coolify Build) ---');
   // 'use cache'; // Temporarily commented out
   

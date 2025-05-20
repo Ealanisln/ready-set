@@ -3,9 +3,8 @@ import { MetadataRoute } from 'next'
 
 /**
  * Generate robots.txt content
- * Using 'use cache' to ensure this can be statically generated
  */
-export default async function robots(): Promise<MetadataRoute.Robots> {
+export default function robots(): MetadataRoute.Robots {
   console.log('--- MINIMAL ROBOTS.TS CALLED (Coolify Build) ---');
   // 'use cache'; // Temporarily commented out
   
