@@ -1,10 +1,10 @@
 // src/app/(site)/food/page.tsx
 import { Metadata } from 'next';
 import FoodIcons from '@/components/Food/FoodIcons';
-import BakeryDelivery from '@/components/Bakery/BakeryDelivery';
 import BakeryPartners from '@/components/Bakery/BakeryPartners';
 import BakeryTerms from '@/components/Bakery/BakeryTerms';
 import DownloadableResources from '@/components/Bakery/DownloadableResources';
+import BakeryHero from '@/components/Bakery/BakeryHero';
 
 // export const metadata: Metadata = {
 //   title: 'Food Delivery Services for Events | Ready Set', // Replace with your title
@@ -62,7 +62,7 @@ import DownloadableResources from '@/components/Bakery/DownloadableResources';
 export default function BakeryPage() {
   return (
     <div className="pt-20 md:pt-24">
-      <BakeryDelivery />
+      <BakeryHero />
       <BakeryPartners />
       <FoodIcons />
       <BakeryTerms />
