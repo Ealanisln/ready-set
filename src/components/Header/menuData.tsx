@@ -49,25 +49,31 @@ export const driverMenuItem: MenuItem = {
 
 export const rsSubsidiariesMenuItem: MenuItem = {
   id: 11,
-  title: 'RS Subsidiaries',
+  title: 'Logistic',
   newTab: false,
   submenu: [
     {
-      id: 15, // Changed from 12 to be sequential
+      id: 12,
       title: 'Logistics',
       path: '/logistics',
       newTab: false,
     },
     {
-      id: 16, // Changed from 13 to be sequential
-      title: 'Virtual Assistant',
-      path: '/va',
+      id: 13,
+      title: 'Food Delivery',
+      path: '/food-delivery',
       newTab: false,
     },
     {
-      id: 17, // Changed from 14 to be sequential
-      title: 'Join Us',
-      path: '/join-the-team',
+      id: 14,
+      title: 'Flowers Delivery',
+      path: '/flowers',
+      newTab: false,
+    },
+    {
+      id: 15,
+      title: 'Bakery Delivery',
+      path: '/bakery-delivery',
       newTab: false,
     },
   ],
@@ -88,19 +94,19 @@ const menuData: MenuItem[] = [
   },
 
   rsSubsidiariesMenuItem,
-
   {
     id: 4,
-    title: 'Flowers',
-    path: '/flowers',
+    title: 'Virtual Assistant',
+    path: '/va',
     newTab: false,
   },
   {
     id: 5,
-    title: 'Food',
-    path: '/food-delivery',
+    title: 'Join Us',
+    path: '/join-the-team',
     newTab: false,
   },
+
   {
     id: 6,
     title: 'Contact',
