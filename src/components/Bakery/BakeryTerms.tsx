@@ -33,7 +33,8 @@ const BakeryTerms = ({ onRequestQuote }: BakeryTermsProps) => {
         />
 
         {/* Content container - separate positioning for mobile vs desktop */}
-        <div className="absolute inset-0 flex flex-col items-center justify-start px-4 pb-8 pt-16 md:justify-center md:py-8">
+        {/* MODIFICACIÓN AQUÍ: Cambiado 'justify-start' a 'justify-center' para móviles */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pb-8 pt-16 md:justify-center md:py-8">
           {/* Dark container */}
           <div className="mb-3 w-full max-w-4xl rounded-2xl bg-gray-900 p-4 text-center md:mb-6 md:p-10">
             <h2 className="mb-3 text-xl font-bold text-white md:mb-6 md:text-5xl">

@@ -1,6 +1,6 @@
 // src/app/(site)/food/page.tsx
 import { Metadata } from 'next';
-import FoodIcons from '@/components/Food/FoodIcons';
+import FoodIcons from '@/components/FoodDelivery/FoodIcons';
 import BakeryPartners from '@/components/Bakery/BakeryPartners';
 import BakeryTerms from '@/components/Bakery/BakeryTerms';
 import DownloadableResources from '@/components/Bakery/DownloadableResources';
@@ -66,7 +66,6 @@ export default function BakeryPage() {
       <BakeryPartners />
       <FoodIcons />
       <BakeryTerms />
-      <DownloadableResources />
     </div>
   );
 }

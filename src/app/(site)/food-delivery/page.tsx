@@ -2,12 +2,12 @@
 import { Metadata } from 'next';
 import { FormType } from '@/components/Logistics/QuoteRequest/types';
 import { FormManager } from '@/components/Logistics/QuoteRequest/Quotes/FormManager';
-import CateringDelivery from '@/components/Food/CateringDelivery';
-import DeliveryPartners from '@/components/Food/DeliveryPartners';
-import FoodIcons from '@/components/Food/FoodIcons';
-import DeliveryTerms from '@/components/Food/DeliveryTerms';
-import HostingChecklist from '@/components/Food/HostingChecklist';
-import MainMeal from '@/components/Food/MainMeal';
+import CateringDelivery from '@/components/FoodDelivery/CateringDelivery';
+import DeliveryPartners from '@/components/FoodDelivery/DeliveryPartners';
+import FoodIcons from '@/components/FoodDelivery/FoodIcons';
+import DeliveryTerms from '@/components/FoodDelivery/DeliveryTerms';
+import HostingChecklist from '@/components/FoodDelivery/HostingChecklist';
+import MainMeal from '@/components/FoodDelivery/MainMeal';
 
 export const metadata: Metadata = {
   title: 'Food Delivery Services for Events | Ready Set', // Replace with your title
